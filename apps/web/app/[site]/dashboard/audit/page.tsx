@@ -178,7 +178,7 @@ export default function AuditLogPage() {
           setStats(statsRes.data.data);
         } catch (statsErr) {
           console.warn('[audit] Stats endpoint not available, using defaults');
-          setStats({});
+          setStats({ total: 0, last7d: 0, byAction: [] });
         }
       }
     } catch (e) {
