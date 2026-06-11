@@ -4,7 +4,7 @@ import { BarChart3, TrendingUp, FileText, ShieldCheck, Activity, ArrowRight, Clo
 import Link from 'next/link';
 import TrafficChart from '../../../components/dashboard/TrafficChart';
 import { useParams } from 'next/navigation';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Skeleton from '../../../components/ui/Skeleton';
 import { api } from '../../../lib/api';
 import { useAuthStore } from '../../../store/authStore';
@@ -63,6 +63,7 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('Selamat');
   const [currentDate, setCurrentDate] = useState('');
+  const [currentTimestamp] = useState(() => Date.now());
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -136,8 +137,6 @@ export default function DashboardOverview() {
   const approved    = articles.filter(a => a.status === 'approved').length;
   const revisions   = articles.filter(a => a.status === 'revision').length;
   const totalViews  = articles.reduce((s, a) => s + (a.viewCount || 0), 0);
-
-  const [currentTimestamp] = useState(() => Date.now());
 
   const getQueueHours = (article: Article) => {
     const queueDate = new Date(article.updatedAt || article.createdAt).getTime();
