@@ -103,12 +103,13 @@ interface ReviewQueueProps {
 }
 
 export function ReviewQueue({ articles, site, count }: ReviewQueueProps) {
+  const [now] = useState(() => Date.now());
   if (articles.length === 0) return null;
 
   const breakingCount = articles.filter((article) => article.isBreaking).length;
   const longQueueCount = articles.filter((article) => {
     const queueDate = new Date(article.updatedAt || article.createdAt).getTime();
-    const queueHours = Math.max(1, Math.floor((Date.now() - queueDate) / (1000 * 60 * 60)));
+    const queueHours = Math.max(1, Math.floor((now - queueDate) / (1000 * 60 * 60)));
     return queueHours >= 24;
   }).length;
 
