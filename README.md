@@ -12,7 +12,7 @@ beritakarya/                         ← Monorepo Root (Turborepo + pnpm)
 │   ├── api/                         ← Backend REST API (Express.js + TypeScript)
 │   │   ├── src/
 │   │   │   ├── modules/             ← auth, article, kyc, ads, site, …
-│   │   │   ├── middleware/          ← Auth, CSRF, rate-limit, sanitize
+│   │   │   ├── middleware/          ← Auth, rate-limit, sanitize
 │   │   │   ├── ai/                  ← Integrasi OpenAI
 │   │   │   ├── cron/                ← KYC cleanup, token cleanup, scheduled publish
 │   │   │   ├── db/                  ← Prisma client
@@ -49,7 +49,7 @@ beritakarya/                         ← Monorepo Root (Turborepo + pnpm)
 | **Cache**      | Redis 7 (ioredis) — rate limiting          |
 | **Search**     | Meilisearch v1.6                           |
 | **AI**         | OpenAI API (GPT-4o default)                |
-| **Auth**       | JWT HttpOnly cookie + CSRF                 |
+| **Auth**       | JWT HttpOnly cookie + CORS whitelist       |
 | **Container**  | Docker + Docker Compose                    |
 | **Web Server** | Nginx (reverse proxy di VPS)               |
 | **SSL**        | Let's Encrypt (Certbot)                    |
@@ -115,7 +115,7 @@ Shell bersama halaman informasi: **`PublicInfoShell`** (`components/layout/`). D
 ## Fitur Keamanan
 
 - **JWT cookie-based** — Token di HttpOnly cookie, bukan `localStorage`
-- **CSRF** — Token CSRF pada mutasi API (kecuali beberapa route auth)
+- **CORS ketat** — Hanya origin tertentu yang diizinkan
 - **Rate limiting (Redis)** — API umum: **1000 req/menit**; auth: **30 percobaan / 15 menit** (hanya yang gagal)
 - **Helmet.js** — Security headers
 - **Sanitasi input** — DOMPurify pada body request

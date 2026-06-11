@@ -12,7 +12,6 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   JWT_ACCESS_EXPIRES: z.string().default('1h'),
   RESET_SECRET: z.string().min(32).optional(),
-  CSRF_SECRET: z.string().optional(),
   COOKIE_DOMAIN: z.string().optional(),
   CORS_ORIGIN: z.string().optional(),
   TRUST_PROXY: z.string().optional(),
