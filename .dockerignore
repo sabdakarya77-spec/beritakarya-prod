@@ -1,0 +1,51 @@
+# ── Git ───────────────────────────────────────────────────────
+.git
+.gitignore
+.github
+
+# ── Environment Files ─────────────────────────────────────────
+.env
+.env.*
+!.env.production.example
+infra/docker/.env
+
+# ── Node Modules (akan diinstall ulang di dalam container) ────
+node_modules
+**/node_modules
+
+# ── Build Output Lokal ────────────────────────────────────────
+# Packages dist TIDAK diexclude — akan di-build di dalam container
+# Hanya exclude build output apps yang akan di-rebuild
+apps/api/dist
+apps/web/.next
+apps/web/out
+
+# ── Turbo Cache ───────────────────────────────────────────────
+.turbo
+**/.turbo
+
+# ── Logs ──────────────────────────────────────────────────────
+logs
+*.log
+npm-debug.log*
+
+# ── Upload & Temp Files ───────────────────────────────────────
+uploads
+temp
+
+# ── Development & Testing ─────────────────────────────────────
+*.test.ts
+*.spec.ts
+coverage
+**/__tests__
+
+# ── Build Info (akan di-regenerate) ──────────────────────────
+*.tsbuildinfo
+
+# ── IDE & OS ──────────────────────────────────────────────────
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

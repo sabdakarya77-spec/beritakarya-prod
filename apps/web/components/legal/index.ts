@@ -1,0 +1,6 @@
+export { LegalPageHeader } from './LegalPageHeader'
+export { LegalPageIntro } from './LegalPageIntro'
+export { LegalDocumentBody } from './LegalDocumentBody'
+export { LegalStandardPage } from './LegalStandardPage'
+export type { LegalStandardPageProps } from './LegalStandardPage'
+export { legalProseClassName } from './legalStyles'

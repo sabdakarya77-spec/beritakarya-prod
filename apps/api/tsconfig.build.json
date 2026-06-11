@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "./dist",
+    "paths": {
+      "@beritakarya/types": ["../../packages/types/dist"],
+      "@beritakarya/config": ["../../packages/config/dist"],
+      "@beritakarya/utils": ["../../packages/utils/dist"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "prisma/**/*", "scripts/**/*", "**/*.test.ts"]
+}

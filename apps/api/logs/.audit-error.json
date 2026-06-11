@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "D:\\beritakarya-v1\\apps\\api\\logs\\.audit-error.json",
+    "files": [
+        {
+            "date": 1780564069450,
+            "name": "D:\\beritakarya-v1\\apps\\api\\logs\\error-2026-06-04.log",
+            "hash": "c8cc87b9eb9df9ab8e95283a3f593931e8958d139719486aa64c6d0bc471f61a"
+        }
+    ],
+    "hashType": "sha256"
+}

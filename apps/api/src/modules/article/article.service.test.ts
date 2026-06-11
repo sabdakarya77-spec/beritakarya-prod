@@ -1,0 +1,258 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+vi.mock('./article.repository')
+vi.mock('@beritakarya/utils', () => ({
+  generateSlug: (t: string) => t.toLowerCase().replace(/\s+/g, '-')
+}))
+vi.mock('../../modules/notification/notification.controller', () => ({
+  sendNotification: vi.fn().mockResolvedValue({})
+}))
+vi.mock('../../db/client', () => ({
+  prisma: {
+    user: { findUnique: vi.fn(), findMany: vi.fn() },
+    site: { findUnique: vi.fn().mockResolvedValue({ id: 'bandung', domain: 'bandung.beritakarya.co' }) },
+    category: { findUnique: vi.fn(), findFirst: vi.fn() }
+  }
+}))
+vi.mock('../../services/google-indexing.service', () => ({
+  googleIndexingService: {
+    submitUrl: vi.fn().mockResolvedValue({ success: true })
+  }
+}))
+vi.mock('./search.service', () => ({
+  indexArticle: vi.fn().mockResolvedValue(undefined),
+  deleteIndexedArticle: vi.fn().mockResolvedValue(undefined),
+  searchArticles: vi.fn()
+}))
+vi.mock('../../lib/redis', () => ({
+  getCache: vi.fn(),
+  setCache: vi.fn(),
+  deleteCache: vi.fn().mockResolvedValue(undefined)
+}))
+
+import * as repo from './article.repository'
+import * as searchService from './search.service'
+import { deleteCache } from '../../lib/redis'
+import {
+  getArticleById, getArticles, createArticle, updateArticle,
+  publishArticle, deleteArticle, assertCanPublish
+} from './article.service'
+import { prisma } from '../../db/client'
+import type { JWTPayload } from '@beritakarya/types'
+
+const reporterBandung: JWTPayload = {
+  userId: 'u-1', role: 'reporter', siteId: 'bandung', iat: 0, exp: 0
+}
+const reporterSurabaya: JWTPayload = {
+  userId: 'u-2', role: 'reporter', siteId: 'surabaya', iat: 0, exp: 0
+}
+const editorPusat: JWTPayload = {
+  userId: 'u-3', role: 'wapimred', siteId: null, iat: 0, exp: 0
+}
+
+/** Minimal 50 kata — syarat publish setelah fix draft save */
+const publishReadyBlocks = () => [
+  {
+    type: 'paragraph' as const,
+    content: Array.from({ length: 50 }, (_, i) => `kata${i + 1}`).join(' ')
+  }
+]
+
+const mockArticle = (overrides = {}) => ({
+  id: 'art-1', title: 'Test', slug: 'test',
+  siteId: 'bandung', authorId: 'u-1',
+  blocks: [], status: 'draft',
+  createdAt: new Date(), updatedAt: new Date(),
+  ...overrides
+})
+
+describe('getArticles — Meilisearch hydrate', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('mengambil artikel lengkap dari DB, bukan hit Meilisearch mentah', async () => {
+    vi.mocked(searchService.searchArticles).mockResolvedValue({
+      hits: [{ id: 'art-1', title: 'partial' }],
+      estimatedTotalHits: 1
+    } as any)
+    vi.mocked(repo.findArticlesByIds).mockResolvedValue([
+      mockArticle({ id: 'art-1', viewCount: 42, author: { name: 'Rep', role: 'reporter' } })
+    ] as any)
+
+    const result = await getArticles('bandung', { search: 'test' })
+
+    expect(repo.findArticlesByIds).toHaveBeenCalledWith('bandung', ['art-1'], {})
+    expect(result.items[0]).toMatchObject({ id: 'art-1', viewCount: 42 })
+  })
+})
+
+describe('getArticleById — multi-site isolation', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+  })
+
+  it('throw 404 jika artikel tidak ditemukan di site', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(null)
+    const err = await getArticleById('art-1', 'surabaya').catch(e => e)
+    expect(err.message).toContain('tidak ditemukan')
+    expect(err.statusCode).toBe(404)
+  })
+
+  it('berhasil jika artikel ada di site yang benar', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle() as any)
+    const result = await getArticleById('art-1', 'bandung')
+    expect(result.id).toBe('art-1')
+  })
+})
+
+describe('createArticle — siteId injection', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+  })
+
+  it('inject siteId dari request, bukan dari body', async () => {
+    vi.mocked(repo.slugExists).mockResolvedValue(false)
+    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as any)
+
+    await createArticle({ title: 'Artikel Baru' }, reporterBandung, 'bandung')
+
+    expect(repo.createArticle).toHaveBeenCalledWith(
+      expect.objectContaining({ siteId: 'bandung', authorId: 'u-1' })
+    )
+  })
+
+  it('generate slug unik jika slug sudah ada', async () => {
+    vi.mocked(repo.slugExists)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
+    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as any)
+
+    await createArticle({ title: 'Artikel Baru' }, reporterBandung, 'bandung')
+
+    expect(repo.createArticle).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'artikel-baru-3' })
+    )
+  })
+})
+
+describe('updateArticle — ownership', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+  })
+
+  it('reporter hanya bisa edit artikel miliknya', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ authorId: 'user-lain' }) as any
+    )
+    const err = await updateArticle('art-1', 'bandung', { title: 'baru' }, reporterBandung).catch(e => e)
+    expect(err.statusCode).toBe(403)
+  })
+
+  it('editor pusat bisa edit artikel siapapun', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ authorId: 'user-lain' }) as any
+    )
+    vi.mocked(repo.slugExists).mockResolvedValue(false)
+    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle() as any)
+
+    await expect(
+      updateArticle('art-1', 'bandung', { title: 'baru' }, editorPusat)
+    ).resolves.not.toThrow()
+  })
+
+  it('resolve category slug to UUID when updating article category', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ authorId: 'user-lain' }) as any)
+    vi.mocked(prisma.category.findUnique).mockResolvedValue(null)
+    vi.mocked(prisma.category.findFirst).mockResolvedValue({ id: 'cat-1' } as any)
+    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle({ categoryId: 'cat-1' }) as any)
+
+    await updateArticle('art-1', 'bandung', { categoryId: 'nasional' }, editorPusat)
+
+    expect(prisma.category.findFirst).toHaveBeenCalledWith({
+      where: {
+        slug: { equals: 'nasional', mode: 'insensitive' },
+        OR: [
+          { siteId: 'bandung' },
+          { isGlobal: true }
+        ]
+      }
+    })
+    expect(repo.updateArticle).toHaveBeenCalledWith('art-1', 'bandung', expect.objectContaining({ categoryId: 'cat-1' }))
+  })
+})
+
+describe('publishArticle', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
+    vi.mocked(repo.getNextVersionNumber).mockResolvedValue(1)
+    vi.mocked(repo.createVersion).mockResolvedValue({ id: 'v-1' } as any)
+  })
+
+  it('menolak publish dari status draft', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ status: 'draft' }) as any)
+    const err = await publishArticle('art-1', 'bandung', editorPusat).catch((e) => e)
+    expect(err.statusCode).toBe(400)
+  })
+
+  it('set status published dari approved', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as any
+    )
+    vi.mocked(repo.updateArticle).mockResolvedValue(
+      mockArticle({ status: 'published', slug: 'test' }) as any
+    )
+    await publishArticle('art-1', 'bandung', editorPusat)
+    expect(repo.updateArticle).toHaveBeenCalledWith(
+      'art-1', 'bandung',
+      expect.objectContaining({ status: 'published', publishedAt: expect.any(Date) })
+    )
+  })
+
+  it('superadmin forcePublish dari draft', () => {
+    expect(() =>
+      assertCanPublish({ status: 'draft' }, { ...editorPusat, role: 'superadmin' }, true)
+    ).not.toThrow()
+  })
+
+  it('re-indexes Meilisearch and invalidates Redis cache on publish', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as any
+    )
+    vi.mocked(repo.updateArticle).mockResolvedValue(
+      mockArticle({ status: 'published', slug: 'test' }) as any
+    )
+    await publishArticle('art-1', 'bandung', editorPusat)
+    expect(searchService.indexArticle).toHaveBeenCalled()
+    expect(deleteCache).toHaveBeenCalledWith('article:bandung:test')
+  })
+})
+
+describe('deleteArticle — permission', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+  })
+
+  it('reporter dari site lain tidak bisa delete', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ authorId: 'u-1', siteId: 'bandung' }) as any
+    )
+    const err = await deleteArticle('art-1', 'bandung', reporterSurabaya).catch(e => e)
+    expect(err.statusCode).toBe(403)
+  })
+
+  it('reporter bisa soft-delete artikel miliknya sendiri', async () => {
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ slug: 'test' }) as any)
+    vi.mocked(repo.softDeleteArticle).mockResolvedValue({ id: 'art-1', slug: 'test' } as any)
+    await expect(deleteArticle('art-1', 'bandung', reporterBandung)).resolves.not.toThrow()
+    expect(repo.softDeleteArticle).toHaveBeenCalledWith('art-1')
+    expect(searchService.deleteIndexedArticle).toHaveBeenCalledWith('art-1')
+    expect(deleteCache).toHaveBeenCalledWith('article:bandung:test')
+  })
+})

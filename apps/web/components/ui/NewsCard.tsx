@@ -1,0 +1,244 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Clock, BookOpen, User } from 'lucide-react';
+import Link from 'next/link';
+import { SmartImage, prefetchImage } from './SmartImage';
+import { cn } from '../../lib/utils';
+import EditorialBadge from './EditorialBadge';
+import { resolveArticleBadge } from '../../lib/resolveArticleBadge';
+import { getCategoryColor } from '../../lib/constants';
+import ArticleBookmarkButton from './ArticleBookmarkButton';
+
+interface NewsCardProps {
+  article: any;
+  variant?: 'large' | 'medium' | 'minimal' | 'horizontal';
+  site?: string;
+  priority?: boolean;
+}
+
+export default function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
+  const imageUrl = article.featuredImage || article.blocks?.find((b: any) => b.type === 'image')?.url || '/placeholder.jpg';
+  const excerpt = article.blocks?.find((b: any) => b.type === 'paragraph')?.content || '';
+  const articleHref = `/${site}/artikel/${article.slug}`;
+  const date = new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  const readTime = article.readingTimeMin ? `${article.readingTimeMin} min baca` : "3 min baca";
+  const badgeVariant = resolveArticleBadge(article);
+  const authorName = article.author?.name || 'Redaksi';
+  const categoryLabelClass = cn(
+    "rounded-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.14em]",
+    getCategoryColor(article.category?.name)
+  );
+  const calmMetaClass = "flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-brand-text-muted";
+  const defaultImageClass = 'object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.03]';
+  const horizontalImageClass = 'object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.04]';
+  const heroImageClass = 'object-cover object-[center_26%] opacity-75 transition-all duration-700 ease-out group-hover:scale-[1.03]';
+
+  if (variant === 'large') {
+    return (
+      <div className="relative">
+        <ArticleBookmarkButton
+          article={article}
+          site={site}
+          className="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
+          activeClassName="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+          idleClassName="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
+          iconSize={14}
+        />
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+          <motion.article 
+            whileHover={{ y: -2 }}
+            className="group relative h-[420px] min-h-[380px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl lg:h-[480px]"
+          >
+            <SmartImage 
+              src={imageUrl} 
+              blur={article.featuredImageBlur}
+              dominantColor={article.featuredImageColor}
+              context="hero_lead"
+              alt={article.title} 
+              fill
+              className={heroImageClass}
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-transparent" />
+            
+            <div className="absolute bottom-0 left-0 w-full max-w-3xl p-6 pb-20 md:p-8 md:pb-12">
+              <div className="mb-3.5 flex items-center gap-2">
+                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                  {article.category?.name || 'UMUM'}
+                </span>
+              </div>
+              <h2 className="mb-3.5 max-w-[20ch] text-balance font-sans text-xl font-extrabold leading-[1.15] tracking-tight text-white md:text-2xl lg:text-[2rem]">
+                {article.title}
+              </h2>
+              <p className="mb-5 max-w-2xl line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
+                {excerpt}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[10px] font-semibold text-white/70">
+                <div className="flex items-center gap-1.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-[10px] font-black text-white">
+                    {authorName[0] || 'R'}
+                  </div>
+                  <span>{authorName}</span>
+                </div>
+                <span className="flex items-center gap-1"><Clock size={12}/> {date}</span>
+                <span className="flex items-center gap-1"><BookOpen size={12}/> {readTime}</span>
+              </div>
+            </div>
+          </motion.article>
+        </Link>
+      </div>
+    );
+  }
+
+  if (variant === 'minimal') {
+    return (
+      <div className="relative">
+        <ArticleBookmarkButton
+          article={article}
+          site={site}
+          className="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
+          activeClassName="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
+          idleClassName="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
+          iconSize={13}
+        />
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+          <div className="py-3.5 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
+            <div className="flex-1">
+              <div className="mb-2 flex items-center gap-2">
+                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+                <span className={categoryLabelClass}>
+                  {article.category?.name || 'UMUM'}
+                </span>
+              </div>
+              <h3 className="line-clamp-3 font-sans text-[0.92rem] font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1rem]">
+                {article.title}
+              </h3>
+              <div className={cn(calmMetaClass, "mt-2.5")}>
+                <span>{authorName}</span>
+                <span className="opacity-30">•</span>
+                <span>{date}</span>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </div>
+    );
+  }
+
+  if (variant === 'horizontal') {
+    return (
+      <div className="relative">
+        <ArticleBookmarkButton
+          article={article}
+          site={site}
+          className="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
+          activeClassName="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
+          idleClassName="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
+          iconSize={13}
+        />
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+          <motion.article 
+            whileHover={{ x: 2 }}
+            className="group flex cursor-pointer gap-4 border-b border-gray-100 pb-4 pr-12 dark:border-white/5 md:gap-5 last:border-0"
+          >
+            <div className="relative aspect-[16/10] w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
+              <SmartImage 
+                src={imageUrl} 
+                blur={article.featuredImageBlur}
+                dominantColor={article.featuredImageColor}
+                context="card_horizontal"
+                alt={article.title} 
+                fill
+                className={horizontalImageClass}
+                priority={priority}
+              />
+            </div>
+            <div className="flex flex-1 flex-col justify-center gap-1.5">
+              <div className="flex items-center gap-2">
+                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+                <span className={categoryLabelClass}>
+                  {article.category?.name || 'UMUM'}
+                </span>
+              </div>
+              <h3 className="line-clamp-3 font-sans text-[0.98rem] font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1.1rem]">
+                {article.title}
+              </h3>
+              <p className="hidden line-clamp-2 text-xs leading-relaxed text-brand-text-muted/90 dark:text-brand-text-muted md:block">
+                {excerpt}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-brand-text-muted">
+                 <span className="flex min-w-0 items-center gap-1"><User size={10}/> <span className="truncate">{authorName}</span></span>
+                 <span>{date}</span>
+              </div>
+            </div>
+          </motion.article>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <ArticleBookmarkButton
+        article={article}
+        site={site}
+        className="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
+        activeClassName="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+        idleClassName="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
+        iconSize={13}
+      />
+      <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+        <motion.article 
+          whileHover={{ y: -4, scale: 1.01 }}
+          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+          className="group relative flex cursor-pointer flex-col gap-3 md:gap-4"
+        >
+          <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
+            <SmartImage 
+              src={imageUrl} 
+              blur={article.featuredImageBlur}
+              dominantColor={article.featuredImageColor}
+              context="card"
+              alt={article.title} 
+              fill
+              className={defaultImageClass}
+              priority={priority}
+            />
+            <div className="absolute left-3.5 top-3.5 flex flex-col gap-1.5">
+              {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center">
+              <span className={categoryLabelClass}>
+                {article.category?.name || 'UMUM'}
+              </span>
+            </div>
+              <h3 className="line-clamp-3 font-sans text-[1.08rem] font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1.18rem]">
+                {article.title}
+              </h3>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10px] text-brand-text-muted">
+               <div className="flex min-w-0 items-center gap-1">
+                  <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gray-100 text-[9px] font-semibold dark:bg-white/10">
+                    {authorName[0] || 'R'}
+                  </div>
+                 <span className="truncate">{authorName}</span>
+               </div>
+               <span className="opacity-30">•</span>
+               <span>{date}</span>
+               <span className="opacity-30">•</span>
+               <span className="flex items-center gap-1"><BookOpen size={10}/> {readTime}</span>
+            </div>
+          </div>
+        </motion.article>
+      </Link>
+    </div>
+  );
+}

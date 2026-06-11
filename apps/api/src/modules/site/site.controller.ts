@@ -1,0 +1,316 @@
+import { Request, Response } from 'express'
+import { siteService } from './site.service'
+import { siteCategoryService } from './site-category.service'
+import { logger } from '../../lib/logger'
+
+/**
+ * Site Routes - Express Router
+ * All routes are prefixed with /api/v1/sites
+ * All endpoints require superadmin role
+ */
+
+/**
+ * GET /api/v1/sites
+ * Get all sites (superadmin only)
+ * Query: ?includeStats=true to include user/article/category counts
+ */
+export async function getSites(req: Request, res: Response) {
+  try {
+    const { includeStats } = req.query
+    const sites = await siteService.getAllSites(includeStats === 'true')
+    res.json({ success: true, data: sites })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITES_FETCH_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/sites/settings
+ * Get current site settings (siteId from query or header)
+ */
+export async function getSiteSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+    
+    const settings = await siteService.getSiteSettings(siteId)
+    res.json({ success: true, data: settings })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_SETTINGS_FETCH_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * PATCH /api/v1/sites/settings
+ * Update current site settings (siteId from query or header)
+ */
+export async function updateSiteSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+
+    // Role check: Only superadmin or wapimred of the site can update settings
+    const userRole = (req as any).user?.role
+    const userSiteId = (req as any).user?.siteId
+
+    if (userRole !== 'superadmin') {
+      if (userRole !== 'wapimred' || userSiteId !== siteId) {
+        return res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Anda tidak memiliki akses untuk mengubah pengaturan situs ini' }
+        })
+      }
+    }
+
+    // [MULTISITE] Field-field ini hanya boleh diedit superadmin.
+    // Wapimred boleh update identitas visual, kontak regional, dan topik
+    // hangat, tapi tidak boleh mengutak-atik sosmed pusat, footer copyright,
+    // Google Search API, atau halaman legal (compliance).
+    const SUPERADMIN_ONLY_FIELDS = [
+      'socialLinks',          // Saluran Media Sosial Resmi
+      'footerText',           // Teks Footer Hak Cipta
+      'googleIndexingConfig', // Google Search API
+      'aboutUs',              // Halaman Legal
+      'codeOfEthics',
+      'editorial',
+      'advertising',
+      'privacyPolicy',
+      'termsOfService',
+      'mediaSiber',
+    ]
+
+    let body = req.body
+    if (userRole !== 'superadmin') {
+      // Wapimred: strip field superadmin-only (silent drop agar UX tetap mulus,
+      // audit log akan otomatis mencatat hanya field yang benar-benar berubah)
+      const stripped: string[] = []
+      for (const field of SUPERADMIN_ONLY_FIELDS) {
+        if (body[field] !== undefined) {
+          delete body[field]
+          stripped.push(field)
+        }
+      }
+      if (stripped.length > 0) {
+        // Catat di audit log agar ada jejak kalau wapimred coba-coba kirim field terlarang
+        logger.warn(
+          `[SECURITY] wapimred userId=${(req as any).user?.userId} coba update field superadmin-only: ${stripped.join(', ')}`
+        )
+      }
+    }
+
+    const actorUserId = (req as any).user?.userId
+    const settings = await siteService.updateSiteSettings(siteId, body, actorUserId)
+    res.json({ success: true, data: settings })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_SETTINGS_UPDATE_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/sites/:siteId/category-assignments
+ * Get global category allowlist for a site (superadmin only)
+ */
+export async function getSiteCategoryAssignments(req: Request, res: Response) {
+  try {
+    const { siteId } = req.params
+    const data = await siteCategoryService.getCategoryAssignments(siteId)
+    res.json({ success: true, data })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: {
+        code: error.code || 'SITE_CATEGORIES_FETCH_FAILED',
+        message: error.message
+      }
+    })
+  }
+}
+
+/**
+ * PUT /api/v1/sites/:siteId/category-assignments
+ * Replace global category allowlist for a site (superadmin only)
+ */
+export async function updateSiteCategoryAssignments(req: Request, res: Response) {
+  try {
+    const { siteId } = req.params
+    const { categoryIds } = req.body
+    const actorUserId = (req as any).user?.userId
+
+    if (!Array.isArray(categoryIds)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_REQUEST',
+          message: 'categoryIds must be an array'
+        }
+      })
+    }
+
+    const data = await siteCategoryService.replaceCategoryAssignments(
+      siteId,
+      categoryIds,
+      actorUserId
+    )
+
+    res.json({ success: true, data })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: {
+        code: error.code || 'SITE_CATEGORIES_UPDATE_FAILED',
+        message: error.message
+      }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/sites/:id
+ * Get single site by ID (superadmin only)
+ */
+export async function getSiteById(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+    const site = await siteService.getSiteById(id)
+    res.json({ success: true, data: site })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_FETCH_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/sites
+ * Create new site (superadmin only)
+ * Optionally assign wapimred in the same request
+ */
+export async function createSite(req: Request, res: Response) {
+  try {
+    const { id, domain, name, wapimredId, logoUrl, contactEmail, phone, address, description } = req.body
+
+    const site = await siteService.createSite({
+      id,
+      domain,
+      name,
+      wapimredId,
+      logoUrl,
+      contactEmail,
+      phone,
+      address,
+      description
+    })
+
+    res.status(201).json({ success: true, data: site })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_CREATE_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * PUT /api/v1/sites/:id
+ * Update site (superadmin only)
+ */
+export async function updateSite(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+    const { domain, name, logoUrl, contactEmail, phone, address, description, trendingTopics } = req.body
+    const actorUserId = (req as any).user?.userId
+
+    const site = await siteService.updateSite(
+      id,
+      { domain, name, logoUrl, contactEmail, phone, address, description, trendingTopics },
+      actorUserId
+    )
+
+    res.json({ success: true, data: site })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_UPDATE_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * DELETE /api/v1/sites/:id
+ * Delete site (superadmin only)
+ * Prevents deletion if site has existing articles
+ */
+export async function deleteSite(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+    const actorUserId = (req as any).user?.userId
+
+    await siteService.deleteSite(id, actorUserId)
+
+    res.json({ success: true, message: 'Site deleted' })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'SITE_DELETE_FAILED', message: error.message }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/sites/:id/wapimred
+ * Assign wapimred to a site (superadmin only)
+ */
+export async function assignWapimred(req: Request, res: Response) {
+  try {
+    const { id } = req.params  // siteId
+    const { wapimredId } = req.body
+    const actorUserId = (req as any).user?.userId
+
+    const user = await siteService.assignWapimred(id, wapimredId, actorUserId)
+
+    res.json({
+      success: true,
+      data: {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        siteId: user.siteId
+      }
+    })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'WAPIMRED_ASSIGN_FAILED', message: error.message }
+    })
+  }
+}

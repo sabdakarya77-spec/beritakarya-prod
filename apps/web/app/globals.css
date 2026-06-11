@@ -1,0 +1,453 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Core Brand */
+    --brand-red: #B91C1C;
+    --brand-red-rgb: 185 28 28;
+    --brand-black: #0F172A;
+    --brand-black-rgb: 15 23 42;
+    --brand-dark: #020617;
+    --brand-dark-rgb: 2 6 23;
+    --brand-grey: #F1F5F9;
+    --brand-grey-rgb: 241 245 249;
+    --brand-surface: #F1F5F9;
+    --brand-surface-rgb: 241 245 249;
+    --brand-text: #0F172A;
+    --brand-text-rgb: 15 23 42;
+    --brand-text-muted: #64748B;
+    --brand-text-muted-rgb: 100 116 139;
+    --bg-main: #F8FAFC;
+
+    /* Editorial Badge Colors */
+    --color-breaking: #DC2626;
+    --color-exclusive: #7C3AED;
+    --color-analysis: #0369A1;
+    --color-live: #16A34A;
+
+    /* Workflow Status Colors */
+    --status-draft: #F59E0B;
+    --status-submitted: #3B82F6;
+    --status-review: #8B5CF6;
+    --status-revision: #F97316;
+    --status-approved: #10B981;
+    --status-scheduled: #06B6D4;
+    --status-published: #059669;
+    --status-archived: #6B7280;
+
+    /* Dashboard Accent */
+    --dash-sidebar: #0F172A;
+    --dash-sidebar-hover: rgba(255,255,255,0.05);
+    --dash-card: #FFFFFF;
+    --dash-border: #E2E8F0;
+
+    /* ==================== PANEL EDITOR DESIGN SYSTEM TOKENS ==================== */
+    --panel-bg: #FFFFFF;
+    --panel-surface: #F8FAFC;
+    --panel-elevated: #F1F5F9;
+    --panel-border: rgba(15, 23, 42, 0.08);
+    --panel-border-hover: rgba(15, 23, 42, 0.15);
+    --accent-red: #EF4444;
+    --accent-red-muted: rgba(239, 68, 68, 0.08);
+    --accent-amber: #F59E0B;
+    --accent-purple: #8B5CF6;
+    --panel-text-primary: #0F172A;
+    --panel-text-secondary: #475569;
+    --panel-text-muted: #94A3B8;
+
+    /* ==================== CONTAINER SYSTEM TOKENS ==================== */
+    /* Horizontal Padding (Container Gutters) */
+    --container-padding-mobile: 1rem;    /* px-4 = 16px */
+    --container-padding-tablet: 2rem;    /* md:px-8 = 32px */
+    --container-padding-desktop: 2.5rem; /* lg:px-10 = 40px */
+    
+    /* Container Max Widths */
+    --container-max-width: 72.5rem;     /* max-w-container = 1160px */
+    --content-max-width: 47.5rem;       /* max-w-[760px] for optimal reading */
+    
+    /* Bleeding Edge System */
+    --bleed-mobile: -1rem;              /* -mx-4 */
+    --bleed-tablet: -2rem;              /* md:-mx-8 */
+    --bleed-desktop: -2.5rem;           /* lg:-mx-10 */
+    
+    /* Grid Gaps */
+    --gap-regular: 1.5rem;             /* gap-6 */
+    --gap-wide: 3rem;                   /* lg:gap-12 */
+    --gap-wider: 5rem;                  /* lg:gap-20 */
+    
+    /* Border Radius */
+    --radius-card: 1.5rem;              /* rounded-3xl */
+    --radius-button: 0.75rem;           /* rounded-xl */
+    --radius-input: 0.5rem;             /* rounded-lg */
+  }
+
+  .dark {
+    --brand-red: #EF4444;
+    --brand-red-rgb: 239 68 68;
+    --brand-black: #F8FAFC;
+    --brand-black-rgb: 248 250 252;
+    --brand-dark: #F1F5F9;
+    --brand-dark-rgb: 241 245 249;
+    --brand-grey: #1E293B;
+    --brand-grey-rgb: 30 41 59;
+    --brand-surface: #0F172A;
+    --brand-surface-rgb: 15 23 42;
+    --brand-text: #F8FAFC;
+    --brand-text-rgb: 248 250 252;
+    --brand-text-muted: #94A3B8;
+    --brand-text-muted-rgb: 148 163 184;
+    --bg-main: #020617;
+
+    --dash-sidebar: #020617;
+    --dash-card: #0F172A;
+    --dash-border: rgba(255,255,255,0.06);
+
+    /* ==================== PANEL EDITOR DESIGN SYSTEM TOKENS (DARK MODE) ==================== */
+    --panel-bg: #0E1118;
+    --panel-surface: #161B27;
+    --panel-elevated: #1C2333;
+    --panel-border: rgba(255, 255, 255, 0.07);
+    --panel-border-hover: rgba(255, 255, 255, 0.15);
+    --accent-red: #EF4444;
+    --accent-red-muted: rgba(239, 68, 68, 0.12);
+    --accent-amber: #F59E0B;
+    --accent-purple: #8B5CF6;
+    --panel-text-primary: #F1F5F9;
+    --panel-text-secondary: #64748B;
+    --panel-text-muted: #334155;
+  }
+
+  body {
+    @apply transition-colors duration-500;
+    background-color: var(--bg-main);
+    color: var(--brand-text);
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight transition-colors duration-500;
+    color: var(--brand-text);
+  }
+
+  /* Fix native select dropdown options visibility in light/dark modes */
+  select option,
+  select optgroup {
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+
+  .dark select option,
+  .dark select optgroup {
+    background-color: #1e293b;
+    color: #f8fafc;
+  }
+}
+
+/* Section Divider - Visual separator between sections */
+.section-divider {
+  @apply relative border-t border-black/5 dark:border-white/5;
+}
+
+.section-divider::before {
+  content: '';
+  @apply absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-brand-red/10 to-transparent;
+}
+
+@layer components {
+  .news-container {
+    @apply max-w-container mx-auto px-4;
+  }
+
+  /* Premium Article Typography (Magazine Feel) */
+  .article-content p {
+    @apply leading-[1.8] md:leading-[1.9] text-brand-text/90 antialiased;
+  }
+
+  .article-content p:first-of-type::first-letter {
+    font-family: 'Playfair Display', var(--font-playfair), Georgia, serif;
+    @apply float-left text-brand-red mr-3 text-7xl md:text-8xl font-black leading-[0.7] mt-3;
+    initial-letter: 3; /* Modern CSS property for better drop caps */
+  }
+
+  .article-content h2, .article-content h3 {
+    @apply mt-16 mb-6 font-serif font-black tracking-tighter text-brand-black dark:text-white;
+  }
+
+  .pull-quote {
+    @apply relative my-12 py-10 px-12 border-y-2 border-brand-red/10 bg-brand-red/[0.02];
+  }
+
+  .pull-quote::before {
+    content: '"';
+    @apply absolute -top-4 left-6 text-8xl font-serif text-brand-red opacity-10 leading-none select-none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Dashboard Card System */
+  .dash-card {
+    @apply bg-white dark:bg-slate-900/60 border border-gray-100 dark:border-white/5 rounded-lg shadow-sm;
+    @apply hover:shadow-md transition-all duration-300;
+  }
+
+  .dash-card-header {
+    @apply flex justify-between items-center px-6 py-4 border-b border-gray-50 dark:border-white/5;
+  }
+
+  .dash-card-body {
+    @apply p-6;
+  }
+
+  .dash-label {
+    @apply text-[10px] font-black uppercase tracking-[0.2em] text-brand-text-muted;
+  }
+
+  .dash-value {
+    @apply text-3xl font-black text-brand-black dark:text-white;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Status Badge System */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest;
+  }
+
+  .status-draft      { @apply bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400; }
+  .status-submitted   { @apply bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400; }
+  .status-review      { @apply bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400; }
+  .status-revision    { @apply bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400; }
+  .status-approved    { @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400; }
+  .status-scheduled   { @apply bg-cyan-50 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-400; }
+  .status-published   { @apply bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400; }
+  .status-archived    { @apply bg-gray-50 text-brand-text-muted dark:bg-gray-800; }
+
+  /* ==================== TIPTAP EDITOR STYLES ==================== */
+  .tiptap-editor-wrapper {
+    @apply w-full transition-all duration-300;
+    background-color: transparent !important;
+  }
+
+  .tiptap-editor-content {
+    @apply py-6 leading-relaxed font-sans text-brand-black dark:text-slate-100;
+    font-size: calc(1.05rem * var(--article-font-scale, 1));
+  }
+
+  /* Prose styling for editor content */
+  .tiptap-editor-content p {
+    @apply mb-4 leading-relaxed text-gray-800 dark:text-gray-200;
+  }
+
+  .tiptap-editor-content h1 {
+    @apply text-3xl font-bold mb-4 mt-6 text-gray-900 dark:text-white;
+  }
+
+  .tiptap-editor-content h2 {
+    @apply text-2xl font-bold mb-3 mt-5 text-gray-900 dark:text-white;
+  }
+
+  .tiptap-editor-content h3 {
+    @apply text-xl font-semibold mb-2 mt-4 text-gray-900 dark:text-white;
+  }
+
+  .tiptap-editor-content h4,
+  .tiptap-editor-content h5,
+  .tiptap-editor-content h6 {
+    @apply text-lg font-semibold mb-2 mt-3 text-gray-900 dark:text-white;
+  }
+
+  .tiptap-editor-content ul,
+  .tiptap-editor-content ol {
+    @apply mb-4 pl-6;
+  }
+
+  .tiptap-editor-content ul {
+    @apply list-disc;
+  }
+
+  .tiptap-editor-content ol {
+    @apply list-decimal;
+  }
+
+  .tiptap-editor-content li {
+    @apply mb-1;
+  }
+
+  .tiptap-editor-content blockquote {
+    @apply border-l-4 border-brand-red pl-4 my-4 italic text-gray-600 dark:text-brand-text-muted;
+  }
+
+  .tiptap-editor-content code {
+    @apply font-mono bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm;
+  }
+
+  .tiptap-editor-content pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg my-4 overflow-x-auto;
+  }
+
+  .tiptap-editor-content pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+
+  .tiptap-editor-content a {
+    @apply text-brand-red underline hover:text-brand-red/80;
+  }
+
+  .tiptap-editor-content img {
+    @apply max-w-full h-auto rounded-lg my-4;
+  }
+
+  .tiptap-editor-content hr {
+    @apply my-8 border-gray-200 dark:border-slate-700;
+  }
+
+  /* Placeholder styling */
+  .tiptap-editor-content p.is-editor-empty:first-child::before {
+    @apply text-brand-text-muted;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Selection styling */
+  .tiptap-editor-content ::selection {
+    @apply bg-brand-red/20;
+  }
+
+  /* Placeholder for headings */
+  .tiptap-editor-content h1.is-empty::before,
+  .tiptap-editor-content h2.is-empty::before,
+  .tiptap-editor-content h3.is-empty::before {
+    @apply text-brand-text-muted;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.4s ease-out forwards;
+}
+
+.animate-count-up {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media print {
+  .no-print, 
+  header, 
+  footer, 
+  aside, 
+  nav, 
+  .share-sidebar, 
+  .comment-section, 
+  button,
+  .reading-progress,
+  .ad-space {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .article-content {
+    font-size: 12pt !important;
+    line-height: 1.6 !important;
+  }
+  
+  .max-w-4xl, .max-w-7xl, .max-w-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  img {
+    max-width: 100% !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Drop Cap (initial letter)
+ * Digunakan oleh paragraph yang memiliki attribute dropCap=true
+ * Tampil di halaman artikel publik dan didukung editor Tiptap.
+ * ------------------------------------------------------------------ */
+.article-content p[data-drop-cap="true"],
+.article-body p[data-drop-cap="true"] {
+  position: relative;
+}
+
+.article-content p[data-drop-cap="true"]::first-letter,
+.article-body p[data-drop-cap="true"]::first-letter {
+  float: left;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-weight: 800;
+  font-size: 4.5em;
+  line-height: 0.85;
+  margin: 0.05em 0.12em 0 0;
+  padding: 0;
+  color: var(--brand-red, #dc2626);
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+@media (max-width: 640px) {
+  .article-content p[data-drop-cap="true"]::first-letter,
+  .article-body p[data-drop-cap="true"]::first-letter {
+    font-size: 3.5em;
+    margin: 0.02em 0.1em 0 0;
+  }
+}
+
+@media print {
+  .article-content p[data-drop-cap="true"]::first-letter,
+  .article-body p[data-drop-cap="true"]::first-letter {
+    color: #000 !important;
+  }
+}

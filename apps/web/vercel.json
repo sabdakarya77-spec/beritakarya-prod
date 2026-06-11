@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "buildCommand": "cd ../.. && pnpm build --filter=@beritakarya/web",
+  "installCommand": "cd ../.. && pnpm install",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "cleanUrls": true
+}
