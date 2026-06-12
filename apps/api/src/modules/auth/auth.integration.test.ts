@@ -163,9 +163,7 @@ describe('POST /api/v1/auth/login', () => {
 })
 
 describe('POST /api/v1/auth/register', () => {
-  it('memaksa role reader walau payload mengirim editor', async () => {
-    vi.mocked(authService.registerUser).mockResolvedValue(mockTokens as any)
-
+  it('menolak role yang tidak valid (editor) dengan 400', async () => {
     const res = await request(app)
       .post('/api/v1/auth/register')
       .send({
@@ -176,11 +174,28 @@ describe('POST /api/v1/auth/register', () => {
         siteId: 'bandung'
       })
 
-    expect(res.status).toBe(201)
+    expect(res.status).toBe(400)
+    expect(authService.registerUser).not.toHaveBeenCalled()
+  })
+
+  it('menerima role reader dan advertiser, menolak sisanya', async () => {
+    vi.mocked(authService.registerUser).mockResolvedValue(mockTokens as any)
+
+    const readerRes = await request(app)
+      .post('/api/v1/auth/register')
+      .send({
+        email: 'reader@test.com',
+        password: 'P@ssword123',
+        name: 'Reader Baru',
+        role: 'reader',
+        siteId: 'bandung'
+      })
+
+    expect(readerRes.status).toBe(201)
     expect(authService.registerUser).toHaveBeenCalledWith(
-      'editor@test.com',
+      'reader@test.com',
       'P@ssword123',
-      'User Baru',
+      'Reader Baru',
       'reader',
       'bandung'
     )
