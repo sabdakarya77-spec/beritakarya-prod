@@ -202,15 +202,15 @@ export default function ProfilePage() {
             {/* Static Info */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</label>
-                <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                <label htmlFor="profile-display-email" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</label>
+                <div id="profile-display-email" className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                   <Mail className="w-4 h-4 text-slate-400" />
                   {user?.email || '-'}
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role</label>
-                <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                <label htmlFor="profile-display-role" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role</label>
+                <div id="profile-display-role" className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                   <Shield className="w-4 h-4 text-slate-400" />
                   {roleLabel}
                 </div>
@@ -219,14 +219,14 @@ export default function ProfilePage() {
 
             {/* Status Badge */}
             <div className="mb-6">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Status Verifikasi</label>
+              <label htmlFor="profile-display-verification" className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Status Verifikasi</label>
               {isVerified ? (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full text-xs font-bold">
+                <div id="profile-display-verification" className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full text-xs font-bold">
                   <CheckCircle2 className="w-4 h-4" />
                   Terverifikasi
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold">
+                <div id="profile-display-verification" className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold">
                   <AlertCircle className="w-4 h-4" />
                   Belum Terverifikasi
                 </div>
@@ -236,8 +236,9 @@ export default function ProfilePage() {
             {/* Edit Form */}
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nama Lengkap</label>
+                <label htmlFor="profile-name" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nama Lengkap</label>
                 <input
+                  id="profile-name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -247,7 +248,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex justify-between items-center">
+                <label htmlFor="profile-bio" className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex justify-between items-center">
                   <span>Bio Publik (yang tampil di profil penulis)</span>
                   <span className={cn(
                     "font-bold tabular-nums",
@@ -257,6 +258,7 @@ export default function ProfilePage() {
                   </span>
                 </label>
                 <textarea
+                  id="profile-bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   maxLength={BIO_MAX_LENGTH}
@@ -331,9 +333,10 @@ export default function ProfilePage() {
 
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password Saat Ini</label>
+                <label htmlFor="profile-current-password" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password Saat Ini</label>
                 <div className="relative">
                   <input
+                    id="profile-current-password"
                     type={showPasswords ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
@@ -352,8 +355,9 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password Baru</label>
+                  <label htmlFor="profile-new-password" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password Baru</label>
                   <input
+                    id="profile-new-password"
                     type={showPasswords ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -362,8 +366,9 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Konfirmasi</label>
+                  <label htmlFor="profile-confirm-password" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Konfirmasi</label>
                   <input
+                    id="profile-confirm-password"
                     type={showPasswords ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}

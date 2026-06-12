@@ -175,7 +175,7 @@ export function PremiumHero({ article, site }: PremiumHeroProps) {
               
               {/* Floating Tag */}
               <div className="absolute top-8 right-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl hidden md:block">
-                <p className="text-[9px] font-black text-brand-red uppercase tracking-[0.3em] mb-1">Terbitan</p>
+                <p className="text-[10px] font-black text-brand-red uppercase tracking-[0.3em] mb-1">Terbitan</p>
                 <p className="text-sm font-bold text-brand-black dark:text-white">{date}</p>
               </div>
             </motion.div>

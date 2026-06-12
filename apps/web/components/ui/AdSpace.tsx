@@ -147,7 +147,7 @@ export default function AdSpace({
         styles[type],
         className
       )}>
-        <span className="text-[8px] font-black tracking-widest text-brand-text-muted uppercase">MEMUAT IKLAN...</span>
+        <span className="text-[10px] font-black tracking-widest text-brand-text-muted uppercase">MEMUAT IKLAN...</span>
       </div>
     );
   }
@@ -162,11 +162,11 @@ export default function AdSpace({
           className
         )}
       >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[8px] sm:tracking-[0.2em]">
+        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
           {label}
         </span>
         <div className="flex flex-col items-center justify-center gap-2 pt-7 sm:gap-3 sm:pt-6">
-          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-brand-text-muted sm:text-[10px] sm:tracking-[0.24em]">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-text-muted sm:text-[10px] sm:tracking-[0.24em]">
             Slot Iklan Mandiri
           </p>
           <div className="space-y-1">
@@ -264,7 +264,7 @@ function AdSlide({
         rel="noopener noreferrer"
         className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
       >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[8px] sm:tracking-[0.2em]">
+        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
           {label}
         </span>
         {isVideo ? (

@@ -77,10 +77,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+              <label htmlFor="login-email" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => {
@@ -95,10 +96,10 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+                <label htmlFor="login-password" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                   Kata Sandi
                 </label>
-                <Link 
+                <Link
                   href="/auth/forgot-password"
                   className="text-[9px] font-bold text-brand-red hover:text-brand-black dark:hover:text-white transition-colors uppercase tracking-wider"
                 >
@@ -107,6 +108,7 @@ export default function LoginPage() {
               </div>
               <div className="relative">
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => {

@@ -129,14 +129,14 @@ export default function TeamMonitoring() {
                   <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <FileText size={12} className="text-brand-red" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Post</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Post</span>
                     </div>
                     <p className="text-lg font-black text-brand-black dark:text-white">{member.publishedCount}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Eye size={12} className="text-blue-500" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Views</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Views</span>
                     </div>
                     <p className="text-lg font-black text-brand-black dark:text-white">
                       {member.totalViews > 1000 ? (member.totalViews/1000).toFixed(1) + 'K' : member.totalViews}
@@ -159,10 +159,10 @@ export default function TeamMonitoring() {
               </div>
               
               <div className="px-6 py-4 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                   <Calendar size={12} /> Terdaftar {new Date(member.createdAt).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
                 </div>
-                <button className="text-[9px] font-black text-brand-red uppercase tracking-widest hover:underline">
+                <button className="text-[10px] font-black text-brand-red uppercase tracking-widest hover:underline">
                   Profil Lengkap
                 </button>
               </div>

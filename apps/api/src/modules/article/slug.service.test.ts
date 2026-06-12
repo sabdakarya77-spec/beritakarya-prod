@@ -8,7 +8,7 @@ import {
   isSlugUniqueViolation,
   resolveUniqueSlug,
   createArticleWithSlugRetry
-} from './article.slug'
+} from './slug.service'
 
 const uniqueError = () =>
   new Prisma.PrismaClientKnownRequestError('Unique constraint', {

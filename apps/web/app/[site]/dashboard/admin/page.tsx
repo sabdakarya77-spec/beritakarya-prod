@@ -155,10 +155,11 @@ export default function AdminDashboardPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label htmlFor="admin-site-id" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Site ID <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="admin-site-id"
                       type="text"
                       value={formData.id}
                       onChange={(e) => setFormData({ ...formData, id: e.target.value })}
@@ -171,10 +172,11 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label htmlFor="admin-site-domain" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Domain <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="admin-site-domain"
                       type="text"
                       value={formData.domain}
                       onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
@@ -186,10 +188,11 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label htmlFor="admin-site-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Nama Tampilan <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="admin-site-name"
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -201,10 +204,11 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label htmlFor="admin-site-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email Kontak
                     </label>
                     <input
+                      id="admin-site-email"
                       type="email"
                       value={formData.contactEmail}
                       onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}

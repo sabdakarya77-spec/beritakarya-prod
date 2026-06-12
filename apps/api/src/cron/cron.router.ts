@@ -10,7 +10,8 @@ import { Router, Request, Response } from 'express'
 import { runKYCCleanup } from './kyc-cleanup'
 import { runTokenCleanup } from './token-cleanup'
 import { runAdExpiry } from './ad-expiry'
-import { checkAllQuotas } from '../middleware/quotaNotifications'
+import { runPageViewCleanup } from './pageview-cleanup'
+import { checkAllQuotas } from '../services/quotaNotifications.service'
 import { processDueScheduledArticles } from '../modules/article/article.service'
 import { logger } from '../lib/logger'
 
@@ -88,6 +89,18 @@ cronRouter.post('/ad-expiry', requireCronSecret, async (_req: Request, res: Resp
     res.json({ success: true, job: 'ad-expiry', result })
   } catch (err) {
     logger.error('[Cron] ad-expiry failed:', err)
+    res.status(500).json({ success: false, error: String(err) })
+  }
+})
+
+// ── POST /api/cron/pageview-cleanup — setiap hari jam 03.00 ─────────────────
+cronRouter.post('/pageview-cleanup', requireCronSecret, async (_req: Request, res: Response) => {
+  logger.info('[Cron] pageview-cleanup triggered')
+  try {
+    await runPageViewCleanup()
+    res.json({ success: true, job: 'pageview-cleanup' })
+  } catch (err) {
+    logger.error('[Cron] pageview-cleanup failed:', err)
     res.status(500).json({ success: false, error: String(err) })
   }
 })

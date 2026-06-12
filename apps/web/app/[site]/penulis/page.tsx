@@ -140,7 +140,7 @@ export default function AuthorsPage() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-red/20 bg-brand-red/5 px-3 py-1">
               <Users size={12} className="text-brand-red" />
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-red">
                 Tim Editorial
               </span>
             </div>
@@ -177,7 +177,7 @@ export default function AuthorsPage() {
 
             {/* Sort */}
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Urutkan:</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Urutkan:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
@@ -229,7 +229,7 @@ export default function AuthorsPage() {
                             {author.name}
                           </h3>
                           <span className={cn(
-                            "mt-1 inline-block rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider",
+                            "mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider",
                             getRoleBadgeClass(author.role)
                           )}>
                             {ROLE_LABELS[author.role] || author.role}
@@ -258,7 +258,7 @@ export default function AuthorsPage() {
                       </div>
 
                       {/* CTA */}
-                      <div className="mt-3 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-brand-red opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="mt-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand-red opacity-0 transition-opacity group-hover:opacity-100">
                         <span>Lihat Profil</span>
                         <ArrowRight size={10} />
                       </div>

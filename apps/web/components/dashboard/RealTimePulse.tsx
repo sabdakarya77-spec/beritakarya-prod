@@ -35,7 +35,7 @@ export function RealTimePulse() {
       </div>
       <div className="flex flex-col">
         <span className="text-[14px] font-black text-brand-black dark:text-white leading-none tabular-nums">{count}</span>
-        <span className="text-[9px] font-black text-brand-red uppercase tracking-widest mt-0.5">Pembaca Aktif</span>
+        <span className="text-[10px] font-black text-brand-red uppercase tracking-widest mt-0.5">Pembaca Aktif</span>
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             <div className="absolute bottom-0 left-0 w-full max-w-3xl p-6 pb-20 md:p-8 md:pb-12">
               <div className="mb-3.5 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
-                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
@@ -227,7 +227,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               </h3>
               <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10px] text-brand-text-muted">
                <div className="flex min-w-0 items-center gap-1">
-                  <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gray-100 text-[9px] font-semibold dark:bg-white/10">
+                  <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold dark:bg-white/10">
                     {authorName[0] || 'R'}
                   </div>
                  <span className="truncate">{authorName}</span>

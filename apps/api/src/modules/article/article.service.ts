@@ -5,7 +5,7 @@ import {
   resolveUniqueSlug,
   createArticleWithSlugRetry,
   updateArticleWithSlugRetry
-} from './article.slug'
+} from './slug.service'
 import type { JWTPayload } from '@beritakarya/types'
 import type { ContentType } from '@prisma/client'
 import { sendNotification } from '../notification/notification.controller'
@@ -14,8 +14,8 @@ import { recordView } from '../analytics/analytics.service'
 import * as searchService from './search.service'
 import { getCache, setCache, deleteCache } from '../../lib/redis'
 import { googleIndexingService } from '../../services/google-indexing.service'
-import { applySeoDefaults, validateArticleContentLimits } from './article.content'
-import { finalizeArticlePublish } from './article.publish'
+import { applySeoDefaults, validateArticleContentLimits } from './content.service'
+import { finalizeArticlePublish } from './publish.service'
 import { parseArticleBlocks } from './article.validator'
 
 const PUBLISH_ALLOWED_STATUSES = ['approved', 'scheduled'] as const

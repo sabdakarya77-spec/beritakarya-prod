@@ -163,7 +163,7 @@ export function SiteSwitcher({ activeSiteId, isCollapsed = false }: SiteSwitcher
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <Lock size={12} className="text-gray-500 flex-shrink-0" />
-            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               Portal Aktif
             </span>
           </div>
@@ -197,7 +197,7 @@ export function SiteSwitcher({ activeSiteId, isCollapsed = false }: SiteSwitcher
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Activity size={12} className="text-emerald-400 flex-shrink-0" />
-          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             Portal Aktif
           </span>
         </div>
@@ -344,13 +344,13 @@ export function SiteSwitcher({ activeSiteId, isCollapsed = false }: SiteSwitcher
                         </p>
                         {s.stats && (
                           <div className="flex items-center gap-3 mt-1.5">
-                            <span className="inline-flex items-center gap-1 text-[9px] text-gray-400">
+                            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400">
                               <Users size={9} /> {s.stats.users}
                             </span>
-                            <span className="inline-flex items-center gap-1 text-[9px] text-gray-400">
+                            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400">
                               <FileText size={9} /> {s.stats.articles}
                             </span>
-                            <span className="inline-flex items-center gap-1 text-[9px] text-gray-400">
+                            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400">
                               <Tag size={9} /> {s.stats.categories}
                             </span>
                           </div>

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { z } from 'zod'
 import { requireAuth } from '../middleware/auth.middleware'
-import { checkAIPermissions } from '../middleware/aiQuota'
+import { checkAIPermissions } from '../middleware/aiQuota.middleware'
 import { aiLimiter } from '../lib/rateLimit'
 import { asyncHandler } from '../utils/asyncHandler'
 import * as writeService from './write.service'

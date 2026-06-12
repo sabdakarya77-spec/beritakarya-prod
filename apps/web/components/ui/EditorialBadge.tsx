@@ -41,7 +41,7 @@ export default function EditorialBadge({ variant, className, size = 'sm' }: Edit
         </span>
       )}
       {config.icon && !config.pulse && (
-        <span className="text-[9px] opacity-80">{config.icon}</span>
+        <span className="text-[10px] opacity-80">{config.icon}</span>
       )}
       {config.label}
     </span>

@@ -255,7 +255,7 @@ export default function ReviewQueuePage() {
                 <div key={i} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0', step.color)}>
                   <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
                   {step.count !== null && (
-                    <span className="text-[9px] font-black opacity-70">({step.count})</span>
+                    <span className="text-[10px] font-black opacity-70">({step.count})</span>
                   )}
                 </div>
               )
@@ -285,7 +285,7 @@ export default function ReviewQueuePage() {
                 {tab.label}
                 {count > 0 && (
                   <span className={cn(
-                    'text-[9px] font-black px-1.5 py-0.5 rounded-full',
+                    'text-[10px] font-black px-1.5 py-0.5 rounded-full',
                     activeTab === tab.key ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'
                   )}>
                     {count}
@@ -356,22 +356,22 @@ export default function ReviewQueuePage() {
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <StatusBadge status={article.status} />
                       {article.isBreaking && (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-red-600 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-600 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
                           <Zap size={10} /> Breaking
                         </span>
                       )}
                       {isLongQueue(article) && (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-amber-600 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-amber-600 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 rounded-full">
                           <Clock size={10} /> Antre Lama
                         </span>
                       )}
                       {article.category?.name && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-brand-red px-2 py-0.5 bg-brand-red/5 rounded">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-red px-2 py-0.5 bg-brand-red/5 rounded">
                           {article.category.name}
                         </span>
                       )}
                       {wordCount(article) > 0 && (
-                        <span className="text-[9px] text-gray-400 font-medium">
+                        <span className="text-[10px] text-gray-400 font-medium">
                           ≈ {wordCount(article).toLocaleString()} kata
                         </span>
                       )}
@@ -384,7 +384,7 @@ export default function ReviewQueuePage() {
                         <UserIcon size={11} /> {article.author?.name || 'Redaksi'}
                       </span>
                       {article.author?.role && (
-                        <span className="px-2 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-[9px] font-black uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                        <span className="px-2 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-wide text-gray-500 dark:text-gray-300">
                           {article.author.role}
                         </span>
                       )}
@@ -524,8 +524,9 @@ export default function ReviewQueuePage() {
                 {reviewModal.title}
               </p>
               <div className="mb-5">
-                <label className="dash-label block mb-2">Catatan untuk reporter/kontributor (opsional)</label>
+                <label htmlFor="review-notes" className="dash-label block mb-2">Catatan untuk reporter/kontributor (opsional)</label>
                 <textarea
+                  id="review-notes"
                   value={reviewNotes}
                   onChange={e => setReviewNotes(e.target.value)}
                   rows={3}

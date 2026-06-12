@@ -126,9 +126,10 @@ export default function InvitationsDashboard() {
             </h2>
             <form onSubmit={handleInvite} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-2">Email Penerima</label>
-                <input 
-                  type="email" 
+                <label htmlFor="invitation-email" className="block text-sm font-medium mb-2">Email Penerima</label>
+                <input
+                  id="invitation-email"
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="reporter@email.com"
@@ -138,8 +139,9 @@ export default function InvitationsDashboard() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-2">Peran (Role)</label>
-                <select 
+                <label htmlFor="invitation-role" className="block text-sm font-medium mb-2">Peran (Role)</label>
+                <select
+                  id="invitation-role"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-red-500"
@@ -153,23 +155,25 @@ export default function InvitationsDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Cakupan Situs (Scope)</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <input 
-                      type="radio" 
-                      name="siteScope" 
-                      checked={siteScope === 'current'} 
-                      onChange={() => setSiteScope('current')} 
+                <label htmlFor="invitation-scope" className="block text-sm font-medium mb-2">Cakupan Situs (Scope)</label>
+                <div id="invitation-scope" className="flex gap-4">
+                  <label htmlFor="invitation-scope-current" className="flex items-center gap-2">
+                    <input
+                      id="invitation-scope-current"
+                      type="radio"
+                      name="siteScope"
+                      checked={siteScope === 'current'}
+                      onChange={() => setSiteScope('current')}
                     />
                     <span className="text-sm">Hanya {siteId}</span>
                   </label>
-                  <label className="flex items-center gap-2">
-                    <input 
-                      type="radio" 
-                      name="siteScope" 
-                      checked={siteScope === 'global'} 
-                      onChange={() => setSiteScope('global')} 
+                  <label htmlFor="invitation-scope-global" className="flex items-center gap-2">
+                    <input
+                      id="invitation-scope-global"
+                      type="radio"
+                      name="siteScope"
+                      checked={siteScope === 'global'}
+                      onChange={() => setSiteScope('global')}
                     />
                     <span className="text-sm">Global (Semua)</span>
                   </label>

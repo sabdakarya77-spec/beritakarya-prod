@@ -50,16 +50,16 @@ const ReviewQueueItem = React.memo(function ReviewQueueItem({ article, site, ind
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             {article.isBreaking && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 dark:bg-red-900/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 dark:bg-red-900/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
                 <Zap size={10} /> Breaking
               </span>
             )}
             {isLongQueue && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
                 <Clock3 size={10} /> Antre Lama
               </span>
             )}
-            <span className="text-[9px] font-black uppercase tracking-widest text-brand-red">
+            <span className="text-[10px] font-black uppercase tracking-widest text-brand-red">
               {article.category?.name || 'Umum'}
             </span>
           </div>
@@ -85,7 +85,7 @@ const ReviewQueueItem = React.memo(function ReviewQueueItem({ article, site, ind
         <div className="md:self-stretch flex items-start">
           <Link
             href={`/${site}/dashboard/articles/${article.id}`}
-            className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-3 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 transition-colors shadow-sm"
           >
             <Eye size={11} />
             Review
@@ -120,7 +120,7 @@ export function ReviewQueue({ articles, site, count }: ReviewQueueProps) {
           <AlertCircle size={14} className="text-violet-500" />
           <h3 className="dash-label text-violet-600 dark:text-violet-400">Antrian Review</h3>
           {count > 0 && (
-            <span className="px-1.5 py-0.5 bg-violet-600 text-white text-[9px] font-black rounded-full">{count}</span>
+            <span className="px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-black rounded-full">{count}</span>
           )}
         </div>
         <Link href={`/${site}/dashboard/review`} className="text-[10px] font-black uppercase tracking-widest text-brand-red hover:underline flex items-center gap-1">

@@ -4,9 +4,9 @@ import {
   buildMetaDescriptionExcerpt,
   validateArticleContentLimits,
   applySeoDefaults
-} from './article.content'
+} from './content.service'
 
-describe('article.content', () => {
+describe('content.service', () => {
   it('extractTextFromBlocks joins paragraph and heading', () => {
     const text = extractTextFromBlocks([
       { type: 'paragraph', content: 'Paragraf satu.' },

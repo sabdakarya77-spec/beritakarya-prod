@@ -25,7 +25,7 @@ vi.mock('../middleware/auth.middleware', () => ({
   }
 }))
 
-vi.mock('../middleware/aiQuota', () => ({
+vi.mock('../middleware/aiQuota.middleware', () => ({
   checkAIPermissions: (_: any, __: any, next: any) => {
     // Mock user quota context
     _.aiQuota = { allowedFeatures: ['rewrite', 'expand'] }

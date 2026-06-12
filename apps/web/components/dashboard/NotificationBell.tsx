@@ -103,7 +103,7 @@ export default function NotificationBell() {
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-brand-red text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 animate-in zoom-in duration-300">
+          <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-brand-red text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 animate-in zoom-in duration-300">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -121,12 +121,12 @@ export default function NotificationBell() {
             <div className="p-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
               <div>
                 <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-black dark:text-white">Notifikasi</h4>
-                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{unreadCount} Belum Dibaca</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">{unreadCount} Belum Dibaca</p>
               </div>
               {unreadCount > 0 && (
                 <button 
                   onClick={markAllRead}
-                  className="flex items-center gap-1.5 text-[9px] font-black text-brand-red uppercase tracking-widest hover:bg-brand-red/10 px-2 py-1.5 rounded-lg transition-all"
+                  className="flex items-center gap-1.5 text-[10px] font-black text-brand-red uppercase tracking-widest hover:bg-brand-red/10 px-2 py-1.5 rounded-lg transition-all"
                 >
                   <Check size={12} /> Tandai Semua
                 </button>
@@ -184,14 +184,14 @@ export default function NotificationBell() {
                           {n.message}
                         </p>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-[9px] text-gray-400 font-bold uppercase">
+                          <span className="text-[10px] text-gray-400 font-bold uppercase">
                             {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: id })}
                           </span>
                           {n.link && (
                             <Link 
                               href={n.link} 
                               onClick={() => { setIsOpen(false); markRead(n.id); }}
-                              className="flex items-center gap-1 text-[9px] font-black text-brand-red uppercase tracking-widest hover:underline"
+                              className="flex items-center gap-1 text-[10px] font-black text-brand-red uppercase tracking-widest hover:underline"
                             >
                               Detail <ExternalLink size={10} />
                             </Link>
@@ -209,7 +209,7 @@ export default function NotificationBell() {
 
             {/* Footer */}
             <div className="p-3 bg-gray-50/50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5 text-center">
-               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                   Pusat Informasi Editorial BeritaKarya
                </p>
             </div>

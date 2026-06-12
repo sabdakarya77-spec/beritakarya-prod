@@ -180,7 +180,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
             transition={{ duration: 0.16, ease: 'easeOut' }}
             className="absolute left-full top-0 z-30 ml-4 w-[12.25rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
           >
-            <p className="px-1 text-[9px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
+            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
               Ukuran Teks
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -190,7 +190,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
                   type="button"
                   onClick={() => setFontSize(size.value)}
                   className={cn(
-                    'rounded-full border px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] transition-all',
+                    'rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all',
                     fontSize === size.value
                       ? 'border-brand-red/40 bg-brand-red text-white'
                       : 'border-white/10 bg-white/[0.03] text-gray-300 hover:border-brand-red/30 hover:text-white'
@@ -214,7 +214,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
             className="absolute left-full top-1/2 z-30 ml-4 w-[17rem] -translate-y-1/2 rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
           >
             <div className="px-1 pb-2.5 pt-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
                 Bagikan Artikel
               </p>
             </div>

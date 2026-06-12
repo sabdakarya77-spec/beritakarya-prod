@@ -153,7 +153,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
                 >
                   Daftar
                 </Link>
-                <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
                   Hanya akun terdaftar yang dapat mengirim komentar
                 </span>
               </div>
@@ -202,7 +202,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
                     <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-black dark:text-white">
                       {c.user?.name || c.authorName || 'Pembaca'}
                     </h4>
-                    <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-brand-text-muted">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand-text-muted">
                       <Clock size={10} />
                       {new Date(c.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>

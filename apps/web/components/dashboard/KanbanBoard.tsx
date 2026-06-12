@@ -68,7 +68,7 @@ export default function KanbanBoard({ articles, site }: KanbanBoardProps) {
                   <Link href={`/${site}/dashboard/articles/${article.id}`}>
                     <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/5 rounded-xl shadow-sm hover:shadow-md hover:border-brand-red/20 transition-all cursor-pointer">
                       {article.category?.name && (
-                        <span className="text-[9px] font-black uppercase tracking-widest text-brand-red mb-2 block">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-red mb-2 block">
                           {article.category.name}
                         </span>
                       )}
@@ -78,7 +78,7 @@ export default function KanbanBoard({ articles, site }: KanbanBoardProps) {
                       
                       <div className="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-white/5">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-[9px] font-black text-gray-500">
+                          <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-500">
                             {article.author?.name?.[0] || 'R'}
                           </div>
                           <span className="text-[10px] font-medium text-gray-400 truncate max-w-[80px]">

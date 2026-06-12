@@ -117,7 +117,7 @@ export function MagazineBentoHero({ articles, site }: { articles: any[], site: s
                 {/* Overlay Konten Teks */}
                 <div className="absolute bottom-0 left-0 w-full p-5 sm:p-7 md:p-8 lg:p-10">
                   <div className="mb-2.5 sm:mb-3">
-                    <span className={cn("px-2.5 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.category?.name))}>
+                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.category?.name))}>
                       {currentArticle.category?.name || 'Headline'}
                     </span>
                   </div>
@@ -149,7 +149,7 @@ export function MagazineBentoHero({ articles, site }: { articles: any[], site: s
                 {/* Label Kategori */}
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className={cn(
-                    "text-[8px] xl:text-[9px] font-extrabold uppercase tracking-widest",
+                    "text-[10px] xl:text-[10px] font-extrabold uppercase tracking-widest",
                     isActive ? "text-brand-red" : "text-brand-text-muted"
                   )}>
                     {article.category?.name || 'Headline'}

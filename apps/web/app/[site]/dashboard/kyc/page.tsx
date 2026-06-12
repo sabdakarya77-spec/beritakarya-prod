@@ -238,13 +238,14 @@ export default function KYCPage() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Bio Section */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">
+              <label htmlFor="kyc-bio" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wider">
                 Tentang Penulis (Akan Tampil di Profil Publik)
               </label>
               <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 Tulis deskripsi singkat tentang diri Anda dalam 1-2 kalimat formal. Isi ini akan tampil saat pembaca membuka profil penulis.
               </p>
-              <textarea 
+              <textarea
+                id="kyc-bio"
                 value={bio}
                 onChange={(e) => {
                   setBio(e.target.value)
@@ -289,7 +290,7 @@ export default function KYCPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* KTP Upload */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">
+                <label htmlFor="ktp-upload" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">
                   Foto KTP <span className="text-brand-red">*</span>
                 </label>
                 <div 
@@ -330,7 +331,7 @@ export default function KYCPage() {
 
               {/* KK Upload */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">
+                <label htmlFor="kk-upload" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">
                   Kartu Keluarga (Opsi)
                 </label>
                 <div 

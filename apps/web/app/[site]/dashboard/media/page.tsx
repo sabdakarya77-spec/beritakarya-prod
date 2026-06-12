@@ -99,13 +99,13 @@ export default function MediaManagerPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <label className={cn(
+          <label htmlFor="media-upload" className={cn(
             "flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-brand-red/20 cursor-pointer",
             uploading && "opacity-50 pointer-events-none"
           )}>
             {uploading ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
             {uploading ? 'Uploading...' : 'Upload Baru'}
-            <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
+            <input id="media-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
           </label>
         </div>
       </div>
@@ -236,11 +236,11 @@ export default function MediaManagerPage() {
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
-                      <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Dimensi</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Dimensi</p>
                       <p className="text-[10px] font-bold text-brand-black dark:text-white">{selectedMedia.width} × {selectedMedia.height}</p>
                     </div>
                     <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl">
-                      <p className="text-[8px] font-black text-gray-400 uppercase mb-1">Ukuran</p>
+                      <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Ukuran</p>
                       <p className="text-[10px] font-bold text-brand-black dark:text-white">{(selectedMedia.size/1024).toFixed(1)} KB</p>
                     </div>
                   </div>
@@ -248,9 +248,10 @@ export default function MediaManagerPage() {
                   {/* Metadata Form */}
                   <div className="space-y-4">
                     <div>
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Alt Text (SEO)</label>
-                      <input 
-                        type="text" 
+                      <label htmlFor="media-alt-text" className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Alt Text (SEO)</label>
+                      <input
+                        id="media-alt-text"
+                        type="text"
                         value={selectedMedia.altText || ''}
                         onChange={(e) => setSelectedMedia({...selectedMedia, altText: e.target.value})}
                         className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand-red rounded-xl text-xs outline-none transition-all"
@@ -258,8 +259,9 @@ export default function MediaManagerPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Caption</label>
-                      <textarea 
+                      <label htmlFor="media-caption" className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Caption</label>
+                      <textarea
+                        id="media-caption"
                         value={selectedMedia.caption || ''}
                         onChange={(e) => setSelectedMedia({...selectedMedia, caption: e.target.value})}
                         className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand-red rounded-xl text-xs outline-none transition-all h-20 resize-none"
@@ -267,9 +269,10 @@ export default function MediaManagerPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Kredit / Sumber</label>
-                      <input 
-                        type="text" 
+                      <label htmlFor="media-credit" className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Kredit / Sumber</label>
+                      <input
+                        id="media-credit"
+                        type="text"
                         value={selectedMedia.credit || ''}
                         onChange={(e) => setSelectedMedia({...selectedMedia, credit: e.target.value})}
                         className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand-red rounded-xl text-xs outline-none transition-all"
@@ -292,13 +295,13 @@ export default function MediaManagerPage() {
                           navigator.clipboard.writeText(selectedMedia.url);
                           alert('Link disalin');
                         }}
-                        className="py-2.5 bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                        className="py-2.5 bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
                       >
                         <Copy size={12} /> Salin URL
                       </button>
                       <button 
                         onClick={() => handleDelete(selectedMedia.id)}
-                        className="py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                        className="py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2"
                       >
                         <Trash2 size={12} /> Hapus
                       </button>

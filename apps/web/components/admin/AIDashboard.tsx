@@ -448,7 +448,7 @@ export function AIDashboard() {
                       </td>
                       <td className="py-4 px-4 capitalize">
                         <span className={cn(
-                          "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border",
+                          "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border",
                           user.role === 'superadmin' 
                             ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' 
                             : user.role === 'wapimred'
@@ -487,7 +487,7 @@ export function AIDashboard() {
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-extrabold text-white capitalize">{quota.role}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black uppercase tracking-widest bg-brand-red/10 border border-brand-red/20 text-brand-red px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-black uppercase tracking-widest bg-brand-red/10 border border-brand-red/20 text-brand-red px-2 py-0.5 rounded-md">
                         {quota.modelRestriction || 'Semua Model (GPT-4o)'}
                       </span>
                       <button 
@@ -502,17 +502,17 @@ export function AIDashboard() {
                   
                   <div className="grid grid-cols-2 gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
                     <div>
-                      <span className="text-gray-500 block text-[9px] font-black">Limit Harian:</span>
+                      <span className="text-gray-500 block text-[10px] font-black">Limit Harian:</span>
                       <p className="font-extrabold text-gray-200 mt-1">{quota.dailyRequests} Permintaan / Hari</p>
                     </div>
                     <div>
-                      <span className="text-gray-500 block text-[9px] font-black">Batas Bulanan:</span>
+                      <span className="text-gray-500 block text-[10px] font-black">Batas Bulanan:</span>
                       <p className="font-extrabold text-emerald-400 mt-1">{formatCurrency(quota.monthlyBudget)} / Bulan</p>
                     </div>
                   </div>
                   
                   <div className="pt-3 border-t border-white/5">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Fitur AI yang Diizinkan:</span>
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Fitur AI yang Diizinkan:</span>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {(() => {
                         let allowed: string[] = []
@@ -526,7 +526,7 @@ export function AIDashboard() {
                           }
                         }
                         return (allowed || []).map((f) => (
-                          <span key={f} className="text-[8px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-gray-300 px-2 py-0.5 rounded">
+                          <span key={f} className="text-[10px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-gray-300 px-2 py-0.5 rounded">
                             {f}
                           </span>
                         ))
@@ -600,7 +600,7 @@ export function AIDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 text-gray-500 font-black uppercase tracking-widest text-[9px] bg-white/[0.01]">
+                <tr className="border-b border-white/5 text-gray-500 font-black uppercase tracking-widest text-[10px] bg-white/[0.01]">
                   <th className="py-3 px-4">User</th>
                   <th className="py-3 px-4">Peran</th>
                   <th className="py-3 px-4">Situs Cabang</th>
@@ -628,13 +628,13 @@ export function AIDashboard() {
                           </div>
                           <div>
                             <p className="font-extrabold text-gray-200">{user.name}</p>
-                            <p className="text-[9px] text-gray-500 font-semibold">{user.email}</p>
+                            <p className="text-[10px] text-gray-500 font-semibold">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-4 capitalize">
                         <span className={cn(
-                          "px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border",
+                          "px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border",
                           user.role === 'superadmin' 
                             ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' 
                             : user.role === 'wapimred'
@@ -649,16 +649,16 @@ export function AIDashboard() {
                       <td className="text-right py-4 px-4 font-extrabold text-emerald-400">{formatCurrency(user.aiMonthlyBudget)}</td>
                       <td className="text-right py-4 px-4">
                         <div className="font-black text-gray-200">{formatCurrency(user.currentMonthUsage.cost)}</div>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase mt-0.5">{user.currentMonthUsage.requests} req</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase mt-0.5">{user.currentMonthUsage.requests} req</p>
                       </td>
                       <td className="text-center py-4 px-4">
-                        <span className="text-[9px] font-black uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded text-gray-300">
+                        <span className="text-[10px] font-black uppercase bg-white/5 border border-white/10 px-2 py-0.5 rounded text-gray-300">
                           {user.aiModelRestriction || 'GPT-4o'}
                         </span>
                       </td>
                       <td className="text-center py-4 px-4">
                         <span className={cn(
-                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border",
+                          "inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border",
                           user.aiEnabled 
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                             : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -769,7 +769,7 @@ export function AIDashboard() {
             <form onSubmit={handleRoleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-wider block">Batas Permintaan Harian</label>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Batas Permintaan Harian</label>
                   <input 
                     type="number" 
                     required
@@ -780,7 +780,7 @@ export function AIDashboard() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-wider block">Anggaran Bulanan (USD)</label>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Anggaran Bulanan (USD)</label>
                   <input 
                     type="number" 
                     required
@@ -794,7 +794,7 @@ export function AIDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-wider block">Batasan Model AI</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Batasan Model AI</label>
                 <select 
                   value={roleFormData.modelRestriction}
                   onChange={(e) => setRoleFormData(prev => ({ ...prev, modelRestriction: e.target.value }))}
@@ -808,7 +808,7 @@ export function AIDashboard() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-wider block">Hak Akses Fitur AI</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">Hak Akses Fitur AI</label>
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
                   {AVAILABLE_FEATURES.map((feature) => {
                     const isChecked = roleFormData.allowedFeatures.includes(feature.id)

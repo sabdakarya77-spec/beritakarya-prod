@@ -254,11 +254,11 @@
 7. Tambah tests untuk 8 untested modules
 
 ### Phase 4 — Rendah (Bertahap)
-1. Decompose monolithic page components
-2. Accessibility fixes (labels, keyboard, alt text)
-3. Database partitioning untuk PageView
-4. Cleanup dead code
-5. Naming convention standardization
+1. ✅ Decompose monolithic page components (ads 1801→1223, settings 1603→1097, dashboard 841→545)
+2. ✅ Accessibility fixes (42 htmlFor added, 25 files text-[7-9px]→text-[10px], clickable div fixed)
+3. ✅ PageView retention cron job (90-day default, batched deletes)
+4. ✅ Cleanup dead code (7 files deleted: useKeyboardShortcuts, layoutStore, ArticleSharePanel, PublicGallery, SectionSuspense, cleanup.service)
+5. ✅ Naming convention standardization (middleware .middleware.ts suffix, article service files renamed)
 
 ---
 

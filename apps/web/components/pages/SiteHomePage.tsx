@@ -51,7 +51,7 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
 // ─────────────────────────────────────────────
 const sectionEyebrowClass = 'text-[10px] font-black uppercase tracking-[0.16em]'
 const sectionEyebrowMutedClass = `${sectionEyebrowClass} text-brand-text-muted`
-const sectionMetaClass = 'text-[9px] font-semibold text-brand-text-muted'
+const sectionMetaClass = 'text-[10px] font-semibold text-brand-text-muted'
 const sectionTitleClass = 'text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white'
 
 function formatSidebarDate(dateValue?: string | Date) {
@@ -388,7 +388,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   <Link
                     key={tag}
                     href={`/${siteParam}?q=${encodeURIComponent(tag)}`}
-                    className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03]"
+                    className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03]"
                   >
                     #{tag}
                   </Link>
@@ -461,7 +461,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/5 dark:bg-white/[0.02]">
                       <div className="mb-4 flex items-center justify-between">
                         <span className={sectionEyebrowMutedClass}>Sponsorship</span>
-                        <span className="text-[9px] font-medium uppercase tracking-[0.1em] text-brand-text-muted">
+                        <span className="text-[10px] font-medium uppercase tracking-[0.1em] text-brand-text-muted">
                           Advertisement
                         </span>
                       </div>
@@ -554,7 +554,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           <SiWhatsapp size={16} />
                         </span>
                         <span>
-                          <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-emerald-300/90">
+                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300/90">
                             WhatsApp
                           </span>
                           <span className="mt-0.5 block text-xs font-bold text-white">Gabung Channel</span>
@@ -575,7 +575,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           <SiTelegram size={16} />
                         </span>
                         <span>
-                          <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-sky-200/90">
+                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-sky-200/90">
                             Telegram
                           </span>
                           <span className="mt-0.5 block text-xs font-bold text-white">Ikuti Kanal</span>
@@ -593,7 +593,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         <Mail size={16} />
                       </span>
                       <span>
-                        <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-white/75">
+                        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-white/75">
                           Email
                         </span>
                         <span className="mt-0.5 block text-xs font-bold text-white">Kirim Email</span>
@@ -625,7 +625,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="mb-1.5 flex items-center gap-2">
-                            <span className="rounded-full bg-brand-red/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-brand-red">
+                            <span className="rounded-full bg-brand-red/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-red">
                               {index === 0 ? 'Top Story' : 'Trending'}
                             </span>
                             <span className={sectionMetaClass}>
@@ -668,11 +668,11 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         <div className="text-sm font-extrabold text-brand-black dark:text-white">{value}</div>
                       </div>
                       <div className="text-right">
-                        <div className={`flex items-center gap-1 text-[9px] font-bold ${up ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
+                        <div className={`flex items-center gap-1 text-[10px] font-bold ${up ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
                           <span>{up ? '↑' : '↓'}</span>
                           <span>{change}</span>
                         </div>
-                        <div className="text-[9px] text-brand-text-muted">{diff}</div>
+                        <div className="text-[10px] text-brand-text-muted">{diff}</div>
                       </div>
                     </div>
                   ))}
@@ -745,7 +745,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
                         <div className="absolute bottom-0 left-0 z-10 w-full p-5 md:p-6">
-                          <span className="mb-2 block text-[9px] font-black uppercase tracking-[0.14em] text-brand-red">
+                          <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-brand-red">
                             {article.category?.name || 'Pilihan Editor'}
                           </span>
                           <Link href={`/${siteParam}/artikel/${article.slug}`}>
@@ -793,7 +793,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           </p>
                         </div>
                         <div className="mt-3 flex items-center gap-2 border-t border-black/5 pt-3 dark:border-white/5">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red/10 text-[9px] font-black text-brand-red">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red/10 text-[10px] font-black text-brand-red">
                             {article.author?.name?.charAt(0) || 'S'}
                           </div>
                           <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-black dark:text-white">
@@ -832,7 +832,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
                         <div className="absolute bottom-0 left-0 z-10 w-full p-5">
-                          <span className="mb-1.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                          <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
                             Jurnal Foto
                           </span>
                           <h4 className="line-clamp-3 text-sm font-sans font-semibold leading-snug text-white">
@@ -875,7 +875,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           />
                         )}
                         <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">
-                          <span className="mb-0.5 block text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
                             Video Report
                           </span>
                           <h4 className="line-clamp-2 text-xs font-semibold text-white">{article.title}</h4>

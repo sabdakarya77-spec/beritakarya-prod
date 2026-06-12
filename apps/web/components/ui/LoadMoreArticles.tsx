@@ -81,7 +81,7 @@ export default function LoadMoreArticles({
               )}
               {loading ? 'Menyelaraskan Data...' : 'Muat Lebih Banyak'}
             </div>
-            <span className="text-[9px] font-bold text-brand-text-muted uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
               Eksplorasi Berita Lainnya
             </span>
           </button>

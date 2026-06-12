@@ -104,10 +104,11 @@ function RegisterForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+              <label htmlFor="register-name" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                 {isAdvertiser ? 'Nama Perusahaan / Brand / Personal' : 'Nama Lengkap'}
               </label>
               <input
+                id="register-name"
                 type="text"
                 value={name}
                 onChange={(e) => {
@@ -121,10 +122,11 @@ function RegisterForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+              <label htmlFor="register-email" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                 Email
               </label>
               <input
+                id="register-email"
                 type="email"
                 value={email}
                 onChange={(e) => {
@@ -138,11 +140,12 @@ function RegisterForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+              <label htmlFor="register-password" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                 Kata Sandi
               </label>
               <div className="relative">
                 <input
+                  id="register-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => {
@@ -167,11 +170,12 @@ function RegisterForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+              <label htmlFor="register-confirm-password" className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
                 Konfirmasi Kata Sandi
               </label>
               <div className="relative">
                 <input
+                  id="register-confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => {

@@ -123,7 +123,7 @@ export function AIPanel({ isOpen = true, onClose, editor }: AIPanelProps) {
           
           {showModelDropdown && (
             <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowModelDropdown(false)} />
+              <div className="fixed inset-0 z-40" role="button" tabIndex={0} onClick={() => setShowModelDropdown(false)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowModelDropdown(false) }} />
               <div className="absolute bottom-full left-0 right-0 mb-1 z-50 bg-panel-surface border border-panel-border rounded-lg shadow-xl overflow-hidden">
                 {MODELS.map((m) => (
                   <button

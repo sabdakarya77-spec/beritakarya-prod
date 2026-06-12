@@ -16,7 +16,7 @@ export function TopContent({ topContent, site }: TopContentProps) {
           <TrendingUp size={16} className="text-brand-red" />
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Konten Terpopuler</h3>
         </div>
-        <Link href={`/${site}/dashboard/articles`} className="text-[9px] font-black text-brand-red uppercase tracking-widest hover:underline">Semua</Link>
+        <Link href={`/${site}/dashboard/articles`} className="text-[10px] font-black text-brand-red uppercase tracking-widest hover:underline">Semua</Link>
       </div>
       <div className="p-2">
         {topContent.length > 0 ? (

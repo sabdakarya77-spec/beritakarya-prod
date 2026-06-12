@@ -169,7 +169,7 @@ export default function MobileArticleTools({
               )}
             >
               <Share2 size={20} />
-              <span className="text-[9px] font-black uppercase tracking-[0.12em]">Bagikan</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.12em]">Bagikan</span>
             </button>
 
             {/* Divider */}
@@ -191,7 +191,7 @@ export default function MobileArticleTools({
               )}
             >
               <Bookmark size={20} className={isSaved ? 'fill-current' : undefined} />
-              <span className="text-[9px] font-black uppercase tracking-[0.12em]">
+              <span className="text-[10px] font-black uppercase tracking-[0.12em]">
                 {isSaved ? 'Tersimpan' : 'Simpan'}
               </span>
             </button>

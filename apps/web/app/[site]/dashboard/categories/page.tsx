@@ -304,9 +304,10 @@ export default function CategoriesDashboard() {
             </h2>
             <form onSubmit={handleCreate} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Nama Kategori / Rubrik</label>
-                <input 
-                  type="text" 
+                <label htmlFor="category-name" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Nama Kategori / Rubrik</label>
+                <input
+                  id="category-name"
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Misal: Olahraga, Politik Lokal"
@@ -316,11 +317,12 @@ export default function CategoriesDashboard() {
               </div>
               
               <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Slug URL / Identifier</label>
+                <label htmlFor="category-slug" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Slug URL / Identifier</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">/</span>
-                  <input 
-                    type="text" 
+                  <input
+                    id="category-slug"
+                    type="text"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     disabled={!!editingCategory}
@@ -336,8 +338,9 @@ export default function CategoriesDashboard() {
 
               {/* Parent Category Selection */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Kategori Induk (Parent Menu)</label>
+                <label htmlFor="category-parent" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Kategori Induk (Parent Menu)</label>
                 <select
+                  id="category-parent"
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-rose-500 transition-all font-semibold"
@@ -364,9 +367,10 @@ export default function CategoriesDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Order Selection */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Urutan (Order)</label>
-                  <input 
-                    type="number" 
+                  <label htmlFor="category-order" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Urutan (Order)</label>
+                  <input
+                    id="category-order"
+                    type="number"
                     value={order}
                     onChange={(e) => setOrder(e.target.value)}
                     placeholder="0"
@@ -378,8 +382,8 @@ export default function CategoriesDashboard() {
 
                 {/* Color Info (read-only) */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Warna Otomatis</label>
-                  <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                  <label htmlFor="category-color-display" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Warna Otomatis</label>
+                  <div id="category-color-display" className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black border uppercase tracking-wider ${getCategoryColor(name || 'umum')}`}>
                       {name || 'Nama Kategori'}
                     </span>

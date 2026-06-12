@@ -137,8 +137,9 @@ export default function KYCDetailReviewPage() {
           {/* Documents Display */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Foto KTP (Watermarked)</label>
-              <div 
+              <label htmlFor="kyc-review-idcard" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Foto KTP (Watermarked)</label>
+              <div
+                id="kyc-review-idcard"
                 className="group relative aspect-[3/2] rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 cursor-zoom-in"
                 onClick={() => user.idCardPath && setShowImage('idCard')}
               >
@@ -157,8 +158,9 @@ export default function KYCDetailReviewPage() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kartu Keluarga (Opsi)</label>
-              <div 
+              <label htmlFor="kyc-review-familycard" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kartu Keluarga (Opsi)</label>
+              <div
+                id="kyc-review-familycard"
                 className="group relative aspect-[3/2] rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 cursor-zoom-in"
                 onClick={() => user.familyCardPath && setShowImage('familyCard')}
               >
@@ -217,8 +219,9 @@ export default function KYCDetailReviewPage() {
             
             <div className="space-y-5">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Catatan Review</label>
-                <textarea 
+                <label htmlFor="kyc-review-notes" className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Catatan Review</label>
+                <textarea
+                  id="kyc-review-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Berikan alasan jika ditolak atau catatan tambahan jika disetujui..."
