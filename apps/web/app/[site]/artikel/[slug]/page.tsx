@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { SmartImage } from '../../../../components/ui/SmartImage'
 import Link from 'next/link'
 import type { Block } from '@beritakarya/types'
+import { sanitizeHtml } from '../../../../lib/sanitize'
 import PublicSiteLayout from '../../../../components/layout/PublicSiteLayout'
 import { SITE_MAP } from '@beritakarya/config'
 import NewsCard from '../../../../components/ui/NewsCard'
@@ -339,7 +340,7 @@ export default async function ArticlePage({ params }: Props) {
                                   <div key="visual-break-quote" className="relative my-10 py-8 px-8 md:px-12 border-y-2 border-brand-red/10 bg-brand-red/[0.02] rounded-xl">
                                     <span className="absolute -top-3 left-6 text-7xl font-serif text-brand-red opacity-10 leading-none select-none">&ldquo;</span>
                                     <blockquote className="relative z-10 font-serif text-xl md:text-2xl italic leading-relaxed text-brand-black dark:text-white/90">
-                                      <span dangerouslySetInnerHTML={{ __html: quoteBlock.content || '' }} />
+                                      <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(quoteBlock.content || '') }} />
                                     </blockquote>
                                     {quoteBlock.attribution && (
                                       <footer className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red">
@@ -680,7 +681,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
             ? 'font-sans text-lg md:text-xl font-medium leading-relaxed text-brand-black/90 dark:text-white/90 antialiased'
             : bodyTextClass
           }
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
         />
       )
     case 'heading':
@@ -697,7 +698,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
             'mt-10 mb-5 font-sans font-extrabold leading-tight tracking-tight text-balance text-brand-black dark:text-white md:mt-12 md:mb-6',
             headingSizeClass
           )}
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
         />
       )
     case 'quote':
@@ -705,7 +706,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
         <div className="relative my-10 rounded-r-xl border-l-4 border-brand-red bg-gray-50 px-5 py-8 dark:bg-white/[0.03] md:px-8 md:py-10 lg:px-12">
           <span className="absolute left-4 top-4 text-6xl font-serif leading-none text-brand-red opacity-10 select-none md:left-6 md:top-5 md:text-7xl">“</span>
           <blockquote className="relative z-10 font-sans text-[calc(1.1rem*var(--article-font-scale,1))] italic leading-[calc(1.7rem*var(--article-font-scale,1))] text-brand-black dark:text-white md:text-[calc(1.35rem*var(--article-font-scale,1))] md:leading-[calc(2.1rem*var(--article-font-scale,1))]">
-            <span dangerouslySetInnerHTML={{ __html: block.content || '' }} />
+            <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }} />
             {block.attribution && (
               <footer className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red mt-4">— {block.attribution}</footer>
             )}
@@ -790,7 +791,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
             <li 
               key={i} 
               className={bodyTextClass}
-              dangerouslySetInnerHTML={{ __html: item || '' }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(item || '') }}
             />
           ))}
         </ListTag>
@@ -809,7 +810,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
             "my-10 rounded-xl border-l-4 p-5 font-sans text-[calc(1rem*var(--article-font-scale,1))] leading-[calc(1.75rem*var(--article-font-scale,1))] antialiased text-left md:p-8 md:text-[calc(1.1rem*var(--article-font-scale,1))] md:leading-[calc(1.9rem*var(--article-font-scale,1))] shadow-sm",
             variants[block.variant as keyof typeof variants] || variants.editorial
           )}
-          dangerouslySetInnerHTML={{ __html: block.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
         />
       )
     case 'embed':

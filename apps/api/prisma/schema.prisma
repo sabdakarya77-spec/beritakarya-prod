@@ -345,7 +345,7 @@ model Media {
   createdAt      DateTime @default(now())
 
   user User  @relation(fields: [userId], references: [id])
-  site Site  @relation(fields: [siteId], references: [id])
+  site Site  @relation(fields: [siteId], references: [id], onDelete: Restrict)
 
   @@index([siteId])
   @@index([siteId, contentHash])

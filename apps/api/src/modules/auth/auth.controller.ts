@@ -60,7 +60,7 @@ const registerSchema = z.object({
     .regex(/[^A-Za-z0-9]/, 'Harus mengandung karakter spesial'),
   name: z.string().min(2),
   siteId: z.string().nullable().default(null),
-  role: z.string().optional().default('reader')
+  role: z.enum(['reader', 'advertiser']).optional().default('reader')
 })
 
 const forgotPasswordSchema = z.object({

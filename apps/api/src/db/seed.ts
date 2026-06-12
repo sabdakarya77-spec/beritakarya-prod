@@ -23,16 +23,21 @@ async function main() {
 
   console.log('Site pusat upserted.')
 
-  // 2. Seed Superadmin User
-  const hash = await bcrypt.hash('6669PusatKarya', 10)
+  // 2. Seed Superadmin User (credentials from env vars — never hardcode)
+  const seedEmail = process.env.SEED_ADMIN_EMAIL
+  const seedPassword = process.env.SEED_ADMIN_PASSWORD
+  if (!seedEmail || !seedPassword) {
+    throw new Error('SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD must be set in environment')
+  }
+  const hash = await bcrypt.hash(seedPassword, 12)
   const superadmin = await prisma.user.upsert({
-    where: { email: 'sabdakarya77@gmail.com' },
+    where: { email: seedEmail },
     update: {
       passwordHash: hash
     },
     create: {
-      email: 'sabdakarya77@gmail.com',
-      name: 'Superadmin Sabdakarya',
+      email: seedEmail,
+      name: 'Superadmin',
       role: 'superadmin',
       siteId: null,
       passwordHash: hash,

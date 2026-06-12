@@ -1,5 +1,6 @@
 import { prepareLegalDocumentContent } from '../../lib/legalPages'
 import { legalProseClassName } from './legalStyles'
+import { sanitizeHtml } from '../../lib/sanitize'
 
 type LegalDocumentBodyProps = {
   /** Page H1 — used to strip duplicate headings from CMS HTML */
@@ -67,7 +68,7 @@ export function LegalDocumentBody({
           <div className={proseClass}>
             <div
               className="text-brand-text-muted leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: preparedHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(preparedHtml) }}
             />
           </div>
         ) : (

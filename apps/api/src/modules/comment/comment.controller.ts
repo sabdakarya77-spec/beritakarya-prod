@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { prisma } from '../../db/client'
-import { requireAuth } from '../../middleware/auth.middleware'
+import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
 import * as service from './comment.service'
@@ -129,7 +129,9 @@ commentRouter.get('/moderation',
 
 commentRouter.patch('/:id/approve',
   requireAuth,
+  siteMiddleware,
   requireSiteAccess,
+  requireRole(['wapimred', 'superadmin']),
   asyncHandler(async (req: any, res: any) => {
     const { id } = req.params
     const siteId = req.site
@@ -148,7 +150,9 @@ commentRouter.patch('/:id/approve',
 
 commentRouter.patch('/:id/reject',
   requireAuth,
+  siteMiddleware,
   requireSiteAccess,
+  requireRole(['wapimred', 'superadmin']),
   asyncHandler(async (req: any, res: any) => {
     const { id } = req.params
     const siteId = req.site
