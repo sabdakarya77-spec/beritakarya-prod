@@ -339,14 +339,16 @@ model Media {
   altText        String? // Teks alt untuk aksesibilitas & SEO
   caption        String? // Keterangan foto
   credit         String? // Kredit/sumber foto
+  contentHash    String? @map("content_hash") // SHA-256 hash untuk deduplikasi per-site
   userId         String
-  siteId         String?
+  siteId         String   // Wajib — semua media terikat site (pusat sebagai single source of truth)
   createdAt      DateTime @default(now())
 
   user User  @relation(fields: [userId], references: [id])
-  site Site? @relation(fields: [siteId], references: [id])
+  site Site  @relation(fields: [siteId], references: [id])
 
   @@index([siteId])
+  @@index([siteId, contentHash])
 }
 
 model Comment {

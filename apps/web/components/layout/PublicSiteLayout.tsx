@@ -42,7 +42,12 @@ export default function PublicSiteLayout({ children, siteConfig, initialCategory
               slug: cat.slug,
               subCategories: cat.subCategories?.map((sub: any) => ({
                 name: sub.name,
-                slug: sub.slug
+                slug: sub.slug,
+                // Map 3rd-level sub-subcategories (Navbar supports 3 levels)
+                subCategories: sub.subCategories?.map((subsub: any) => ({
+                  name: subsub.name,
+                  slug: subsub.slug
+                }))
               }))
             })),
             { name: 'Tersimpan', slug: 'tersimpan' }

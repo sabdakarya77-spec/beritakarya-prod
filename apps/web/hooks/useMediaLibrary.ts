@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { api } from '../lib/api'
+import { useSiteStore } from '../store/siteStore'
 
 export interface MediaItem {
   id: string
@@ -11,30 +12,50 @@ export interface MediaItem {
   originalFormat: string
   size: number
   userId: string
-  siteId?: string
+  siteId: string // MASALAH 1 FIX: wajib — semua media terikat site
   altText: string | null
   caption: string | null
   credit: string | null
   dominantColor?: string
+  contentHash?: string // MASALAH 4: hash untuk deduplikasi
   createdAt: string
 }
 
-export function useMediaLibrary() {
+/**
+ * Hook untuk mengakses media library.
+ * MASALAH 2 FIX: siteId kini dikirim secara eksplisit sebagai query param,
+ * tidak hanya mengandalkan axios interceptor.
+ *
+ * @param siteId - Opsional. Jika diberikan, override site dari store/cookie.
+ *                 Jika tidak, hook akan membaca dari siteStore secara reaktif.
+ */
+export function useMediaLibrary(siteId?: string) {
   const [items, setItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
 
+  // MASALAH 2 FIX: Baca site dari Zustand store secara reaktif sebagai fallback
+  const storeSiteId = useSiteStore((s) => s.siteId)
+
+  // Prioritas: param eksplisit > store > undefined (interceptor akan handle via cookie)
+  const effectiveSiteId = siteId || storeSiteId
+
   const fetchMedia = useCallback(async (pageNum = 1, reset = false) => {
     setLoading(true)
     try {
-      const response = await api.get('/media', {
-        params: {
-          page: pageNum,
-          limit: 30
-        }
-      })
+      const params: Record<string, unknown> = {
+        page: pageNum,
+        limit: 30
+      }
+
+      // MASALAH 2 FIX: Kirim siteId secara eksplisit sebagai query param
+      if (effectiveSiteId) {
+        params.site = effectiveSiteId
+      }
+
+      const response = await api.get('/media', { params })
       const { items: newItems, total: totalItems, totalPages } = response.data.data
       
       setItems(prev => {
@@ -51,7 +72,7 @@ export function useMediaLibrary() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [effectiveSiteId])
 
   const loadMore = useCallback(() => {
     if (loading || !hasMore) return
@@ -68,7 +89,7 @@ export function useMediaLibrary() {
     await fetchMedia(1, true)
   }, [fetchMedia])
 
-  // Initial fetch on mount
+  // Re-fetch ketika siteId berubah (MASALAH 2 FIX: reaktif terhadap perubahan site)
   useEffect(() => {
     fetchMedia(1, true)
   }, [fetchMedia])

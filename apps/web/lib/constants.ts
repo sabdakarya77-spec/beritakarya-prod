@@ -167,4 +167,8 @@ export function getAdSlotDefinition(slot: string): AdSlotDefinition | null {
   return AD_SLOT_MAP[slot as AdSlotId] || null
 }
 
+/**
+ * @deprecated Hanya untuk fallback/seed. Frontend harus fetch dari API.
+ * @see PublicSiteLayout.tsx — fetch `/categories/tree` dan gunakan ini sebagai fallback awal.
+ */
 export const CATEGORIES_CONFIG: CategoryItem[] = CATEGORY_NAV_CONFIG

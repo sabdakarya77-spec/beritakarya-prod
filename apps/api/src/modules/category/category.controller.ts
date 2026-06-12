@@ -236,3 +236,24 @@ export async function deleteCategory(req: Request, res: Response) {
     })
   }
 }
+
+/**
+ * POST /api/v1/categories/sync-from-template
+ * Force-sync global categories from CATEGORY_TREE_CONFIG template (superadmin only).
+ * Unlike seed-global, this runs even when categories already exist —
+ * it updates names/orders and creates any missing categories.
+ *
+ * MASALAH 3 FIX: Memastikan database selalu sinkron dengan template config.
+ */
+export async function syncFromTemplate(req: Request, res: Response) {
+  try {
+    const result = await categoryService.syncFromTemplate()
+    res.json({ success: true, data: result })
+  } catch (error: any) {
+    const statusCode = error.statusCode || 500
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_SYNC_FAILED', message: error.message }
+    })
+  }
+}

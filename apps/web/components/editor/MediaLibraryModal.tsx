@@ -11,6 +11,7 @@ import {
 import { useMediaLibrary, type MediaItem } from '../../hooks/useMediaLibrary'
 import { useImageUpload } from '../../hooks/useImageUpload'
 import { useAuthStore } from '../../store/authStore'
+import { useSiteStore } from '../../store/siteStore'
 import { cn } from '../../lib/utils'
 
 interface MediaLibraryModalProps {
@@ -31,6 +32,7 @@ export function MediaLibraryModal({
   maxSelect = 10
 }: MediaLibraryModalProps) {
   const { user } = useAuthStore()
+  const siteIdFromStore = useSiteStore((s) => s.siteId)
   const { items, loading, hasMore, loadMore } = useMediaLibrary()
   const { uploading, upload, reset: resetUpload } = useImageUpload()
   
@@ -104,6 +106,7 @@ export function MediaLibraryModal({
           size: result.size,
           originalFormat: file.type.split('/')[1] || 'unknown',
           userId: user?.id || '',
+          siteId: siteIdFromStore || 'pusat', // MASALAH 1 FIX: siteId wajib
           altText: null,
           caption: null,
           credit: null,

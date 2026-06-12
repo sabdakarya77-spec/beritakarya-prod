@@ -132,6 +132,18 @@ export const SYSTEM_CATEGORIES: CategoryConfigItem[] = [
   { name: 'Tersimpan', slug: 'tersimpan' }
 ]
 
+/**
+ * @deprecated Jangan digunakan untuk navigasi runtime.
+ *
+ * MASALAH 3 FIX: Database adalah single source of truth untuk kategori runtime.
+ * Frontend HARUS fetch navigasi dari API (`/api/v1/categories/tree?site=...`).
+ *
+ * Konfigurasi ini HANYA untuk:
+ * 1. Seed awal database (`seedGlobalCategories` / `syncFromTemplate`)
+ * 2. Referensi developer saat development
+ *
+ * Lihat `PublicSiteLayout.tsx` yang sudah fetch dari API dengan fallback ke config ini.
+ */
 export const CATEGORY_NAV_CONFIG: CategoryConfigItem[] = [
   SYSTEM_CATEGORIES[0],
   ...CATEGORY_TREE_CONFIG,

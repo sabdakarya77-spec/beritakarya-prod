@@ -474,6 +474,117 @@ export class CategoryService {
 
     return created
   }
+
+  /**
+   * Force-sync global categories from CATEGORY_TREE_CONFIG template.
+   * Unlike seedGlobalCategories(), this runs even when categories already exist —
+   * it updates names/orders and creates any missing categories.
+   *
+   * MASALAH 3 FIX: Database is the single source of truth for runtime.
+   * This endpoint lets superadmin re-sync when the template config is updated.
+   */
+  async syncFromTemplate() {
+    let created = 0
+    let updated = 0
+    let order = 1
+
+    for (const category of CATEGORY_TREE_CONFIG) {
+      const { id: parentId, created: parentNew, updated: parentUpdated } =
+        await this.upsertGlobalCategory({
+          name: category.name,
+          slug: category.slug,
+          parentId: null,
+          order: order++
+        })
+      if (parentNew) created++
+      if (parentUpdated) updated++
+
+      if (category.subCategories) {
+        let subOrder = 1
+        for (const sub of category.subCategories) {
+          const { id: subId, created: subNew, updated: subUpdated } =
+            await this.upsertGlobalCategory({
+              name: sub.name,
+              slug: sub.slug,
+              parentId,
+              order: subOrder++
+            })
+          if (subNew) created++
+          if (subUpdated) updated++
+
+          // Handle 3rd-level sub-subcategories
+          if (sub.subCategories) {
+            let subSubOrder = 1
+            for (const subsub of sub.subCategories) {
+              const { created: subSubNew, updated: subSubUpdated } =
+                await this.upsertGlobalCategory({
+                  name: subsub.name,
+                  slug: subsub.slug,
+                  parentId: subId,
+                  order: subSubOrder++
+                })
+              if (subSubNew) created++
+              if (subSubUpdated) updated++
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      created,
+      updated,
+      total: created + updated,
+      message: `Sinkronisasi selesai: ${created} dibuat, ${updated} diperbarui`
+    }
+  }
+
+  /**
+   * Upsert a global category: create if missing, update name/order/parentId if exists.
+   */
+  private async upsertGlobalCategory(data: {
+    name: string
+    slug: string
+    parentId: string | null
+    order: number
+  }): Promise<{ id: string; created: boolean; updated: boolean }> {
+    const existing = await prisma.category.findFirst({
+      where: { slug: data.slug, isGlobal: true, deletedAt: null }
+    })
+
+    if (existing) {
+      // Update if name, order, or parentId changed
+      const needsUpdate =
+        existing.name !== data.name ||
+        existing.order !== data.order ||
+        existing.parentId !== data.parentId
+
+      if (needsUpdate) {
+        await prisma.category.update({
+          where: { id: existing.id },
+          data: {
+            name: data.name,
+            order: data.order,
+            parentId: data.parentId
+          }
+        })
+        return { id: existing.id, created: false, updated: true }
+      }
+      return { id: existing.id, created: false, updated: false }
+    }
+
+    const row = await prisma.category.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        siteId: null,
+        isGlobal: true,
+        parentId: data.parentId,
+        order: data.order
+      }
+    })
+    return { id: row.id, created: true, updated: false }
+  }
 }
 
 export const categoryService = new CategoryService()

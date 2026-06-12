@@ -148,6 +148,9 @@ app.get('/api/v1/categories', siteMiddleware, asyncHandler(categoryController.ge
 app.post('/api/v1/categories/seed-global',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(categoryController.seedGlobalCategories))
+app.post('/api/v1/categories/sync-from-template',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(categoryController.syncFromTemplate))
 app.post('/api/v1/categories',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin', 'wapimred']),

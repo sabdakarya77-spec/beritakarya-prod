@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import multer from 'multer'
 import { v4 as uuidv4 } from 'uuid'
+import { createHash } from 'crypto'
 import { requireAuth } from '../../middleware/auth.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -233,6 +234,22 @@ mediaRouter.post(
 
     const isAd = req.query.purpose === 'ad'
 
+    // MASALAH 4: Hitung SHA-256 content hash untuk deduplikasi per-site
+    const contentHash = createHash('sha256').update(req.file.buffer).digest('hex')
+
+    // MASALAH 4: Cek duplikat sebelum proses upload
+    if (!isAd && contentHash) {
+      const existingMedia = await repo.findMediaByContentHash(req.site!, contentHash)
+      if (existingMedia) {
+        logger.info(`[Media] Deduplikasi: file identik sudah ada (id=${existingMedia.id}), melewati upload`)
+        return res.json({ 
+          success: true, 
+          data: existingMedia, 
+          meta: { deduplicated: true, message: 'File identik sudah ada di site ini' } 
+        })
+      }
+    }
+
     if (req.file.mimetype === 'application/pdf') {
       // ── PDF: upload buffer directly ──
       const key = `${id}.pdf`
@@ -288,11 +305,12 @@ mediaRouter.post(
       originalFormat,
       size: req.file.size,
       userId: req.user!.userId,
-      siteId: req.site,
+      siteId: req.site as string,
       altText: req.body.altText || (isLogo ? 'Logo Situs' : ''),
       caption: req.body.caption,
       credit: req.body.credit,
       dominantColor,
+      contentHash,
     })
 
     res.status(201).json({ success: true, data: media })

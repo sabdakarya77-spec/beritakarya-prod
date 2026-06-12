@@ -9,11 +9,12 @@ export async function createMedia(data: {
   originalFormat: string;
   size: number;
   userId: string;
-  siteId?: string;
+  siteId: string; // Wajib — semua media terikat site (MASALAH 1 fix)
   altText?: string;
   caption?: string;
   credit?: string;
   dominantColor?: string;
+  contentHash?: string; // MASALAH 4: SHA-256 hash untuk deduplikasi
 }) {
   return prisma.media.create({ data })
 }
@@ -54,4 +55,17 @@ export async function updateMedia(id: string, data: Partial<{ altText: string; c
 
 export async function deleteMedia(id: string) {
   return prisma.media.delete({ where: { id } })
+}
+
+// MASALAH 4: Cek duplikasi media berdasarkan content hash + siteId
+export async function findMediaByContentHash(
+  siteId: string,
+  contentHash: string
+) {
+  return prisma.media.findFirst({
+    where: {
+      siteId,
+      contentHash,
+    }
+  })
 }
