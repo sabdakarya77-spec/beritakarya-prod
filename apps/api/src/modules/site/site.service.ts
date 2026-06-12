@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client'
+import { logger } from '../../lib/logger'
 
 /**
  * Field-field "aset korporat" yang diwariskan dari site 'pusat' ke
@@ -490,7 +491,7 @@ export class SiteService {
         }
       })
     } catch (error) {
-      console.error('Audit log failed:', error)
+      logger.error('Audit log failed:', error)
     }
   }
 }

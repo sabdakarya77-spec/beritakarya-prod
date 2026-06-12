@@ -58,9 +58,9 @@ describe('ALL_LEGAL_PAGES', () => {
     const testSite = 'jabar'
 
     const aboutPage = ALL_LEGAL_PAGES.find((p: any) => p.id === 'aboutUs')
-    expect(aboutPage.href(testSite)).toBe('/jabar/p/about')
+    expect(aboutPage!.href(testSite)).toBe('/jabar/p/about')
 
     const privacyPage = ALL_LEGAL_PAGES.find((p: any) => p.id === 'privacyPolicy')
-    expect(privacyPage.href(testSite)).toBe('/jabar/kebijakan-privasi')
+    expect(privacyPage!.href(testSite)).toBe('/jabar/kebijakan-privasi')
   })
 })

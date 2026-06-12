@@ -1,4 +1,6 @@
 import * as repo from './article.repository'
+import { logger } from '../../lib/logger'
+import { AppError } from '../../utils/AppError'
 import {
   resolveUniqueSlug,
   createArticleWithSlugRetry,
@@ -24,7 +26,7 @@ export function assertCanPublish(
   forcePublish?: boolean
 ): void {
   if (article.status === 'published') {
-    throw Object.assign(new Error('Post sudah terbit'), { statusCode: 400 })
+    throw new AppError('Post sudah terbit', 400)
   }
   if (PUBLISH_ALLOWED_STATUSES.includes(article.status as (typeof PUBLISH_ALLOWED_STATUSES)[number])) {
     return
@@ -32,11 +34,9 @@ export function assertCanPublish(
   if (forcePublish && user.role === 'superadmin') {
     return
   }
-  throw Object.assign(
-    new Error(
-      `Post harus berstatus disetujui (approved) atau terjadwal (scheduled) sebelum diterbitkan. Status saat ini: ${article.status}`
-    ),
-    { statusCode: 400 }
+  throw new AppError(
+    `Post harus berstatus disetujui (approved) atau terjadwal (scheduled) sebelum diterbitkan. Status saat ini: ${article.status}`,
+    400
   )
 }
 
@@ -103,11 +103,11 @@ export async function getArticles(
 
 export async function getArticleById(id: string, siteId: string, user?: JWTPayload) {
   const article = await repo.findArticleById(id, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
-  
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
+
   // Authorization: Reporters and kontributors can only view their own articles (unless published, but dashboard usually shows drafts)
   if (user && !['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
-    throw Object.assign(new Error('Anda tidak punya akses ke post ini'), { statusCode: 403 })
+    throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
   return article
@@ -115,7 +115,7 @@ export async function getArticleById(id: string, siteId: string, user?: JWTPaylo
 
 export async function getArticleBySlug(slug: string, siteId: string) {
   const article = await repo.findArticleBySlug(slug, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
   return article
 }
 
@@ -130,7 +130,7 @@ export async function getPublishedArticleBySlug(
   let article = cached
   if (!article) {
     article = await repo.findPublishedArticleBySlug(slug, siteId)
-    if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
+    if (!article) throw new AppError('Post tidak ditemukan', 404)
     await setCache(cacheKey, article, 3600) // Cache for 1 hour
   }
   
@@ -140,7 +140,7 @@ export async function getPublishedArticleBySlug(
     articleId: article.id,
     path: `/artikel/${slug}`,
     ...meta
-  }).catch(err => console.error('Failed to record view:', err))
+  }).catch(err => logger.error('Failed to record view:', err))
   
   return article
 }
@@ -170,17 +170,17 @@ export async function createArticle(
     })
 
     if (!dbUser) {
-      throw Object.assign(new Error('User tidak ditemukan'), { statusCode: 404 })
+      throw new AppError('User tidak ditemukan', 404)
     }
 
     // Role validation: Readers cannot create articles
     if (dbUser.role === 'reader') {
-      throw Object.assign(new Error('Akses ditolak: Pembaca tidak dapat membuat artikel'), { statusCode: 403 })
+      throw new AppError('Akses ditolak: Pembaca tidak dapat membuat artikel', 403)
     }
 
     // KYC validation: Reporters and kontributors must be APPROVED to create articles
     if ((dbUser.role === 'reporter' || dbUser.role === 'kontributor') && dbUser.kycStatus !== 'APPROVED') {
-      throw Object.assign(new Error('Akses ditolak: Verifikasi identitas (KYC) Anda belum disetujui'), { statusCode: 403 })
+      throw new AppError('Akses ditolak: Verifikasi identitas (KYC) Anda belum disetujui', 403)
     }
 
     if (input.blocks) {
@@ -188,10 +188,7 @@ export async function createArticle(
         input.blocks = parseArticleBlocks(input.blocks) as typeof input.blocks
       } catch (err) {
         if (err instanceof Error) {
-          throw Object.assign(
-            new Error(`Struktur blok tidak valid: ${err.message}`),
-            { statusCode: 400, code: 'INVALID_BLOCKS' }
-          )
+          throw new AppError(`Struktur blok tidak valid: ${err.message}`, 400, 'INVALID_BLOCKS')
         }
         throw err
       }
@@ -235,11 +232,11 @@ export async function createArticle(
     })
 
     // Indexing
-    searchService.indexArticle(article).catch(err => console.error('Failed to index article:', err))
+    searchService.indexArticle(article).catch(err => logger.error('Failed to index article:', err))
 
     return article
   } catch (err: any) {
-    console.error('[createArticle] Error:', err?.message || err, err?.stack ? `\nStack: ${err.stack}` : '')
+    logger.error('[createArticle] Error:', err?.message || err, err?.stack ? `\nStack: ${err.stack}` : '')
     throw err
   }
 }
@@ -262,25 +259,25 @@ export async function updateArticle(
   })
 
   if (!dbUser) {
-    throw Object.assign(new Error('User tidak ditemukan'), { statusCode: 404 })
+    throw new AppError('User tidak ditemukan', 404)
   }
 
   // Role validation: Readers cannot update articles
   if (dbUser.role === 'reader') {
-    throw Object.assign(new Error('Akses ditolak: Pembaca tidak dapat mengubah artikel'), { statusCode: 403 })
+    throw new AppError('Akses ditolak: Pembaca tidak dapat mengubah artikel', 403)
   }
 
   // KYC validation: Reporters and kontributors must be APPROVED to update articles
   if ((dbUser.role === 'reporter' || dbUser.role === 'kontributor') && dbUser.kycStatus !== 'APPROVED') {
-    throw Object.assign(new Error('Akses ditolak: Verifikasi identitas (KYC) Anda belum disetujui'), { statusCode: 403 })
+    throw new AppError('Akses ditolak: Verifikasi identitas (KYC) Anda belum disetujui', 403)
   }
 
   const article = await repo.findArticleById(id, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
-  
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
+
   // Authorization
   if (!['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
-    throw Object.assign(new Error('Anda tidak punya akses ke post ini'), { statusCode: 403 })
+    throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
   // [H-006] State Machine Workflow Validation
@@ -299,17 +296,14 @@ export async function updateArticle(
   if (input.status && input.status !== article.status) {
     const allowed = WORKFLOW_TRANSITIONS[article.status] || []
     if (!allowed.includes(input.status)) {
-      throw Object.assign(
-        new Error(`Transisi status tidak valid: ${article.status} -> ${input.status}`), 
-        { statusCode: 400 }
-      )
+      throw new AppError(`Transisi status tidak valid: ${article.status} -> ${input.status}`, 400)
     }
   }
 
   // Prevent reporters and kontributors from setting certain statuses directly
   if ((user.role === 'reporter' || user.role === 'kontributor') && input.status && !['draft', 'submitted'].includes(input.status)) {
      if (article.status !== 'revision' && input.status !== 'submitted') {
-        throw Object.assign(new Error('Hanya Wapimred yang dapat mengubah status ke ' + input.status), { statusCode: 403 })
+        throw new AppError('Hanya Wapimred yang dapat mengubah status ke ' + input.status, 403)
      }
   }
 
@@ -319,10 +313,7 @@ export async function updateArticle(
       input.blocks = parseArticleBlocks(input.blocks) as typeof input.blocks
     } catch (err) {
       if (err instanceof Error) {
-        throw Object.assign(
-          new Error(`Struktur blok tidak valid: ${err.message}`),
-          { statusCode: 400, code: 'INVALID_BLOCKS' }
-        )
+        throw new AppError(`Struktur blok tidak valid: ${err.message}`, 400, 'INVALID_BLOCKS')
       }
       throw err
     }
@@ -445,12 +436,12 @@ export async function updateArticle(
   })
 
   // Re-indexing
-  searchService.indexArticle(updated).catch(err => console.error('Failed to index article:', err))
+  searchService.indexArticle(updated).catch(err => logger.error('Failed to index article:', err))
 
   // Invalidate cache (old slug too if title/slug changed)
   const invalidateCache = (slug: string) =>
     deleteCache(`article:${siteId}:${slug}`).catch((err) =>
-      console.error(`Failed to invalidate article cache on update (${slug}):`, err)
+      logger.error(`Failed to invalidate article cache on update (${slug}):`, err)
     )
   await invalidateCache(updated.slug)
   if (article.slug && article.slug !== updated.slug) {
@@ -467,13 +458,10 @@ export async function publishArticle(
   options?: { forcePublish?: boolean }
 ) {
   const article = await repo.findArticleById(id, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   if (!['superadmin', 'wapimred'].includes(user.role)) {
-    throw Object.assign(
-      new Error('Akses ditolak: Hanya Wapimred dan Superadmin yang dapat mem-publish post'),
-      { statusCode: 403 }
-    )
+    throw new AppError('Akses ditolak: Hanya Wapimred dan Superadmin yang dapat mem-publish post', 403)
   }
 
   assertCanPublish(article, user, options?.forcePublish)
@@ -489,7 +477,7 @@ export async function publishArticle(
 
 export async function getDueScheduledArticles(siteId: string, user: JWTPayload) {
   if (!['superadmin', 'wapimred'].includes(user.role)) {
-    throw Object.assign(new Error('Akses ditolak'), { statusCode: 403 })
+    throw new AppError('Akses ditolak', 403)
   }
 
   const rows = await repo.findDueScheduledArticles(100)
@@ -517,7 +505,7 @@ export async function processDueScheduledArticles(): Promise<{
       published++
     } catch (err) {
       failed++
-      console.error(`Scheduled publish failed for ${row.id}:`, err)
+      logger.error(`Scheduled publish failed for ${row.id}:`, err)
     }
   }
 
@@ -526,7 +514,7 @@ export async function processDueScheduledArticles(): Promise<{
 
 export async function deleteArticle(id: string, siteId: string, user: JWTPayload) {
   const article = await repo.findArticleById(id, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // [DELETE-PERMISSION] Aturan hapus per-role:
   // - superadmin         : boleh hapus semua status (termasuk published)
@@ -566,7 +554,7 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
   }
 
   if (!allowed) {
-    throw Object.assign(new Error(denyReason), { statusCode: 403 })
+    throw new AppError(denyReason, 403)
   }
 
   await repo.createAuditLog({
@@ -586,10 +574,10 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
 
   // Remove from search index and public cache
   searchService.deleteIndexedArticle(id).catch(err =>
-    console.error('Failed to delete indexed article:', err)
+    logger.error('Failed to delete indexed article:', err)
   )
   deleteCache(`article:${siteId}:${article.slug}`).catch(err =>
-    console.error('Failed to invalidate article cache on delete:', err)
+    logger.error('Failed to invalidate article cache on delete:', err)
   )
 
   return repo.softDeleteArticle(id)
@@ -601,7 +589,7 @@ export async function getArticleVersions(articleId: string) {
 
 export async function saveArticleVersion(articleId: string, authorId: string, siteId: string) {
   const article = await repo.findArticleById(articleId, siteId)
-  if (!article) throw new Error('Post tidak ditemukan')
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   const versionNumber = await repo.getNextVersionNumber(articleId)
   return repo.createVersion({
@@ -615,14 +603,14 @@ export async function saveArticleVersion(articleId: string, authorId: string, si
 
 export async function restoreArticleVersion(versionId: string, siteId: string, user: JWTPayload) {
   const version = await repo.findVersionById(versionId)
-  if (!version) throw new Error('Versi tidak ditemukan')
+  if (!version) throw new AppError('Versi tidak ditemukan', 404)
 
   const article = await repo.findArticleById(version.articleId, siteId)
-  if (!article) throw new Error('Post tidak ditemukan')
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization check
   if (!['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
-    throw new Error('Akses ditolak')
+    throw new AppError('Akses ditolak', 403)
   }
 
   const updated = await repo.updateArticle(article.id, siteId, {
@@ -666,9 +654,9 @@ export async function getArticleStats(siteId: string) {
 
 export async function indexGoogleArticle(id: string, siteId: string) {
   const article = await repo.findArticleById(id, siteId)
-  if (!article) throw Object.assign(new Error('Post tidak ditemukan'), { statusCode: 404 })
+  if (!article) throw new AppError('Post tidak ditemukan', 404)
   if (article.status !== 'published') {
-    throw Object.assign(new Error('Hanya artikel yang sudah terbit (Published) yang dapat di-indeks ke Google'), { statusCode: 400 })
+    throw new AppError('Hanya artikel yang sudah terbit (Published) yang dapat di-indeks ke Google', 400)
   }
 
   const site = await prisma.site.findUnique({
@@ -676,10 +664,7 @@ export async function indexGoogleArticle(id: string, siteId: string) {
   })
 
   if (!site?.domain) {
-    throw Object.assign(
-      new Error(`Domain tidak dikonfigurasi untuk site ${siteId}`),
-      { statusCode: 500 }
-    )
+    throw new AppError(`Domain tidak dikonfigurasi untuk site ${siteId}`, 500)
   }
   
   const domain = site.domain
@@ -701,10 +686,7 @@ async function resolveCategoryId(categoryId: string | null | undefined, siteId: 
       where: { id: categoryId }
     })
     if (cat) return cat.id
-    throw Object.assign(
-      new Error(`Kategori dengan ID "${categoryId}" tidak ditemukan`),
-      { statusCode: 400 }
-    )
+    throw new AppError(`Kategori dengan ID "${categoryId}" tidak ditemukan`, 400)
   }
 
   // Otherwise, try to find by slug (case-insensitive)
@@ -721,9 +703,6 @@ async function resolveCategoryId(categoryId: string | null | undefined, siteId: 
   if (catBySlug) return catBySlug.id
 
   // Slug tidak ditemukan — throw error agar tidak silent null
-  throw Object.assign(
-    new Error(`Kategori "${categoryId}" tidak ditemukan di database`),
-    { statusCode: 400 }
-  )
+  throw new AppError(`Kategori "${categoryId}" tidak ditemukan di database`, 400)
 }
 

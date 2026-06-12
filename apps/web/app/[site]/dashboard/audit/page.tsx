@@ -154,7 +154,7 @@ export default function AuditLogPage() {
     }
   }, [user, site, router]);
 
-  const fetchLogs = useCallback(async () => {
+  const fetchLogs = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -165,7 +165,8 @@ export default function AuditLogPage() {
       });
 
       // Fetch logs (required)
-      const logsRes = await api.get(`/audit?${params}`);
+      const logsRes = await api.get(`/audit?${params}`, { signal });
+      if (signal?.aborted) return;
       const d = logsRes.data.data;
       setLogs(d.items);
       setTotal(d.total);
@@ -174,21 +175,27 @@ export default function AuditLogPage() {
       // Fetch stats (optional - graceful fallback if endpoint doesn't exist)
       if (stats === null) {
         try {
-          const statsRes = await api.get('/audit/stats');
-          setStats(statsRes.data.data);
-        } catch (statsErr) {
-          console.warn('[audit] Stats endpoint not available, using defaults');
-          setStats({ total: 0, last7d: 0, byAction: [] });
+          const statsRes = await api.get('/audit/stats', { signal });
+          if (!signal?.aborted) setStats(statsRes.data.data);
+        } catch (statsErr: any) {
+          if (statsErr?.name !== 'CanceledError') {
+            console.warn('[audit] Stats endpoint not available, using defaults');
+            setStats({ total: 0, last7d: 0, byAction: [] });
+          }
         }
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e?.name !== 'CanceledError') console.error(e);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [page, searchAction, filterEntityType]);
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchLogs(controller.signal);
+    return () => { controller.abort(); };
+  }, [fetchLogs]);
 
   const LIMIT = 25;
 
@@ -229,7 +236,7 @@ export default function AuditLogPage() {
             <Download size={14} /> Ekspor CSV
           </button>
           <button
-            onClick={fetchLogs}
+            onClick={() => fetchLogs()}
             className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all border border-gray-100 dark:border-white/5"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh

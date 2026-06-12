@@ -44,11 +44,13 @@ auditRouter.get('/export', ...withSite, asyncHandler(async (req: Request, res: R
 
   const logs = await repo.findAllAuditLogsForExport(req.site!)
   
+  const escapeCsv = (val: string) => `"${val.replace(/"/g, '""')}"`
+
   let csv = 'ID,Timestamp,User,Action,Entity,EntityID\n'
   logs.forEach(log => {
     const ts = log.createdAt.toISOString()
     const userName = log.user?.name || log.userId
-    csv += `"${log.id}","${ts}","${userName}","${log.action}","${log.entityType || ''}","${log.entityId || ''}"\n`
+    csv += `${escapeCsv(log.id)},${escapeCsv(ts)},${escapeCsv(userName)},${escapeCsv(log.action)},${escapeCsv(log.entityType || '')},${escapeCsv(log.entityId || '')}\n`
   })
 
   res.setHeader('Content-Type', 'text/csv')

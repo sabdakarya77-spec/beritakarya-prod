@@ -18,7 +18,11 @@ function RegisterForm() {
   const { register, isLoading, error, clearError, user } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const roleParam = searchParams.get('role') || 'reader';
+  const ALLOWED_ROLES = ['reader', 'advertiser'] as const;
+  const rawRole = searchParams.get('role') || 'reader';
+  const roleParam = ALLOWED_ROLES.includes(rawRole as (typeof ALLOWED_ROLES)[number])
+    ? rawRole
+    : 'reader';
   const isAdvertiser = roleParam === 'advertiser';
 
   // Redirect if already logged in

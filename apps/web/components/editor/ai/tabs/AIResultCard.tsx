@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 interface Props {
   label: string
@@ -10,7 +10,7 @@ interface Props {
   model?: string
 }
 
-export function AIResultCard({ label, content, onApply, showCompare = false, originalContent = '', model }: Props) {
+export const AIResultCard = React.memo(function AIResultCard({ label, content, onApply, showCompare = false, originalContent = '', model }: Props) {
   const [applied, setApplied] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
@@ -78,4 +78,4 @@ export function AIResultCard({ label, content, onApply, showCompare = false, ori
       </div>
     </div>
   )
-}
+})

@@ -101,8 +101,8 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
             <div className="flex justify-center">
               <ReactCrop
                 crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(_, percentCrop) => setCompletedCrop(percentCrop)}
+                onChange={(_: any, percentCrop: any) => setCrop(percentCrop)}
+                onComplete={(_: any, percentCrop: any) => setCompletedCrop(percentCrop)}
                 aspect={aspectRatio}
                 minWidth={50}
               >

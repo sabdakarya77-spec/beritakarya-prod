@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client'
+import { logger } from '../../lib/logger'
 import { categoryService } from '../category/category.service'
 import {
   expandWithAncestors,
@@ -148,7 +149,7 @@ export class SiteCategoryService {
         }
       })
     } catch (error) {
-      console.error('Audit log failed:', error)
+      logger.error('Audit log failed:', error)
     }
   }
 }

@@ -17,22 +17,33 @@ export async function getTeamStats(siteId: string) {
     }
   })
 
-  // Get total views per user
-  const userStats = await Promise.all(users.map(async (u: any) => {
-    const aggregate = await prisma.article.aggregate({
-      where: { authorId: u.id, siteId, status: 'published' },
-      _sum: { viewCount: true },
-      _avg: { wordCount: true }
-    })
-    
-    return {
-      ...u,
-      publishedCount: u._count.articles,
-      totalViews: aggregate._sum.viewCount || 0,
-      avgWords: Math.round(aggregate._avg.wordCount || 0),
-      isOnline: false // Status online akan diimplementasikan via Heartbeat/WebSocket
-    }
-  }))
+  if (users.length === 0) return []
 
-  return userStats.sort((a: any, b: any) => b.publishedCount - a.publishedCount)
+  // Single aggregation query for all users (avoids N+1)
+  const userIds = users.map(u => u.id)
+  const aggregated = await prisma.article.groupBy({
+    by: ['authorId'],
+    where: { authorId: { in: userIds }, siteId, status: 'published' },
+    _sum: { viewCount: true },
+    _avg: { wordCount: true }
+  })
+
+  const statsMap = new Map(aggregated.map(a => [a.authorId, a]))
+
+  return users
+    .map(u => {
+      const agg = statsMap.get(u.id)
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        createdAt: u.createdAt,
+        publishedCount: u._count.articles,
+        totalViews: agg?._sum?.viewCount || 0,
+        avgWords: Math.round(agg?._avg?.wordCount || 0),
+        isOnline: false
+      }
+    })
+    .sort((a, b) => b.publishedCount - a.publishedCount)
 }

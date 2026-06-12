@@ -10,7 +10,7 @@ type LegalDocumentBodyProps = {
   /** Static intro above — stripped from CMS if repeated */
   intro?: string
   emptyMessage?: string
-  eyebrow?: string
+  eyebrow?: string | null
   /** Optional subheading above the body when a page needs an extra section title */
   sectionTitle?: string | null
   /** Smaller prose for nested sections (e.g. ads terms footer) */

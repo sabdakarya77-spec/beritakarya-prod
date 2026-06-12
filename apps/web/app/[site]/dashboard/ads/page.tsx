@@ -125,11 +125,12 @@ export default function AdsDashboard() {
   };
 
   // Upload file with optional crop
-  const uploadAdFile = async (file: File, slotId?: AdSlotId): Promise<string> => {
+  const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
     // If slot has an aspect ratio, show cropper first
-    if (slotId && SLOT_ASPECT_RATIOS[slotId]) {
+    const typedSlotId = slotId as AdSlotId | undefined;
+    if (typedSlotId && SLOT_ASPECT_RATIOS[typedSlotId]) {
       const croppedBlob = await new Promise<Blob>((resolve, reject) => {
-        setCropperAspect(SLOT_ASPECT_RATIOS[slotId]);
+        setCropperAspect(SLOT_ASPECT_RATIOS[typedSlotId]);
         setCropperFile(file);
         cropperCallbackRef.current = resolve;
         // onCancel will reject
@@ -167,35 +168,39 @@ export default function AdsDashboard() {
   };
 
   // Initial Data Loaders
-  const fetchData = async () => {
+  const fetchData = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       if (user?.role === 'superadmin' || user?.role === 'wapimred') {
         const [adsRes, pkgsRes, bookingsRes] = await Promise.all([
-          api.get('/ads'),
-          api.get('/ads/packages'),
-          api.get('/ads/bookings/all').catch(() => ({ data: { data: [] } }))
+          api.get('/ads', { signal }),
+          api.get('/ads/packages', { signal }),
+          api.get('/ads/bookings/all', { signal }).catch(() => ({ data: { data: [] } }))
         ]);
+        if (signal?.aborted) return;
         setAds(adsRes.data.data || []);
         setPackages(pkgsRes.data.data || []);
         setBookings(bookingsRes.data.data || []);
       } else if (user?.role === 'advertiser') {
         const [pkgsRes, bookingsRes] = await Promise.all([
-          api.get('/ads/packages'),
-          api.get('/ads/bookings/my').catch(() => ({ data: { data: [] } }))
+          api.get('/ads/packages', { signal }),
+          api.get('/ads/bookings/my', { signal }).catch(() => ({ data: { data: [] } }))
         ]);
+        if (signal?.aborted) return;
         setPackages(pkgsRes.data.data || []);
         setBookings(bookingsRes.data.data || []);
       }
-    } catch (error) {
-      console.error('Gagal mengambil data dashboard iklan', error);
+    } catch (error: any) {
+      if (error?.name !== 'CanceledError') console.error('Gagal mengambil data dashboard iklan', error);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => { controller.abort(); };
   }, [site, user]);
 
   // Auto-fill endDate when startDate or selected package changes

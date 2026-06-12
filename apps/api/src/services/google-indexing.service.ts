@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { prisma } from '../db/client'
+import { logger } from '../lib/logger'
 
 export class GoogleIndexingService {
   private async getAccessToken(config: any): Promise<string> {
@@ -78,7 +79,7 @@ export class GoogleIndexingService {
       const result = await res.json()
       return { success: true, data: result }
     } catch (error: any) {
-      console.error('Google Indexing API failed:', error)
+      logger.error('Google Indexing API failed:', error)
       return { success: false, error: error.message }
     }
   }

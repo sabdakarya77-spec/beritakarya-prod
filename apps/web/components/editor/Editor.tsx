@@ -107,7 +107,7 @@ export function Editor({ articleId, siteId }: EditorProps) {
     
     // Count words in content
     const textContent = content.replace(/<[^>]*>/g, ' ').trim()
-    const words = textContent.split(/\s+/).filter(w => w.length > 0)
+    const words = textContent.split(/\s+/).filter((w: string) => w.length > 0)
     
     // Count words in list items
     const listWords = items.reduce((acc: number, item: string) => {

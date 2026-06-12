@@ -76,16 +76,18 @@ export default function DashboardOverview() {
       setLoading(false);
       return;
     }
+    const controller = new AbortController();
     const loadData = async () => {
       setLoading(true);
       try {
         const [artRes, trafficRes, topRes, engRes] = await Promise.all([
-          api.get('/articles', { params: { limit: 50 } }),
-          api.get('/analytics/traffic', { params: { days: 7 } }),
-          api.get('/analytics/top-content', { params: { limit: 5 } }),
-          api.get('/analytics/engagement')
+          api.get('/articles', { params: { limit: 50 }, signal: controller.signal }),
+          api.get('/analytics/traffic', { params: { days: 7 }, signal: controller.signal }),
+          api.get('/analytics/top-content', { params: { limit: 5 }, signal: controller.signal }),
+          api.get('/analytics/engagement', { signal: controller.signal })
         ]);
-        
+
+        if (controller.signal.aborted) return;
         setArticles(artRes.data.data.articles || artRes.data.data.items || []);
         setTrafficData(trafficRes.data.data);
         setTopContent(topRes.data.data);
@@ -94,22 +96,24 @@ export default function DashboardOverview() {
         if (user?.role === 'superadmin') {
           try {
             const [kycRes, auditRes] = await Promise.all([
-              api.get('/kyc', { params: { status: 'pending', limit: 5 } }),
-              api.get('/audit', { params: { limit: 5 } })
+              api.get('/kyc', { params: { status: 'pending', limit: 5 }, signal: controller.signal }),
+              api.get('/audit', { params: { limit: 5 }, signal: controller.signal })
             ]);
+            if (controller.signal.aborted) return;
             setKycRequests(kycRes.data.data || []);
             setAuditLogs(auditRes.data.data?.items || []);
-          } catch (err) {
-            console.error('Failed to load admin stats:', err);
+          } catch (err: any) {
+            if (err?.name !== 'CanceledError') console.error('Failed to load admin stats:', err);
           }
         }
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
+      } catch (err: any) {
+        if (err?.name !== 'CanceledError') console.error('Failed to load dashboard data:', err);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     loadData();
+    return () => { controller.abort(); };
   }, [site, user]);
 
   if (loading) {

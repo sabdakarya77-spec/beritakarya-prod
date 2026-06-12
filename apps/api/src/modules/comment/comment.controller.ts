@@ -1,9 +1,15 @@
 import { Router } from 'express'
+import { z } from 'zod'
 import { prisma } from '../../db/client'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
 import * as service from './comment.service'
+
+const createCommentSchema = z.object({
+  content: z.string().min(1, 'Komentar tidak boleh kosong').max(5000, 'Komentar terlalu panjang'),
+  parentId: z.string().uuid().optional()
+})
 
 export const commentRouter = Router() as any
 
@@ -20,7 +26,7 @@ commentRouter.post('/article/:articleId',
   siteMiddleware,
   requireSiteAccess,
   asyncHandler(async (req: any, res: any) => {
-    const { content, parentId } = req.body
+    const { content, parentId } = createCommentSchema.parse(req.body)
     const comment = await service.addComment(
       req.params.articleId,
       req.site!,

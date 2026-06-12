@@ -2,16 +2,9 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { JWTPayload } from '@beritakarya/types'
 
-// Extend Express Request type to include user, site and auth error
-declare global {
-  namespace Express {
-    interface Request {
-      user?: JWTPayload
-      site?: string
-      authError?: any
-    }
-  }
-}
+/**
+ * NOTE: Express Request augmentation is in types/express.ts (single source of truth).
+ */
 
 /**
  * Middleware to require authentication

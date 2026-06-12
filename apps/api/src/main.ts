@@ -31,7 +31,7 @@ import { performanceMiddleware } from './middleware/performance.middleware'
 import { jwtVerify } from './middleware/jwtVerification.middleware'
 import { requireAuth, requireRole, requireSuperadmin } from './middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from './middleware/site.middleware'
-import { authLimiter, apiLimiter } from './lib/rateLimit'
+import { authLimiter, apiLimiter, publicLimiter } from './lib/rateLimit'
 import { prisma } from './db/client'
 import { logger, httpLogger } from './lib/logger'
 import { metrics } from './lib/monitoring'
@@ -142,9 +142,9 @@ app.use('/api/v1/articles', articleRouter)
 app.use('/api/v1/media', mediaRouter)
 app.use('/api/v1/ai', aiRouter)
 
-// Category routes
-app.get('/api/v1/categories/tree', siteMiddleware, asyncHandler(categoryController.getCategoryTree))
-app.get('/api/v1/categories', siteMiddleware, asyncHandler(categoryController.getCategories))
+// Category routes (public)
+app.get('/api/v1/categories/tree', publicLimiter, siteMiddleware, asyncHandler(categoryController.getCategoryTree))
+app.get('/api/v1/categories', publicLimiter, siteMiddleware, asyncHandler(categoryController.getCategories))
 app.post('/api/v1/categories/seed-global',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(categoryController.seedGlobalCategories))
@@ -164,9 +164,9 @@ app.delete('/api/v1/categories/:id',
   requireRole(['superadmin', 'wapimred']),
   asyncHandler(categoryController.deleteCategory))
 
-// Site routes
-app.get('/api/v1/sites', asyncHandler(siteController.getSites))
-app.get('/api/v1/sites/settings', asyncHandler(siteController.getSiteSettings))
+// Site routes (public)
+app.get('/api/v1/sites', publicLimiter, asyncHandler(siteController.getSites))
+app.get('/api/v1/sites/settings', publicLimiter, asyncHandler(siteController.getSiteSettings))
 app.get('/api/v1/sites/:siteId/category-assignments',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(siteController.getSiteCategoryAssignments))
@@ -254,6 +254,16 @@ if (env.SENTRY_DSN) {
   process.on('unhandledRejection', (reason) => {
     Sentry.captureException(reason)
     Sentry.close()
+    process.exit(1)
+  })
+} else {
+  // Always register global error handlers (M14)
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', error)
+    process.exit(1)
+  })
+  process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled Rejection:', reason)
     process.exit(1)
   })
 }

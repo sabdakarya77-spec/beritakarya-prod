@@ -5,43 +5,41 @@ export async function getTrafficStats(siteId: string, days: number = 7, authorId
   startDate.setDate(startDate.getDate() - days)
   startDate.setHours(0, 0, 0, 0)
 
-  const views = await prisma.pageView.groupBy({
-    by: ['createdAt'],
-    where: {
-      siteId,
-      createdAt: { gte: startDate },
-      ...(authorId && { article: { authorId } })
-    },
-    _count: {
-      id: true
-    }
-  })
+  // Use raw query with DATE() to properly group by day
+  // Prisma groupBy on createdAt returns one row per unique timestamp, which is wrong
+  const rows = authorId
+    ? await prisma.$queryRaw<{ date: string; views: bigint }[]>`
+        SELECT DATE(pv."createdAt")::text AS date, COUNT(pv.id)::bigint AS views
+        FROM "PageView" pv
+        INNER JOIN "Article" a ON a.id = pv."articleId"
+        WHERE pv."siteId" = ${siteId}
+          AND pv."createdAt" >= ${startDate}
+          AND a."authorId" = ${authorId}
+        GROUP BY DATE(pv."createdAt")
+        ORDER BY date ASC
+      `
+    : await prisma.$queryRaw<{ date: string; views: bigint }[]>`
+        SELECT DATE(pv."createdAt")::text AS date, COUNT(pv.id)::bigint AS views
+        FROM "PageView" pv
+        WHERE pv."siteId" = ${siteId}
+          AND pv."createdAt" >= ${startDate}
+        GROUP BY DATE(pv."createdAt")
+        ORDER BY date ASC
+      `
 
-  // Group by day since createdAt is a full timestamp
-  const dailyData: Record<string, number> = {}
-  
-  // Initialize last X days
-  for (let i = 0; i < days; i++) {
+  // Build a map from DB results
+  const dbData = new Map(rows.map(r => [r.date, Number(r.views)]))
+
+  // Fill in all days (including zero-view days) for Recharts
+  const result: { date: string; views: number }[] = []
+  for (let i = days - 1; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
     const key = d.toISOString().split('T')[0]
-    dailyData[key] = 0
+    result.push({ date: key, views: dbData.get(key) || 0 })
   }
 
-  views.forEach((v: any) => {
-    const key = v.createdAt.toISOString().split('T')[0]
-    if (dailyData[key] !== undefined) {
-      dailyData[key] += v._count.id
-    }
-  })
-
-  // Convert to array for Recharts
-  return Object.entries(dailyData)
-    .map(([date, count]) => ({
-      date,
-      views: count
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date))
+  return result
 }
 
 export async function getTopContent(siteId: string, limit: number = 5, authorId?: string) {

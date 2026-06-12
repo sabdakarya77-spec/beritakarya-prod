@@ -118,6 +118,25 @@ export const adTrackingLimiter = rateLimit({
   legacyHeaders: false,
 })
 
+/**
+ * Rate limiter for public (unauthenticated) read endpoints.
+ * More restrictive than the general API limiter to prevent abuse.
+ */
+export const publicLimiter = rateLimit({
+  store: getStore('public'),
+  windowMs: 60 * 1000, // 1 minute
+  max: 200,            // 200 requests per IP per minute
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMITED',
+      message: 'Terlalu banyak request. Coba lagi sebentar.',
+    },
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
 export const aiLimiter = rateLimit({
   store: getStore('ai'),
   windowMs: 60 * 60 * 1000,

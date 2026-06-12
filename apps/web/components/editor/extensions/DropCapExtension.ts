@@ -34,7 +34,7 @@ export const DropCapParagraph = Paragraph.extend({
       ...this.parent?.(),
       toggleDropCap:
         () =>
-        ({ commands, editor }) => {
+        ({ commands, editor }: { commands: any; editor: any }) => {
           if (!editor.isActive('paragraph')) return false
           return commands.updateAttributes('paragraph', {
             dropCap: !editor.getAttributes('paragraph').dropCap,
@@ -42,7 +42,7 @@ export const DropCapParagraph = Paragraph.extend({
         },
       setDropCap:
         (value: boolean) =>
-        ({ commands }) => {
+        ({ commands }: { commands: any }) => {
           return commands.updateAttributes('paragraph', { dropCap: value })
         },
     } as never

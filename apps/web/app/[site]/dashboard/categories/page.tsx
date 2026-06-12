@@ -170,7 +170,7 @@ export default function CategoriesDashboard() {
             const { data } = await api.post('/categories', payload);
             if (data.success && data.data?.id) {
               parentIdToUse = data.data.id;
-              existingSlugs.set(parentSlugNormalized, parentIdToUse);
+              existingSlugs.set(parentSlugNormalized, parentIdToUse!);
               createdParentCount++;
             }
           } catch (err: any) {

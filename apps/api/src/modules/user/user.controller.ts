@@ -145,35 +145,31 @@ userRouter.get('/authors',
         role: true,
         bio: true,
         createdAt: true,
-        articles: {
-          where: {
-            siteId,
-            status: 'published',
-            deletedAt: null
-          },
-          select: {
-            viewCount: true
-          }
+        _count: {
+          select: { articles: { where: { siteId, status: 'published', deletedAt: null } } }
         }
       },
       take: limit
     })
 
-    // Transform data with article stats
-    const authorsWithStats = authors.map(author => {
-      const publishedCount = author.articles.length
-      const totalViews = author.articles.reduce((acc, art) => acc + (art.viewCount || 0), 0)
-      
-      return {
-        id: author.id,
-        name: author.name,
-        role: author.role,
-        bio: author.bio,
-        createdAt: author.createdAt,
-        publishedCount,
-        totalViews
-      }
+    // Single aggregation query for all authors
+    const authorIds = authors.map(a => a.id)
+    const aggregated = await prisma.article.groupBy({
+      by: ['authorId'],
+      where: { authorId: { in: authorIds }, siteId, status: 'published', deletedAt: null },
+      _sum: { viewCount: true }
     })
+    const viewsMap = new Map(aggregated.map(a => [a.authorId, a._sum.viewCount || 0]))
+
+    const authorsWithStats = authors.map(author => ({
+      id: author.id,
+      name: author.name,
+      role: author.role,
+      bio: author.bio,
+      createdAt: author.createdAt,
+      publishedCount: author._count.articles,
+      totalViews: viewsMap.get(author.id) || 0
+    }))
 
     res.json({
       success: true,
@@ -218,22 +214,27 @@ userRouter.get('/',
       prisma.user.count({ where: whereClause })
     ])
 
-    // Fetch online status from Redis for each user
-    const usersWithOnlineStatus = await Promise.all(users.map(async (u) => {
-      let isOnline = false
-      if (process.env.REDIS_HOST) {
-        try {
-          const onlineVal = await redis.get(`user:online:${u.id}`)
-          isOnline = !!onlineVal
-        } catch (err) {
-          // ignore
-        }
+    // Batch Redis online status check (mget instead of N+1 get)
+    let onlineSet = new Set<string>()
+    if (process.env.REDIS_HOST && users.length > 0) {
+      try {
+        const keys = users.map(u => `user:online:${u.id}`)
+        const values = await redis.mget(...keys)
+        users.forEach((u, i) => {
+          if (values[i]) onlineSet.add(u.id)
+        })
+      } catch {
+        // ignore Redis errors
       }
-      return { ...u, isOnline }
+    }
+
+    const usersWithOnlineStatus = users.map(u => ({
+      ...u,
+      isOnline: onlineSet.has(u.id)
     }))
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       data: usersWithOnlineStatus,
       meta: {
         total,
@@ -252,8 +253,8 @@ userRouter.get('/stats',
   asyncHandler(async (req: any, res: any) => {
     const siteId = req.site
     const users = await prisma.user.findMany({
-      where: { 
-        siteId, 
+      where: {
+        siteId,
         deletedAt: null,
         role: { in: ['reporter', 'kontributor', 'wapimred', 'superadmin'] }
       },
@@ -263,49 +264,56 @@ userRouter.get('/stats',
         email: true,
         role: true,
         createdAt: true,
-        articles: {
-          where: { status: 'published' },
-          select: { viewCount: true, wordCount: true }
+        _count: {
+          select: { articles: { where: { status: 'published' } } }
         }
       }
     })
 
-    const stats = users.map(user => {
-      const publishedCount = user.articles.length
-      const totalViews = user.articles.reduce((acc, art) => acc + art.viewCount, 0)
-      const validWordCounts = user.articles.filter(a => a.wordCount).map(a => a.wordCount as number)
-      const avgWords = validWordCounts.length > 0 
-        ? Math.round(validWordCounts.reduce((a, b) => a + b, 0) / validWordCounts.length) 
-        : 0
+    if (users.length === 0) {
+      return res.json({ success: true, data: [] })
+    }
 
+    // Single aggregation query instead of N+1
+    const userIds = users.map(u => u.id)
+    const aggregated = await prisma.article.groupBy({
+      by: ['authorId'],
+      where: { authorId: { in: userIds }, siteId, status: 'published' },
+      _sum: { viewCount: true },
+      _avg: { wordCount: true }
+    })
+    const statsMap = new Map(aggregated.map(a => [a.authorId, a]))
+
+    // Batch Redis online status check (mget instead of N+1 get)
+    let onlineSet = new Set<string>()
+    if (process.env.REDIS_HOST) {
+      try {
+        const keys = userIds.map(id => `user:online:${id}`)
+        const values = await redis.mget(...keys)
+        userIds.forEach((id, i) => {
+          if (values[i]) onlineSet.add(id)
+        })
+      } catch {
+        // ignore Redis errors
+      }
+    }
+
+    const data = users.map(user => {
+      const agg = statsMap.get(user.id)
       return {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        isOnline: false, // Placeholder, will be updated below
-        publishedCount,
-        totalViews,
-        avgWords,
+        isOnline: onlineSet.has(user.id),
+        publishedCount: user._count.articles,
+        totalViews: agg?._sum?.viewCount || 0,
+        avgWords: Math.round(agg?._avg?.wordCount || 0),
         createdAt: user.createdAt
       }
     })
 
-    // Fetch real online status from Redis
-    const statsWithOnlineStatus = await Promise.all(stats.map(async (s) => {
-      let isOnline = false
-      if (process.env.REDIS_HOST) {
-        try {
-          const onlineVal = await redis.get(`user:online:${s.id}`)
-          isOnline = !!onlineVal
-        } catch (err) {
-          // ignore
-        }
-      }
-      return { ...s, isOnline }
-    }))
-
-    res.json({ success: true, data: statsWithOnlineStatus })
+    res.json({ success: true, data })
   })
 )
 

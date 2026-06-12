@@ -68,7 +68,7 @@ if (require.main === module) {
       process.exit(0)
     })
     .catch((err) => {
-      console.error('[AdExpiry] Failed:', err)
+      logger.error('[AdExpiry] Failed:', err)
       process.exit(1)
     })
 }

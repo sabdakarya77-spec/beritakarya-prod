@@ -61,7 +61,7 @@ model Site {
   advertising          String?   @db.Text
   privacyPolicy        String?   @db.Text
   termsOfService       String?   @db.Text
-  mediaSiber          String?   @db.Text
+  mediaSiber           String?   @db.Text
   socialLinks          Json?     @default("{}")
   appearance           Json?     @default("{\"primaryColor\":\"#e11d48\"}")
   trendingTopics       Json?     @default("[]")
@@ -122,17 +122,18 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  site          Site?          @relation(fields: [siteId], references: [id])
-  articles      Article[]
-  refreshTokens RefreshToken[]
-  comments      Comment[]
-  kycViewLogs   KYCViewLog[]
-  invitations   Invitation[] // Invitations sent by this user
-  aiUsage       AIUsage[]
-  media         Media[]
-  auditLogs     AuditLog[]
-  notifications Notification[]
-  adBookings    AdBooking[]
+  site                Site?          @relation(fields: [siteId], references: [id])
+  articles            Article[]
+  refreshTokens       RefreshToken[]
+  comments            Comment[]
+  kycViewLogs         KYCViewLog[]   @relation("KYCUser")
+  kycViewLogsAsViewer KYCViewLog[]   @relation("KYCViewer")
+  invitations         Invitation[] // Invitations sent by this user
+  aiUsage             AIUsage[]
+  media               Media[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
+  adBookings          AdBooking[]
 
   @@index([siteId])
   @@index([email])
@@ -161,8 +162,8 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  site          Site?      @relation(fields: [siteId], references: [id])
-  articles      Article[]
+  site            Site?          @relation(fields: [siteId], references: [id])
+  articles        Article[]
   parent          Category?      @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   subCategories   Category[]     @relation("CategoryHierarchy")
   siteAssignments SiteCategory[]
@@ -208,13 +209,13 @@ model Advertisement {
 }
 
 model Article {
-  id         String  @id @default(uuid())
-  title      String
-  slug       String
-  excerpt    String?
-  siteId     String
-  categoryId String?
-  authorId   String
+  id          String      @id @default(uuid())
+  title       String
+  slug        String
+  excerpt     String?
+  siteId      String
+  categoryId  String?
+  authorId    String
   blocks      Json        @default("[]")
   tags        Json        @default("[]")
   contentType ContentType @default(article) @map("content_type")
@@ -228,10 +229,10 @@ model Article {
   scheduledAt DateTime? // Waktu terbit yang dijadwalkan
 
   // SEO
-  metaTitle         String?
-  metaDescription   String?
-  featuredImage     String? // URL gambar utama
-  featuredImageBlur String? // Base64 blur hash (10x10 webp)
+  metaTitle          String?
+  metaDescription    String?
+  featuredImage      String? // URL gambar utama
+  featuredImageBlur  String? // Base64 blur hash (10x10 webp)
   featuredImageColor String? // Hex dominant color
 
   // Article Metadata
@@ -285,7 +286,7 @@ model BlacklistedToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
-  @@index([token])
+  // @@index([token]) removed — redundant with @unique
   @@index([expiresAt])
 }
 
@@ -339,13 +340,13 @@ model Media {
   altText        String? // Teks alt untuk aksesibilitas & SEO
   caption        String? // Keterangan foto
   credit         String? // Kredit/sumber foto
-  contentHash    String? @map("content_hash") // SHA-256 hash untuk deduplikasi per-site
+  contentHash    String?  @map("content_hash") // SHA-256 hash untuk deduplikasi per-site
   userId         String
-  siteId         String   // Wajib — semua media terikat site (pusat sebagai single source of truth)
+  siteId         String // Wajib — semua media terikat site (pusat sebagai single source of truth)
   createdAt      DateTime @default(now())
 
-  user User  @relation(fields: [userId], references: [id])
-  site Site  @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id])
+  site Site @relation(fields: [siteId], references: [id], onDelete: Restrict)
 
   @@index([siteId])
   @@index([siteId, contentHash])
@@ -372,6 +373,7 @@ model Comment {
 
   @@index([articleId])
   @@index([siteId, status])
+  @@index([articleId, status])
 }
 
 model PageView {
@@ -443,6 +445,7 @@ model Notification {
 
   @@index([userId])
   @@index([siteId])
+  @@index([userId, isRead])
 }
 
 // Audit trail untuk akses file KYC
@@ -456,8 +459,9 @@ model KYCViewLog {
   ipAddress String?
   userAgent String?
 
-  user User @relation(fields: [userId], references: [id])
-  site Site @relation(fields: [siteId], references: [id])
+  user   User @relation("KYCUser", fields: [userId], references: [id])
+  viewer User @relation("KYCViewer", fields: [viewerId], references: [id], onDelete: Restrict)
+  site   Site @relation(fields: [siteId], references: [id])
 
   @@index([userId, viewedAt])
   @@index([viewerId])
@@ -492,7 +496,7 @@ model Invitation {
 
   @@unique([email, siteId])
   @@index([email])
-  @@index([token])
+  // @@index([token]) removed — redundant with @unique
   @@index([expiresAt])
   @@index([siteId])
   @@index([invitedBy])
@@ -540,6 +544,7 @@ model AdBooking {
   @@index([siteId])
   @@index([packageId])
   @@index([status])
+  @@index([siteId, status, startDate, endDate])
 }
 
 enum PaymentStatus {

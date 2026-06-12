@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client'
+import { logger } from '../../lib/logger'
 import { googleIndexingService } from '../../services/google-indexing.service'
 import { sendNotification } from '../notification/notification.controller'
 import * as repo from './article.repository'
@@ -51,13 +52,13 @@ export async function finalizeArticlePublish(
       const articleUrl = `${protocol}://${domain}/artikel/${updated.slug}`
       return googleIndexingService.submitUrl(siteId, articleUrl, 'URL_UPDATED')
     })
-    .catch((err) => console.error('Auto Google Indexing API trigger error:', err))
+    .catch((err) => logger.error('Auto Google Indexing API trigger error:', err))
 
   searchService.indexArticle(updated).catch((err) =>
-    console.error('Failed to index article on publish:', err)
+    logger.error('Failed to index article on publish:', err)
   )
   deleteCache(`article:${siteId}:${updated.slug}`).catch((err) =>
-    console.error('Failed to invalidate article cache on publish:', err)
+    logger.error('Failed to invalidate article cache on publish:', err)
   )
 
   return updated

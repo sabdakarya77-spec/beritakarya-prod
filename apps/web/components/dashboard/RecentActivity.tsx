@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, ChevronRight, FileText } from 'lucide-react';
 import Link from 'next/link';
@@ -13,14 +14,14 @@ interface Article {
   createdAt: string;
 }
 
-function ActivityItem({ article, site, index }: { article: Article; site: string; index: number }) {
+const ActivityItem = React.memo(function ActivityItem({ article, site, index }: { article: Article; site: string; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.08 * index }}
     >
-      <Link 
+      <Link
         href={`/${site}/dashboard/articles/${article.id}`}
         className="flex items-center gap-3 py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0 group cursor-pointer"
       >
@@ -42,7 +43,7 @@ function ActivityItem({ article, site, index }: { article: Article; site: string
       </Link>
     </motion.div>
   );
-}
+});
 
 interface RecentActivityProps {
   articles: Article[];

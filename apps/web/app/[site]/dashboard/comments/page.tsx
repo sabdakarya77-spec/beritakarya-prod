@@ -37,25 +37,27 @@ export default function ModerationPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('pending');
 
-  const fetchQueue = async () => {
+  const fetchQueue = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       const { data } = await api.get('/comments/moderation', {
-        params: { search, status }
+        params: { search, status },
+        signal
       });
-      setComments(data.data);
-    } catch (err) {
-      console.error('Failed to fetch moderation queue:', err);
+      if (!signal?.aborted) setComments(data.data);
+    } catch (err: any) {
+      if (err?.name !== 'CanceledError') console.error('Failed to fetch moderation queue:', err);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetchQueue();
+      fetchQueue(controller.signal);
     }, 500);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [search, status]);
 
   const handleApprove = async (id: string) => {

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   FileText, CheckCircle, AlertCircle, Calendar, 
@@ -34,7 +35,7 @@ interface KPICardProps {
   delay?: number;
 }
 
-function KPICard({ title, value, sub, trend, icon: Icon, accent, sparkData, delay = 0 }: KPICardProps) {
+const KPICard = React.memo(function KPICard({ title, value, sub, trend, icon: Icon, accent, sparkData, delay = 0 }: KPICardProps) {
   const isUp = trend !== undefined && trend >= 0;
   return (
     <motion.div
@@ -83,7 +84,7 @@ function KPICard({ title, value, sub, trend, icon: Icon, accent, sparkData, dela
       </div>
     </motion.div>
   );
-}
+});
 
 interface KPICardsProps {
   stats: {

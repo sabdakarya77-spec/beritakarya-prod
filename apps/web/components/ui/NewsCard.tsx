@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, BookOpen, User } from 'lucide-react';
 import Link from 'next/link';
@@ -17,7 +18,7 @@ interface NewsCardProps {
   priority?: boolean;
 }
 
-export default function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
+const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
   const imageUrl = article.featuredImage || article.blocks?.find((b: any) => b.type === 'image')?.url || '/placeholder.jpg';
   const excerpt = article.blocks?.find((b: any) => b.type === 'paragraph')?.content || '';
   const articleHref = `/${site}/artikel/${article.slug}`;
@@ -241,4 +242,5 @@ export default function NewsCard({ article, variant = 'medium', site = 'pusat', 
       </Link>
     </div>
   );
-}
+});
+export default NewsCard;

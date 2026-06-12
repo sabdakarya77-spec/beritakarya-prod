@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp } from 'lucide-react';
 
@@ -9,7 +10,7 @@ interface CategoryBarProps {
   max: number;
 }
 
-function CategoryBar({ name, value, max }: CategoryBarProps) {
+const CategoryBar = React.memo(function CategoryBar({ name, value, max }: CategoryBarProps) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
     <div className="space-y-1.5">
@@ -18,7 +19,7 @@ function CategoryBar({ name, value, max }: CategoryBarProps) {
         <span className="text-brand-red">{value} post</span>
       </div>
       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <motion.div 
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -27,7 +28,7 @@ function CategoryBar({ name, value, max }: CategoryBarProps) {
       </div>
     </div>
   );
-}
+});
 
 interface CategoryPerformanceProps {
   catEntries: [string, number][];

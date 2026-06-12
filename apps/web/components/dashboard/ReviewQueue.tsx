@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertCircle, ChevronRight, Clock3, Eye, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ interface Article {
   isBreaking?: boolean;
 }
 
-function ReviewQueueItem({ article, site, index }: { article: Article; site: string; index: number }) {
+const ReviewQueueItem = React.memo(function ReviewQueueItem({ article, site, index }: { article: Article; site: string; index: number }) {
   const [currentTimestamp] = useState(() => Date.now());
 
   const queueHours = useMemo(() => {
@@ -94,7 +94,7 @@ function ReviewQueueItem({ article, site, index }: { article: Article; site: str
       </div>
     </motion.div>
   );
-}
+});
 
 interface ReviewQueueProps {
   articles: Article[];

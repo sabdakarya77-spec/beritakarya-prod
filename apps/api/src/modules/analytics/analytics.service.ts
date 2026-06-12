@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client'
+import { logger } from '../../lib/logger'
 import { redis } from '../../lib/redis'
 import { anonymizeIP } from '@beritakarya/utils'
 import crypto from 'crypto'
@@ -50,7 +51,7 @@ export async function recordView(data: {
       })
     }
   } catch (error) {
-    console.error('Failed to record view:', error)
+    logger.error('Failed to record view:', error)
   }
 }
 

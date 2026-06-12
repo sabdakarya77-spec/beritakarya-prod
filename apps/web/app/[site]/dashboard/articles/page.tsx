@@ -59,7 +59,7 @@ export default function ArticlesPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [globalStats, setGlobalStats] = useState<Record<string, number>>({});
 
-  const load = async () => {
+  const load = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       const params: any = {
@@ -71,7 +71,8 @@ export default function ArticlesPage() {
       if (filter) params.status = filter;
 
       // Fetch articles (required)
-      const artRes = await api.get('/articles', { params });
+      const artRes = await api.get('/articles', { params, signal });
+      if (signal?.aborted) return;
       const items = artRes.data.data.articles || artRes.data.data.items || [];
       setArticles(items);
       setTotalPages(artRes.data.data.totalPages || 1);
@@ -79,25 +80,28 @@ export default function ArticlesPage() {
 
       // Fetch stats (optional - graceful fallback if endpoint doesn't exist)
       try {
-        const statsRes = await api.get('/articles/stats', { params: { site } });
-        setGlobalStats(statsRes.data.data || {});
-      } catch (statsErr) {
-        console.warn('[articles] Stats endpoint not available, using defaults');
-        setGlobalStats({});
+        const statsRes = await api.get('/articles/stats', { params: { site }, signal });
+        if (!signal?.aborted) setGlobalStats(statsRes.data.data || {});
+      } catch (statsErr: any) {
+        if (statsErr?.name !== 'CanceledError') {
+          console.warn('[articles] Stats endpoint not available, using defaults');
+          setGlobalStats({});
+        }
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e?.name !== 'CanceledError') console.error(e);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
-  // Debounce search agar tidak hit API setiap ketikan huruf
+  // Debounce search dengan AbortController untuk cancel request sebelumnya
   useEffect(() => {
+    const controller = new AbortController();
     const timer = setTimeout(() => {
-      load();
+      load(controller.signal);
     }, 500);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [site, filter, searchQuery, page]);
 
   // Reset page when filter/search changes
