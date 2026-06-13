@@ -31,7 +31,7 @@ function buildTiledTextComposites(
   height: number,
   fontSize: number,
   opacity: number,
-  fontfile: string
+  fontfile: string | undefined
 ): sharp.OverlayOptions[] {
   const composites: sharp.OverlayOptions[] = []
 
@@ -59,7 +59,7 @@ function buildTiledTextComposites(
           text: {
             text: `<span foreground="${foreground}">${text}</span>`,
             font: 'Inter Bold',
-            fontfile,
+            fontfile: fontfile || undefined,
             dpi: 96,
             rgba: true,
           },
@@ -83,7 +83,7 @@ async function buildStampComposite(
   text: string,
   width: number,
   height: number,
-  fontfile: string
+  fontfile: string | undefined
 ): Promise<sharp.OverlayOptions[]> {
   const boxH = 40
   const boxW = width
@@ -117,7 +117,7 @@ async function buildStampComposite(
         text: {
           text: `<span foreground="white" letter_spacing="1024">${text}</span>`,
           font: 'Inter Bold',
-          fontfile,
+          fontfile: fontfile || undefined,
           dpi: 96,
           rgba: true,
         },
@@ -151,12 +151,12 @@ export class WatermarkService {
       const height = metadata.height ?? 900
 
       // Cek apakah font file tersedia
-      let fontfile = FONT_PATH
+      let fontfile: string | undefined = FONT_PATH
       try {
         await fs.access(fontfile)
       } catch {
         // Fallback: gunakan font sistem jika Inter-Bold.ttf tidak ada
-        fontfile = ''
+        fontfile = undefined
         logger.warn('[WatermarkService] Inter-Bold.ttf not found, using system font')
       }
 
