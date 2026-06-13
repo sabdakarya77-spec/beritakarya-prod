@@ -1,10 +1,12 @@
 import sharp from 'sharp'
 import fs from 'fs/promises'
 import path from 'path'
+import os from 'os'
 import { logger } from '../lib/logger'
 
 const KYC_TILE_PATH = path.join(__dirname, '..', 'assets', 'watermarks', 'kyc-tile.png')
 const KYC_STAMP_PATH = path.join(__dirname, '..', 'assets', 'watermarks', 'kyc-stamp.png')
+
 
 export interface WatermarkOptions {
   text?: string
@@ -105,7 +107,10 @@ export class WatermarkService {
     const { randomBytes } = await import('crypto')
     const hash = randomBytes(16).toString('hex')
     const ext = path.extname(tempPath) || '.jpg'
-    const finalDir = storageDir ?? process.env.KYC_STORAGE_PATH ?? '/var/uploads/kyc'
+    const defaultDir = process.env.NODE_ENV === 'production'
+      ? path.join(os.tmpdir(), 'beritakarya-kyc')
+      : path.join(process.cwd(), 'uploads', 'kyc')
+    const finalDir = storageDir ?? process.env.KYC_STORAGE_PATH ?? defaultDir
     const filename = `${type}_${userId}_${hash}${ext}`
     const thumbFilename = `${type}_${userId}_${hash}_thumb.jpg`
     const finalPath = path.join(finalDir, filename)
