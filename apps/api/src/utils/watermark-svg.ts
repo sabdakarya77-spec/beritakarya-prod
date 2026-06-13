@@ -29,7 +29,7 @@ export function createMediaWatermarkSvg(
     <style>
       @font-face {
         font-family: 'WatermarkFont';
-        src: url("data:font/woff2;base64,${INTER_BOLD_BASE64}") format('woff2');
+        src: url("data:font/ttf;base64,${INTER_BOLD_BASE64}") format('truetype');
         font-weight: bold;
       }
     </style>
@@ -89,7 +89,7 @@ export function createTiledWatermarkSvg(
     <style>
       @font-face {
         font-family: 'WatermarkFont';
-        src: url("data:font/woff2;base64,${INTER_BOLD_BASE64}") format('woff2');
+        src: url("data:font/ttf;base64,${INTER_BOLD_BASE64}") format('truetype');
         font-weight: bold;
       }
     </style>
@@ -145,7 +145,7 @@ export function createStampWatermarkSvg(
     <style>
       @font-face {
         font-family: 'WatermarkFont';
-        src: url("data:font/woff2;base64,${INTER_BOLD_BASE64}") format('woff2');
+        src: url("data:font/ttf;base64,${INTER_BOLD_BASE64}") format('truetype');
         font-weight: bold;
       }
     </style>

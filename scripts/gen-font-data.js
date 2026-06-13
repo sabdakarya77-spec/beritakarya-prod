@@ -1,15 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const fontPath = path.join(__dirname, '..', 'apps', 'api', 'src', 'utils', 'inter-bold.woff2');
+const fontPath = path.join(__dirname, '..', 'apps', 'api', 'src', 'assets', 'fonts', 'Inter-Bold.ttf');
 const outputPath = path.join(__dirname, '..', 'apps', 'api', 'src', 'utils', 'font-data.ts');
 
 const data = fs.readFileSync(fontPath);
 const b64 = data.toString('base64');
 
-// Verify magic bytes: wOFF2 = 0x774F4632
+// Verify magic bytes: TTF = 0x00010000
 const magic = data.slice(0, 4);
-console.log('Font magic bytes (hex):', magic.toString('hex'), '(should be 774f4632 for woff2)');
+console.log('Font magic bytes (hex):', magic.toString('hex'), '(should be 00010000 for ttf)');
 console.log('Font size:', data.length, 'bytes');
 console.log('Base64 length:', b64.length, 'chars');
 
