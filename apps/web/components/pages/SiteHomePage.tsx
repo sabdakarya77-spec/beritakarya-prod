@@ -12,6 +12,7 @@ import { MagazineBentoHero } from '../berita/MagazineBentoHero'
 import { notFound } from 'next/navigation'
 import ScrollAnimate from '../ui/ScrollAnimate'
 import { Container } from '../layout/Container'
+import MarketWidget from '../ui/MarketWidget'
 
 // ─────────────────────────────────────────────
 // Helper: resolve nama kategori dari slug
@@ -167,6 +168,19 @@ async function getSiteSettings(siteId: string) {
   }
 }
 
+async function getMarketSnapshot() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const res = await fetch(`${apiUrl}/api/v1/market/snapshot`, { next: { revalidate: 300 } })
+    if (!res.ok) return null
+    const json = await res.json()
+    return json?.data || null
+  } catch (e) {
+    console.error('Error fetching market snapshot:', e)
+    return null
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // distributeArticles
 // Mendistribusikan artikel ke slot section yang terpisah secara deterministik.
@@ -297,6 +311,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const articlesList = await getArticles(siteConfig.id, categoryFilter, searchQuery)
   const categoriesTree = await getCategories(siteConfig.id)
+  const marketData = await getMarketSnapshot()
 
   // Mode halaman
   const isHomepage = !searchQuery && categoryFilter === 'terbaru'
@@ -697,35 +712,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               )}
 
               {/* Info Pasar */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
-                <div className="mb-4">
-                  <span className={`${sectionEyebrowClass} text-brand-red`}>Info Pasar</span>
-                </div>
-                <div className="space-y-3.5">
-                  {[
-                    { label: 'IHSG', value: '7,452.80', change: '+1.25%', diff: '+92.30', up: true },
-                    { label: 'USD/IDR', value: '15,890', change: '-0.45%', diff: '-71.50', up: false },
-                    { label: 'Emas (gram)', value: 'Rp 1,125,000', change: '+0.18%', diff: '+2,000', up: true },
-                  ].map(({ label, value, change, diff, up }, i, arr) => (
-                    <div
-                      key={label}
-                      className={`flex items-center justify-between ${i < arr.length - 1 ? 'border-b border-black/5 pb-2.5 dark:border-white/5' : ''}`}
-                    >
-                      <div>
-                        <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted">{label}</div>
-                        <div className="text-sm font-extrabold text-brand-black dark:text-white">{value}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`flex items-center gap-1 text-[10px] font-bold ${up ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
-                          <span>{up ? '↑' : '↓'}</span>
-                          <span>{change}</span>
-                        </div>
-                        <div className="text-[10px] text-brand-text-muted">{diff}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <MarketWidget initialData={marketData} />
 
               {/* Video / Partner Placement */}
               <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">

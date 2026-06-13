@@ -21,6 +21,7 @@ import { commentRouter } from './modules/comment/comment.controller'
 import { kycRouter } from './modules/kyc/kyc.controller'
 import { invitationRouter } from './modules/invitation/invitation.controller'
 import adminRouter from './admin/admin.router'
+import { marketRouter } from './modules/market/market.controller'
 import { cronRouter } from './cron/cron.router'
 import timeout from 'connect-timeout'
 import { requestIdMiddleware } from './middleware/requestId.middleware'
@@ -200,6 +201,7 @@ app.use('/api/v1/comments', commentRouter)
 app.use('/api/v1/kyc', kycRouter)
 app.use('/api/v1/invitations', invitationRouter)
 app.use('/api/v1/admin', adminRouter)
+app.use('/api/v1/market', publicLimiter, marketRouter)
 
 // Cron endpoints (called by Vercel Cron Jobs)
 app.use('/api/cron', cronRouter)
