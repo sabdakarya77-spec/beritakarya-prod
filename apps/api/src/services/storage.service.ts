@@ -23,7 +23,14 @@ const KYC_BUCKET = process.env.S3_BUCKET || 'kyc'
 const MEDIA_BUCKET = process.env.S3_MEDIA_BUCKET || 'media'
 
 // Base URL for Supabase public CDN, e.g. https://<ref>.supabase.co/storage/v1/object/public
-const SUPABASE_STORAGE_PUBLIC_URL = process.env.SUPABASE_STORAGE_PUBLIC_URL || ''
+let resolvedPublicUrl = process.env.SUPABASE_STORAGE_PUBLIC_URL || ''
+if (!resolvedPublicUrl && process.env.S3_ENDPOINT) {
+  const match = process.env.S3_ENDPOINT.match(/https:\/\/([^.]+)\.storage\.supabase\.co/)
+  if (match && match[1]) {
+    resolvedPublicUrl = `https://${match[1]}.supabase.co/storage/v1/object/public`
+  }
+}
+const SUPABASE_STORAGE_PUBLIC_URL = resolvedPublicUrl
 
 export class StorageService {
   /**
