@@ -19,7 +19,41 @@ interface NewsCardProps {
 }
 
 const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
-  const imageUrl = article.featuredImage || article.blocks?.find((b: any) => b.type === 'image')?.url || '/placeholder.jpg';
+  const imageUrl = (() => {
+    if (article.featuredImage) return article.featuredImage;
+
+    if (Array.isArray(article.blocks)) {
+      // 1. YouTube embed block thumbnail fallback
+      const embedBlock = article.blocks.find((b: any) => b.type === 'embed' && b.embedType === 'youtube');
+      if (embedBlock?.url) {
+        const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+        const match = embedBlock.url.match(regExp);
+        if (match && match[2].length === 11) {
+          return `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`;
+        }
+      }
+
+      // 2. Gallery block fallback
+      const galleryBlock = article.blocks.find((b: any) => b.type === 'gallery');
+      if (galleryBlock?.images?.[0]?.url) {
+        return galleryBlock.images[0].url;
+      }
+
+      // 3. Single image block fallback
+      const imageBlock = article.blocks.find((b: any) => b.type === 'image');
+      if (imageBlock?.url) {
+        return imageBlock.url;
+      }
+
+      // 4. Image grid block fallback
+      const gridBlock = article.blocks.find((b: any) => b.type === 'imageGrid');
+      if (gridBlock?.images?.[0]?.url) {
+        return gridBlock.images[0].url;
+      }
+    }
+
+    return '/placeholder.jpg';
+  })();
   const excerpt = article.blocks?.find((b: any) => b.type === 'paragraph')?.content || '';
   const articleHref = `/${site}/artikel/${article.slug}`;
   const date = new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
