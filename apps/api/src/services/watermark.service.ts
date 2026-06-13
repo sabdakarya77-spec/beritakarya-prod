@@ -38,15 +38,34 @@ export class WatermarkService {
         throw new Error('Aset watermark tidak ditemukan di server')
       }
 
+      // Dapatkan dimensi gambar input
+      const imageMeta = await sharp(imageBuffer).metadata()
+      const imgW = imageMeta.width ?? 800
+      const imgH = imageMeta.height ?? 600
+
+      // Resize stamp agar lebarnya pas dengan gambar (wajib — stamp default 2400px bisa > gambar)
+      const stampResized = await sharp(KYC_STAMP_PATH)
+        .resize(imgW, null, { fit: 'fill' })
+        .toBuffer()
+
+      // Resize tile jika lebih besar dari gambar di salah satu dimensi (mis. foto KTP sangat kecil)
+      const tileMeta = await sharp(KYC_TILE_PATH).metadata()
+      const tileNeedsResize = (tileMeta.width ?? 0) > imgW || (tileMeta.height ?? 0) > imgH
+      const tileInput = tileNeedsResize
+        ? await sharp(KYC_TILE_PATH)
+            .resize(Math.min(imgW, tileMeta.width ?? imgW), Math.min(imgH, tileMeta.height ?? imgH), { fit: 'inside' })
+            .toBuffer()
+        : KYC_TILE_PATH as string
+
       // Tumpuk pola tile ke seluruh foto (tile: true) dan pita merah di bagian bawah (gravity: south)
       const allComposites: sharp.OverlayOptions[] = [
         {
-          input: KYC_TILE_PATH,
+          input: tileInput as any,
           tile: true,
           blend: 'over',
         },
         {
-          input: KYC_STAMP_PATH,
+          input: stampResized,
           gravity: 'south',
           blend: 'over',
         },
