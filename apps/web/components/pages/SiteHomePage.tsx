@@ -147,17 +147,41 @@ function distributeArticles(articles: any[]) {
   }
   if (!articles || articles.length === 0) return empty
 
-  // Zona 1 — Hero: 4 artikel paling awal
-  const hero = articles.slice(0, 4)
+  // Filter berdasarkan kategori — Opini, Foto Jurnalistik, Video
+  const opinionSlugs = ['opini', 'kolom-esai', 'analisis', 'kolom']
+  const photoSlugs = ['foto-jurnalistik']
+  const videoSlugs = ['video', 'dokumenter-reportase', 'podcast-audio']
+
+  // 1. Ekstrak Foto Jurnalistik dari seluruh artikel (tidak terbatas dari afterFeed)
+  const photoJournal = articles.filter((a: any) => {
+    const catSlug = a.category?.slug?.toLowerCase()
+    const parentSlug = a.category?.parentSlug?.toLowerCase()
+    return a.contentType === 'photo_journalism' || photoSlugs.includes(catSlug) || photoSlugs.includes(parentSlug)
+  }).slice(0, 3)
+  const photoJournalIds = new Set(photoJournal.map((a: any) => a.id))
+
+  // 2. Ekstrak Video dari seluruh artikel (tidak terbatas dari afterFeed)
+  const videoStories = articles.filter((a: any) => {
+    const catSlug = a.category?.slug?.toLowerCase()
+    const parentSlug = a.category?.parentSlug?.toLowerCase()
+    return a.contentType === 'video_exclusive' || videoSlugs.includes(catSlug) || videoSlugs.includes(parentSlug)
+  }).slice(0, 3)
+  const videoStoriesIds = new Set(videoStories.map((a: any) => a.id))
+
+  // 3. Saring artikel umum (non-foto dan non-video) untuk masuk ke feed utama (Hero, Fokus, dll.)
+  const generalArticles = articles.filter((a: any) => !photoJournalIds.has(a.id) && !videoStoriesIds.has(a.id))
+
+  // Zona 1 — Hero: 4 artikel paling awal dari generalArticles
+  const hero = generalArticles.slice(0, 4)
   const heroIds = new Set(hero.map((a: any) => a.id))
 
   // Zona 2 — Fokus Redaksi: prioritaskan isFeatured/isExclusive yang belum di hero
-  const featuredPool = articles
+  const featuredPool = generalArticles
     .slice(4)
     .filter((a: any) => a.isFeatured || a.isExclusive)
     .slice(0, 4)
   // Fallback ke urutan biasa jika featured tidak cukup
-  const fokusRedaksi = featuredPool.length >= 2 ? featuredPool : articles.slice(4, 8)
+  const fokusRedaksi = featuredPool.length >= 2 ? featuredPool : generalArticles.slice(4, 8)
 
   // Kumpulkan semua ID yang sudah dipakai
   const usedIds = new Set([
@@ -166,7 +190,7 @@ function distributeArticles(articles: any[]) {
   ])
 
   // Artikel sisa yang belum dipakai di hero atau fokusRedaksi
-  const remaining = articles.filter((a: any) => !usedIds.has(a.id))
+  const remaining = generalArticles.filter((a: any) => !usedIds.has(a.id))
 
   // Zona 4 — Feed utama: 2 horizontal + 6 medium
   const feedFeatured = remaining.slice(0, 2)
@@ -176,30 +200,11 @@ function distributeArticles(articles: any[]) {
   const afterFeed = remaining.slice(8)
   const editorChoice = afterFeed.filter((a: any) => a.isFeatured).slice(0, 3)
 
-  // Filter berdasarkan kategori — Opini, Foto Jurnalistik, Video
-  const opinionSlugs = ['opini', 'kolom-esai', 'analisis', 'kolom']
-  const photoSlugs = ['foto-jurnalistik']
-  const videoSlugs = ['video', 'dokumenter-reportase', 'podcast-audio']
-
   // Opinion: ambil dari artikel dengan kategori opini/analisis
   const opinion = afterFeed.filter((a: any) => {
     const catSlug = a.category?.slug?.toLowerCase()
     const parentSlug = a.category?.parentSlug?.toLowerCase()
     return opinionSlugs.includes(catSlug) || opinionSlugs.includes(parentSlug)
-  }).slice(0, 3)
-
-  // Photo Journal: ambil dari kategori galeri foto
-  const photoJournal = afterFeed.filter((a: any) => {
-    const catSlug = a.category?.slug?.toLowerCase()
-    const parentSlug = a.category?.parentSlug?.toLowerCase()
-    return photoSlugs.includes(catSlug) || photoSlugs.includes(parentSlug)
-  }).slice(0, 3)
-
-  // Video Stories: ambil dari kategori video
-  const videoStories = afterFeed.filter((a: any) => {
-    const catSlug = a.category?.slug?.toLowerCase()
-    const parentSlug = a.category?.parentSlug?.toLowerCase()
-    return videoSlugs.includes(catSlug) || videoSlugs.includes(parentSlug)
   }).slice(0, 3)
 
   // Sidebar populer: dari artikel non-hero (boleh overlap dengan section lain)
@@ -285,8 +290,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const showInlineSponsor = mainFeedFeatured.length > 0 || mainFeedStream.length > 0
   const showEditorChoice = isHomepage && editorChoice.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
-  const showPhotoSection = isHomepage && photoJournal.length >= 2
-  const showVideoSection = isHomepage && videoStories.length >= 2
+  const showPhotoSection = isHomepage && photoJournal.length >= 1
+  const showVideoSection = isHomepage && videoStories.length >= 1
   const showEditorialExtras = isHomepage && (showEditorChoice || showOpinionSection || showPhotoSection || showVideoSection)
 
   const defaultTags = ['Politik', 'Ekonomi', 'Investigasi', 'Teknologi', 'Gaya Hidup', 'Hiburan']
