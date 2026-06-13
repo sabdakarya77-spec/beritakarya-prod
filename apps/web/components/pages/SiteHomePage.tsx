@@ -31,6 +31,49 @@ function resolveCategoryName(slug: string, categoriesTree: any[] = []): string {
 }
 
 // ─────────────────────────────────────────────
+// Helpers for Fallback Article Thumbnails
+// ─────────────────────────────────────────────
+function getPhotoThumbnail(article: any): string | null {
+  if (article.featuredImage) return article.featuredImage
+
+  if (Array.isArray(article.blocks)) {
+    const galleryBlock = article.blocks.find((b: any) => b.type === 'gallery')
+    if (galleryBlock?.images?.[0]?.url) {
+      return galleryBlock.images[0].url
+    }
+
+    const imageBlock = article.blocks.find((b: any) => b.type === 'image')
+    if (imageBlock?.url) {
+      return imageBlock.url
+    }
+
+    const gridBlock = article.blocks.find((b: any) => b.type === 'imageGrid')
+    if (gridBlock?.images?.[0]?.url) {
+      return gridBlock.images[0].url
+    }
+  }
+
+  return '/placeholder.jpg'
+}
+
+function getVideoThumbnail(article: any): string | null {
+  if (article.featuredImage) return article.featuredImage
+
+  if (Array.isArray(article.blocks)) {
+    const embedBlock = article.blocks.find((b: any) => b.type === 'embed' && b.embedType === 'youtube')
+    if (embedBlock?.url) {
+      const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/
+      const match = embedBlock.url.match(regExp)
+      if (match && match[2].length === 11) {
+        return `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
+      }
+    }
+  }
+
+  return '/placeholder.jpg'
+}
+
+// ─────────────────────────────────────────────
 // Helper: build URL WhatsApp redaksi
 // ─────────────────────────────────────────────
 function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
@@ -823,29 +866,33 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                    {photoJournal.map((article: any) => (
-                      <div
-                        key={article.id}
-                        className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-md"
-                      >
-                        {article.featuredImage && (
-                          <img
-                            src={article.featuredImage}
-                            alt={article.title}
-                            className="h-full w-full object-cover transition-transform duration-[5s] group-hover:scale-110"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
-                        <div className="absolute bottom-0 left-0 z-10 w-full p-5">
-                          <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
-                            Jurnal Foto
-                          </span>
-                          <h4 className="line-clamp-3 text-sm font-sans font-semibold leading-snug text-white">
-                            {article.title}
-                          </h4>
-                        </div>
-                      </div>
-                    ))}
+                    {photoJournal.map((article: any) => {
+                      const photoImg = getPhotoThumbnail(article)
+                      return (
+                        <Link
+                          key={article.id}
+                          href={`/${siteParam}/artikel/${article.slug}`}
+                          className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-md block"
+                        >
+                          {photoImg && (
+                            <img
+                              src={photoImg}
+                              alt={article.title}
+                              className="h-full w-full object-cover transition-transform duration-[5s] group-hover:scale-110"
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
+                          <div className="absolute bottom-0 left-0 z-10 w-full p-5">
+                            <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                              Jurnal Foto
+                            </span>
+                            <h4 className="line-clamp-3 text-sm font-sans font-semibold leading-snug text-white">
+                              {article.title}
+                            </h4>
+                          </div>
+                        </Link>
+                      )
+                    })}
                   </div>
                 </ScrollAnimate>
               )}
@@ -862,32 +909,35 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-                    {videoStories.map((article: any) => (
-                      <Link
-                        key={article.id}
-                        href={`/${siteParam}/artikel/${article.slug}`}
-                        className="group relative aspect-video overflow-hidden rounded-xl bg-black shadow-md block"
-                      >
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/60">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/20 backdrop-blur-md transition-transform group-hover:scale-110 group-hover:border-transparent group-hover:bg-brand-red">
-                            <span className="ml-0.5 text-md text-white">▶</span>
+                    {videoStories.map((article: any) => {
+                      const videoImg = getVideoThumbnail(article)
+                      return (
+                        <Link
+                          key={article.id}
+                          href={`/${siteParam}/artikel/${article.slug}`}
+                          className="group relative aspect-video overflow-hidden rounded-xl bg-black shadow-md block"
+                        >
+                          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/60">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/20 backdrop-blur-md transition-transform group-hover:scale-110 group-hover:border-transparent group-hover:bg-brand-red">
+                              <span className="ml-0.5 text-md text-white">▶</span>
+                            </div>
                           </div>
-                        </div>
-                        {article.featuredImage && (
-                          <img
-                            src={article.featuredImage}
-                            alt={article.title}
-                            className="h-full w-full object-cover transition-transform duration-[4s] group-hover:scale-105"
-                          />
-                        )}
-                        <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">
-                          <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
-                            Video Report
-                          </span>
-                          <h4 className="line-clamp-2 text-xs font-semibold text-white">{article.title}</h4>
-                        </div>
-                      </Link>
-                    ))}
+                          {videoImg && (
+                            <img
+                              src={videoImg}
+                              alt={article.title}
+                              className="h-full w-full object-cover transition-transform duration-[4s] group-hover:scale-105"
+                            />
+                          )}
+                          <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">
+                            <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                              Video Report
+                            </span>
+                            <h4 className="line-clamp-2 text-xs font-semibold text-white">{article.title}</h4>
+                          </div>
+                        </Link>
+                      )
+                    })}
                   </div>
                 </ScrollAnimate>
               )}
