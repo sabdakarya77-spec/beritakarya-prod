@@ -21,6 +21,7 @@ import ArticleShareActions from '../../../../components/ui/ArticleShareActions'
 import ArticleBookmarkButton from '../../../../components/ui/ArticleBookmarkButton'
 import ArticleFloatingTools from '../../../../components/ui/ArticleFloatingTools'
 import FadeInOnScroll from '../../../../components/ui/FadeInOnScroll'
+import { YouTubeEmbed } from '../../../../components/ui/YouTubeEmbed'
 
 interface Props {
   params: { site: string; slug: string }
@@ -35,18 +36,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const siteParam = resolvedParams?.site || 'pusat';
   const slugParam = resolvedParams?.slug;
-  
+
   const [article, siteSettings] = await Promise.all([
     getArticle(siteParam, slugParam),
     getSiteSettings(siteParam)
   ])
-  
+
   if (!article) return { title: 'Post Tidak Ditemukan' }
 
   const fallbackConfig = SITE_MAP[siteParam] || SITE_MAP['pusat']
   const siteName = siteSettings?.name || fallbackConfig?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1));
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico';
-  
+
   const excerpt = article.blocks.find((b: any) => b.type === 'paragraph')?.content || ''
   const coverImage = article.featuredImage || article.blocks.find((b: any) => b.type === 'image')?.url || '/logo.png'
 
@@ -139,7 +140,7 @@ export default async function ArticlePage({ params }: Props) {
   const slugParam = resolvedParams?.slug;
 
   const siteSettings = await getSiteSettings(siteParam)
-  
+
   if (!siteSettings && siteParam !== 'pusat') {
     notFound()
   }
@@ -318,80 +319,80 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
                 <div className="min-w-0">
                   <FadeInOnScroll>
-                  <div className="space-y-8">
-                    <div className="article-content max-w-[40rem] space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
-                      {(() => {
-                        const blocks = article.blocks as Block[];
-                        let paragraphCount = 0;
-                        const elements: React.ReactNode[] = [];
+                    <div className="space-y-8">
+                      <div className="article-content max-w-[40rem] space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
+                        {(() => {
+                          const blocks = article.blocks as Block[];
+                          let paragraphCount = 0;
+                          const elements: React.ReactNode[] = [];
 
-                        for (let i = 0; i < blocks.length; i++) {
-                          const block = blocks[i];
-                          elements.push(<PublicBlock key={`block-${i}`} block={block} index={i} />);
+                          for (let i = 0; i < blocks.length; i++) {
+                            const block = blocks[i];
+                            elements.push(<PublicBlock key={`block-${i}`} block={block} index={i} />);
 
-                          if (block.type === 'paragraph') {
-                            paragraphCount++;
+                            if (block.type === 'paragraph') {
+                              paragraphCount++;
 
-                            // After 3rd paragraph: insert pull quote highlight
-                            if (paragraphCount === 3) {
-                              const quoteBlock = blocks.find((b: Block) => b.type === 'quote');
-                              if (quoteBlock && quoteBlock.type === 'quote') {
+                              // After 3rd paragraph: insert pull quote highlight
+                              if (paragraphCount === 3) {
+                                const quoteBlock = blocks.find((b: Block) => b.type === 'quote');
+                                if (quoteBlock && quoteBlock.type === 'quote') {
+                                  elements.push(
+                                    <div key="visual-break-quote" className="relative my-10 py-8 px-8 md:px-12 border-y-2 border-brand-red/10 bg-brand-red/[0.02] rounded-xl">
+                                      <span className="absolute -top-3 left-6 text-7xl font-serif text-brand-red opacity-10 leading-none select-none">&ldquo;</span>
+                                      <blockquote className="relative z-10 font-serif text-xl md:text-2xl italic leading-relaxed text-brand-black dark:text-white/90">
+                                        <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(quoteBlock.content || '') }} />
+                                      </blockquote>
+                                      {quoteBlock.attribution && (
+                                        <footer className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red">
+                                          — {quoteBlock.attribution}
+                                        </footer>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              }
+
+                              // After 5th paragraph: insert inline related article
+                              if (paragraphCount === 5 && relatedArticles.length > 0) {
+                                const rel = relatedArticles[0];
                                 elements.push(
-                                  <div key="visual-break-quote" className="relative my-10 py-8 px-8 md:px-12 border-y-2 border-brand-red/10 bg-brand-red/[0.02] rounded-xl">
-                                    <span className="absolute -top-3 left-6 text-7xl font-serif text-brand-red opacity-10 leading-none select-none">&ldquo;</span>
-                                    <blockquote className="relative z-10 font-serif text-xl md:text-2xl italic leading-relaxed text-brand-black dark:text-white/90">
-                                      <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(quoteBlock.content || '') }} />
-                                    </blockquote>
-                                    {quoteBlock.attribution && (
-                                      <footer className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red">
-                                        — {quoteBlock.attribution}
-                                      </footer>
-                                    )}
+                                  <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+                                    <div className="flex items-center gap-1.5 mb-3">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
+                                      <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-red">Baca Juga</span>
+                                    </div>
+                                    <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
+                                      <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
+                                        <SmartImage
+                                          src={rel.featuredImage || rel.blocks?.find((b: any) => b.type === 'image')?.url}
+                                          context="card"
+                                          alt={rel.title}
+                                          fill
+                                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                      </div>
+                                      <div className="min-w-0 flex flex-col justify-center">
+                                        <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.category?.name)}`}>
+                                          {rel.category?.name || 'Umum'}
+                                        </span>
+                                        <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
+                                          {rel.title}
+                                        </h4>
+                                        <span className="mt-1.5 text-[9px] font-semibold text-brand-text-muted">
+                                          {rel.author?.name || 'Redaksi'} · {rel.readingTimeMin || 3} min baca
+                                        </span>
+                                      </div>
+                                    </Link>
                                   </div>
                                 );
                               }
                             }
-
-                            // After 5th paragraph: insert inline related article
-                            if (paragraphCount === 5 && relatedArticles.length > 0) {
-                              const rel = relatedArticles[0];
-                              elements.push(
-                                <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
-                                  <div className="flex items-center gap-1.5 mb-3">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                                    <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-red">Baca Juga</span>
-                                  </div>
-                                  <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
-                                    <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
-                                      <SmartImage
-                                        src={rel.featuredImage || rel.blocks?.find((b: any) => b.type === 'image')?.url}
-                                        context="card"
-                                        alt={rel.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                      />
-                                    </div>
-                                    <div className="min-w-0 flex flex-col justify-center">
-                                      <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.category?.name)}`}>
-                                        {rel.category?.name || 'Umum'}
-                                      </span>
-                                      <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
-                                        {rel.title}
-                                      </h4>
-                                      <span className="mt-1.5 text-[9px] font-semibold text-brand-text-muted">
-                                        {rel.author?.name || 'Redaksi'} · {rel.readingTimeMin || 3} min baca
-                                      </span>
-                                    </div>
-                                  </Link>
-                                </div>
-                              );
-                            }
                           }
-                        }
-                        return elements;
-                      })()}
+                          return elements;
+                        })()}
+                      </div>
                     </div>
-                  </div>
                   </FadeInOnScroll>
 
                   {/* Share & Save Section (Inline at the end of article) */}
@@ -416,8 +417,8 @@ export default async function ArticlePage({ params }: Props) {
                   {/* Tags */}
                   <div className="mt-10 flex flex-wrap gap-2 border-t border-gray-100 pt-6 dark:border-white/5 md:mt-12 md:pt-8">
                     {(article.tags || ['Investigasi', 'KaryaNyata', 'Nusantara', 'Politik']).map((tag: string) => (
-                      <Link 
-                        key={tag} 
+                      <Link
+                        key={tag}
                         href={`/${siteParam}?q=${encodeURIComponent(tag)}`}
                         className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03] dark:text-brand-text-muted"
                       >
@@ -433,52 +434,52 @@ export default async function ArticlePage({ params }: Props) {
 
                   {/* Recommended Articles */}
                   <FadeInOnScroll>
-                  <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/5 md:mt-12 md:pt-10">
-                    <div className="mb-6 flex items-center gap-2.5">
-                      <div className="h-5 w-0.75 bg-brand-red" />
-                      <div>
-                        <h3 className="text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white">
-                          Rekomendasi Artikel
-                        </h3>
-                        <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-text-muted">
-                          Lanjutkan bacaan terkait topik ini
-                        </p>
+                    <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/5 md:mt-12 md:pt-10">
+                      <div className="mb-6 flex items-center gap-2.5">
+                        <div className="h-5 w-0.75 bg-brand-red" />
+                        <div>
+                          <h3 className="text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white">
+                            Rekomendasi Artikel
+                          </h3>
+                          <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-text-muted">
+                            Lanjutkan bacaan terkait topik ini
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {relatedArticles.length > 0 ? (
-                      <div className="space-y-5">
-                        {/* Hero row: 2 horizontal cards */}
-                        {relatedArticles.length >= 2 && (
-                          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                            {relatedArticles.slice(0, 2).map((rel: any) => (
-                              <NewsCard key={rel.id} article={rel} variant="horizontal" site={siteParam} />
-                            ))}
-                          </div>
-                        )}
-                        {/* Medium cards below */}
-                        {relatedArticles.length > 2 && (
-                          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                            {relatedArticles.slice(2).map((rel: any) => (
-                              <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
-                            ))}
-                          </div>
-                        )}
-                        {/* Fallback: if only 1 article, show as medium */}
-                        {relatedArticles.length === 1 && (
-                          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                            <NewsCard key={relatedArticles[0].id} article={relatedArticles[0]} variant="medium" site={siteParam} />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="col-span-full rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center dark:border-white/10">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-brand-text-muted">
-                          Belum ada rekomendasi artikel terkait.
-                        </p>
-                      </div>
-                    )}
-                  </section>
+                      {relatedArticles.length > 0 ? (
+                        <div className="space-y-5">
+                          {/* Hero row: 2 horizontal cards */}
+                          {relatedArticles.length >= 2 && (
+                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                              {relatedArticles.slice(0, 2).map((rel: any) => (
+                                <NewsCard key={rel.id} article={rel} variant="horizontal" site={siteParam} />
+                              ))}
+                            </div>
+                          )}
+                          {/* Medium cards below */}
+                          {relatedArticles.length > 2 && (
+                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                              {relatedArticles.slice(2).map((rel: any) => (
+                                <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
+                              ))}
+                            </div>
+                          )}
+                          {/* Fallback: if only 1 article, show as medium */}
+                          {relatedArticles.length === 1 && (
+                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+                              <NewsCard key={relatedArticles[0].id} article={relatedArticles[0]} variant="medium" site={siteParam} />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="col-span-full rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center dark:border-white/10">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-brand-text-muted">
+                            Belum ada rekomendasi artikel terkait.
+                          </p>
+                        </div>
+                      )}
+                    </section>
                   </FadeInOnScroll>
                 </div>
               </div>
@@ -717,8 +718,8 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       return (
         <figure className="my-10">
           <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
-            <SmartImage 
-              src={block.url} 
+            <SmartImage
+              src={block.url}
               context="article_block"
               alt={block.alt || 'Post image'}
               fill
@@ -742,10 +743,10 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
           {block.images.map((img, i) => (
             <figure key={i} className="m-0">
               <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
-                <SmartImage 
-                  src={img.url} 
+                <SmartImage
+                  src={img.url}
                   context="article_block"
-                  alt={img.alt || `Grid image ${i+1}`}
+                  alt={img.alt || `Grid image ${i + 1}`}
                   fill
                   className="object-cover"
                 />
@@ -765,10 +766,10 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {block.images.map((img, i) => (
               <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
-                <SmartImage 
-                  src={img.url} 
+                <SmartImage
+                  src={img.url}
                   context="gallery_thumb"
-                  alt={img.alt || `Gallery image ${i+1}`}
+                  alt={img.alt || `Gallery image ${i + 1}`}
                   fill
                   className="object-cover cursor-pointer hover:scale-110 transition-transform"
                 />
@@ -788,8 +789,8 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
           block.ordered ? "list-decimal" : "list-disc"
         )}>
           {block.items.map((item, i) => (
-            <li 
-              key={i} 
+            <li
+              key={i}
               className={bodyTextClass}
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(item || '') }}
             />
@@ -805,7 +806,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
         editorial: 'bg-brand-surface border-gray-100 text-brand-black dark:bg-white/[0.03] dark:border-white/10 dark:text-white'
       }
       return (
-        <div 
+        <div
           className={cn(
             "my-10 rounded-xl border-l-4 p-5 font-sans text-[calc(1rem*var(--article-font-scale,1))] leading-[calc(1.75rem*var(--article-font-scale,1))] antialiased text-left md:p-8 md:text-[calc(1.1rem*var(--article-font-scale,1))] md:leading-[calc(1.9rem*var(--article-font-scale,1))] shadow-sm",
             variants[block.variant as keyof typeof variants] || variants.editorial
@@ -816,26 +817,23 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
     case 'embed':
       return (
         <div className="my-10">
-          <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 flex items-center justify-center">
-            {block.embedType === 'youtube' ? (
-              <iframe
-                src={block.url.replace('watch?v=', 'embed/')}
-                className="absolute inset-0 w-full h-full"
-                allowFullScreen
-                title={block.title || 'YouTube video'}
-              />
-            ) : (
+          {block.embedType === 'youtube' ? (
+            <YouTubeEmbed
+              url={block.url}
+              title={block.title}
+            />
+          ) : (
+            <div className="relative rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 p-6 flex items-center justify-center">
               <a href={block.url} target="_blank" rel="noopener noreferrer" className="text-brand-red font-bold underline">
                 Buka konten eksternal: {block.title || block.url}
               </a>
-            )}
-          </div>
-          {block.title && <p className="mt-3 text-center text-xs text-brand-text-muted uppercase tracking-widest font-black">{block.title}</p>}
+            </div>
+          )}
         </div>
       )
     case 'mediaText':
       return (
-        <div 
+        <div
           className={cn(
             "flex flex-col gap-6 my-10 items-center w-full",
             block.align === 'right' ? "md:flex-row-reverse" : "md:flex-row"
@@ -845,8 +843,8 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
           <div className="w-full md:w-1/2 min-w-0">
             <figure className="m-0">
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
-                <SmartImage 
-                  src={block.url || '/placeholder.jpg'} 
+                <SmartImage
+                  src={block.url || '/placeholder.jpg'}
                   context="media_text"
                   alt={block.alt || 'Post image'}
                   fill

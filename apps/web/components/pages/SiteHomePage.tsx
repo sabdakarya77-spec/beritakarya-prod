@@ -170,31 +170,31 @@ function distributeArticles(articles: any[]) {
 
   // Zona 4 — Feed utama: 2 horizontal + 6 medium
   const feedFeatured = remaining.slice(0, 2)
-  const feedStream   = remaining.slice(2, 8)
+  const feedStream = remaining.slice(2, 8)
 
   // Zona 5+ — Editorial extras (full-width, di bawah zona sidebar)
-  const afterFeed   = remaining.slice(8)
+  const afterFeed = remaining.slice(8)
   const editorChoice = afterFeed.filter((a: any) => a.isFeatured).slice(0, 3)
-  
+
   // Filter berdasarkan kategori — Opini, Foto Jurnalistik, Video
   const opinionSlugs = ['opini', 'kolom-esai', 'analisis', 'kolom']
-  const photoSlugs   = ['foto-jurnalistik']
-  const videoSlugs   = ['video', 'dokumenter-reportase', 'podcast-audio']
-  
+  const photoSlugs = ['foto-jurnalistik']
+  const videoSlugs = ['video', 'dokumenter-reportase', 'podcast-audio']
+
   // Opinion: ambil dari artikel dengan kategori opini/analisis
   const opinion = afterFeed.filter((a: any) => {
     const catSlug = a.category?.slug?.toLowerCase()
     const parentSlug = a.category?.parentSlug?.toLowerCase()
     return opinionSlugs.includes(catSlug) || opinionSlugs.includes(parentSlug)
   }).slice(0, 3)
-  
+
   // Photo Journal: ambil dari kategori galeri foto
   const photoJournal = afterFeed.filter((a: any) => {
     const catSlug = a.category?.slug?.toLowerCase()
     const parentSlug = a.category?.parentSlug?.toLowerCase()
     return photoSlugs.includes(catSlug) || photoSlugs.includes(parentSlug)
   }).slice(0, 3)
-  
+
   // Video Stories: ambil dari kategori video
   const videoStories = afterFeed.filter((a: any) => {
     const catSlug = a.category?.slug?.toLowerCase()
@@ -214,7 +214,7 @@ function distributeArticles(articles: any[]) {
 export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProps) {
   const resolvedSearchParams = await searchParams
   const categoryFilter = resolvedSearchParams?.cat || 'terbaru'
-  const searchQuery    = resolvedSearchParams?.q || ''
+  const searchQuery = resolvedSearchParams?.q || ''
 
   const siteSettings = await getSiteSettings(siteParam)
 
@@ -233,60 +233,60 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     description:
       siteSettings?.description || (SITE_MAP[siteParam] as any)?.description ||
       `Portal berita resmi ${siteParam}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`,
-    logoUrl:       siteSettings?.logoUrl || (SITE_MAP[siteParam] as any)?.logoUrl || null,
-    footerText:    siteSettings?.footerText || (SITE_MAP[siteParam] as any)?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`,
-    address:       siteSettings?.address || (SITE_MAP[siteParam] as any)?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
-    contactEmail:  siteSettings?.contactEmail || (SITE_MAP[siteParam] as any)?.contactEmail || 'support.beritakarya@gmail.com',
-    phone:         siteSettings?.phone || (SITE_MAP[siteParam] as any)?.phone || null,
-    aboutUs:       siteSettings?.aboutUs || (SITE_MAP[siteParam] as any)?.aboutUs || null,
-    codeOfEthics:  siteSettings?.codeOfEthics || (SITE_MAP[siteParam] as any)?.codeOfEthics || null,
-    editorial:     siteSettings?.editorial || (SITE_MAP[siteParam] as any)?.editorial || null,
-    advertising:   siteSettings?.advertising || (SITE_MAP[siteParam] as any)?.advertising || null,
-    socialLinks:   siteSettings?.socialLinks || (SITE_MAP[siteParam] as any)?.socialLinks || { facebook: '', twitter: '', instagram: '', youtube: '' },
-    appearance:    siteSettings?.appearance || (SITE_MAP[siteParam] as any)?.appearance || { primaryColor: '#e11d48' },
-    devDomain:     (SITE_MAP[siteParam] as any)?.devDomain || `${siteParam}.localhost:3000`,
+    logoUrl: siteSettings?.logoUrl || (SITE_MAP[siteParam] as any)?.logoUrl || null,
+    footerText: siteSettings?.footerText || (SITE_MAP[siteParam] as any)?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`,
+    address: siteSettings?.address || (SITE_MAP[siteParam] as any)?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
+    contactEmail: siteSettings?.contactEmail || (SITE_MAP[siteParam] as any)?.contactEmail || 'support.beritakarya@gmail.com',
+    phone: siteSettings?.phone || (SITE_MAP[siteParam] as any)?.phone || null,
+    aboutUs: siteSettings?.aboutUs || (SITE_MAP[siteParam] as any)?.aboutUs || null,
+    codeOfEthics: siteSettings?.codeOfEthics || (SITE_MAP[siteParam] as any)?.codeOfEthics || null,
+    editorial: siteSettings?.editorial || (SITE_MAP[siteParam] as any)?.editorial || null,
+    advertising: siteSettings?.advertising || (SITE_MAP[siteParam] as any)?.advertising || null,
+    socialLinks: siteSettings?.socialLinks || (SITE_MAP[siteParam] as any)?.socialLinks || { facebook: '', twitter: '', instagram: '', youtube: '' },
+    appearance: siteSettings?.appearance || (SITE_MAP[siteParam] as any)?.appearance || { primaryColor: '#e11d48' },
+    devDomain: (SITE_MAP[siteParam] as any)?.devDomain || `${siteParam}.localhost:3000`,
   }
 
-  const articlesList   = await getArticles(siteConfig.id, categoryFilter, searchQuery)
+  const articlesList = await getArticles(siteConfig.id, categoryFilter, searchQuery)
   const categoriesTree = await getCategories(siteConfig.id)
 
   // Mode halaman
-  const isHomepage      = !searchQuery && categoryFilter === 'terbaru'
+  const isHomepage = !searchQuery && categoryFilter === 'terbaru'
   const isCategoryFilter = categoryFilter && categoryFilter !== 'terbaru' && categoryFilter !== 'tersimpan'
-  const showSavedFeed   = categoryFilter === 'tersimpan'
+  const showSavedFeed = categoryFilter === 'tersimpan'
 
   // ── Distribusi artikel (homepage) ──
   const dist = isHomepage ? distributeArticles(articlesList) : null
 
-  const heroArticles   = dist?.hero         || []
-  const fokusRedaksi   = dist?.fokusRedaksi  || []
-  const feedFeatured   = dist?.feedFeatured  || []
-  const feedStream     = dist?.feedStream    || []
-  const editorChoice   = dist?.editorChoice  || []
-  const opinionArticles = dist?.opinion      || []
-  const photoJournal   = dist?.photoJournal  || []
-  const videoStories   = dist?.videoStories  || []
-  const sidebarPopular = dist?.popular       || []
+  const heroArticles = dist?.hero || []
+  const fokusRedaksi = dist?.fokusRedaksi || []
+  const feedFeatured = dist?.feedFeatured || []
+  const feedStream = dist?.feedStream || []
+  const editorChoice = dist?.editorChoice || []
+  const opinionArticles = dist?.opinion || []
+  const photoJournal = dist?.photoJournal || []
+  const videoStories = dist?.videoStories || []
+  const sidebarPopular = dist?.popular || []
 
   // ── Feed untuk halaman kategori/pencarian ──
   const catFeedFeatured = articlesList.slice(0, 2)
-  const catFeedStream   = articlesList.slice(2, 8)
-  const catPopular      = articlesList.slice(0, 5)
+  const catFeedStream = articlesList.slice(2, 8)
+  const catPopular = articlesList.slice(0, 5)
 
   // Pilih antara homepage feed atau kategori/cari feed
   const mainFeedFeatured = isHomepage ? feedFeatured : catFeedFeatured
-  const mainFeedStream   = isHomepage ? feedStream   : catFeedStream
-  const popular          = isHomepage ? sidebarPopular : catPopular
+  const mainFeedStream = isHomepage ? feedStream : catFeedStream
+  const popular = isHomepage ? sidebarPopular : catPopular
 
   // ── Conditional flags ──
-  const showHomepageHero   = isHomepage && heroArticles.length > 0
-  const showFokusRedaksi   = isHomepage && fokusRedaksi.length > 0
-  const showTrending       = true
-  const showInlineSponsor  = mainFeedFeatured.length > 0 || mainFeedStream.length > 0
-  const showEditorChoice   = isHomepage && editorChoice.length >= 2
+  const showHomepageHero = isHomepage && heroArticles.length > 0
+  const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
+  const showTrending = true
+  const showInlineSponsor = mainFeedFeatured.length > 0 || mainFeedStream.length > 0
+  const showEditorChoice = isHomepage && editorChoice.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
-  const showPhotoSection   = isHomepage && photoJournal.length >= 2
-  const showVideoSection   = isHomepage && videoStories.length >= 2
+  const showPhotoSection = isHomepage && photoJournal.length >= 2
+  const showVideoSection = isHomepage && videoStories.length >= 2
   const showEditorialExtras = isHomepage && (showEditorChoice || showOpinionSection || showPhotoSection || showVideoSection)
 
   const defaultTags = ['Politik', 'Ekonomi', 'Investigasi', 'Teknologi', 'Gaya Hidup', 'Hiburan']
@@ -296,7 +296,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const whatsappUrl = buildWhatsAppUrl(siteConfig.phone, siteConfig.name)
   const telegramUrl = siteConfig.socialLinks?.telegram || null
-  const reportUrl   = `mailto:${siteConfig.contactEmail}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
+  const reportUrl = `mailto:${siteConfig.contactEmail}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
 
   return (
     <PublicSiteLayout siteConfig={siteConfig} initialCategory={categoryFilter}>
@@ -655,9 +655,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                 </div>
                 <div className="space-y-3.5">
                   {[
-                    { label: 'IHSG',        value: '7,452.80',    change: '+1.25%', diff: '+92.30',  up: true  },
-                    { label: 'USD/IDR',     value: '15,890',      change: '-0.45%', diff: '-71.50',  up: false },
-                    { label: 'Emas (gram)', value: 'Rp 1,125,000', change: '+0.18%', diff: '+2,000', up: true  },
+                    { label: 'IHSG', value: '7,452.80', change: '+1.25%', diff: '+92.30', up: true },
+                    { label: 'USD/IDR', value: '15,890', change: '-0.45%', diff: '-71.50', up: false },
+                    { label: 'Emas (gram)', value: 'Rp 1,125,000', change: '+0.18%', diff: '+2,000', up: true },
                   ].map(({ label, value, change, diff, up }, i, arr) => (
                     <div
                       key={label}
@@ -858,9 +858,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
                     {videoStories.map((article: any) => (
-                      <div
+                      <Link
                         key={article.id}
-                        className="group relative aspect-video overflow-hidden rounded-xl bg-black shadow-md"
+                        href={`/${siteParam}/artikel/${article.slug}`}
+                        className="group relative aspect-video overflow-hidden rounded-xl bg-black shadow-md block"
                       >
                         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/60">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/20 backdrop-blur-md transition-transform group-hover:scale-110 group-hover:border-transparent group-hover:bg-brand-red">
@@ -880,7 +881,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           </span>
                           <h4 className="line-clamp-2 text-xs font-semibold text-white">{article.title}</h4>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </ScrollAnimate>
