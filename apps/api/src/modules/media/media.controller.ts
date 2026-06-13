@@ -9,7 +9,10 @@ import * as repo from './media.repository'
 import { AppError } from '../../utils/AppError'
 import { logger } from '../../lib/logger'
 import { StorageService } from '../../services/storage.service'
-import { createMediaWatermarkSvg } from '../../utils/watermark-svg'
+import nodePath from 'path'
+
+// Path ke Inter-Bold.ttf untuk Pango text rendering (bukan librsvg SVG @font-face)
+const MEDIA_FONT_PATH = nodePath.join(__dirname, '..', '..', 'assets', 'fonts', 'Inter-Bold.ttf')
 
 export const mediaRouter: Router = Router()
 
@@ -114,13 +117,25 @@ async function processImage(
       const currentW = currentMeta.width || maxW
       // Font size scales with image width: ~2% of width, min 14px, max 48px
       const fontSize = Math.min(48, Math.max(14, Math.floor(currentW * 0.020)))
-      const watermarkText = '\u00A9 BERITAKARYA.co'
+      const watermarkText = '<span foreground="rgba(255,255,255,0.85)"\u00A9 BERITAKARYA.co</span>'
 
-      // Professional text-only watermark with drop shadow (no background box)
-      // Matches global media agency standard: Reuters, AFP, AP style
-      const svgBuf = createMediaWatermarkSvg(watermarkText, { fontSize })
-
-      pipeline = pipeline.composite([{ input: svgBuf, gravity: 'southeast' }])
+      // Professional text-only watermark via Pango (bukan SVG @font-face)
+      // librsvg tidak mendukung embedded font via data URI — gunakan sharp text input.
+      pipeline = pipeline.composite([
+        {
+          input: {
+            text: {
+              text: `<span foreground="rgba(255,255,255,0.85)">${'\u00A9 BERITAKARYA.co'}</span>`,
+              font: 'Inter Bold',
+              fontfile: MEDIA_FONT_PATH,
+              dpi: 96,
+              rgba: true,
+            },
+          } as any,
+          gravity: 'southeast',
+          blend: 'over',
+        },
+      ])
     } catch (err: any) {
       logger.error('[Media] Failed to add watermark:', err)
       throw new AppError('Gagal menambahkan watermark', 500, 'WATERMARK_FAILED')
