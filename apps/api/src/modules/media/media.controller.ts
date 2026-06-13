@@ -10,9 +10,10 @@ import { AppError } from '../../utils/AppError'
 import { logger } from '../../lib/logger'
 import { StorageService } from '../../services/storage.service'
 import nodePath from 'path'
+import fs from 'fs/promises'
 
-// Path ke Inter-Bold.ttf untuk Pango text rendering (bukan librsvg SVG @font-face)
-const MEDIA_FONT_PATH = nodePath.join(__dirname, '..', '..', 'assets', 'fonts', 'Inter-Bold.ttf')
+// Path ke editorial.png watermark
+const MEDIA_WATERMARK_PATH = nodePath.join(__dirname, '..', '..', 'assets', 'watermarks', 'editorial.png')
 
 export const mediaRouter: Router = Router()
 
@@ -113,25 +114,23 @@ async function processImage(
 
   if (!options.skipWatermark) {
     try {
+      // Cek ketersediaan asset watermark editorial
+      await fs.access(MEDIA_WATERMARK_PATH)
+
       const currentMeta = await sharp(processedBuffer).metadata()
       const currentW = currentMeta.width || maxW
-      // Font size scales with image width: ~2% of width, min 14px, max 48px
-      const fontSize = Math.min(48, Math.max(14, Math.floor(currentW * 0.020)))
-      const watermarkText = '<span foreground="rgba(255,255,255,0.85)"\u00A9 BERITAKARYA.co</span>'
+      
+      // Hitung lebar watermark ideal: 12% dari lebar gambar, minimal 100px, maksimal 300px
+      const targetWatermarkWidth = Math.min(300, Math.max(100, Math.floor(currentW * 0.12)))
 
-      // Professional text-only watermark via Pango (bukan SVG @font-face)
-      // librsvg tidak mendukung embedded font via data URI — gunakan sharp text input.
+      // Resize watermark PNG secara dinamis agar proporsional
+      const resizedWatermarkBuffer = await sharp(MEDIA_WATERMARK_PATH)
+        .resize(targetWatermarkWidth)
+        .toBuffer()
+
       pipeline = pipeline.composite([
         {
-          input: {
-            text: {
-              text: `<span foreground="rgba(255,255,255,0.85)">${'\u00A9 BERITAKARYA.co'}</span>`,
-              font: 'Inter Bold',
-              fontfile: MEDIA_FONT_PATH,
-              dpi: 96,
-              rgba: true,
-            },
-          } as any,
+          input: resizedWatermarkBuffer,
           gravity: 'southeast',
           blend: 'over',
         },
