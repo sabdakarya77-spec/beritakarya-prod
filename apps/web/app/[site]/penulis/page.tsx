@@ -6,6 +6,7 @@ import { Search, Users, FileText, ArrowRight, Loader2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ROLE_LABELS } from '@/lib/constants'
+import { API_URL } from '@/lib/api'
 
 interface Author {
   id: string
@@ -46,8 +47,7 @@ export default function AuthorsPage() {
     const fetchAuthors = async () => {
       setLoading(true)
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-        const res = await fetch(`${apiUrl}/api/v1/users/authors?site=${siteId}&limit=100`, {
+        const res = await fetch(`${API_URL}/api/v1/users/authors?site=${siteId}&limit=100`, {
           cache: 'no-store'
         })
         if (res.ok) {

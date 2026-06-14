@@ -13,6 +13,8 @@ import { notFound } from 'next/navigation'
 import ScrollAnimate from '../ui/ScrollAnimate'
 import { Container } from '../layout/Container'
 import MarketWidget from '../ui/MarketWidget'
+import { API_URL } from '../../lib/api'
+import { fetchSiteSettings, buildPublicSiteConfig } from '../../lib/siteSettings'
 
 // ─────────────────────────────────────────────
 // Helper: resolve nama kategori dari slug
@@ -124,8 +126,7 @@ type SiteHomePageProps = {
 // ─────────────────────────────────────────────
 async function getArticles(siteId: string, category?: string, search?: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    let url = `${apiUrl}/api/v1/articles/public?site=${siteId}&limit=25`
+    let url = `${API_URL}/api/v1/articles/public?site=${siteId}&limit=25`
     if (category && category !== 'terbaru' && category !== 'tersimpan') {
       url += `&category=${encodeURIComponent(category)}`
     }
@@ -144,8 +145,7 @@ async function getArticles(siteId: string, category?: string, search?: string) {
 
 async function getCategories(siteId: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/categories/tree?site=${siteId}`, { next: { revalidate: 60 } })
+    const res = await fetch(`${API_URL}/api/v1/categories/tree?site=${siteId}`, { next: { revalidate: 60 } })
     if (!res.ok) return []
     const json = await res.json()
     return json?.data || []
@@ -155,23 +155,9 @@ async function getCategories(siteId: string) {
   }
 }
 
-async function getSiteSettings(siteId: string) {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${siteId}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    const json = await res.json()
-    return json?.data || null
-  } catch (e) {
-    console.error('Error fetching site settings:', e)
-    return null
-  }
-}
-
 async function getMarketSnapshot() {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/market/snapshot`, { next: { revalidate: 300 } })
+    const res = await fetch(`${API_URL}/api/v1/market/snapshot`, { next: { revalidate: 300 } })
     if (!res.ok) return null
     const json = await res.json()
     return json?.data || null
@@ -278,36 +264,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const categoryFilter = resolvedSearchParams?.cat || 'terbaru'
   const searchQuery = resolvedSearchParams?.q || ''
 
-  const siteSettings = await getSiteSettings(siteParam)
+  const siteSettings = await fetchSiteSettings(siteParam)
 
   if (!siteSettings && siteParam !== 'pusat') {
     notFound()
   }
 
-  const siteConfig = {
-    id: siteParam,
-    name:
-      siteSettings?.name || (SITE_MAP[siteParam] as any)?.name ||
-      (siteParam.charAt(0).toUpperCase() + siteParam.slice(1)),
-    domain:
-      siteSettings?.domain || (SITE_MAP[siteParam] as any)?.domain ||
-      `${siteParam}.beritakarya.co`,
-    description:
-      siteSettings?.description || (SITE_MAP[siteParam] as any)?.description ||
-      `Portal berita resmi ${siteParam}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`,
-    logoUrl: siteSettings?.logoUrl || (SITE_MAP[siteParam] as any)?.logoUrl || null,
-    footerText: siteSettings?.footerText || (SITE_MAP[siteParam] as any)?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`,
-    address: siteSettings?.address || (SITE_MAP[siteParam] as any)?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
-    contactEmail: siteSettings?.contactEmail || (SITE_MAP[siteParam] as any)?.contactEmail || 'support.beritakarya@gmail.com',
-    phone: siteSettings?.phone || (SITE_MAP[siteParam] as any)?.phone || null,
-    aboutUs: siteSettings?.aboutUs || (SITE_MAP[siteParam] as any)?.aboutUs || null,
-    codeOfEthics: siteSettings?.codeOfEthics || (SITE_MAP[siteParam] as any)?.codeOfEthics || null,
-    editorial: siteSettings?.editorial || (SITE_MAP[siteParam] as any)?.editorial || null,
-    advertising: siteSettings?.advertising || (SITE_MAP[siteParam] as any)?.advertising || null,
-    socialLinks: siteSettings?.socialLinks || (SITE_MAP[siteParam] as any)?.socialLinks || { facebook: '', twitter: '', instagram: '', youtube: '' },
-    appearance: siteSettings?.appearance || (SITE_MAP[siteParam] as any)?.appearance || { primaryColor: '#e11d48' },
-    devDomain: (SITE_MAP[siteParam] as any)?.devDomain || `${siteParam}.localhost:3000`,
-  }
+  const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   const articlesList = await getArticles(siteConfig.id, categoryFilter, searchQuery)
   const categoriesTree = await getCategories(siteConfig.id)

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { API_URL } from '../../../../lib/api'
 import { notFound } from 'next/navigation'
 import { LegalStandardPage } from '../../../../components/legal'
 import { AdsMarketingPage, type AdPackage } from '../../../../components/marketing'
@@ -15,8 +16,7 @@ export const dynamic = 'force-dynamic'
 
 async function getAdPackages(site: string): Promise<AdPackage[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/ads/packages?site=${site}`, { next: { revalidate: 60 } })
+    const res = await fetch(`${API_URL}/api/v1/ads/packages?site=${site}`, { next: { revalidate: 60 } })
     if (!res.ok) return []
     const json = await res.json()
     return json.data?.filter((pkg: AdPackage) => pkg.isActive) || []

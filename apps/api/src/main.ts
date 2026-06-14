@@ -43,9 +43,9 @@ import { getMeilisearchCircuitStatus } from './modules/article/search.service'
 // Import global type augmentation (must be before other imports)
 import './types/express'
 
-// Import controller functions
-import * as categoryController from './modules/category/category.controller'
-import * as siteController from './modules/site/site.controller'
+// Import modular routers
+import { categoryRouter } from './modules/category/category.controller'
+import { siteRouter } from './modules/site/site.controller'
 
 // ─── Sentry ───────────────────────────────────────────────────────────────────
 
@@ -143,54 +143,8 @@ app.use('/api/v1/articles', articleRouter)
 app.use('/api/v1/media', mediaRouter)
 app.use('/api/v1/ai', aiRouter)
 
-// Category routes (public)
-app.get('/api/v1/categories/tree', publicLimiter, siteMiddleware, asyncHandler(categoryController.getCategoryTree))
-app.get('/api/v1/categories', publicLimiter, siteMiddleware, asyncHandler(categoryController.getCategories))
-app.post('/api/v1/categories/seed-global',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(categoryController.seedGlobalCategories))
-app.post('/api/v1/categories/sync-from-template',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(categoryController.syncFromTemplate))
-app.post('/api/v1/categories',
-  requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
-  asyncHandler(categoryController.createCategory))
-app.put('/api/v1/categories/:id',
-  requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
-  asyncHandler(categoryController.updateCategory))
-app.delete('/api/v1/categories/:id',
-  requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
-  asyncHandler(categoryController.deleteCategory))
-
-// Site routes (public)
-app.get('/api/v1/sites', publicLimiter, asyncHandler(siteController.getSites))
-app.get('/api/v1/sites/settings', publicLimiter, asyncHandler(siteController.getSiteSettings))
-app.get('/api/v1/sites/:siteId/category-assignments',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.getSiteCategoryAssignments))
-app.put('/api/v1/sites/:siteId/category-assignments',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.updateSiteCategoryAssignments))
-app.get('/api/v1/sites/:id', asyncHandler(siteController.getSiteById))
-app.patch('/api/v1/sites/settings',
-  requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
-  asyncHandler(siteController.updateSiteSettings))
-app.post('/api/v1/sites',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.createSite))
-app.put('/api/v1/sites/:id',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.updateSite))
-app.delete('/api/v1/sites/:id',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.deleteSite))
-app.post('/api/v1/sites/:id/wapimred',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(siteController.assignWapimred))
+app.use('/api/v1/categories', categoryRouter)
+app.use('/api/v1/sites', siteRouter)
 
 app.use('/api/v1/ads', adRouter)
 app.use('/api/v1/newsletter', newsletterRouter)

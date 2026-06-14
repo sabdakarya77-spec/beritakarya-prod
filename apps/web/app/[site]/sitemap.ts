@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next'
+import { API_URL } from '../../lib/api'
 
 const SITEMAP_MAX_PAGES = 50 // Safety cap
 const DEFAULT_IMAGE = '/logo.png'
 
 async function getArticles(site: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
   const all: any[] = []
 
   try {
@@ -14,7 +14,7 @@ async function getArticles(site: string) {
         limit: '1000',
         page: String(page),
       })
-      const res = await fetch(`${apiUrl}/api/v1/articles/public?${params.toString()}`, {
+      const res = await fetch(`${API_URL}/api/v1/articles/public?${params.toString()}`, {
         cache: 'no-store',
       })
       if (!res.ok) break
@@ -36,8 +36,7 @@ async function getArticles(site: string) {
 
 async function getCategories(site: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/categories?site=${site}`, { cache: 'no-store' })
+    const res = await fetch(`${API_URL}/api/v1/categories?site=${site}`, { cache: 'no-store' })
     if (!res.ok) return []
     const json = await res.json()
     return json.data || []
@@ -48,8 +47,7 @@ async function getCategories(site: string) {
 
 async function getAuthors(site: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/users/authors?site=${site}&limit=200`, {
+    const res = await fetch(`${API_URL}/api/v1/users/authors?site=${site}&limit=200`, {
       cache: 'no-store',
     })
     if (!res.ok) return []

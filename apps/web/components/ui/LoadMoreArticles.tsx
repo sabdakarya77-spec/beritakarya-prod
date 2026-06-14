@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import NewsCard from './NewsCard';
 import { Loader2, ChevronDown } from 'lucide-react';
+import { API_URL } from '../../lib/api';
 
 interface LoadMoreArticlesProps {
   siteId: string;
@@ -28,8 +29,7 @@ export default function LoadMoreArticles({
     setLoading(true);
     try {
       const nextPage = page + 1;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      let url = `${apiUrl}/api/v1/articles/public?site=${siteId}&page=${nextPage}&limit=10`;
+      let url = `${API_URL}/api/v1/articles/public?site=${siteId}&page=${nextPage}&limit=10`;
 
       if (category && category !== 'Terbaru') {
         url += `&category=${encodeURIComponent(category)}`;

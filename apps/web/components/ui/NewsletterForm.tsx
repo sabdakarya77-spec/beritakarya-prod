@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { API_URL } from '../../lib/api'
 
 export default function NewsletterForm() {
   const { site } = useParams() as { site: string }
@@ -16,8 +17,7 @@ export default function NewsletterForm() {
 
     setStatus('loading')
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      const res = await fetch(`${apiUrl}/api/v1/newsletter/subscribe?site=${site}`, {
+      const res = await fetch(`${API_URL}/api/v1/newsletter/subscribe?site=${site}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

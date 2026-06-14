@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, TrendingUp, ArrowRight, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { API_URL } from '../../lib/api';
 
 interface FullScreenSearchProps {
   isOpen: boolean;
@@ -47,8 +48,7 @@ export default function FullScreenSearch({
     const delayDebounce = setTimeout(async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/v1/articles/public?site=${site}&search=${encodeURIComponent(query)}&limit=5`);
+        const res = await fetch(`${API_URL}/api/v1/articles/public?site=${site}&search=${encodeURIComponent(query)}&limit=5`);
         if (res.ok) {
           const json = await res.json();
           const items = json?.data?.articles || json?.data?.items || [];

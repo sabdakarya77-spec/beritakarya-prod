@@ -1,5 +1,6 @@
 import { SITE_MAP } from '@beritakarya/config'
 import { Metadata } from 'next'
+import { API_URL } from '../../lib/api'
 import { notFound } from 'next/navigation'
 import { constructMetadata } from '../../lib/metadata'
 import { SiteHomePage } from '../../components/pages/SiteHomePage'
@@ -16,8 +17,7 @@ export async function generateMetadata({ params }: { params: { site: string } })
   let ogImageUrl = '/logo.png';
   
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const json = await res.json();
       if (json.data) {
@@ -54,8 +54,7 @@ export default async function SitePage({
   let siteName = siteParam.charAt(0).toUpperCase() + siteParam.slice(1);
   let socialLinks: Record<string, string | null | undefined> = {};
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const json = await res.json();
       if (json.data) {

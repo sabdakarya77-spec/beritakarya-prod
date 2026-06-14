@@ -1,5 +1,32 @@
-import { Request, Response } from 'express'
+import { Router, Request, Response } from 'express'
 import { categoryService } from './category.service'
+import { requireAuth, requireRole } from '../../middleware/auth.middleware'
+import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
+import { publicLimiter } from '../../lib/rateLimit'
+import { asyncHandler } from '../../utils/asyncHandler'
+
+export const categoryRouter: Router = Router()
+
+categoryRouter.get('/tree', publicLimiter, siteMiddleware, asyncHandler(getCategoryTree))
+categoryRouter.get('/', publicLimiter, siteMiddleware, asyncHandler(getCategories))
+categoryRouter.post('/seed-global',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(seedGlobalCategories))
+categoryRouter.post('/sync-from-template',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(syncFromTemplate))
+categoryRouter.post('/',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(createCategory))
+categoryRouter.put('/:id',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(updateCategory))
+categoryRouter.delete('/:id',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(deleteCategory))
 
 /**
  * Category Routes - Express Router

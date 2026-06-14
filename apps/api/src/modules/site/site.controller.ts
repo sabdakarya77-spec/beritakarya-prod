@@ -1,7 +1,39 @@
-import { Request, Response } from 'express'
+import { Router, Request, Response } from 'express'
 import { siteService } from './site.service'
 import { siteCategoryService } from './site-category.service'
 import { logger } from '../../lib/logger'
+import { requireAuth, requireRole } from '../../middleware/auth.middleware'
+import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
+import { publicLimiter } from '../../lib/rateLimit'
+import { asyncHandler } from '../../utils/asyncHandler'
+
+export const siteRouter: Router = Router()
+
+siteRouter.get('/', publicLimiter, asyncHandler(getSites))
+siteRouter.get('/settings', publicLimiter, asyncHandler(getSiteSettings))
+siteRouter.get('/:siteId/category-assignments',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(getSiteCategoryAssignments))
+siteRouter.put('/:siteId/category-assignments',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(updateSiteCategoryAssignments))
+siteRouter.get('/:id', asyncHandler(getSiteById))
+siteRouter.patch('/settings',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(updateSiteSettings))
+siteRouter.post('/',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(createSite))
+siteRouter.put('/:id',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(updateSite))
+siteRouter.delete('/:id',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(deleteSite))
+siteRouter.post('/:id/wapimred',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(assignWapimred))
 
 /**
  * Site Routes - Express Router

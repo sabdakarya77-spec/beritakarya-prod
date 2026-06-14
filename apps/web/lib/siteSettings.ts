@@ -1,21 +1,29 @@
 import { SITE_MAP } from '@beritakarya/config'
+import { API_URL } from './api'
 
 export type PublicSiteConfig = {
   id: string
   name: string
+  domain: string
+  description: string
   logoUrl: string | null
+  footerText: string
   address: string | null
   contactEmail: string | null
   phone?: string | null
   appearance: { primaryColor?: string }
   socialLinks: Record<string, string>
   trendingTopics?: unknown[]
+  aboutUs?: string | null
+  codeOfEthics?: string | null
+  editorial?: string | null
+  advertising?: string | null
+  devDomain: string
 }
 
 export async function fetchSiteSettings(site: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${site}`, {
+    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${site}`, {
       cache: 'no-store',
     })
     if (!res.ok) return null
@@ -33,31 +41,42 @@ export function buildPublicSiteConfig(
   const fallback = SITE_MAP[siteParam as keyof typeof SITE_MAP] as
     | {
         name?: string
+        domain?: string
+        description?: string
         logoUrl?: string
+        footerText?: string
         address?: string
         contactEmail?: string
         phone?: string
         appearance?: PublicSiteConfig['appearance']
         socialLinks?: Record<string, string>
+        devDomain?: string
       }
     | undefined
 
+  const name = (siteSettings?.name as string) || fallback?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1))
+  const domain = (siteSettings?.domain as string) || fallback?.domain || `${siteParam}.beritakarya.co`
+  const description = (siteSettings?.description as string) || fallback?.description || `Portal berita resmi ${siteParam}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`
+  const footerText = (siteSettings?.footerText as string) || fallback?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`
+  const devDomain = fallback?.devDomain || `${siteParam}.localhost:3000`
+
   return {
     id: siteParam,
-    name: (siteSettings?.name as string) || fallback?.name || siteParam,
+    name,
+    domain,
+    description,
     logoUrl: (siteSettings?.logoUrl as string) || fallback?.logoUrl || null,
-    address: (siteSettings?.address as string) || fallback?.address || null,
-    contactEmail:
-      (siteSettings?.contactEmail as string) || fallback?.contactEmail || null,
+    footerText,
+    address: (siteSettings?.address as string) || fallback?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
+    contactEmail: (siteSettings?.contactEmail as string) || fallback?.contactEmail || 'support.beritakarya@gmail.com',
     phone: (siteSettings?.phone as string) || fallback?.phone || null,
-    appearance:
-      (siteSettings?.appearance as PublicSiteConfig['appearance']) ||
-      fallback?.appearance ||
-      { primaryColor: '#e11d48' },
-    socialLinks:
-      (siteSettings?.socialLinks as Record<string, string>) ||
-      fallback?.socialLinks ||
-      {},
-    trendingTopics: (siteSettings?.trendingTopics as unknown[]) || undefined,
+    appearance: (siteSettings?.appearance as PublicSiteConfig['appearance']) || fallback?.appearance || { primaryColor: '#e11d48' },
+    socialLinks: (siteSettings?.socialLinks as Record<string, string>) || fallback?.socialLinks || { facebook: '', twitter: '', instagram: '', youtube: '' },
+    trendingTopics: (siteSettings?.trendingTopics as unknown[]) || [],
+    aboutUs: (siteSettings?.aboutUs as string) || null,
+    codeOfEthics: (siteSettings?.codeOfEthics as string) || null,
+    editorial: (siteSettings?.editorial as string) || null,
+    advertising: (siteSettings?.advertising as string) || null,
+    devDomain,
   }
 }

@@ -31,6 +31,8 @@ import { constructMetadata } from '../../../../lib/metadata'
 import { cn } from '../../../../lib/utils'
 import { JsonLd } from '../../../../components/ui/JsonLd'
 import { buildArticle, buildBreadcrumb } from '../../../../lib/structuredData'
+import { API_URL } from '../../../../lib/api'
+import { fetchSiteSettings, buildPublicSiteConfig } from '../../../../lib/siteSettings'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
@@ -39,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const [article, siteSettings] = await Promise.all([
     getArticle(siteParam, slugParam),
-    getSiteSettings(siteParam)
+    fetchSiteSettings(siteParam)
   ])
 
   if (!article) return { title: 'Post Tidak Ditemukan' }
@@ -63,9 +65,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 async function getArticle(site: string, slug: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
     const res = await fetch(
-      `${apiUrl}/api/v1/articles/slug/${slug}?site=${site}`,
+      `${API_URL}/api/v1/articles/slug/${slug}?site=${site}`,
       { next: { revalidate: 60 } }
     )
     if (!res.ok) return null
@@ -85,9 +86,8 @@ async function getRelatedArticles(site: string, currentSlug: string, category?: 
       limit: '6',
       ...(category && { category })
     })
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
     const res = await fetch(
-      `${apiUrl}/api/v1/articles/public?${params.toString()}`,
+      `${API_URL}/api/v1/articles/public?${params.toString()}`,
       { next: { revalidate: 60 } }
     )
     if (!res.ok) return []
@@ -108,9 +108,8 @@ async function getPopularArticles(site: string, currentSlug: string) {
       sort: 'views',
       order: 'desc'
     })
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
     const res = await fetch(
-      `${apiUrl}/api/v1/articles/public?${params.toString()}`,
+      `${API_URL}/api/v1/articles/public?${params.toString()}`,
       { next: { revalidate: 120 } }
     )
     if (!res.ok) return []
@@ -122,43 +121,18 @@ async function getPopularArticles(site: string, currentSlug: string) {
   }
 }
 
-async function getSiteSettings(siteId: string) {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${siteId}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.data || null;
-  } catch {
-    return null;
-  }
-}
-
 export default async function ArticlePage({ params }: Props) {
   const resolvedParams = await params;
   const siteParam = resolvedParams?.site || 'pusat';
   const slugParam = resolvedParams?.slug;
 
-  const siteSettings = await getSiteSettings(siteParam)
+  const siteSettings = await fetchSiteSettings(siteParam)
 
   if (!siteSettings && siteParam !== 'pusat') {
     notFound()
   }
 
-  const siteConfig = {
-    id: siteParam,
-    name: siteSettings?.name || SITE_MAP[siteParam]?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1)),
-    domain: siteSettings?.domain || SITE_MAP[siteParam]?.domain || `${siteParam}.beritakarya.co`,
-    description: siteSettings?.description || SITE_MAP[siteParam]?.description || `Portal berita resmi ${siteParam}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`,
-    footerText: siteSettings?.footerText || SITE_MAP[siteParam]?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`,
-    address: siteSettings?.address || SITE_MAP[siteParam]?.address || "Jl. Merdeka No. 123, Jakarta Pusat, Indonesia",
-    contactEmail: siteSettings?.contactEmail || SITE_MAP[siteParam]?.contactEmail || "support.beritakarya@gmail.com",
-    phone: siteSettings?.phone || SITE_MAP[siteParam]?.phone || null,
-    socialLinks: siteSettings?.socialLinks || SITE_MAP[siteParam]?.socialLinks || {},
-    appearance: siteSettings?.appearance || SITE_MAP[siteParam]?.appearance || { primaryColor: '#e11d48' },
-    trendingTopics: siteSettings?.trendingTopics || [],
-    devDomain: SITE_MAP[siteParam]?.devDomain || `${siteParam}.localhost:3000`
-  }
+  const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   const article = await getArticle(siteParam, slugParam)
   if (!article || article.status !== 'published') notFound()

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
+import { API_URL } from '../../lib/api';
 
 interface AdSpaceProps {
   type: 'leaderboard' | 'rectangle' | 'in-feed';
@@ -45,8 +46,7 @@ export default function AdSpace({
     const fetchAds = async () => {
       try {
         const siteParam = site || 'pusat';
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/v1/ads/public?site=${siteParam}`);
+        const res = await fetch(`${API_URL}/api/v1/ads/public?site=${siteParam}`);
         if (!res.ok) return;
         const json = await res.json();
 
@@ -101,8 +101,7 @@ export default function AdSpace({
         if (!entry?.isIntersecting) return;
 
         trackedRef.current.add(ad.id);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        fetch(`${apiUrl}/api/v1/ads/track/${ad.id}?action=impression`, {
+        fetch(`${API_URL}/api/v1/ads/track/${ad.id}?action=impression`, {
           method: 'POST'
         }).catch(() => {});
         observer.disconnect();
@@ -118,8 +117,7 @@ export default function AdSpace({
   }, [ads, currentIndex]);
 
   const handleAdClick = (ad: AdItem) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const url = `${apiUrl}/api/v1/ads/track/${ad.id}?action=click`;
+    const url = `${API_URL}/api/v1/ads/track/${ad.id}?action=click`;
     if (navigator.sendBeacon) {
       navigator.sendBeacon(url);
     } else {

@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { API_URL } from '../../lib/api'
 
 /**
  * Manifest dinamis per-situs. Yang divariasikan per situs:
@@ -30,9 +31,8 @@ export default async function manifest({
     : `Portal berita ${siteName} - Jernih Melihat Nusantara`
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
     const res = await fetch(
-      `${apiUrl}/api/v1/sites/settings?site=${siteParam}`,
+      `${API_URL}/api/v1/sites/settings?site=${siteParam}`,
       { next: { revalidate: 3600 } }
     )
     if (res.ok) {

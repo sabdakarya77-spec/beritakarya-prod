@@ -8,6 +8,8 @@ import { Container } from '../../../../components/layout/Container'
 import NewsCard from '../../../../components/ui/NewsCard'
 import { ROLE_LABELS, getCategoryColor } from '../../../../lib/constants'
 import { cn } from '../../../../lib/utils'
+import { API_URL } from '../../../../lib/api'
+import { fetchSiteSettings, buildPublicSiteConfig } from '../../../../lib/siteSettings'
 
 interface Props {
   params: { site: string; id: string }
@@ -30,22 +32,9 @@ interface AuthorProfileResponse {
 
 // ─── Fetch helpers ──────────────────────────────────────────────────
 
-async function getSiteSettings(siteId: string) {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/sites/settings?site=${siteId}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    const json = await res.json()
-    return json?.data || null
-  } catch {
-    return null
-  }
-}
-
 async function getAuthorProfile(siteId: string, authorId: string): Promise<AuthorProfileResponse | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/users/public/${authorId}?site=${siteId}`, {
+    const res = await fetch(`${API_URL}/api/v1/users/public/${authorId}?site=${siteId}`, {
       next: { revalidate: 60 }
     })
     if (!res.ok) return null
@@ -58,8 +47,7 @@ async function getAuthorProfile(siteId: string, authorId: string): Promise<Autho
 
 async function getOtherAuthors(siteId: string, currentId: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const res = await fetch(`${apiUrl}/api/v1/users/authors?site=${siteId}&limit=6`, { next: { revalidate: 120 } })
+    const res = await fetch(`${API_URL}/api/v1/users/authors?site=${siteId}&limit=6`, { next: { revalidate: 120 } })
     if (!res.ok) return []
     const json = await res.json()
     const authors = json?.data || []
@@ -141,7 +129,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const [profileData, siteSettings] = await Promise.all([
     getAuthorProfile(siteParam, authorId),
-    getSiteSettings(siteParam)
+    fetchSiteSettings(siteParam)
   ])
 
   const fallbackConfig = SITE_MAP[siteParam] || SITE_MAP.pusat
@@ -173,27 +161,14 @@ export default async function AuthorProfilePage({ params }: Props) {
   const authorId = resolvedParams?.id
 
   const [siteSettings, profileData, otherAuthors] = await Promise.all([
-    getSiteSettings(siteParam),
+    fetchSiteSettings(siteParam),
     getAuthorProfile(siteParam, authorId),
     getOtherAuthors(siteParam, authorId),
   ])
 
   if (!profileData) notFound()
 
-  const siteConfig = {
-    id: siteParam,
-    name: siteSettings?.name || SITE_MAP[siteParam]?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1)),
-    domain: siteSettings?.domain || SITE_MAP[siteParam]?.domain || `${siteParam}.beritakarya.co`,
-    description: siteSettings?.description || SITE_MAP[siteParam]?.description || `Portal berita resmi ${siteParam}.`,
-    footerText: siteSettings?.footerText || SITE_MAP[siteParam]?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`,
-    address: siteSettings?.address || SITE_MAP[siteParam]?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
-    contactEmail: siteSettings?.contactEmail || SITE_MAP[siteParam]?.contactEmail || 'support.beritakarya@gmail.com',
-    phone: siteSettings?.phone || SITE_MAP[siteParam]?.phone || null,
-    socialLinks: siteSettings?.socialLinks || SITE_MAP[siteParam]?.socialLinks || {},
-    appearance: siteSettings?.appearance || SITE_MAP[siteParam]?.appearance || { primaryColor: '#e11d48' },
-    trendingTopics: siteSettings?.trendingTopics || [],
-    devDomain: SITE_MAP[siteParam]?.devDomain || `${siteParam}.localhost:3000`
-  }
+  const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   const { profile, stats, recentArticles } = profileData
   const roleLabel = ROLE_LABELS[profile.role] || 'Penulis'
