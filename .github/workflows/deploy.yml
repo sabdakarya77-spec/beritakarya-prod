@@ -21,15 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -64,5 +55,5 @@ jobs:
           echo ""
           echo "To complete staging deployment, configure your hosting platform:"
           echo "  - Railway: railway up"
-          echo "  - VPS: ssh $STAGING_HOST 'cd /app && docker compose pull && docker compose up -d'"
+          echo "  - VPS: ssh \$STAGING_HOST 'cd /app && docker compose pull && docker compose up -d'"
           echo "  - Fly.io: fly deploy"
