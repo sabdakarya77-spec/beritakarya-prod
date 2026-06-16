@@ -120,7 +120,7 @@ export default function Navbar({
                   <span className="text-white">KARYA</span>
                 </h1>
               )}
-              <span className="hidden sm:block text-[9px] tracking-wide mt-0.5 text-brand-text-muted">
+              <span className="hidden sm:block text-[9px] tracking-wide mt-0.5 text-white/60">
                 <span className="font-bold text-white/80 italic">Nusantara Berbicara</span>
                 <span className="text-brand-red mx-1.5 font-bold">•</span>
                 <span className="font-normal">{articleTopDate}</span>
@@ -129,20 +129,20 @@ export default function Navbar({
           </div>
 
           <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xs xl:max-w-md mx-auto hidden md:block">
-            <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-text-muted" />
+            <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60" />
             <input
               type="text"
               placeholder="Cari berita, topik, penulis..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full border border-brand-dark/70 bg-brand-black/40 py-2 pl-9 pr-4 text-[11px] text-white placeholder:text-brand-text-muted outline-none transition-all focus:border-brand-red/50 focus:bg-brand-black/60 focus:ring-1 focus:ring-brand-red/30"
+              className="w-full rounded-full border border-brand-dark/70 bg-brand-black/40 py-2 pl-9 pr-4 text-[11px] text-white placeholder:text-white/60 outline-none transition-all focus:border-brand-red/50 focus:bg-brand-black/60 focus:ring-1 focus:ring-brand-red/30"
             />
           </form>
 
           <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-1.5 shrink-0">
             <button
               onClick={onSearchClick}
-              className="md:hidden rounded-full p-3 text-brand-text-muted hover:bg-brand-dark/70 hover:text-white transition-colors"
+              className="md:hidden rounded-full p-3 text-white/60 hover:bg-brand-dark/70 hover:text-white transition-colors"
               aria-label="Cari berita"
             >
               <Search size={18} strokeWidth={1.5} />
@@ -152,7 +152,7 @@ export default function Navbar({
               <Link
                 href={`/${activeSite}?cat=tersimpan`}
                 aria-label="Artikel tersimpan"
-                className="relative rounded-full p-2 text-brand-text-muted transition-colors hover:bg-brand-dark/70 hover:text-white"
+                className="relative rounded-full p-2 text-white/60 transition-colors hover:bg-brand-dark/70 hover:text-white"
               >
                 <Bookmark size={15} strokeWidth={1.5} />
                 {savedArticlesCount > 0 && (
@@ -164,7 +164,7 @@ export default function Navbar({
             )}
 
             <button
-              className="rounded-full p-3 text-brand-text-muted transition-colors hover:bg-brand-dark/70 hover:text-white"
+              className="rounded-full p-3 text-white/60 transition-colors hover:bg-brand-dark/70 hover:text-white"
               onClick={toggleTheme}
               aria-label={theme === 'light' ? 'Aktifkan mode gelap' : 'Aktifkan mode terang'}
             >
@@ -200,7 +200,7 @@ export default function Navbar({
                     >
                       <div className="border-b border-brand-dark p-4">
                         <p className="text-xs font-bold text-white truncate">{user.name}</p>
-                        <p className="text-[10px] text-brand-text-muted truncate">{user.email}</p>
+                        <p className="text-[10px] text-white/60 truncate">{user.email}</p>
                       </div>
                       <div className="p-2" role="none">
                         {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user.role) && (
@@ -253,7 +253,7 @@ export default function Navbar({
 
       <div className="hidden border-t border-brand-dark/50 bg-brand-dark md:block">
         <Container className={cn(
-          "relative z-40 hidden items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-brand-text-muted md:flex lg:text-[11px]",
+          "relative z-40 hidden items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-white/60 md:flex lg:text-[11px]",
           isCollapsed
             ? "h-8 gap-3"
             : "h-10 gap-5"
@@ -288,7 +288,7 @@ export default function Navbar({
                 aria-expanded={hasSub ? (hoveredCategory === cat.name || keyboardExpanded === cat.name) : undefined}
                 className={cn(
                   "group relative flex items-center gap-1 transition-all hover:text-white",
-                  isActive ? "font-black text-white" : "text-brand-text-muted"
+                  isActive ? "font-black text-white" : "text-white/60"
                 )}
               >
                 {cat.slug === 'tersimpan' && (
@@ -296,7 +296,7 @@ export default function Navbar({
                     size={11} 
                     className={cn(
                       "transition-colors",
-                      isActive ? "text-brand-red fill-brand-red/20" : "text-brand-text-muted group-hover:text-white"
+                      isActive ? "text-brand-red fill-brand-red/20" : "text-white/60 group-hover:text-white"
                     )} 
                   />
                 )}
@@ -341,7 +341,7 @@ export default function Navbar({
                             }}
                             className={cn(
                               "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-brand-dark",
-                              isSubActive ? "text-brand-red bg-brand-red/5" : "text-brand-text-muted hover:text-white"
+                              isSubActive ? "text-brand-red bg-brand-red/5" : "text-white/60 hover:text-white"
                             )}
                           >
                             <span>{sub.name}</span>
@@ -365,7 +365,7 @@ export default function Navbar({
                                     }}
                                     className={cn(
                                       "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-brand-dark w-full",
-                                      isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-brand-text-muted hover:text-white"
+                                      isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-white/60 hover:text-white"
                                     )}
                                   >
                                     <span>{subsub.name}</span>
@@ -409,13 +409,13 @@ export default function Navbar({
                         isCollapsed && "px-3 py-2 text-[10px]",
                 isActive
                   ? "border-brand-red bg-brand-red/10 text-brand-red"
-                  : "border-brand-dark text-brand-text-muted bg-brand-black/40"
+                  : "border-brand-dark text-white/60 bg-brand-black/40"
               )}
             >
               {cat.slug === 'tersimpan' && (
                 <Bookmark 
                   size={9} 
-                  className={isActive ? "text-brand-red fill-brand-red/20" : "text-brand-text-muted"}
+                  className={isActive ? "text-brand-red fill-brand-red/20" : "text-white/60"}
                 />
               )}
               <span>{cat.name}</span>
@@ -457,7 +457,7 @@ export default function Navbar({
                           isCollapsed && "px-3 py-2 text-[9px]",
                           isSubActive
                             ? "bg-brand-red text-white"
-                            : "bg-brand-black text-brand-text-muted border border-brand-dark"
+                            : "bg-brand-black text-white/60 border border-brand-dark"
                         )}
                       >
                         {sub.name}
@@ -503,7 +503,7 @@ export default function Navbar({
                           "shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-[9px] font-medium transition-all",
                           isSubSubActive
                             ? "bg-brand-red/20 text-brand-red border border-brand-red/30"
-                            : "bg-brand-black/50 text-brand-text-muted border border-brand-dark/50"
+                            : "bg-brand-black/50 text-white/60 border border-brand-dark/50"
                         )}
                       >
                         {subsub.name}
