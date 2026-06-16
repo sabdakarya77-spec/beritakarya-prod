@@ -88,10 +88,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         <ArticleBookmarkButton
           article={article}
           site={site}
-          className="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
-          activeClassName="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-          idleClassName="absolute right-4 top-4 z-10 h-9 w-9 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
-          iconSize={14}
+          className="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
+          activeClassName="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+          idleClassName="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
+          iconSize={16}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <motion.article 
@@ -146,10 +146,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         <ArticleBookmarkButton
           article={article}
           site={site}
-          className="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
-          activeClassName="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
-          idleClassName="absolute right-0 top-3 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
-          iconSize={13}
+          className="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
+          activeClassName="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
+          idleClassName="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
+          iconSize={15}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <div className="py-3.5 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
@@ -181,10 +181,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         <ArticleBookmarkButton
           article={article}
           site={site}
-          className="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
-          activeClassName="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
-          idleClassName="absolute right-0 top-0 z-10 h-8 w-8 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
-          iconSize={13}
+          className="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
+          activeClassName="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
+          idleClassName="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
+          iconSize={15}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <motion.article 
@@ -232,10 +232,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
       <ArticleBookmarkButton
         article={article}
         site={site}
-        className="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
-        activeClassName="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-        idleClassName="absolute right-3 top-3 z-10 h-8 w-8 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
-        iconSize={13}
+        className="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
+        activeClassName="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+        idleClassName="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
+        iconSize={15}
       />
       <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
         <motion.article 

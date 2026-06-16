@@ -93,7 +93,7 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-900/60 bg-slate-950/98 backdrop-blur-sm text-white shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+    <header className="sticky top-0 z-50 border-b border-brand-dark/60 bg-brand-dark/98 backdrop-blur-sm text-white shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
       <div className={cn(
         "transition-all duration-300 ease-out",
         isCollapsed
@@ -116,47 +116,47 @@ export default function Navbar({
                 </div>
               ) : (
                 <h1 className="font-sans text-[1.15rem] font-extrabold leading-none tracking-[-0.045em] sm:text-[1.4rem]">
-                  <span className="text-red-500 transition-colors">BERITA</span>
+                  <span className="text-brand-red transition-colors">BERITA</span>
                   <span className="text-white">KARYA</span>
                 </h1>
               )}
-              <span className="hidden sm:block text-[9px] tracking-wide mt-0.5 text-slate-400">
-                <span className="font-bold text-slate-300 italic">Nusantara Berbicara</span>
-                <span className="text-red-500 mx-1.5 font-bold">•</span>
+              <span className="hidden sm:block text-[9px] tracking-wide mt-0.5 text-brand-text-muted">
+                <span className="font-bold text-white/80 italic">Nusantara Berbicara</span>
+                <span className="text-brand-red mx-1.5 font-bold">•</span>
                 <span className="font-normal">{articleTopDate}</span>
               </span>
             </Link>
           </div>
 
           <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xs xl:max-w-md mx-auto hidden md:block">
-            <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-text-muted" />
             <input
               type="text"
               placeholder="Cari berita, topik, penulis..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full border border-slate-800/70 bg-slate-900/40 py-2 pl-9 pr-4 text-[11px] text-white placeholder:text-slate-600 outline-none transition-all focus:border-red-500/50 focus:bg-slate-900/60 focus:ring-1 focus:ring-brand-red/30"
+              className="w-full rounded-full border border-brand-dark/70 bg-brand-black/40 py-2 pl-9 pr-4 text-[11px] text-white placeholder:text-brand-text-muted outline-none transition-all focus:border-brand-red/50 focus:bg-brand-black/60 focus:ring-1 focus:ring-brand-red/30"
             />
           </form>
 
           <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-1.5 shrink-0">
-            <button 
+            <button
               onClick={onSearchClick}
-              className="md:hidden rounded-full p-2 text-slate-400 hover:bg-slate-800/70 hover:text-white transition-colors"
+              className="md:hidden rounded-full p-3 text-brand-text-muted hover:bg-brand-dark/70 hover:text-white transition-colors"
               aria-label="Cari berita"
             >
-              <Search size={17} strokeWidth={1.5} />
+              <Search size={18} strokeWidth={1.5} />
             </button>
 
             {!isArticlePage && (
               <Link
                 href={`/${activeSite}?cat=tersimpan`}
                 aria-label="Artikel tersimpan"
-                className="relative rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-800/70 hover:text-white"
+                className="relative rounded-full p-2 text-brand-text-muted transition-colors hover:bg-brand-dark/70 hover:text-white"
               >
                 <Bookmark size={15} strokeWidth={1.5} />
                 {savedArticlesCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-bold text-white leading-none">
+                  <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-brand-red px-1 text-[8px] font-bold text-white leading-none">
                     {savedArticlesCount}
                   </span>
                 )}
@@ -164,11 +164,11 @@ export default function Navbar({
             )}
 
             <button
-              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-800/70 hover:text-white"
+              className="rounded-full p-3 text-brand-text-muted transition-colors hover:bg-brand-dark/70 hover:text-white"
               onClick={toggleTheme}
               aria-label={theme === 'light' ? 'Aktifkan mode gelap' : 'Aktifkan mode terang'}
             >
-              {theme === 'light' ? <Moon size={15} strokeWidth={1.5} /> : <Sun size={15} strokeWidth={1.5} />}
+              {theme === 'light' ? <Moon size={16} strokeWidth={1.5} /> : <Sun size={16} strokeWidth={1.5} />}
             </button>
 
             {user ? (
@@ -178,9 +178,9 @@ export default function Navbar({
                   aria-haspopup="menu"
                   aria-expanded={isProfileOpen}
                   aria-label="Menu profil"
-                  className="flex items-center gap-1.5 rounded-full p-1 text-slate-300 transition-colors hover:bg-slate-900 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-full p-1 text-white/80 transition-colors hover:bg-brand-black hover:text-white"
                 >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white shadow-sm">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden max-w-[88px] truncate text-[11px] font-semibold md:inline">
@@ -196,18 +196,18 @@ export default function Navbar({
                       exit={{ opacity: 0, y: 10 }}
                       role="menu"
                       aria-label="Menu profil"
-                      className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-xl"
+                      className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-brand-dark bg-brand-black shadow-xl"
                     >
-                      <div className="border-b border-slate-800 p-4">
+                      <div className="border-b border-brand-dark p-4">
                         <p className="text-xs font-bold text-white truncate">{user.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                        <p className="text-[10px] text-brand-text-muted truncate">{user.email}</p>
                       </div>
                       <div className="p-2" role="none">
                         {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user.role) && (
                           <Link
                             href={`/${activeSite}/dashboard`}
                             role="menuitem"
-                            className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300 transition-colors hover:bg-slate-800 hover:text-red-500"
+                            className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80 transition-colors hover:bg-brand-dark hover:text-brand-red"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Dashboard
@@ -219,7 +219,7 @@ export default function Navbar({
                             setIsProfileOpen(false);
                             logout();
                           }}
-                          className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-red-500 transition-colors hover:bg-red-500/10"
+                          className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
                         >
                           Keluar
                         </button>
@@ -231,7 +231,7 @@ export default function Navbar({
             ) : (
               <Link 
                 href="/login"
-                className="flex items-center gap-1.5 rounded-full p-1.5 text-slate-300 transition-colors hover:bg-slate-900 hover:text-white"
+                className="flex items-center gap-1.5 rounded-full p-1.5 text-white/80 transition-colors hover:bg-brand-black hover:text-white"
               >
                 <UserIcon size={15} strokeWidth={1.5} />
                 <span className="hidden text-[11px] font-semibold md:inline">Masuk</span>
@@ -240,7 +240,7 @@ export default function Navbar({
 
             <button
               onClick={onMenuClick}
-              className="md:hidden rounded-full p-1.5 text-slate-300 transition-colors hover:bg-slate-900 hover:text-white"
+              className="md:hidden rounded-full p-1.5 text-white/80 transition-colors hover:bg-brand-black hover:text-white"
               aria-label="Menu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -251,9 +251,9 @@ export default function Navbar({
         </Container>
       </div>
 
-      <div className="hidden border-t border-slate-900/50 bg-slate-950 md:block">
+      <div className="hidden border-t border-brand-dark/50 bg-brand-dark md:block">
         <Container className={cn(
-          "relative z-40 hidden items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-slate-400 md:flex lg:text-[11px]",
+          "relative z-40 hidden items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-brand-text-muted md:flex lg:text-[11px]",
           isCollapsed
             ? "h-8 gap-3"
             : "h-10 gap-5"
@@ -288,7 +288,7 @@ export default function Navbar({
                 aria-expanded={hasSub ? (hoveredCategory === cat.name || keyboardExpanded === cat.name) : undefined}
                 className={cn(
                   "group relative flex items-center gap-1 transition-all hover:text-white",
-                  isActive ? "font-black text-white" : "text-slate-400"
+                  isActive ? "font-black text-white" : "text-brand-text-muted"
                 )}
               >
                 {cat.slug === 'tersimpan' && (
@@ -296,25 +296,25 @@ export default function Navbar({
                     size={11} 
                     className={cn(
                       "transition-colors",
-                      isActive ? "text-red-500 fill-red-500/20" : "text-slate-500 group-hover:text-white"
+                      isActive ? "text-brand-red fill-brand-red/20" : "text-brand-text-muted group-hover:text-white"
                     )} 
                   />
                 )}
                 <span>{cat.name}</span>
                 {cat.slug === 'tersimpan' && savedArticlesCount > 0 && (
-                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-black tracking-normal text-white">
+                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-brand-red px-1.5 py-0.5 text-[9px] font-black tracking-normal text-white">
                     {savedArticlesCount}
                   </span>
                 )}
                 {isActive && (
                   <motion.span 
                     layoutId="activeCategoryLine"
-                    className="absolute -bottom-[0.67rem] left-0 h-0.5 w-full bg-red-500"
+                    className="absolute -bottom-[0.67rem] left-0 h-0.5 w-full bg-brand-red"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
                 {!isActive && (
-                  <span className="absolute -bottom-[0.67rem] left-0 h-0.5 w-0 bg-red-500 transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-[0.67rem] left-0 h-0.5 w-0 bg-brand-red transition-all duration-300 group-hover:w-full" />
                 )}
               </motion.button>
 
@@ -325,7 +325,7 @@ export default function Navbar({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.12, ease: "easeOut" }}
-                    className="absolute left-1/2 top-full z-50 mt-1 flex min-w-[200px] -translate-x-1/2 flex-col gap-0.5 rounded-xl border border-slate-800 bg-slate-900 p-1.5 shadow-xl backdrop-blur-md"
+                    className="absolute left-1/2 top-full z-50 mt-1 flex min-w-[200px] -translate-x-1/2 flex-col gap-0.5 rounded-xl border border-brand-dark bg-brand-black p-1.5 shadow-xl backdrop-blur-md"
                   >
                     {cat.subCategories?.map((sub) => {
                       const isSubActive = selectedCategory === sub.slug;
@@ -340,18 +340,18 @@ export default function Navbar({
                               setKeyboardExpanded(null);
                             }}
                             className={cn(
-                              "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-slate-800",
-                              isSubActive ? "text-red-500 bg-red-500/5" : "text-slate-400 hover:text-white"
+                              "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-brand-dark",
+                              isSubActive ? "text-brand-red bg-brand-red/5" : "text-brand-text-muted hover:text-white"
                             )}
                           >
                             <span>{sub.name}</span>
                             <span className={cn(
-                              "w-1 h-1 rounded-full bg-red-500 scale-0 transition-transform group-hover/sub:scale-100",
+                              "w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
                               isSubActive ? "scale-100" : ""
                             )} />
                           </button>
                           {hasSubSub && (
-                            <div className="ml-3 border-l border-slate-800 pl-2 py-0.5">
+                            <div className="ml-3 border-l border-brand-dark pl-2 py-0.5">
                               {sub.subCategories!.map((subsub) => {
                                 const isSubSubActive = selectedCategory === subsub.slug;
                                 return (
@@ -364,13 +364,13 @@ export default function Navbar({
                                       setKeyboardExpanded(null);
                                     }}
                                     className={cn(
-                                      "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-slate-800 w-full",
-                                      isSubSubActive ? "text-red-500 bg-red-500/5" : "text-slate-500 hover:text-slate-300"
+                                      "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-brand-dark w-full",
+                                      isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-brand-text-muted hover:text-white"
                                     )}
                                   >
                                     <span>{subsub.name}</span>
                                     <span className={cn(
-                                      "w-0.5 h-0.5 rounded-full bg-red-500 scale-0 transition-transform group-hover/subsub:scale-100",
+                                      "w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
                                       isSubSubActive ? "scale-100" : ""
                                     )} />
                                   </button>
@@ -390,7 +390,7 @@ export default function Navbar({
         </Container>
       </div>
 
-      <div className="border-t border-slate-900 md:hidden bg-slate-950">
+      <div className="border-t border-brand-dark md:hidden bg-brand-dark">
         <Container className="md:hidden">
           <nav className={cn(
             "flex gap-1.5 overflow-x-auto no-scrollbar transition-all duration-300",
@@ -405,22 +405,22 @@ export default function Navbar({
               key={cat.slug}
               onClick={() => handleCategoryClick(cat.slug)}
               className={cn(
-                "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-1.5 text-[11px] font-medium transition-all",
-                        isCollapsed && "px-2.5 py-1 text-[10px]",
+                "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-3 py-2 text-[11px] font-medium transition-all",
+                        isCollapsed && "px-3 py-2 text-[10px]",
                 isActive
-                  ? "border-red-500 bg-red-500/10 text-red-500"
-                  : "border-slate-800 text-slate-400 bg-slate-900/40"
+                  ? "border-brand-red bg-brand-red/10 text-brand-red"
+                  : "border-brand-dark text-brand-text-muted bg-brand-black/40"
               )}
             >
               {cat.slug === 'tersimpan' && (
                 <Bookmark 
                   size={9} 
-                  className={isActive ? "text-red-500 fill-red-500/20" : "text-slate-500"} 
+                  className={isActive ? "text-brand-red fill-brand-red/20" : "text-brand-text-muted"}
                 />
               )}
               <span>{cat.name}</span>
               {cat.slug === 'tersimpan' && savedArticlesCount > 0 && (
-                <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-red-500 px-1 py-0.5 text-[9px] font-black tracking-normal text-white">
+                <span className="inline-flex min-w-4 items-center justify-center rounded-full bg-brand-red px-1 py-0.5 text-[9px] font-black tracking-normal text-white">
                   {savedArticlesCount}
                 </span>
               )}
@@ -438,7 +438,7 @@ export default function Navbar({
         if (activeParent && activeParent.subCategories && activeParent.subCategories.length > 0) {
           return (
             <div className={cn(
-              "border-t border-slate-900 bg-slate-950 transition-all duration-300 md:hidden",
+              "border-t border-brand-dark bg-brand-dark transition-all duration-300 md:hidden",
               isCollapsed && "border-transparent"
             )}>
               <Container className="md:hidden">
@@ -453,11 +453,11 @@ export default function Navbar({
                         key={sub.slug}
                         onClick={() => handleCategoryClick(sub.slug)}
                         className={cn(
-                          "shrink-0 whitespace-nowrap rounded-xl px-2.5 py-1 text-[10px] font-medium transition-all",
-                          isCollapsed && "px-2 py-1 text-[9px]",
+                          "shrink-0 whitespace-nowrap rounded-xl px-3 py-2 text-[10px] font-medium transition-all",
+                          isCollapsed && "px-3 py-2 text-[9px]",
                           isSubActive
-                            ? "bg-red-500 text-white"
-                            : "bg-slate-900 text-slate-400 border border-slate-800"
+                            ? "bg-brand-red text-white"
+                            : "bg-brand-black text-brand-text-muted border border-brand-dark"
                         )}
                       >
                         {sub.name}
@@ -485,7 +485,7 @@ export default function Navbar({
         if (activeSub && activeSub.subCategories && activeSub.subCategories.length > 0) {
           return (
             <div className={cn(
-              "border-t border-slate-900/50 bg-slate-950/80 transition-all duration-300 md:hidden",
+              "border-t border-brand-dark/50 bg-brand-dark/80 transition-all duration-300 md:hidden",
               isCollapsed && "border-transparent"
             )}>
               <Container className="md:hidden">
@@ -500,10 +500,10 @@ export default function Navbar({
                         key={subsub.slug}
                         onClick={() => handleCategoryClick(subsub.slug)}
                         className={cn(
-                          "shrink-0 whitespace-nowrap rounded-lg px-2 py-0.5 text-[9px] font-medium transition-all",
+                          "shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-[9px] font-medium transition-all",
                           isSubSubActive
-                            ? "bg-red-500/20 text-red-500 border border-red-500/30"
-                            : "bg-slate-900/50 text-slate-500 border border-slate-800/50"
+                            ? "bg-brand-red/20 text-brand-red border border-brand-red/30"
+                            : "bg-brand-black/50 text-brand-text-muted border border-brand-dark/50"
                         )}
                       >
                         {subsub.name}

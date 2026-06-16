@@ -106,9 +106,9 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
                   rel="noopener noreferrer"
                   aria-label={label}
                   title={label}
-                  className="group flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-xl bg-gray-100 transition-colors hover:bg-brand-red dark:bg-white/5"
+                  className="group flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 transition-colors hover:bg-brand-red dark:bg-white/5"
                 >
-                  <Icon size={13} className="text-brand-text-muted group-hover:text-white" />
+                  <Icon size={16} className="text-brand-text-muted group-hover:text-white" />
                 </a>
               ))}
             </div>

@@ -45,8 +45,8 @@ export default function BreakingNewsTicker({
         <span className="text-[10px] font-black uppercase tracking-[0.15em] text-brand-red">TERKINI</span>
       </div>
       <div className="relative flex h-full min-w-0 flex-1 items-center overflow-hidden group">
-        <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-6 bg-gradient-to-r from-brand-black to-transparent sm:w-10 lg:w-14 dark:from-[#020617]" />
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-6 bg-gradient-to-l from-brand-black to-transparent sm:w-10 lg:w-14 dark:from-[#020617]" />
+        <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-6 bg-gradient-to-r from-brand-black to-transparent sm:w-10 lg:w-14 dark:from-brand-dark" />
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-6 bg-gradient-to-l from-brand-black to-transparent sm:w-10 lg:w-14 dark:from-brand-dark" />
 
         <motion.div 
           animate={{ x: ["0%", "-50%"] }}

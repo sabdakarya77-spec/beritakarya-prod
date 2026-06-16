@@ -408,16 +408,16 @@ Semua varian menggunakan `text-[10px]` untuk metadata (kategori, tanggal, author
 
 ### Fase 1: Touch Targets & Color Tokens (Estimasi: 2-3 jam) — PRIORITAS TINGGI
 
-| # | Task | File | Detail |
-|---|---|---|---|
-| 1.1 | Bookmark buttons → 44px | `NewsCard.tsx` | `h-11 w-11` (44px) dengan `aria-label` |
-| 1.2 | Navbar icon buttons → 44px | `Navbar.tsx` | `p-2.5` minimum, tambah `aria-label` |
-| 1.3 | Category chips → 44px | `Navbar.tsx` | `py-2` minimum |
-| 1.4 | Subcategory pills → 44px | `Navbar.tsx` | `py-2` minimum |
-| 1.5 | Footer social icons → 44px | `SiteFooter.tsx` | Container `h-11 w-11` dengan icon di dalam |
-| 1.6 | Navbar → brand tokens | `Navbar.tsx` | Ganti `slate-*` / `red-*` → `brand-*` tokens (~40 baris) |
-| 1.7 | BreakingNewsTicker hex | `BreakingNewsTicker.tsx:48` | `dark:from-[#020617]` → `dark:from-brand-dark` |
-| 1.8 | FullScreenSearch colors | `FullScreenSearch.tsx:75` | `bg-slate-950/95` → `bg-brand-dark/95` |
+| # | Task | File | Detail | Status |
+|---|---|---|---|---|
+| 1.1 | Bookmark buttons → 44px | `NewsCard.tsx` | `h-11 w-11` (44px) dengan `aria-label` | ✅ |
+| 1.2 | Navbar icon buttons → 44px | `Navbar.tsx` | `p-3` minimum, icon 16-18px | ✅ |
+| 1.3 | Category chips → 44px | `Navbar.tsx` | `py-2` minimum | ✅ |
+| 1.4 | Subcategory pills → 44px | `Navbar.tsx` | `py-2` minimum | ✅ |
+| 1.5 | Footer social icons → 44px | `SiteFooter.tsx` | Container `h-11 w-11` dengan icon di dalam | ✅ |
+| 1.6 | Navbar → brand tokens | `Navbar.tsx` | Ganti `slate-*` / `red-*` → `brand-*` tokens (~40 baris) | ✅ |
+| 1.7 | BreakingNewsTicker hex | `BreakingNewsTicker.tsx` | `dark:from-[#020617]` → `dark:from-brand-dark` | ✅ |
+| 1.8 | FullScreenSearch colors | `FullScreenSearch.tsx` | `bg-slate-950/95` → `bg-brand-dark/95` | ✅ (Fase 0) |
 
 ### Fase 2: NewsCard & Grid Consistency (Estimasi: 1-2 jam) — PRIORITAS SEDANG
 
