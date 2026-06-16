@@ -25,9 +25,8 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 COPY turbo.json pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-# Build workspace packages first, then Next.js
-RUN pnpm --filter @beritakarya/types build && pnpm --filter @beritakarya/utils build && pnpm --filter @beritakarya/config build
-RUN cd apps/web && pnpm run build
+# turbo handles dependency order: packages build before apps (^build)
+RUN npx turbo run build --filter=@beritakarya/web...
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
