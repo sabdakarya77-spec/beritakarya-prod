@@ -22,6 +22,7 @@
     --brand-text-muted: #64748B;
     --brand-text-muted-rgb: 100 116 139;
     --bg-main: #F8FAFC;
+    --border: 214 32% 91%;
 
     /* Editorial Badge Colors */
     --color-breaking: #DC2626;
@@ -101,6 +102,23 @@
     --brand-text-muted: #94A3B8;
     --brand-text-muted-rgb: 148 163 184;
     --bg-main: #020617;
+    --border: 217 33% 17%;
+
+    /* Editorial Badge Colors (Dark Mode) */
+    --color-breaking: #EF4444;
+    --color-exclusive: #A78BFA;
+    --color-analysis: #38BDF8;
+    --color-live: #4ADE80;
+
+    /* Workflow Status Colors (Dark Mode) */
+    --status-draft: #FBBF24;
+    --status-submitted: #60A5FA;
+    --status-review: #A78BFA;
+    --status-revision: #FB923C;
+    --status-approved: #34D399;
+    --status-scheduled: #22D3EE;
+    --status-published: #2DD4BF;
+    --status-archived: #94A3B8;
 
     --dash-sidebar: #020617;
     --dash-card: #0F172A;

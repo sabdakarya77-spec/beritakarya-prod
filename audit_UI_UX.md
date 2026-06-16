@@ -443,12 +443,12 @@ Semua varian menggunakan `text-[10px]` untuk metadata (kategori, tanggal, author
 
 ### Fase 4: Dark Mode & Cleanup (Estimasi: 1 jam) — PRIORITAS RENDAH
 
-| # | Task | File | Detail |
-|---|---|---|---|
-| 4.1 | Editorial badge dark overrides | `globals.css` | Tambahkan `.dark` overrides untuk `--color-*` |
-| 4.2 | Workflow status dark overrides | `globals.css` | Tambahkan `.dark` overrides untuk `--status-*` |
-| 4.3 | Hapus `--border` reference | `tailwind.config.ts` | Hapus atau definisikan `--border` di globals.css |
-| 4.4 | Footer font minimum | `SiteFooter.tsx` | Copyright 10px → 12px minimum |
+| # | Task | File | Detail | Status |
+|---|---|---|---|---|
+| 4.1 | Editorial badge dark overrides | `globals.css` | `.dark` overrides untuk `--color-*` | ✅ |
+| 4.2 | Workflow status dark overrides | `globals.css` | `.dark` overrides untuk `--status-*` | ✅ |
+| 4.3 | Definisikan `--border` | `globals.css` | Tambah `--border` untuk light dan dark mode | ✅ |
+| 4.4 | Footer font minimum | `SiteFooter.tsx` | Copyright dan links → `text-xs` (12px) | ✅ |
 
 ---
 

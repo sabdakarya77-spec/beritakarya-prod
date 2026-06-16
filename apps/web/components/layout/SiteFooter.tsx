@@ -159,14 +159,14 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
 
         <div className="mb-5 flex flex-wrap items-center justify-center gap-3 border-t border-black/5 pt-6 md:gap-6 dark:border-white/5">
           {bottomLinks.map((item) => (
-            <Link key={item.href} href={item.href} className="text-[10px] font-medium tracking-[0.04em] text-brand-text-muted opacity-75 transition-colors hover:text-brand-red sm:text-[11px]">
+            <Link key={item.href} href={item.href} className="text-xs font-medium tracking-[0.04em] text-brand-text-muted opacity-75 transition-colors hover:text-brand-red sm:text-[13px]">
               {item.label}
             </Link>
           ))}
         </div>
 
         <div className="text-center">
-          <span suppressHydrationWarning className="text-[10px] font-normal tracking-[0.04em] text-brand-text-muted opacity-60">
+          <span suppressHydrationWarning className="text-xs font-normal tracking-[0.04em] text-brand-text-muted opacity-60">
             {siteConfig?.footerText || `© ${new Date().getFullYear()} PT SABDA KARYA NUSANTARA (BERITA KARYA DIGITAL GROUP). ALL RIGHTS RESERVED.`}
           </span>
         </div>
