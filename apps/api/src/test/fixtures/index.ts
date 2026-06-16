@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 import { Role } from '@prisma/client'
 
 // ─── Mock User Factory ─────────────────────────────────────────────────────────
