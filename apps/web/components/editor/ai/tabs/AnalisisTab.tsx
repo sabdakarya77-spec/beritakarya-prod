@@ -5,6 +5,7 @@ import { Loader2, RefreshCw, BookOpen, ShieldCheck, Eye } from 'lucide-react'
 import { cn } from '../../../../lib/utils'
 import { useEditorStore } from '../../../../store/editorStore'
 import { useReadability, useFactCheck, useObjectivity } from '../../../../hooks/useAI'
+import { AILoadingSkeleton } from '../AILoadingSkeleton'
 import type { ReadabilityResult, FactCheckResult, ObjectivityResult } from '../../../../hooks/useAI'
 
 type Section = 'readability' | 'factcheck' | 'objectivity'
@@ -108,14 +109,25 @@ export function AnalisisTab() {
         </button>
       </div>
 
+      {/* Loading skeleton */}
+      {readabilityState.loading && activeSection === 'readability' && (
+        <AILoadingSkeleton lines={4} label="Menganalisis keterbacaan..." />
+      )}
+      {factCheckState.loading && activeSection === 'factcheck' && (
+        <AILoadingSkeleton lines={5} label="Memeriksa fakta..." />
+      )}
+      {objectivityState.loading && activeSection === 'objectivity' && (
+        <AILoadingSkeleton lines={4} label="Menganalisis objektivitas..." />
+      )}
+
       {/* Results */}
-      {readabilityState.result && activeSection === 'readability' && (
+      {readabilityState.result && activeSection === 'readability' && !readabilityState.loading && (
         <ReadabilityCard result={readabilityState.result} />
       )}
-      {factCheckState.result && activeSection === 'factcheck' && (
+      {factCheckState.result && activeSection === 'factcheck' && !factCheckState.loading && (
         <FactCheckCard result={factCheckState.result} />
       )}
-      {objectivityState.result && activeSection === 'objectivity' && (
+      {objectivityState.result && activeSection === 'objectivity' && !objectivityState.loading && (
         <ObjectivityCard result={objectivityState.result} />
       )}
 

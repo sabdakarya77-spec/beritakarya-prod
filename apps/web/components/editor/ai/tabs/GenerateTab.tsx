@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Loader2, FileText, Languages, ImageIcon } from 'lucide-react'
 import { cn } from '../../../../lib/utils'
 import { useSummarize, useTranslate, useImageGen } from '../../../../hooks/useAI'
+import { AILoadingSkeleton } from '../AILoadingSkeleton'
 
 type Section = 'summarize' | 'translate' | 'image'
 
@@ -131,7 +132,11 @@ function SummarizeSection() {
         Buat Ringkasan
       </button>
 
-      {summarizeState.result && (
+      {summarizeState.loading && (
+        <AILoadingSkeleton lines={3} label="Membuat ringkasan..." />
+      )}
+
+      {summarizeState.result && !summarizeState.loading && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-purple-600">Hasil Ringkasan</span>
@@ -197,7 +202,11 @@ function TranslateSection() {
         Terjemahkan
       </button>
 
-      {translateState.result && (
+      {translateState.loading && (
+        <AILoadingSkeleton lines={4} label="Menerjemahkan..." />
+      )}
+
+      {translateState.result && !translateState.loading && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-medium text-blue-600">
@@ -277,7 +286,14 @@ function ImageSection() {
         Buat Gambar
       </button>
 
-      {imageState.result && (
+      {imageState.loading && (
+        <div className="space-y-2 animate-pulse">
+          <div className="h-3 w-20 bg-gray-200 dark:bg-slate-700 rounded" />
+          <div className="h-40 bg-gray-200 dark:bg-slate-700 rounded-lg" />
+        </div>
+      )}
+
+      {imageState.result && !imageState.loading && (
         <div className="space-y-2">
           <span className="text-[10px] font-medium text-indigo-600">Hasil:</span>
           <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700">

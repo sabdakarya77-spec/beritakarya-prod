@@ -33,6 +33,13 @@ export interface AIResult<T> {
   cached?: boolean
 }
 
+// Stores actual token usage from the last OpenAI call
+let lastUsage: { prompt_tokens: number; completion_tokens: number } | null = null
+
+export function getLastUsage() {
+  return lastUsage
+}
+
 // Generate cache key from prompt + options
 function getCacheKey(
   systemPrompt: string,
@@ -47,9 +54,9 @@ function getCacheKey(
 
 // Circuit breaker for OpenAI with fallback
 const openaiBreaker = createOpenAIBreaker(
-  async (systemPrompt: string, userPrompt: string, opts: { 
-    maxTokens?: number; 
-    temperature?: number; 
+  async (systemPrompt: string, userPrompt: string, opts: {
+    maxTokens?: number;
+    temperature?: number;
     model?: string;
   }) => {
     const res = await getClient().chat.completions.create({
@@ -61,7 +68,10 @@ const openaiBreaker = createOpenAIBreaker(
         { role: 'user', content: userPrompt }
       ]
     })
-    return res.choices[0]?.message?.content?.trim() ?? ''
+    return {
+      content: res.choices[0]?.message?.content?.trim() ?? '',
+      usage: res.usage
+    }
   }
 )
 
@@ -126,37 +136,46 @@ export async function chatComplete(
   }
 
   // Use circuit breaker for OpenAI call
-  let result: string
+  let content: string
   try {
-    result = await openaiBreaker.fire(
-      systemPrompt, 
-      userPrompt, 
+    const response = await openaiBreaker.fire(
+      systemPrompt,
+      userPrompt,
       {
         maxTokens: opts.maxTokens ?? 1000,
         temperature: opts.temperature ?? 0.7,
         model
       }
     )
+    content = response.content
+
+    // Store actual usage for accurate cost tracking
+    if (response.usage) {
+      lastUsage = {
+        prompt_tokens: response.usage.prompt_tokens,
+        completion_tokens: response.usage.completion_tokens
+      }
+    }
   } catch (err: any) {
     logger.error('OpenAI circuit breaker error:', err.message)
-    
+
     // Circuit is open, return fallback message
     // @ts-expect-error - opossum circuit breaker has stats.state
     if (openaiBreaker.stats?.state === 'open') {
       return '[Service temporarily unavailable]'
     }
-    
+
     throw err
   }
 
   // Cache successful result
-  if (useCache && process.env.REDIS_HOST && result) {
+  if (useCache && process.env.REDIS_HOST && content) {
     const cacheKey = getCacheKey(systemPrompt, userPrompt, { ...opts, model })
-    await setCache(cacheKey, { result }, cacheTtl)
+    await setCache(cacheKey, { result: content }, cacheTtl)
     logger.debug('Cached AI response')
   }
 
-  return result
+  return content
 }
 
 export async function callAIWithTracking<T>(
@@ -229,16 +248,26 @@ async function accountAIUsage(
 
   if (!userId) return
 
-  // Estimate tokens (rough approximation if not available)
-  const inputLength = typeof req?.body?.content === 'string' 
-    ? req.body.content.length 
-    : JSON.stringify(req.body).length
-  const outputLength = typeof result.data === 'string'
-    ? result.data.length
-    : JSON.stringify(result.data).length
+  // Use actual token counts from OpenAI when available, fall back to estimation
+  let tokensInput: number
+  let tokensOutput: number
 
-  const tokensInput = Math.ceil(inputLength / 4)
-  const tokensOutput = Math.ceil(outputLength / 4)
+  const actualUsage = getLastUsage()
+  if (actualUsage) {
+    tokensInput = actualUsage.prompt_tokens
+    tokensOutput = actualUsage.completion_tokens
+    lastUsage = null // Reset after use
+  } else {
+    // Fallback: estimate tokens from character count
+    const inputLength = typeof req?.body?.content === 'string'
+      ? req.body.content.length
+      : JSON.stringify(req.body).length
+    const outputLength = typeof result.data === 'string'
+      ? result.data.length
+      : JSON.stringify(result.data).length
+    tokensInput = Math.ceil(inputLength / 4)
+    tokensOutput = Math.ceil(outputLength / 4)
+  }
 
   // Calculate cost based on model
   const cost = calculateCost(tokensInput, tokensOutput, model)

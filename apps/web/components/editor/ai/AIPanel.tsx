@@ -9,6 +9,7 @@ import { ValidateTab } from './tabs/ValidateTab'
 import { ImageTab } from './tabs/ImageTab'
 import { AnalisisTab } from './tabs/AnalisisTab'
 import { GenerateTab } from './tabs/GenerateTab'
+import { AIErrorBoundary } from './AIErrorBoundary'
 
 type TabId = 'write' | 'seo' | 'validate' | 'image' | 'analisis' | 'generate'
 
@@ -92,12 +93,14 @@ export function AIPanel({ isOpen = true, onClose, editor }: AIPanelProps) {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'write' && <WriteTab />}
-        {activeTab === 'seo' && <SEOTab />}
-        {activeTab === 'validate' && <ValidateTab />}
-        {activeTab === 'image' && <ImageTab />}
-        {activeTab === 'analisis' && <AnalisisTab />}
-        {activeTab === 'generate' && <GenerateTab />}
+        <AIErrorBoundary key={activeTab}>
+          {activeTab === 'write' && <WriteTab />}
+          {activeTab === 'seo' && <SEOTab />}
+          {activeTab === 'validate' && <ValidateTab />}
+          {activeTab === 'image' && <ImageTab />}
+          {activeTab === 'analisis' && <AnalisisTab />}
+          {activeTab === 'generate' && <GenerateTab />}
+        </AIErrorBoundary>
       </div>
 
       {/* Footer */}
