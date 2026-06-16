@@ -9,6 +9,7 @@ Dokumentasi lengkap untuk BeritaKarya.
 | [Setup Guide](setup.md) | Panduan instalasi dan konfigurasi lokal |
 | [Architecture](architecture.md) | Arsitektur sistem dan design decisions |
 | [Deployment](deployment.md) | Panduan deploy ke berbagai platform |
+| [Discussion Notes](discussion-notes.md) | Diskusi teknis: impor berita, Google Index, AI features |
 | [Contributing](../CONTRIBUTING.md) | Cara berkontribusi ke project |
 
 ## Quick Links
