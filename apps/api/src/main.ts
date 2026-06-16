@@ -234,6 +234,8 @@ if (!process.env.VERCEL) {
   const server = app.listen(PORT, () => {
     logger.info(`API berjalan di http://localhost:${PORT}`)
     logger.info(`Swagger Docs: http://localhost:${PORT}/api-docs`)
+    // Start periodic metrics persistence to Redis (survives restarts)
+    metrics.startAutoFlush()
   })
 
   // ── Graceful Shutdown ────────────────────────────────────────────────────────

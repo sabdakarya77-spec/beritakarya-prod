@@ -547,13 +547,15 @@ jobs:
 - [ ] 2.4 Prisma mock helper (ditunda)
 
 #### Fase 3: Architecture (Week 5–6)
-- [ ] 3.1 User repository layer
-- [ ] 3.1 Notification repository layer
-- [ ] 3.1 Invitation repository layer
-- [ ] 3.2 Shared pagination utility
-- [ ] 3.2 Migrate semua list endpoints ke format standar
-- [ ] 3.3 Persist metrics ke Redis
-- [ ] 3.4 Evaluasi JSON columns (tags → tabel)
+- [x] 3.1 User repository layer ✅ (sudah ada sebelumnya)
+- [x] 3.1 Notification repository layer ✅ (sudah ada sebelumnya)
+- [x] 3.1 Invitation repository layer ✅ (2026-06-16) — invitation.repository.ts + refactor controller
+- [x] 3.1 Ad repository layer ✅ (2026-06-16) — ad.repository.ts + full controller refactor
+- [x] 3.1 KYC repository layer ✅ (2026-06-16) — kyc.repository.ts
+- [x] 3.2 Shared pagination utility ✅ (2026-06-16) — packages/utils/src/pagination.ts + types
+- [ ] 3.2 Migrate semua list endpoints ke format standar (ditunda)
+- [x] 3.3 Persist metrics ke Redis ✅ (2026-06-16) — auto-flush setiap 5 menit, load on startup
+- [ ] 3.4 Evaluasi JSON columns (tags → tabel) (ditunda)
 
 #### Fase 4: CI/CD (Week 6–8)
 - [ ] 4.1 Deploy workflow (GitHub Actions)
