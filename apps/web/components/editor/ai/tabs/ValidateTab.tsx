@@ -3,14 +3,10 @@ import { Loader2, RefreshCw } from 'lucide-react'
 import { useGrammar } from '../../../../hooks/useAI'
 import { useEditorStore } from '../../../../store/editorStore'
 
-interface Props {
-  model?: string
-}
-
-export function ValidateTab({ model = 'gpt-4o' }: Props) {
+export function ValidateTab() {
   const { blocks } = useEditorStore()
   const [text, setText] = useState('')
-  const grammarState = useGrammar(model)
+  const grammarState = useGrammar()
 
   // Menggabungkan seluruh teks dari blok dokumen
   const getFullDocumentText = () => {

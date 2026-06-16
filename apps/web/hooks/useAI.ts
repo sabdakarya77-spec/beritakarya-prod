@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from 'react'
 
-// Types
+// ── Types ────────────────────────────────────────────────────────
+
 export interface RewriteOptions {
   content: string
   tone?: 'formal' | 'santai' | 'berita'
@@ -98,14 +99,14 @@ export interface TranscriptOptions {
   speakerName?: string
 }
 
-// State types
+// ── State types ──────────────────────────────────────────────────
+
 interface AIState<T> {
   loading: boolean
   result: T | null
   error: string | null
 }
 
-// Helper hook for AI state
 function useAIState<T>() {
   return useState<AIState<T>>({
     loading: false,
@@ -114,47 +115,64 @@ function useAIState<T>() {
   })
 }
 
-// OpenAI API call helper
-async function callOpenAI(model: string, messages: { role: string; content: string }[]) {
-  const response = await fetch('/api/ai/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages }),
-  })
-  
-  if (!response.ok) {
-    throw new Error('AI request failed')
-  }
-  
-  const data = await response.json()
-  return data.content as string
+// ── Backend API helper ───────────────────────────────────────────
+
+interface BackendAIResult<T> {
+  success: boolean
+  data?: T
+  error?: string
 }
 
+async function callBackendAPI<T>(endpoint: string, body: Record<string, unknown>): Promise<T> {
+  const response = await fetch(`/api/v1/ai/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    credentials: 'include',
+  })
+
+  if (response.status === 403) {
+    const data = await response.json().catch(() => ({}))
+    if (data.error?.code === 'CONSENT_REQUIRED') {
+      throw new Error('CONSENT_REQUIRED')
+    }
+    throw new Error(data.error?.message || 'Access denied')
+  }
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.error?.message || 'AI request failed')
+  }
+
+  const result: BackendAIResult<T> = await response.json()
+  if (!result.success) {
+    throw new Error(result.error || 'AI request failed')
+  }
+  return result.data as T
+}
+
+// ── Hooks ────────────────────────────────────────────────────────
+
 // Rewrite Hook
-export function useRewrite(model = 'gpt-4o') {
+export function useRewrite() {
   const [state, setState] = useAIState<RewriteResult>()
 
   const rewrite = useCallback(async (options: RewriteOptions) => {
     setState({ loading: true, result: null, error: null })
-    
+
     try {
-      const toneLabel = { formal: 'formal', santai: 'santai', berita: 'gaya berita Indonesia' }[options.tone || 'berita']
-      const lengthLabel = { lebih_pendek: 'lebih singkat', sama: 'sepanjang original', lebih_panjang: 'lebih detail' }[options.length || 'sama']
-      
-      const context = options.prevContent || options.nextContent 
-        ? `\nKonteks sebelumnya: "${options.prevContent || ''}"\nKonteks sesudahnya: "${options.nextContent || ''}"`
-        : ''
-      
-      const prompt = `Tulis ulang teks berikut dengan gaya ${toneLabel} dan ${lengthLabel}:\n\nTeks: ${options.content}${context}\n\nHanya kembalikan teks yang sudah ditulis ulang, tanpa penjelasan.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
+      const data = await callBackendAPI<string>('rewrite', {
+        content: options.content,
+        tone: options.tone || 'berita',
+        length: options.length || 'sama',
+        prevContent: options.prevContent,
+        nextContent: options.nextContent,
+      })
 
       setState({
         loading: false,
         result: {
-          rewritten: result,
+          rewritten: data,
           original: options.content,
           tone: options.tone || 'berita',
           length: options.length || 'sama',
@@ -168,31 +186,28 @@ export function useRewrite(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to rewrite',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, rewrite }
 }
 
 // Expand Hook
-export function useExpand(model = 'gpt-4o') {
+export function useExpand() {
   const [state, setState] = useAIState<{ expanded: string; original: string }>()
 
   const expand = useCallback(async (options: ExpandOptions) => {
     setState({ loading: true, result: null, error: null })
-    
+
     try {
-      const context = options.prevContent ? `\nParagraf sebelumnya: "${options.prevContent}"` : ''
-      
-      const prompt = `Perluas paragraf berikut dengan detail tambahan yang relevan dan natural:${context}\n\nParagraf: ${options.content}\n\nHanya kembalikan hasil expand, tanpa penjelasan.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
+      const data = await callBackendAPI<string>('expand', {
+        content: options.content,
+        prevContent: options.prevContent,
+      })
 
       setState({
         loading: false,
         result: {
-          expanded: result,
+          expanded: data,
           original: options.content,
         },
         error: null,
@@ -204,37 +219,33 @@ export function useExpand(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to expand',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, expand }
 }
 
 // Transcript to Quote Hook
-export function useTranscriptToQuote(model = 'gpt-4o') {
+export function useTranscriptToQuote() {
   const [state, setState] = useAIState<{ quote: string; speaker: string; context: string }>()
 
   const transcript = useCallback(async (options: TranscriptOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const speakerContext = options.speakerName ? ` dari ${options.speakerName}` : ''
-      
-      const prompt = `Ubah transkrip berikut${speakerContext} menjadi kutipan berita yang profesional dalam format JSON:\n\nTranskrip: ${options.transcript}\n\nFormat JSON: {"quote": "kutipan dalam tanda kutip", "speaker": "nama pembicara", "context": "konteks 1-2 kalimat"}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{ quote: string; attribution: string; context: string }>(
+        'transcript-to-quote',
+        { transcript: options.transcript }
+      )
+
+      setState({
+        loading: false,
+        result: {
+          quote: data.quote,
+          speaker: data.attribution,
+          context: data.context,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -242,40 +253,32 @@ export function useTranscriptToQuote(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to convert transcript',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, transcript }
 }
 
 // Headlines Hook
-export function useHeadlines(model = 'gpt-4o') {
+export function useHeadlines() {
   const [state, setState] = useAIState<HeadlineResult>()
 
   const generate = useCallback(async (options: HeadlineOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const count = options.count || 5
-      
-      const prompt = `Buat ${count} headline berita yang menarik dalam Bahasa Indonesia berdasarkan:\n\nJudul: ${options.title}\nKonten: ${options.contentExcerpt}\n\nKembalikan dalam format JSON: {"headlines": ["headline 1", "headline 2", ...]}\n\nGunakan gaya berita yang profesional dan menarik perhatian. Hanya kembalikan JSON.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: {
-            ...parsed,
-            title: options.title,
-          },
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{ headlines: string[] }>('headline', {
+        title: options.title,
+        contentExcerpt: options.contentExcerpt,
+      })
+
+      setState({
+        loading: false,
+        result: {
+          headlines: data.headlines,
+          title: options.title,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -283,35 +286,37 @@ export function useHeadlines(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to generate headlines',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, generate }
 }
 
 // SEO Hook
-export function useSEO(model = 'gpt-4o') {
+export function useSEO() {
   const [state, setState] = useAIState<SEOResult>()
 
   const generate = useCallback(async (options: SEOOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Buat SEO optimization untuk artikel:\n\nJudul: ${options.title}\nKonten: ${options.contentExcerpt}\n\nKembalikan dalam format JSON:\n{\n  "metaTitle": "meta title 50-60 karakter",\n  "metaDescription": "meta description 120-160 karakter",\n  "focusKeyword": "kata kunci utama",\n  "suggestions": ["saran 1", "saran 2"]\n}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{ metaTitle: string; metaDescription: string; keywords: string[] }>(
+        'seo',
+        {
+          title: options.title,
+          contentExcerpt: options.contentExcerpt,
+        }
+      )
+
+      setState({
+        loading: false,
+        result: {
+          metaTitle: data.metaTitle,
+          metaDescription: data.metaDescription,
+          focusKeyword: data.keywords[0] || '',
+          suggestions: data.keywords,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -319,35 +324,31 @@ export function useSEO(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to generate SEO',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, generate }
 }
 
 // Caption Hook
-export function useCaption(model = 'gpt-4o') {
+export function useCaption() {
   const [state, setState] = useAIState<CaptionResult>()
 
   const generate = useCallback(async (options: CaptionOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Analisis gambar dari URL berikut dan generate alt text serta caption dalam Bahasa Indonesia:\n\nURL: ${options.imageUrl}\n\nKembalikan dalam format JSON:\n{\n  "altText": "deskripsi alt text untuk SEO (max 125 karakter)",\n  "caption": "caption informatif untuk pembaca"\n}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{ caption: string; altText: string }>('caption', {
+        imageUrl: options.imageUrl,
+      })
+
+      setState({
+        loading: false,
+        result: {
+          altText: data.altText,
+          caption: data.caption,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -355,35 +356,38 @@ export function useCaption(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to generate caption',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, generate }
 }
 
 // Grammar Hook
-export function useGrammar(model = 'gpt-4o') {
+export function useGrammar() {
   const [state, setState] = useAIState<GrammarResult>()
 
   const check = useCallback(async (options: GrammarOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Periksa dan perbaiki tata bahasa, ejaan, dan tanda baca dari teks berikut:\n\nTeks: ${options.text}\n\nKembalikan dalam format JSON:\n{\n  "corrected": "teks yang sudah diperbaiki",\n  "corrections": [\n    {"original": "teks asli", "suggestion": "perbaikan", "reason": "alasan perbaikan"}\n  ]\n}\n\nJika tidak ada koreksi, kembalikan corrections kosong. Hanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
+    try {
+      const data = await callBackendAPI<{
+        corrections: { original: string; suggestion: string; reason: string }[]
+        totalIssues: number
+      }>('grammar', { text: options.text })
+
+      // Build corrected text by applying each correction sequentially
+      let corrected = options.text
+      for (const c of data.corrections) {
+        corrected = corrected.replace(c.original, c.suggestion)
       }
+
+      setState({
+        loading: false,
+        result: {
+          corrected,
+          corrections: data.corrections,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -391,35 +395,35 @@ export function useGrammar(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to check grammar',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, check }
 }
 
 // Readability Hook
-export function useReadability(model = 'gpt-4o') {
+export function useReadability() {
   const [state, setState] = useAIState<ReadabilityResult>()
 
   const analyze = useCallback(async (options: ReadabilityOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Analisis readability teks berikut (skala 0-100):\n\nTeks: ${options.text}\n\nKembalikan dalam format JSON:\n{\n  "score": [0-100],\n  "level": "tingkat keterbacaan (sangat mudah/mudah/sedang/sulit/sangat sulit)",\n  "suggestions": ["saran 1", "saran 2"]\n}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{
+        score: number
+        level: string
+        summary: string
+        suggestions: string[]
+      }>('readability', { text: options.text })
+
+      setState({
+        loading: false,
+        result: {
+          score: data.score,
+          level: data.level,
+          suggestions: data.suggestions,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -427,35 +431,37 @@ export function useReadability(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to analyze readability',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, analyze }
 }
 
 // Fact Check Hook
-export function useFactCheck(model = 'gpt-4o') {
+export function useFactCheck() {
   const [state, setState] = useAIState<FactCheckResult>()
 
   const check = useCallback(async (options: FactCheckOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Periksa fakta-fakta dalam teks berikut:\n\nTeks: ${options.text}\n\nKembalikan dalam format JSON:\n{\n  "claims": [\n    {"text": "pernyataan 1", "verified": true/false, "explanation": "penjelasan"}\n  ],\n  "accuracy_score": [0-100]\n}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{
+        claims: { claim: string; verdict: string; explanation: string; sources: string[] }[]
+        summary: string
+        trustScore: number
+      }>('fact-check', { text: options.text })
+
+      setState({
+        loading: false,
+        result: {
+          claims: data.claims.map((c) => ({
+            text: c.claim,
+            verified: c.verdict === 'Benar',
+            explanation: c.explanation,
+          })),
+          accuracy_score: data.trustScore,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -463,35 +469,38 @@ export function useFactCheck(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to fact check',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, check }
 }
 
 // Objectivity Hook
-export function useObjectivity(model = 'gpt-4o') {
+export function useObjectivity() {
   const [state, setState] = useAIState<ObjectivityResult>()
 
   const analyze = useCallback(async (options: ObjectivityOptions) => {
     setState({ loading: true, result: null, error: null })
-    
-    try {
-      const prompt = `Analisis objectivity dan potential bias dalam teks berita berikut:\n\nTeks: ${options.text}\n\nKembalikan dalam format JSON:\n{\n  "score": [0-100],\n  "biased_phrases": [\n    {"phrase": "frasa yang bias", "suggestion": "alternatif netral"}\n  ],\n  "overall_verdict": "verdict keseluruhan"\n}\n\nHanya kembalikan JSON valid.`
-      
-      const result = await callOpenAI(model, [
-        { role: 'user', content: prompt }
-      ])
 
-      try {
-        const parsed = JSON.parse(result)
-        setState({
-          loading: false,
-          result: parsed,
-          error: null,
-        })
-      } catch {
-        throw new Error('Invalid JSON response')
-      }
+    try {
+      const data = await callBackendAPI<{
+        score: number
+        issues: { original: string; suggested: string; reason: string; severity: string }[]
+        ethicalCompliance: string
+        suggestions: string[]
+      }>('objectivity', { text: options.text })
+
+      setState({
+        loading: false,
+        result: {
+          score: data.score,
+          biased_phrases: data.issues.map((issue) => ({
+            phrase: issue.original,
+            suggestion: issue.suggested,
+          })),
+          overall_verdict: data.ethicalCompliance,
+        },
+        error: null,
+      })
     } catch (error) {
       setState({
         loading: false,
@@ -499,7 +508,7 @@ export function useObjectivity(model = 'gpt-4o') {
         error: error instanceof Error ? error.message : 'Failed to analyze objectivity',
       })
     }
-  }, [model])
+  }, [])
 
   return { ...state, analyze }
 }

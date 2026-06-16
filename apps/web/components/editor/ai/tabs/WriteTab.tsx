@@ -4,10 +4,6 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useRewrite, useExpand } from '../../../../hooks/useAI'
 
-interface Props {
-  model?: string
-}
-
 type Tone = 'formal' | 'santai' | 'berita'
 type Length = 'lebih_pendek' | 'sama' | 'lebih_panjang'
 
@@ -23,13 +19,13 @@ const LENGTH_OPTIONS = [
   { value: 'lebih_panjang' as Length, label: 'Lebih Panjang' }
 ]
 
-export function WriteTab({ model = 'gpt-4o' }: Props) {
+export function WriteTab() {
   const [text, setText] = useState('')
   const [tone, setTone] = useState<Tone>('berita')
   const [length, setLength] = useState<Length>('sama')
-  
-  const rewriteState = useRewrite(model)
-  const expandState = useExpand(model)
+
+  const rewriteState = useRewrite()
+  const expandState = useExpand()
 
   const handleRewrite = async () => {
     if (!text.trim()) return

@@ -3,11 +3,7 @@ import { Loader2, RefreshCw } from 'lucide-react'
 import { useHeadlines, useSEO } from '../../../../hooks/useAI'
 import { useEditorStore } from '../../../../store/editorStore'
 
-interface Props {
-  model?: string
-}
-
-export function OptimizeTab({ model = 'gpt-4o' }: Props) {
+export function OptimizeTab() {
   const { title: storeTitle, excerpt: storeExcerpt } = useEditorStore()
   const [title, setTitle] = useState('')
   const [excerpt, setExcerpt] = useState('')
@@ -23,8 +19,8 @@ export function OptimizeTab({ model = 'gpt-4o' }: Props) {
     setExcerpt(storeExcerpt || '')
   }
   
-  const headlineState = useHeadlines(model)
-  const seoState = useSEO(model)
+  const headlineState = useHeadlines()
+  const seoState = useSEO()
 
   const handleGenerateHeadlines = async () => {
     if (!title.trim()) return

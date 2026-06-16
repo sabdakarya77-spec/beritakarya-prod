@@ -2,15 +2,11 @@ import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useCaption } from '../../../../hooks/useAI'
 
-interface Props {
-  model?: string
-}
-
-export function ImageTab({ model = 'gpt-4o' }: Props) {
+export function ImageTab() {
   const [imageUrl, setImageUrl] = useState('')
   const [altText, setAltText] = useState('')
   const [caption, setCaption] = useState('')
-  const captionState = useCaption(model)
+  const captionState = useCaption()
 
   const handleGenerate = async () => {
     if (!imageUrl.trim()) return
