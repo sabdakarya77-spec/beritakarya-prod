@@ -111,7 +111,7 @@ All API routes are prefixed with `/api/v1/`. Key modules:
 - `/auth` - Login, register, refresh, logout
 - `/articles` - CRUD with editorial workflow
 - `/sites` - Multi-site management
-- `/ai` - AI features (rewrite, grammar, etc.)
+- `/ai` - AI features (rewrite, expand, headline, seo, grammar, readability, fact-check, objectivity, caption, summarize, translate, image-gen)
 - `/kyc` - Identity verification
 - `/ads` - Advertisement management
 

@@ -82,7 +82,7 @@ modules/<feature>/
 | category | `/api/v1/categories` | Global & site categories |
 | site | `/api/v1/sites` | Multi-site management |
 | media | `/api/v1/media` | File upload & management |
-| ai | `/api/v1/ai` | AI features (rewrite, grammar) |
+| ai | `/api/v1/ai` | AI features (rewrite, expand, headline, seo, grammar, readability, fact-check, objectivity, caption, summarize, translate, image-gen) |
 | kyc | `/api/v1/kyc` | Identity verification |
 | ad | `/api/v1/ads` | Advertisement system |
 | notification | `/api/v1/notifications` | In-app notifications |
