@@ -432,14 +432,14 @@ Semua varian menggunakan `text-[10px]` untuk metadata (kategori, tanggal, author
 
 ### Fase 3: Performance & Missing Pages (Estimasi: 1-2 jam) — PRIORITAS SEDANG
 
-| # | Task | File | Detail |
-|---|---|---|---|
-| 3.1 | Raw `<img>` → SmartImage | `SiteHomePage.tsx` | 3 lokasi editorial (lines 737, 828, 875) |
-| 3.2 | CSS hover alih-alih framer-motion | `NewsCard.tsx` | Ganti `whileHover` dengan `transition-transform hover:-translate-y-1` |
-| 3.3 | Halaman 404 global | `app/not-found.tsx` (baru) | Search bar, link homepage, popular articles |
-| 3.4 | Halaman 404 per site | `app/[site]/not-found.tsx` (baru) | Dengan site config |
-| 3.5 | Search error UI | `FullScreenSearch.tsx` | Tampilkan pesan error ke user, bukan hanya console.log |
-| 3.6 | LoadMore error UI | `LoadMoreArticles.tsx` | Tampilkan pesan error + retry button |
+| # | Task | File | Detail | Status |
+|---|---|---|---|---|
+| 3.1 | Raw `<img>` → lazy loading | `SiteHomePage.tsx` | Tambah `loading="lazy" decoding="async"` | ✅ (Fase 2) |
+| 3.2 | CSS hover alih-alih framer-motion | `NewsCard.tsx` | Hapus framer-motion, gunakan CSS `transition-transform hover:` | ✅ |
+| 3.3 | Halaman 404 global | `app/not-found.tsx` | 404 page dengan icon, link beranda | ✅ |
+| 3.4 | Halaman 404 per site | `app/[site]/not-found.tsx` | 404 dengan search bar, link beranda | ✅ |
+| 3.5 | Search error UI | `FullScreenSearch.tsx` | Error message ditampilkan ke user | ✅ (Fase 0) |
+| 3.6 | LoadMore error UI | `LoadMoreArticles.tsx` | Error message + retry button | ✅ |
 
 ### Fase 4: Dark Mode & Cleanup (Estimasi: 1 jam) — PRIORITAS RENDAH
 

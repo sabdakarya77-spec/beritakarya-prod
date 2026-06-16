@@ -22,11 +22,13 @@ export default function LoadMoreArticles({
   const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadMore = async () => {
     if (loading || !hasMore) return;
-    
+
     setLoading(true);
+    setError(null);
     try {
       const nextPage = page + 1;
       let url = `${API_URL}/api/v1/articles/public?site=${siteId}&page=${nextPage}&limit=10`;
@@ -49,8 +51,9 @@ export default function LoadMoreArticles({
         setPage(nextPage);
         if (newArticles.length < 10) setHasMore(false);
       }
-    } catch (error) {
-      console.error("Error loading more articles:", error);
+    } catch (err) {
+      console.error("Error loading more articles:", err);
+      setError("Gagal memuat artikel. Periksa koneksi Anda.");
     } finally {
       setLoading(false);
     }
@@ -65,8 +68,21 @@ export default function LoadMoreArticles({
         ))}
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-sm text-brand-text-muted">{error}</p>
+          <button
+            onClick={loadMore}
+            className="rounded-lg border border-brand-red/30 bg-brand-red/5 px-4 py-2 text-sm font-semibold text-brand-red transition-colors hover:bg-brand-red/10"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      )}
+
       {/* Load More Button or State */}
-      {hasMore && (
+      {hasMore && !error && (
         <div className="flex justify-center mt-12 pb-20">
           <button 
             onClick={loadMore}

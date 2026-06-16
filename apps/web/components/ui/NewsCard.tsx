@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Clock, BookOpen, User } from 'lucide-react';
 import Link from 'next/link';
 import { SmartImage, prefetchImage } from './SmartImage';
@@ -94,9 +93,8 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           iconSize={16}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
-          <motion.article 
-            whileHover={{ y: -2 }}
-            className="group relative h-[420px] min-h-[380px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl lg:h-[480px]"
+          <article
+            className="group relative h-[420px] min-h-[380px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5 lg:h-[480px]"
           >
             <SmartImage 
               src={imageUrl} 
@@ -134,7 +132,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 <span className="flex items-center gap-1"><BookOpen size={12}/> {readTime}</span>
               </div>
             </div>
-          </motion.article>
+          </article>
         </Link>
       </div>
     );
@@ -187,9 +185,8 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           iconSize={15}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
-          <motion.article 
-            whileHover={{ x: 2 }}
-            className="group flex cursor-pointer gap-4 border-b border-gray-100 pb-4 pr-12 dark:border-white/5 md:gap-5 last:border-0"
+          <article
+            className="group flex cursor-pointer gap-4 border-b border-gray-100 pb-4 pr-12 transition-transform duration-300 ease-out hover:translate-x-0.5 dark:border-white/5 md:gap-5 last:border-0"
           >
             <div className="relative aspect-[16/10] w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-28">
               <SmartImage 
@@ -221,7 +218,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                  <span>{date}</span>
               </div>
             </div>
-          </motion.article>
+          </article>
         </Link>
       </div>
     );
@@ -238,10 +235,8 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         iconSize={15}
       />
       <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
-        <motion.article 
-          whileHover={{ y: -4, scale: 1.01 }}
-          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="group relative flex cursor-pointer flex-col gap-3 md:gap-4"
+        <article
+          className="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] md:gap-4"
         >
           <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
             <SmartImage 
@@ -280,7 +275,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                <span className="flex items-center gap-1"><BookOpen size={10}/> {readTime}</span>
             </div>
           </div>
-        </motion.article>
+        </article>
       </Link>
     </div>
   );
