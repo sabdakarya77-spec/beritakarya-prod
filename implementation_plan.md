@@ -563,11 +563,11 @@ jobs:
 - [x] 4.3 Environment parity checklist ✅ (2026-06-16) — Docker HEALTHCHECK added to both Dockerfiles
 
 #### Dokumentasi (Ongoing)
-- [ ] `docs/setup.md`
-- [ ] `docs/architecture.md`
-- [ ] Swagger annotations
-- [ ] `docs/deployment.md`
-- [ ] `CONTRIBUTING.md`
+- [x] `docs/setup.md` ✅ (2026-06-16) — Local dev setup, env vars, Docker, troubleshooting
+- [x] `docs/architecture.md` ✅ (2026-06-16) — System architecture, modules, database, security
+- [ ] Swagger annotations (sudah ada di codebase)
+- [x] `docs/deployment.md` ✅ (2026-06-16) — Vercel+Railway, VPS Docker, CI/CD, backup
+- [x] `CONTRIBUTING.md` ✅ (2026-06-16) — Workflow, code style, testing, PR checklist
 
 ---
 

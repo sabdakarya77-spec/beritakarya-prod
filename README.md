@@ -232,11 +232,11 @@ pnpm --filter @beritakarya/web test    # Web (Vitest)
 
 ### Layout & halaman publik
 
+- [Setup Guide](docs/setup.md) — Instalasi dan konfigurasi lokal
+- [Architecture](docs/architecture.md) — Arsitektur sistem
+- [Deployment](docs/deployment.md) — Panduan deploy
+- [Contributing](CONTRIBUTING.md) — Cara berkontribusi
 - Layout System — `Container`, token, bleed _(Coming Soon)_
-- Homepage Spec _(Coming Soon)_
-- Article Page Spec _(Coming Soon)_
-- Legal Public Pages _(Coming Soon)_
-- Ads Public Page _(Coming Soon)_
 
 ### Contoh `Container`
 
@@ -263,6 +263,7 @@ import { LegalStandardPage } from '@/components/legal'
 
 ### Roadmap & audit
 
+- [Documentation](docs/README.md) — Semua dokumentasi
 - UI/UX Roadmap _(Coming Soon)_
 - Audit Sistem _(Coming Soon)_
 
