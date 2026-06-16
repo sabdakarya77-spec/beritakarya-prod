@@ -30,6 +30,7 @@ export { SEOTab } from './ai/tabs/SEOTab'
 export { ValidateTab } from './ai/tabs/ValidateTab'
 export { ImageTab } from './ai/tabs/ImageTab'
 export { AnalisisTab } from './ai/tabs/AnalisisTab'
+export { GenerateTab } from './ai/tabs/GenerateTab'
 
 // Media Library Modal
 export { MediaLibraryModal } from './MediaLibraryModal'

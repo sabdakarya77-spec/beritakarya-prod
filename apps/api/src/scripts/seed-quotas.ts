@@ -11,7 +11,7 @@ async function main() {
       dailyRequests: 1000,
       dailyTokens: 500000,
       monthlyBudget: 100.00,
-      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption', 'image_gen']),
+      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption', 'image_gen', 'summarize', 'translate']),
       modelRestriction: null
     },
     {
@@ -19,7 +19,7 @@ async function main() {
       dailyRequests: 500,
       dailyTokens: 200000,
       monthlyBudget: 50.00,
-      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption', 'image_gen']),
+      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption', 'image_gen', 'summarize', 'translate']),
       modelRestriction: null
     },
     {
@@ -27,7 +27,7 @@ async function main() {
       dailyRequests: 100,
       dailyTokens: 50000,
       monthlyBudget: 50.00,
-      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption']),
+      allowedFeatures: JSON.stringify(['rewrite', 'expand', 'headline', 'seo', 'grammar', 'readability', 'fact-check', 'caption', 'summarize', 'translate']),
       modelRestriction: null
     },
     {

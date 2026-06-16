@@ -95,3 +95,65 @@ Kembalikan HANYA teks yang sudah dikembangkan.`,
     return result
   })
 }
+
+// ── SUMMARIZE ────────────────────────────────────────────────────
+
+export type SummaryStyle = 'excerpt' | 'social' | 'bullet'
+
+const STYLE_DESC: Record<SummaryStyle, string> = {
+  excerpt: '2-3 kalimat ringkas yang menangkap inti artikel, cocok untuk excerpt/pratinjau',
+  social: 'maksimal 280 karakter, menarik dan engaging untuk media sosial',
+  bullet: '5 poin utama dalam format bullet point'
+}
+
+export async function summarize(
+  text: string,
+  style: SummaryStyle = 'excerpt'
+): Promise<AIResult<string>> {
+  return callAI(async () => {
+    const result = await chatComplete(
+      `Kamu adalah editor berita Indonesia yang ahli membuat ringkasan.
+Buat ringkasan dari artikel berikut.
+Gaya ringkasan: ${STYLE_DESC[style]}
+Gunakan bahasa Indonesia yang baik dan sesuai PUEBI.
+Kembalikan HANYA teks ringkasan tanpa penjelasan atau judul tambahan.`,
+      `Artikel:
+"${text.slice(0, 8000)}"`,
+      { temperature: 0.5 }
+    )
+    if (!result) throw new Error('AI mengembalikan respons kosong')
+    return result
+  })
+}
+
+// ── TRANSLATE ────────────────────────────────────────────────────
+
+export type TargetLang = 'en' | 'ms' | 'ar' | 'ja' | 'zh'
+
+const LANG_NAMES: Record<TargetLang, string> = {
+  en: 'Inggris',
+  ms: 'Melayu',
+  ar: 'Arab',
+  ja: 'Jepang',
+  zh: 'Mandarin'
+}
+
+export async function translate(
+  text: string,
+  targetLang: TargetLang
+): Promise<AIResult<string>> {
+  return callAI(async () => {
+    const result = await chatComplete(
+      `Kamu adalah penerjemah profesional untuk media berita.
+Terjemahkan teks berikut ke bahasa ${LANG_NAMES[targetLang]}.
+Pertahankan gaya jurnalistik, nada, dan makna asli.
+Jangan menambahkan atau mengurangi informasi.
+Kembalikan HANYA teks terjemahan tanpa penjelasan.`,
+      `Teks yang harus diterjemahkan:
+"${text.slice(0, 8000)}"`,
+      { temperature: 0.3 }
+    )
+    if (!result) throw new Error('AI mengembalikan respons kosong')
+    return result
+  })
+}

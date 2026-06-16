@@ -5,6 +5,7 @@ import { checkAIPermissions } from '../middleware/aiQuota.middleware'
 import { aiLimiter } from '../lib/rateLimit'
 import { asyncHandler } from '../utils/asyncHandler'
 import * as writeService from './write.service'
+import * as imageGenService from './image-gen.service'
 import * as optimizeService from './optimize.service'
 import * as validateService from './validate.service'
 import * as layoutService from './layout.service'
@@ -161,6 +162,45 @@ aiRouter.post('/caption', asyncHandler(async (req: Request, res: Response) => {
 
   const result = await withQuotaAndTracking(req, 'caption', () =>
     imageService.generateCaption(imageUrl)
+  )
+  res.json(result)
+}))
+
+// ── SUMMARIZE ────────────────────────────────────────────────────
+aiRouter.post('/summarize', asyncHandler(async (req: Request, res: Response) => {
+  const { text, style } = z.object({
+    text: z.string().min(50).max(10000),
+    style: z.enum(['excerpt', 'social', 'bullet']).default('excerpt')
+  }).parse(req.body)
+
+  const result = await withQuotaAndTracking(req, 'summarize', () =>
+    writeService.summarize(text, style)
+  )
+  res.json(result)
+}))
+
+// ── TRANSLATE ────────────────────────────────────────────────────
+aiRouter.post('/translate', asyncHandler(async (req: Request, res: Response) => {
+  const { text, targetLang } = z.object({
+    text: z.string().min(50).max(10000),
+    targetLang: z.enum(['en', 'ms', 'ar', 'ja', 'zh'])
+  }).parse(req.body)
+
+  const result = await withQuotaAndTracking(req, 'translate', () =>
+    writeService.translate(text, targetLang)
+  )
+  res.json(result)
+}))
+
+// ── IMAGE GENERATION ─────────────────────────────────────────────
+aiRouter.post('/image-gen', asyncHandler(async (req: Request, res: Response) => {
+  const { prompt, size } = z.object({
+    prompt: z.string().min(10).max(1000),
+    size: z.enum(['1024x1024', '1792x1024', '1024x1792']).default('1024x1024')
+  }).parse(req.body)
+
+  const result = await withQuotaAndTracking(req, 'image_gen', () =>
+    imageGenService.generateImage(prompt, size)
   )
   res.json(result)
 }))

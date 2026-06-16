@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Pencil, Search, ShieldCheck, Image, BarChart3, Circle } from 'lucide-react'
+import { Sparkles, Pencil, Search, ShieldCheck, Image, BarChart3, Wand2, Circle } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { WriteTab } from './tabs/WriteTab'
 import { SEOTab } from './tabs/SEOTab'
 import { ValidateTab } from './tabs/ValidateTab'
 import { ImageTab } from './tabs/ImageTab'
 import { AnalisisTab } from './tabs/AnalisisTab'
+import { GenerateTab } from './tabs/GenerateTab'
 
-type TabId = 'write' | 'seo' | 'validate' | 'image' | 'analisis'
+type TabId = 'write' | 'seo' | 'validate' | 'image' | 'analisis' | 'generate'
 
 const TABS = [
   { id: 'write' as const, label: 'Tulis', icon: Pencil },
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'validate' as const, label: 'Validasi', icon: ShieldCheck },
   { id: 'image' as const, label: 'Gambar', icon: Image },
   { id: 'analisis' as const, label: 'Analisis', icon: BarChart3 },
+  { id: 'generate' as const, label: 'Buat', icon: Wand2 },
 ]
 
 interface AIPanelProps {
@@ -95,6 +97,7 @@ export function AIPanel({ isOpen = true, onClose, editor }: AIPanelProps) {
         {activeTab === 'validate' && <ValidateTab />}
         {activeTab === 'image' && <ImageTab />}
         {activeTab === 'analisis' && <AnalisisTab />}
+        {activeTab === 'generate' && <GenerateTab />}
       </div>
 
       {/* Footer */}

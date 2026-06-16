@@ -512,3 +512,135 @@ export function useObjectivity() {
 
   return { ...state, analyze }
 }
+
+// ── Summarize Hook ─────────────────────────────────────────────
+
+export interface SummarizeOptions {
+  text: string
+  style?: 'excerpt' | 'social' | 'bullet'
+}
+
+export interface SummarizeResult {
+  summary: string
+  style: string
+}
+
+export function useSummarize() {
+  const [state, setState] = useAIState<SummarizeResult>()
+
+  const generate = useCallback(async (options: SummarizeOptions) => {
+    setState({ loading: true, result: null, error: null })
+
+    try {
+      const data = await callBackendAPI<string>('summarize', {
+        text: options.text,
+        style: options.style || 'excerpt',
+      })
+
+      setState({
+        loading: false,
+        result: {
+          summary: data,
+          style: options.style || 'excerpt',
+        },
+        error: null,
+      })
+    } catch (error) {
+      setState({
+        loading: false,
+        result: null,
+        error: error instanceof Error ? error.message : 'Failed to summarize',
+      })
+    }
+  }, [])
+
+  return { ...state, generate }
+}
+
+// ── Translate Hook ─────────────────────────────────────────────
+
+export interface TranslateOptions {
+  text: string
+  targetLang: 'en' | 'ms' | 'ar' | 'ja' | 'zh'
+}
+
+export interface TranslateResult {
+  translated: string
+  targetLang: string
+}
+
+export function useTranslate() {
+  const [state, setState] = useAIState<TranslateResult>()
+
+  const translate = useCallback(async (options: TranslateOptions) => {
+    setState({ loading: true, result: null, error: null })
+
+    try {
+      const data = await callBackendAPI<string>('translate', {
+        text: options.text,
+        targetLang: options.targetLang,
+      })
+
+      setState({
+        loading: false,
+        result: {
+          translated: data,
+          targetLang: options.targetLang,
+        },
+        error: null,
+      })
+    } catch (error) {
+      setState({
+        loading: false,
+        result: null,
+        error: error instanceof Error ? error.message : 'Failed to translate',
+      })
+    }
+  }, [])
+
+  return { ...state, translate }
+}
+
+// ── Image Generation Hook ──────────────────────────────────────
+
+export interface ImageGenOptions {
+  prompt: string
+  size?: '1024x1024' | '1792x1024' | '1024x1792'
+}
+
+export interface ImageGenResult {
+  url: string
+  revisedPrompt: string
+}
+
+export function useImageGen() {
+  const [state, setState] = useAIState<ImageGenResult>()
+
+  const generate = useCallback(async (options: ImageGenOptions) => {
+    setState({ loading: true, result: null, error: null })
+
+    try {
+      const data = await callBackendAPI<{ url: string; revisedPrompt: string }>('image-gen', {
+        prompt: options.prompt,
+        size: options.size || '1024x1024',
+      })
+
+      setState({
+        loading: false,
+        result: {
+          url: data.url,
+          revisedPrompt: data.revisedPrompt,
+        },
+        error: null,
+      })
+    } catch (error) {
+      setState({
+        loading: false,
+        result: null,
+        error: error instanceof Error ? error.message : 'Failed to generate image',
+      })
+    }
+  }, [])
+
+  return { ...state, generate }
+}
