@@ -22,8 +22,6 @@ export default function CategoriesDashboard() {
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
 
-  if (!isAllowed) return null;
-
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
@@ -54,13 +52,15 @@ export default function CategoriesDashboard() {
 
   // Auto-generate slug from name
   useEffect(() => {
-    if (editingCategory) return; // Don't auto-generate if editing
+    if (editingCategory) return;
     const generated = name.toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
     setSlug(generated);
   }, [name, editingCategory]);
+
+  if (!isAllowed) return null;
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

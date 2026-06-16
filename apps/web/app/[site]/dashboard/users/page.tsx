@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { useToastStore } from '../../../../store/toastStore';
 import { useAuthStore } from '../../../../store/authStore';
@@ -23,25 +23,19 @@ export default function UsersDashboard() {
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { addToast } = useToastStore();
   const { user: currentUser } = useAuthStore();
-
-  if (!isAllowed) return null;
-
-  // [A-5b] Fix: use useParams() instead of window.location.pathname regex (which always returned empty string)
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
 
   const fetchUsers = async () => {
     setError(null);
     try {
-      const params: Record<string, string> = {};
+      const queryParams: Record<string, string> = {};
       if (showAll) {
-        params.site = 'all';
+        queryParams.site = 'all';
       }
-      // [A-5b] Fix: use api (axios with auth interceptor) instead of bare fetch()
-      const { data } = await api.get('/users', { params });
+      const { data } = await api.get('/users', { params: queryParams });
       if (data.success) {
         setUsers(data.data);
       }
@@ -69,6 +63,8 @@ export default function UsersDashboard() {
     fetchUsers();
     fetchSites();
   }, [showAll]);
+
+  if (!isAllowed) return null;
 
   const getRoleBadge = (role: string) => {
     const styles = {
