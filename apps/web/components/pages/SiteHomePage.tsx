@@ -560,7 +560,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             <aside className="space-y-6 lg:col-span-4">
 
               {/* Akses Redaksi */}
-              <div className="rounded-2xl border border-white/5 bg-slate-950 p-4 text-white shadow-[0_20px_40px_rgba(2,6,23,0.2)] md:p-5">
+              <div className="rounded-2xl border border-white/5 bg-[#0a0f1a] p-4 text-white shadow-[0_20px_40px_rgba(2,6,23,0.2)] md:p-5">
                 <div className="pb-2">
                   <span className={`${sectionEyebrowClass} text-brand-red`}>Akses Redaksi</span>
                   <h4 className="mt-2 text-lg md:text-xl font-sans font-bold leading-snug text-white">
@@ -828,12 +828,14 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                             <img
                               src={photoImg}
                               alt={article.title}
+                              loading="lazy"
+                              decoding="async"
                               className="h-full w-full object-cover transition-transform duration-[5s] group-hover:scale-110"
                             />
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
                           <div className="absolute bottom-0 left-0 z-10 w-full p-5">
-                            <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-red">
                               Jurnal Foto
                             </span>
                             <h4 className="line-clamp-3 text-sm font-sans font-semibold leading-snug text-white">
@@ -849,10 +851,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
               {/* Video Eksklusif — dark bg, aspect-video */}
               {showVideoSection && (
-                <ScrollAnimate className="rounded-2xl bg-slate-950 px-5 py-6 text-white md:px-6 md:py-8">
+                <ScrollAnimate className="rounded-2xl bg-[#0a0f1a] px-5 py-6 text-white md:px-6 md:py-8">
                   <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div className="flex items-center gap-2">
-                      <Zap size={14} className="fill-red-500 text-red-500" />
+                      <Zap size={14} className="fill-brand-red text-brand-red" />
                       <h3 className={`${sectionEyebrowClass} tracking-[0.14em] text-white`}>
                         Laporan Video Eksklusif
                       </h3>
@@ -876,14 +878,16 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                             <img
                               src={videoImg}
                               alt={article.title}
+                              loading="lazy"
+                              decoding="async"
                               className="h-full w-full object-cover transition-transform duration-[4s] group-hover:scale-105"
                             />
                           )}
                           <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">
-                            <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-red">
+                            <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-red">
                               Video Report
                             </span>
-                            <h4 className="line-clamp-2 text-xs font-semibold text-white">{article.title}</h4>
+                            <h4 className="line-clamp-2 text-sm font-semibold text-white">{article.title}</h4>
                           </div>
                         </Link>
                       )
