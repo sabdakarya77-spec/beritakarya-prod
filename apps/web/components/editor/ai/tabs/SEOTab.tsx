@@ -226,7 +226,7 @@ export function SEOTab() {
       {/* Tips */}
       <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
         <p className="text-[10px] text-blue-700 dark:text-blue-400">
-          💡 Tips: Gunakan "Generate SEO" untuk mengisi meta title & description secara otomatis, lalu sesuaikan manual jika perlu.
+          💡 Tips: Gunakan &quot;Generate SEO&quot; untuk mengisi meta title & description secara otomatis, lalu sesuaikan manual jika perlu.
         </p>
       </div>
     </div>

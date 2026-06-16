@@ -191,7 +191,7 @@ export function WriteTab() {
                 </button>
               </div>
               <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-xs text-gray-700 dark:text-gray-300 space-y-1.5">
-                <p className="italic">"{transcriptState.result.quote}"</p>
+                <p className="italic">&quot;{transcriptState.result.quote}&quot;</p>
                 <p className="text-[10px] text-gray-500">
                   — {transcriptState.result.speaker}
                 </p>
