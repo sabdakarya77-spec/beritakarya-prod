@@ -25,10 +25,13 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 COPY turbo.json pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-# Generate Prisma Client first, then build packages + API via turbo
+# Build workspace packages first (order matters: types/config before utils)
+RUN cd packages/types && pnpm run build
+RUN cd packages/config && pnpm run build
+RUN cd packages/utils && pnpm run build
+# Generate Prisma Client and build API
 RUN cd apps/api && npx prisma generate
-# turbo handles dependency order: packages build before apps (^build)
-RUN npx turbo run build --filter=@beritakarya/api...
+RUN cd apps/api && pnpm run build
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
