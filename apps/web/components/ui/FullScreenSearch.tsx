@@ -22,7 +22,19 @@ export default function FullScreenSearch({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -32,10 +44,34 @@ export default function FullScreenSearch({
       document.body.style.overflow = 'unset';
       setQuery('');
       setResults([]);
+      setError(null);
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
+  }, [isOpen]);
+
+  // Focus trap: keep Tab within the search overlay
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    function handleTab(e: KeyboardEvent) {
+      if (e.key !== 'Tab' || !containerRef.current) return;
+      const focusable = containerRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    document.addEventListener('keydown', handleTab);
+    return () => document.removeEventListener('keydown', handleTab);
   }, [isOpen]);
 
   // Fetch search results on input change
@@ -48,14 +84,18 @@ export default function FullScreenSearch({
     const delayDebounce = setTimeout(async () => {
       setLoading(true);
       try {
+        setError(null);
         const res = await fetch(`${API_URL}/api/v1/articles/public?site=${site}&search=${encodeURIComponent(query)}&limit=5`);
         if (res.ok) {
           const json = await res.json();
           const items = json?.data?.articles || json?.data?.items || [];
           setResults(items);
+        } else {
+          setError('Gagal memuat hasil pencarian. Coba lagi.');
         }
       } catch (e) {
         console.error('Search error:', e);
+        setError('Terjadi kesalahan koneksi. Periksa jaringan Anda.');
       } finally {
         setLoading(false);
       }
@@ -68,11 +108,15 @@ export default function FullScreenSearch({
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={containerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Pencarian"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-2xl flex flex-col px-6 py-8 md:px-16 md:py-16"
+          className="fixed inset-0 z-[100] bg-brand-dark/95 backdrop-blur-2xl flex flex-col px-6 py-8 md:px-16 md:py-16"
         >
           {/* Header Controls */}
           <div className="flex justify-between items-center w-full max-w-5xl mx-auto mb-16">
@@ -81,6 +125,7 @@ export default function FullScreenSearch({
             </span>
             <button
               onClick={onClose}
+              aria-label="Tutup pencarian"
               className="p-3 bg-white/5 hover:bg-brand-red rounded-full text-white transition-all transform hover:rotate-90 duration-300"
             >
               <X size={20} />
@@ -97,7 +142,7 @@ export default function FullScreenSearch({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ketik topik berita atau kata kunci..."
-                className="w-full pl-12 bg-transparent text-white text-2xl md:text-5xl font-serif font-black focus:outline-none placeholder-gray-600 tracking-tight"
+                className="w-full pl-12 bg-transparent text-white text-2xl md:text-5xl font-serif font-black focus:outline-none placeholder-gray-400 tracking-tight"
               />
               {loading && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -111,13 +156,15 @@ export default function FullScreenSearch({
             {/* Content Body: Autocomplete vs Trending */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
               {/* Left Column: Instant Autocomplete Results */}
-              <div className="md:col-span-7 space-y-6">
+              <div className="md:col-span-7 space-y-6" aria-live="polite" aria-atomic="false">
                 {query.trim() ? (
                   <>
                     <h4 className="text-[11px] font-semibold uppercase tracking-wide text-brand-text-muted border-b border-white/10 pb-2">
                       Hasil Pencarian ({results.length})
                     </h4>
-                    {results.length > 0 ? (
+                    {error ? (
+                      <p className="text-red-400 text-sm">{error}</p>
+                    ) : results.length > 0 ? (
                       <div className="flex flex-col gap-4">
                         {results.map((art: any) => (
                           <Link

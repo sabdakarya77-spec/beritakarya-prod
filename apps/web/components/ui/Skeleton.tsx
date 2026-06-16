@@ -9,6 +9,10 @@ interface SkeletonProps {
 }
 
 export default function Skeleton({ variant = 'card', className }: SkeletonProps) {
+  const a11yProps = {
+    role: 'status' as const,
+    'aria-label': 'Memuat konten',
+  };
   const shimmer = {
     initial: { x: '-100%' },
     animate: { x: '100%' },
@@ -22,7 +26,7 @@ export default function Skeleton({ variant = 'card', className }: SkeletonProps)
 
   if (variant === 'hero') {
     return (
-      <div className={cn("relative h-[400px] md:h-[600px] w-full bg-gray-100 dark:bg-slate-800 overflow-hidden rounded-sm", className)}>
+      <div {...a11yProps} className={cn("relative h-[400px] md:h-[600px] w-full bg-gray-100 dark:bg-slate-800 overflow-hidden rounded-sm", className)}>
         <motion.div
           initial="initial"
           animate="animate"
@@ -45,7 +49,7 @@ export default function Skeleton({ variant = 'card', className }: SkeletonProps)
 
   if (variant === 'minimal') {
     return (
-      <div className={cn("py-4 border-b border-gray-100 dark:border-white/10 last:border-0 relative overflow-hidden", className)}>
+      <div {...a11yProps} className={cn("py-4 border-b border-gray-100 dark:border-white/10 last:border-0 relative overflow-hidden", className)}>
         <motion.div
           initial="initial"
           animate="animate"
@@ -62,7 +66,7 @@ export default function Skeleton({ variant = 'card', className }: SkeletonProps)
 
   if (variant === 'text') {
     return (
-      <div className={cn("relative overflow-hidden bg-gray-100 dark:bg-slate-800 rounded-sm", className)}>
+      <div {...a11yProps} className={cn("relative overflow-hidden bg-gray-100 dark:bg-slate-800 rounded-sm", className)}>
         <motion.div
           initial="initial"
           animate="animate"
@@ -75,7 +79,7 @@ export default function Skeleton({ variant = 'card', className }: SkeletonProps)
   }
 
   return (
-      <div className={cn("flex flex-col gap-4 relative overflow-hidden", className)}>
+      <div {...a11yProps} className={cn("flex flex-col gap-4 relative overflow-hidden", className)}>
         <div className="aspect-video bg-gray-100 dark:bg-slate-800 rounded-sm" />
         <motion.div
           initial="initial"

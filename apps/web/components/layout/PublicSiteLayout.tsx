@@ -63,10 +63,15 @@ export default function PublicSiteLayout({ children, siteConfig, initialCategory
   }, [siteConfig.id]);
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-[var(--bg-main)] pb-28 transition-colors duration-500 md:pb-0"
       style={{ '--brand-red': siteConfig.appearance?.primaryColor || '#B91C1C' } as React.CSSProperties}
     >
+      {/* Skip-to-content for keyboard and screen reader users */}
+      <a href="#main-content" className="skip-to-content">
+        Langsung ke konten
+      </a>
+
       <div className="border-b border-black/5 bg-brand-black text-white shadow-[0_16px_32px_rgba(2,6,23,0.18)] dark:border-white/5 dark:bg-[#020617]">
         <Container>
           <BreakingNewsTicker />

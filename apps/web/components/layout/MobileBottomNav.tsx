@@ -126,7 +126,7 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
 
           if (item.kind === 'link') {
             return (
-              <Link key={index} href={item.href} className="flex-1 flex justify-center">
+              <Link key={index} href={item.href} aria-label={item.label} className="flex-1 flex justify-center">
                 {content}
               </Link>
             );
@@ -136,6 +136,7 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
             <button
               key={index}
               onClick={item.onClick}
+              aria-label={item.label}
               className="flex-1 flex justify-center focus:outline-none"
             >
               {content}

@@ -37,6 +37,7 @@ export default function Navbar({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [keyboardExpanded, setKeyboardExpanded] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -148,8 +149,9 @@ export default function Navbar({
             </button>
 
             {!isArticlePage && (
-              <Link 
+              <Link
                 href={`/${activeSite}?cat=tersimpan`}
+                aria-label="Artikel tersimpan"
                 className="relative rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-800/70 hover:text-white"
               >
                 <Bookmark size={15} strokeWidth={1.5} />
@@ -161,17 +163,21 @@ export default function Navbar({
               </Link>
             )}
 
-            <button 
-              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-800/70 hover:text-white" 
+            <button
+              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-800/70 hover:text-white"
               onClick={toggleTheme}
+              aria-label={theme === 'light' ? 'Aktifkan mode gelap' : 'Aktifkan mode terang'}
             >
               {theme === 'light' ? <Moon size={15} strokeWidth={1.5} /> : <Sun size={15} strokeWidth={1.5} />}
             </button>
 
             {user ? (
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileOpen}
+                  aria-label="Menu profil"
                   className="flex items-center gap-1.5 rounded-full p-1 text-slate-300 transition-colors hover:bg-slate-900 hover:text-white"
                 >
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
@@ -188,23 +194,27 @@ export default function Navbar({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
+                      role="menu"
+                      aria-label="Menu profil"
                       className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-xl"
                     >
                       <div className="border-b border-slate-800 p-4">
                         <p className="text-xs font-bold text-white truncate">{user.name}</p>
                         <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
                       </div>
-                      <div className="p-2">
+                      <div className="p-2" role="none">
                         {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user.role) && (
-                          <Link 
+                          <Link
                             href={`/${activeSite}/dashboard`}
+                            role="menuitem"
                             className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300 transition-colors hover:bg-slate-800 hover:text-red-500"
                             onClick={() => setIsProfileOpen(false)}
                           >
                             Dashboard
                           </Link>
                         )}
-                        <button 
+                        <button
+                          role="menuitem"
                           onClick={() => {
                             setIsProfileOpen(false);
                             logout();
@@ -254,17 +264,28 @@ export default function Navbar({
           );
           const hasSub = cat.subCategories && cat.subCategories.length > 0;
           return (
-            <div 
+            <div
               key={cat.slug}
               className="relative flex items-center py-2.5"
-              onMouseEnter={() => setHoveredCategory(cat.name)}
+              onMouseEnter={() => { setHoveredCategory(cat.name); setKeyboardExpanded(null); }}
               onMouseLeave={() => setHoveredCategory(null)}
             >
-              <motion.button 
+              <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => handleCategoryClick(cat.slug)}
+                onKeyDown={(e) => {
+                  if (hasSub && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    setKeyboardExpanded(keyboardExpanded === cat.name ? null : cat.name);
+                  }
+                  if (e.key === 'Escape') {
+                    setKeyboardExpanded(null);
+                  }
+                }}
+                aria-haspopup={hasSub ? 'true' : undefined}
+                aria-expanded={hasSub ? (hoveredCategory === cat.name || keyboardExpanded === cat.name) : undefined}
                 className={cn(
                   "group relative flex items-center gap-1 transition-all hover:text-white",
                   isActive ? "font-black text-white" : "text-slate-400"
@@ -298,7 +319,7 @@ export default function Navbar({
               </motion.button>
 
               <AnimatePresence>
-                {hoveredCategory === cat.name && hasSub && (
+                {(hoveredCategory === cat.name || keyboardExpanded === cat.name) && hasSub && (
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -316,6 +337,7 @@ export default function Navbar({
                               e.stopPropagation();
                               handleCategoryClick(sub.slug);
                               setHoveredCategory(null);
+                              setKeyboardExpanded(null);
                             }}
                             className={cn(
                               "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-slate-800",
@@ -339,6 +361,7 @@ export default function Navbar({
                                       e.stopPropagation();
                                       handleCategoryClick(subsub.slug);
                                       setHoveredCategory(null);
+                                      setKeyboardExpanded(null);
                                     }}
                                     className={cn(
                                       "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-slate-800 w-full",

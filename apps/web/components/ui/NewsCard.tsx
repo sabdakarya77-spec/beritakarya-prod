@@ -19,6 +19,14 @@ interface NewsCardProps {
 }
 
 const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
+  if (!article) {
+    return (
+      <div className="flex items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-6 text-center dark:border-white/10 dark:bg-white/[0.02]">
+        <p className="text-xs text-brand-text-muted">Artikel tidak tersedia</p>
+      </div>
+    );
+  }
+
   const imageUrl = (() => {
     if (article.featuredImage) return article.featuredImage;
 
