@@ -5,13 +5,13 @@ WORKDIR /app
 
 # ---- Dependencies ----
 FROM base AS deps
-# Copy workspace structure for filtered install
+# Copy workspace structure
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
 COPY packages/utils/package.json ./packages/utils/
 COPY packages/config/package.json ./packages/config/
-RUN pnpm install --frozen-lockfile --filter @beritakarya/web...
+RUN pnpm install --frozen-lockfile
 
 # ---- Builder ----
 FROM base AS builder
@@ -26,8 +26,8 @@ COPY packages/config/package.json ./packages/config/
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 COPY turbo.json ./
-# Install dependencies (pnpm handles symlinks correctly within this stage)
-RUN pnpm install --frozen-lockfile --filter @beritakarya/web...
+# Install dependencies (all packages to ensure devDependencies for build)
+RUN pnpm install --frozen-lockfile
 # Build workspace packages first
 RUN cd packages/types && pnpm run build
 RUN cd packages/config && pnpm run build
