@@ -528,18 +528,23 @@ jobs:
 - [x] 1.4 Catat baseline warning count ✅ (2026-06-16) — 360 warnings, 0 errors
 
 #### Fase 2: Testing (Week 3–5)
-- [ ] 2.1 Buat API vitest.config.mts dengan threshold
-- [ ] 2.2 E2E: Auth flow test
-- [ ] 2.2 E2E: Article lifecycle test
-- [ ] 2.2 E2E: Article public view test
-- [ ] 2.2 E2E: Dashboard access test
-- [ ] 2.3 Unit: auth middleware test
-- [ ] 2.3 Unit: aiQuota middleware test
-- [ ] 2.3 Unit: site middleware test
-- [ ] 2.3 Unit: accountLockout test
-- [ ] 2.3 Unit: rateLimit test
-- [ ] 2.4 Shared test fixtures
-- [ ] 2.4 Prisma mock helper
+- [x] 2.1 Buat API vitest.config.mts dengan threshold ✅ (sudah ada sebelumnya)
+- [x] 2.2 E2E: Auth flow test ✅ (2026-06-16) — 6 tests
+- [x] 2.2 E2E: Article lifecycle test ✅ (2026-06-16) — 6 tests
+- [x] 2.2 E2E: Article public view test ✅ (2026-06-16) — 8 tests
+- [x] 2.2 E2E: Dashboard access test ✅ (2026-06-16) — 7 tests
+- [x] 2.3 Unit: auth middleware test ✅ (2026-06-16) — 11 tests
+- [ ] 2.3 Unit: aiQuota middleware test (complex, ditunda)
+- [x] 2.3 Unit: site middleware test ✅ (2026-06-16) — 9 tests
+- [x] 2.3 Unit: accountLockout test ✅ (2026-06-16) — 8 tests
+- [ ] 2.3 Unit: rateLimit test (side effects, ditunda)
+- [x] 2.3 Unit: sanitize middleware test ✅ (2026-06-16) — 9 tests
+- [x] 2.3 Unit: error middleware test ✅ (2026-06-16) — 6 tests
+- [x] 2.3 Unit: security middleware test ✅ (2026-06-16) — 4 tests
+- [x] 2.3 Unit: requestId middleware test ✅ (2026-06-16) — 2 tests
+- [x] 2.3 Unit: performance middleware test ✅ (2026-06-16) — 4 tests
+- [x] 2.4 Shared test fixtures ✅ (2026-06-16) — mockUser, mockArticle, mockSite, mockReq/Res/Next
+- [ ] 2.4 Prisma mock helper (ditunda)
 
 #### Fase 3: Architecture (Week 5–6)
 - [ ] 3.1 User repository layer
