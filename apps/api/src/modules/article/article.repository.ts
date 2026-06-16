@@ -6,9 +6,9 @@ export const articleNotDeleted: Prisma.ArticleWhereInput = { deletedAt: null }
 
 export async function findArticlesBySite(
   siteId: string,
-  opts: { status?: string; search?: string; category?: string; page?: number; limit?: number; authorId?: string } = {}
+  opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number; authorId?: string } = {}
 ) {
-  const { status, search, category, page = 1, limit = 20, authorId } = opts
+  const { status, search, category, startDate, endDate, page = 1, limit = 20, authorId } = opts
   const categoryFilter: Prisma.ArticleWhereInput = {}
 
   if (category) {
@@ -50,12 +50,18 @@ export async function findArticlesBySite(
     ...(status && { status: status as ArticleStatus }),
     ...(authorId && { authorId }),
     ...categoryFilter,
-    ...(search && { 
+    ...(search && {
       OR: [
         { title: { contains: search, mode: 'insensitive' } },
         { blocks: { path: ['$'], string_contains: search } }
       ]
-    })
+    }),
+    ...((startDate || endDate) && {
+      publishedAt: {
+        ...(startDate ? { gte: new Date(startDate) } : {}),
+        ...(endDate ? { lte: new Date(endDate) } : {}),
+      }
+    }),
   }
 
   const skip = (page - 1) * limit

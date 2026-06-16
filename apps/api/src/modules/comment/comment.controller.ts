@@ -74,6 +74,34 @@ commentRouter.get('/',
   })
 )
 
+commentRouter.get('/stats',
+  requireAuth,
+  siteMiddleware,
+  requireSiteAccess,
+  asyncHandler(async (req: any, res: any) => {
+    const { siteId } = req
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
+    const [pending, approvedToday, total] = await Promise.all([
+      prisma.comment.count({ where: { siteId, status: 'pending' } }),
+      prisma.comment.count({
+        where: {
+          siteId,
+          status: 'approved',
+          createdAt: { gte: todayStart }
+        }
+      }),
+      prisma.comment.count({ where: { siteId } })
+    ])
+
+    res.json({
+      success: true,
+      data: { pending, approvedToday, total }
+    })
+  })
+)
+
 commentRouter.get('/moderation',
   requireAuth,
   siteMiddleware,

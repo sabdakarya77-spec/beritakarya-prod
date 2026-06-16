@@ -23,26 +23,47 @@ export async function isDuplicateImpression(adId: string, ip: string): Promise<b
 }
 
 // ─── Sync Tracking ke AdBooking ───────────────────────────────────────────────
-// Saat impression/click di-track, juga increment counter di AdBooking yang ACTIVE
-// untuk site+slot yang sama agar dashboard advertiser menampilkan stats benar.
+// Saat impression/click di-track, increment counter di AdBooking yang terkait.
+// Prioritas: gunakan bookingId dari Advertisement (link langsung).
+// Fallback: cari berdasarkan siteId+slot+tanggal (untuk data lama yang belum punya bookingId).
 
 export async function syncTrackingToBooking(
   siteId: string,
   slot: string,
-  action: 'impression' | 'click'
+  action: 'impression' | 'click',
+  bookingId?: string | null
 ) {
   try {
     const field = action === 'impression' ? 'impressions' : 'clicks'
-    await prisma.adBooking.updateMany({
+
+    // Prioritas 1: gunakan bookingId langsung dari Advertisement
+    if (bookingId) {
+      await prisma.adBooking.update({
+        where: { id: bookingId },
+        data: { [field]: { increment: 1 } },
+      })
+      return
+    }
+
+    // Fallback: cari booking aktif yang paling relevan (data lama tanpa bookingId)
+    const now = new Date()
+    const booking = await prisma.adBooking.findFirst({
       where: {
         siteId,
         package: { slot },
         status: 'ACTIVE',
+        startDate: { lte: now },
+        endDate: { gte: now },
       },
-      data: {
-        [field]: { increment: 1 },
-      },
+      orderBy: { startDate: 'asc' },
     })
+
+    if (booking) {
+      await prisma.adBooking.update({
+        where: { id: booking.id },
+        data: { [field]: { increment: 1 } },
+      })
+    }
   } catch (err) {
     // Non-critical: jangan ganggu tracking utama jika ini gagal
     logger.warn('[AdService] Failed to sync tracking to booking:', err)

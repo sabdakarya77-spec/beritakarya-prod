@@ -36,12 +36,11 @@ export default function EditorialCalendar() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        // Fetch all articles for the current month range
         const { data } = await api.get('/articles', {
-          params: { 
+          params: {
             limit: 100,
-            // We'd ideally have a date range filter in the API, 
-            // but for now we fetch recent/scheduled and filter client-side
+            startDate: monthStart.toISOString(),
+            endDate: monthEnd.toISOString(),
           }
         });
         setArticles(data.data.articles || data.data.items || []);
@@ -50,7 +49,7 @@ export default function EditorialCalendar() {
       }
     };
     fetchArticles();
-  }, [site, monthStart.toISOString()]);
+  }, [site, monthStart.toISOString(), monthEnd.toISOString()]);
 
   const getArticlesForDay = (day: Date) => {
     return articles.filter(a => {

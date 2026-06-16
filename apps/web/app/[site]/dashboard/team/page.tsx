@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../../../lib/api';
 import { motion } from 'framer-motion';
+import { useRequireRole } from '../../../../hooks/useRequireRole';
 
 interface TeamMember {
   id: string;
@@ -23,6 +24,7 @@ interface TeamMember {
 }
 
 export default function TeamMonitoring() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const { site } = useParams() as { site: string };
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,8 @@ export default function TeamMonitoring() {
     m.name.toLowerCase().includes(search.toLowerCase()) || 
     m.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (!isAllowed) return null;
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">

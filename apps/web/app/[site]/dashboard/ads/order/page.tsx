@@ -53,72 +53,39 @@ export default function OrderAdPage() {
   const [receiptFileName, setReceiptFileName] = useState('');
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string>('');
   
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().split('T')[0];
+  });
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [invoiceNumber] = useState(() => Math.floor(100000 + Math.random() * 900000));
-
-  // Fallback default packages if database empty
-  const FALLBACK_PACKAGES: AdPackage[] = [
-    {
-      id: 'fallback-lead-30',
-      name: 'Billboard Banner Pusat/Regional',
-      slot: 'leaderboard',
-      durationDays: 30,
-      price: 1500000,
-      description: 'Impresi tertinggi di first-fold bagian atas seluruh halaman regional.',
-      isActive: true
-    },
-    {
-      id: 'fallback-feed-14',
-      name: 'In-Feed Artikel Rectangle',
-      slot: 'in_feed',
-      durationDays: 14,
-      price: 500000,
-      description: 'Rasio klik (CTR) tertinggi, disisipkan secara alami di antara paragraf berita.',
-      isActive: true
-    },
-    {
-      id: 'fallback-side-7',
-      name: 'Vertical Sidebar Widget Utama',
-      slot: 'rectangle',
-      durationDays: 7,
-      price: 250000,
-      description: 'Sangat cocok untuk materi promosi utama di sidebar homepage dan artikel.',
-      isActive: true
-    },
-    {
-      id: 'fallback-side-2-7',
-      name: 'Vertical Sidebar Widget Sekunder',
-      slot: 'rectangle_secondary',
-      durationDays: 7,
-      price: 200000,
-      description: 'Slot tambahan di sidebar artikel untuk promosi pendamping atau kampanye kedua.',
-      isActive: true
-    }
-  ];
 
   useEffect(() => {
     const fetchPackages = async () => {
       try {
         const res = await api.get('/ads/packages');
-        let pkgList = FALLBACK_PACKAGES;
-        if (res.data && res.data.success && res.data.data && res.data.data.length > 0) {
-          pkgList = res.data.data;
-        }
+        const pkgList: AdPackage[] = (res.data && res.data.success && res.data.data) ? res.data.data : [];
         setPackages(pkgList);
-        
+
         // Auto-select package matching the query param
-        const matchingPkg = pkgList.find((p: AdPackage) => p.id === packageId);
-        if (matchingPkg) {
-          setSelectedPackage(matchingPkg);
-        } else if (pkgList.length > 0) {
-          setSelectedPackage(pkgList[0]);
+        if (pkgList.length > 0) {
+          const matchingPkg = pkgList.find((p: AdPackage) => p.id === packageId);
+          const selected = matchingPkg || pkgList[0];
+          setSelectedPackage(selected);
+          const end = new Date();
+          end.setDate(end.getDate() + selected.durationDays);
+          setEndDate(end.toISOString().split('T')[0]);
         }
       } catch (e) {
         console.error('Gagal mengambil paket iklan:', e);
-        setPackages(FALLBACK_PACKAGES);
-        const matchingPkg = FALLBACK_PACKAGES.find((p: AdPackage) => p.id === packageId);
-        setSelectedPackage(matchingPkg || FALLBACK_PACKAGES[0]);
+        setPackages([]);
       } finally {
         setLoadingPackages(false);
       }
@@ -153,13 +120,13 @@ export default function OrderAdPage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
-    
-    const res = await api.post('/media/upload', formData, {
+
+    const res = await api.post('/media/upload?purpose=ad', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    
-    // API usually returns url inside nested properties
-    return res.data?.url || res.data?.filePath || res.data || '';
+
+    // Consistent with dashboard ads page response parsing
+    return res.data?.data?.url || res.data?.url || res.data?.filePath || res.data || '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -179,10 +146,9 @@ export default function OrderAdPage() {
         throw new Error('Gagal mengunggah materi kreatif iklan. Silakan coba kembali.');
       }
 
-      // 2. Calculate dynamic date range
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate() + selectedPackage.durationDays);
+      // 2. Use user-selected date range
+      const start = new Date(startDate);
+      const end = new Date(endDate);
 
       // 3. Create booking transaction
       const bookingRes = await api.post('/ads/bookings', {
@@ -190,8 +156,8 @@ export default function OrderAdPage() {
         siteId: site || 'pusat',
         imageUrl: uploadedAdUrl,
         linkUrl: linkUrl || '#',
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
+        startDate: start.toISOString(),
+        endDate: end.toISOString()
       });
 
       if (!bookingRes.data || !bookingRes.data.success || !bookingRes.data.data) {
@@ -301,6 +267,18 @@ export default function OrderAdPage() {
                   <RefreshCw size={24} className="animate-spin text-brand-red mx-auto" />
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Memuat Katalog Tarif Regional...</p>
                 </div>
+              ) : packages.length === 0 ? (
+                <div className="py-12 text-center space-y-3">
+                  <AlertCircle size={24} className="text-gray-300 mx-auto" />
+                  <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Belum Ada Paket Iklan Tersedia</p>
+                  <p className="text-[10px] text-gray-400">Hubungi admin untuk membuat paket iklan baru.</p>
+                  <Link
+                    href={`/${site}/dashboard`}
+                    className="inline-flex items-center gap-2 mt-4 px-6 py-3 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/40 text-brand-black dark:text-white text-[10px] font-black uppercase tracking-widest transition-all rounded-sm"
+                  >
+                    <ArrowLeft size={14} /> Kembali ke Dashboard
+                  </Link>
+                </div>
               ) : (
                 <div className="space-y-6">
                   {/* Packages grid */}
@@ -324,7 +302,12 @@ export default function OrderAdPage() {
                             name="ad_package"
                             value={pkg.id}
                             checked={selectedPackage?.id === pkg.id}
-                            onChange={() => setSelectedPackage(pkg)}
+                            onChange={() => {
+                              setSelectedPackage(pkg);
+                              const end = new Date();
+                              end.setDate(end.getDate() + pkg.durationDays);
+                              setEndDate(end.toISOString().split('T')[0]);
+                            }}
                             className="mt-1.5 accent-brand-red"
                           />
                           <div className="flex-1">
@@ -447,6 +430,38 @@ export default function OrderAdPage() {
                   <p className="text-[9px] text-gray-400">
                     * Alamat tujuan website atau link WhatsApp yang akan dituju saat audiens mengklik banner iklan Anda.
                   </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+                      Tanggal Mulai Tayang
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors rounded-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+                      Tanggal Berakhir
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      min={startDate}
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors rounded-sm"
+                    />
+                    <p className="text-[9px] text-gray-400">
+                      * Durasi otomatis sesuai paket ({selectedPackage?.durationDays || '...'} hari). Anda bisa sesuaikan.
+                    </p>
+                  </div>
                 </div>
 
                 {/* File Upload with Smart Local Preview */}

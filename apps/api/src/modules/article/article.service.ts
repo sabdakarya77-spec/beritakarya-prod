@@ -42,7 +42,7 @@ export function assertCanPublish(
 
 export async function getArticles(
   siteId: string,
-  query: { status?: string; search?: string; category?: string; page?: number; limit?: number },
+  query: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number },
   user?: JWTPayload
 ) {
   // If search is provided, use Meilisearch

@@ -5,8 +5,10 @@ import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import type { Category } from '@beritakarya/types';
 import { getCategoryColor, CATEGORIES_CONFIG } from '../../../../lib/constants';
+import { useRequireRole } from '../../../../hooks/useRequireRole';
 
 export default function CategoriesDashboard() {
+  const { isAllowed } = useRequireRole(['superadmin']);
   const [categories, setCategories] = useState<Category[]>([]);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -19,6 +21,8 @@ export default function CategoriesDashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
+
+  if (!isAllowed) return null;
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });

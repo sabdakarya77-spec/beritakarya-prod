@@ -1,10 +1,12 @@
-import { AIDashboard } from '../../../../../components/admin/AIDashboard'
+'use client'
 
-export const metadata = {
-  title: 'AI Usage Dashboard — BeritaKarya Admin',
-  description: 'Monitor penggunaan AI, quota, dan biaya di seluruh jaringan BeritaKarya.',
-}
+import { AIDashboard } from '../../../../../components/admin/AIDashboard'
+import { useRequireRole } from '../../../../../hooks/useRequireRole'
 
 export default function AIUsagePage() {
+  const { isAllowed } = useRequireRole(['superadmin']);
+
+  if (!isAllowed) return null;
+
   return <AIDashboard />
 }

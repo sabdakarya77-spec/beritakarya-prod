@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { Mail, Plus, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { useRequireRole } from '../../../../hooks/useRequireRole';
 
 interface Invitation {
   id: string;
@@ -21,6 +22,7 @@ interface Invitation {
 }
 
 export default function InvitationsDashboard() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
@@ -89,6 +91,8 @@ export default function InvitationsDashboard() {
     }
     return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800"><Clock size={10} /> MENUNGGU</span>;
   };
+
+  if (!isAllowed) return null;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">

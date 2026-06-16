@@ -137,6 +137,8 @@ export const articleQuerySchema = z.object({
   status: z.enum(['draft','submitted','review','revision','approved','scheduled','published','archived']).optional(),
   search: z.string().optional(),
   category: z.string().optional(),
+  startDate: z.string().optional(), // ISO date string for date range filtering
+  endDate: z.string().optional(),   // ISO date string for date range filtering
   page: z.coerce.number().positive().default(1),
   limit: z.coerce.number().positive().max(100).default(20)
 })

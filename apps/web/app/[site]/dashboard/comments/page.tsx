@@ -17,6 +17,7 @@ import {
 import { api } from '../../../../lib/api';
 import Skeleton from '../../../../components/ui/Skeleton';
 import { cn } from '../../../../lib/utils';
+import { useRequireRole } from '../../../../hooks/useRequireRole';
 
 interface Comment {
   id: string;
@@ -30,12 +31,23 @@ interface Comment {
 }
 
 export default function ModerationPage() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const { site } = useParams() as { site: string };
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('pending');
+  const [stats, setStats] = useState({ pending: 0, approvedToday: 0, total: 0 });
+
+  const fetchStats = async () => {
+    try {
+      const { data } = await api.get('/comments/stats');
+      if (data.success) setStats(data.data);
+    } catch (err) {
+      console.error('Failed to fetch comment stats:', err);
+    }
+  };
 
   const fetchQueue = async (signal?: AbortSignal) => {
     setLoading(true);
@@ -57,6 +69,7 @@ export default function ModerationPage() {
     const timer = setTimeout(() => {
       fetchQueue(controller.signal);
     }, 500);
+    fetchStats();
     return () => { clearTimeout(timer); controller.abort(); };
   }, [search, status]);
 
@@ -84,6 +97,8 @@ export default function ModerationPage() {
       setProcessingId(null);
     }
   };
+
+  if (!isAllowed) return null;
 
   return (
     <div className="space-y-8">
@@ -130,15 +145,15 @@ export default function ModerationPage() {
             <p className="text-[10px] font-black uppercase tracking-widest text-violet-600 dark:text-violet-400">Menunggu Review</p>
             <AlertCircle size={14} className="text-violet-500" />
           </div>
-          <p className="text-3xl font-black text-brand-black dark:text-white">{comments.length}</p>
+          <p className="text-3xl font-black text-brand-black dark:text-white">{stats.pending}</p>
         </div>
         <div className="dash-card p-5">
           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Disetujui Hari Ini</p>
-          <p className="text-3xl font-black text-brand-black dark:text-white">0</p>
+          <p className="text-3xl font-black text-brand-black dark:text-white">{stats.approvedToday}</p>
         </div>
         <div className="dash-card p-5">
           <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Total Diskusi</p>
-          <p className="text-3xl font-black text-brand-black dark:text-white">0</p>
+          <p className="text-3xl font-black text-brand-black dark:text-white">{stats.total}</p>
         </div>
       </div>
 

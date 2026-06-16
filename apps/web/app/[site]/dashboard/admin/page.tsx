@@ -4,21 +4,22 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { api } from '../../../../lib/api'
 import { SiteCategoriesDialog } from './components/SiteCategoriesDialog'
-import { 
-  Plus, 
-  Settings, 
-  Trash2, 
-  Edit3, 
-  Globe, 
-  Mail, 
-  Users, 
-  FileText, 
+import {
+  Plus,
+  Settings,
+  Trash2,
+  Edit3,
+  Globe,
+  Mail,
+  Users,
+  FileText,
   FolderOpen,
   Tags,
   AlertTriangle,
   X,
   CheckCircle2
 } from 'lucide-react'
+import { useRequireRole } from '../../../../hooks/useRequireRole'
 
 interface Site {
   id: string
@@ -33,6 +34,7 @@ interface Site {
 }
 
 export default function AdminDashboardPage() {
+  const { isAllowed } = useRequireRole(['superadmin']);
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -285,6 +287,8 @@ export default function AdminDashboardPage() {
           document.body
         )
       : null
+
+  if (!isAllowed) return null;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">

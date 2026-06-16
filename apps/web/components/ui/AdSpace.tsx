@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 import { API_URL } from '../../lib/api';
 
 interface AdSpaceProps {
-  type: 'leaderboard' | 'rectangle' | 'in-feed';
+  type: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in-feed';
   slot?: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed';
   label?: string;
   className?: string;
@@ -128,6 +128,7 @@ export default function AdSpace({
   const styles = {
     leaderboard: "w-full h-24 md:h-[250px] mb-6",
     rectangle: "w-full h-[250px] mb-8",
+    rectangle_secondary: "w-full h-[250px] mb-8",
     'in-feed': "w-full h-40 mb-12"
   };
 

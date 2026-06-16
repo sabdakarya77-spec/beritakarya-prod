@@ -27,6 +27,7 @@ import Link from 'next/link'
 // [A-5d] Fix: use api (axios with auth interceptor + auto token refresh) instead of raw axios with manual token
 import { api } from '../../../../../lib/api'
 import { cn } from '../../../../../lib/utils'
+import { useRequireRole } from '../../../../../hooks/useRequireRole'
 
 interface KYCUser {
   id: string
@@ -50,6 +51,7 @@ interface KYCStats {
 }
 
 export default function KYCReviewPage() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const params = useParams()
   const siteId = params.site as string
   const [users, setUsers] = useState<KYCUser[]>([])
@@ -116,6 +118,8 @@ export default function KYCReviewPage() {
     { label: 'Ditolak (7h)', value: stats.rejectedThisWeek, color: 'text-red-600', bg: 'bg-red-50' },
     { label: 'Rata-rata Waktu', value: `${stats.avgApprovalTime} Jam`, color: 'text-slate-600', bg: 'bg-slate-50' }
   ]
+
+  if (!isAllowed) return null;
 
   return (
     <div className="space-y-8 animate-fade-in">

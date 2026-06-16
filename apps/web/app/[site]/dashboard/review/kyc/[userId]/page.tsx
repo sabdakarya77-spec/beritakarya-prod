@@ -18,6 +18,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { api } from '../../../../../../lib/api'
 import { cn } from '../../../../../../lib/utils'
+import { useRequireRole } from '../../../../../../hooks/useRequireRole'
 
 interface KYCUser {
   id: string
@@ -35,6 +36,7 @@ interface KYCUser {
 }
 
 export default function KYCDetailReviewPage() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const params = useParams()
   const siteId = params.site as string
   const userId = params.userId as string
@@ -87,6 +89,8 @@ export default function KYCDetailReviewPage() {
       setSubmitting(false)
     }
   }
+
+  if (!isAllowed) return null;
 
   if (loading) {
     return (

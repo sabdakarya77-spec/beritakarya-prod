@@ -32,6 +32,7 @@ import { api } from '../../../../lib/api'
 import { useAuthStore } from '../../../../store/authStore'
 import { ALL_LEGAL_PAGES } from '../../../../lib/legalPages'
 import { LegalRichTextEditor } from '../../../../components/dashboard/settings/LegalRichTextEditor'
+import { useRequireRole } from '../../../../hooks/useRequireRole'
 
 type SettingsTab = 'basic' | 'contact' | 'google' | 'info' | 'trending'
 type LegalFieldKey =
@@ -42,9 +43,9 @@ type LegalFieldKey =
   | 'termsOfService'
   | 'mediaSiber'
 export default function SettingsPage() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred'])
   const { site } = useParams() as { site: string }
   const { user } = useAuthStore()
-
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
@@ -296,6 +297,8 @@ export default function SettingsPage() {
   const tabs = allTabs.filter((t) => isSuperadmin || (t.id !== 'google' && t.id !== 'info'))
 
   const contrastAdvice = getContrastAdvice(settings.appearance.primaryColor)
+
+  if (!isAllowed) return null;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-24">

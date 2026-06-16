@@ -33,15 +33,25 @@ export async function runAdExpiry() {
       })
 
       // 2. Nonaktifkan Advertisement slot terkait
-      //    Hanya nonaktifkan jika slot masih menampilkan kreatif dari booking ini
-      const adv = await prisma.advertisement.findFirst({
+      //    Gunakan bookingId untuk link langsung, fallback ke imageUrl match
+      let adv = await prisma.advertisement.findFirst({
         where: {
-          siteId: booking.siteId,
-          slot: booking.package.slot,
-          imageUrl: booking.imageUrl,
+          bookingId: booking.id,
           isActive: true,
         },
       })
+
+      // Fallback: jika bookingId belum di-backfill (data lama), coba match via imageUrl
+      if (!adv) {
+        adv = await prisma.advertisement.findFirst({
+          where: {
+            siteId: booking.siteId,
+            slot: booking.package.slot,
+            imageUrl: booking.imageUrl,
+            isActive: true,
+          },
+        })
+      }
 
       if (adv) {
         await prisma.advertisement.update({

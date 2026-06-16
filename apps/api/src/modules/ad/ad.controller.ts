@@ -29,16 +29,16 @@ adRouter.post('/track/:id',
             where: { id },
             data: { impressions: { increment: 1 } }
           })
-          // Sync ke AdBooking yang ACTIVE
-          await syncTrackingToBooking(ad.siteId, ad.slot, 'impression')
+          // Sync ke AdBooking yang terkait
+          await syncTrackingToBooking(ad.siteId, ad.slot, 'impression', ad.bookingId)
         }
       } else if (action === 'click') {
         await prisma.advertisement.update({
           where: { id },
           data: { clicks: { increment: 1 } }
         })
-        // Sync ke AdBooking yang ACTIVE
-        await syncTrackingToBooking(ad.siteId, ad.slot, 'click')
+        // Sync ke AdBooking yang terkait
+        await syncTrackingToBooking(ad.siteId, ad.slot, 'click', ad.bookingId)
       }
     } catch (e) {
       // Ignore if ad not found
@@ -415,6 +415,27 @@ adRouter.post('/bookings/:id/approve',
       })
     }
 
+    // Validasi overlap: non-leaderboard slot tidak boleh ada booking aktif yang tanggalnya overlap
+    if (booking.package.slot !== 'leaderboard') {
+      const overlapping = await prisma.adBooking.findFirst({
+        where: {
+          siteId: booking.siteId,
+          status: 'ACTIVE',
+          id: { not: booking.id },
+          package: { slot: booking.package.slot },
+          startDate: { lte: booking.endDate },
+          endDate: { gte: booking.startDate },
+        },
+        include: { package: true }
+      })
+      if (overlapping) {
+        return res.status(409).json({
+          success: false,
+          message: `Slot "${booking.package.slot}" sudah ditempati booking lain (${overlapping.id}) pada rentang tanggal ${overlapping.startDate.toISOString().slice(0, 10)} — ${overlapping.endDate.toISOString().slice(0, 10)}. Tolak atau tunggu hingga booking tersebut berakhir.`
+        })
+      }
+    }
+
     // Update booking status
     const updatedBooking = await prisma.adBooking.update({
       where: { id },
@@ -431,7 +452,8 @@ adRouter.post('/bookings/:id/approve',
       code: null,
       isActive: true,
       impressions: 0,
-      clicks: 0
+      clicks: 0,
+      bookingId: booking.id
     }
 
     if (booking.package.slot === 'leaderboard') {

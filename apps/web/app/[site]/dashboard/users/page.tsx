@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { useToastStore } from '../../../../store/toastStore';
 import { useAuthStore } from '../../../../store/authStore';
+import { useRequireRole } from '../../../../hooks/useRequireRole';
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ interface User {
 }
 
 export default function UsersDashboard() {
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
   const [users, setUsers] = useState<User[]>([]);
   const [sites, setSites] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,8 @@ export default function UsersDashboard() {
   const router = useRouter();
   const { addToast } = useToastStore();
   const { user: currentUser } = useAuthStore();
+
+  if (!isAllowed) return null;
 
   // [A-5b] Fix: use useParams() instead of window.location.pathname regex (which always returned empty string)
   const params = useParams();

@@ -361,6 +361,15 @@ export default async function ArticlePage({ params }: Props) {
                                   </div>
                                 );
                               }
+
+                              // After 7th paragraph: insert in-feed ad
+                              if (paragraphCount === 7) {
+                                elements.push(
+                                  <div key="visual-break-infeed-ad" className="my-10">
+                                    <AdSpace type="in-feed" label="Iklan" />
+                                  </div>
+                                );
+                              }
                             }
                           }
                           return elements;
