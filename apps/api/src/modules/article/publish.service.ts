@@ -18,9 +18,10 @@ export async function finalizeArticlePublish(
   articleBefore: { id: string; title: string; slug: string; authorId: string; status: string },
   actor: PublishActor
 ) {
+  const existingArticle = await repo.findArticleById(id, siteId)
   const updated = await repo.updateArticle(id, siteId, {
     status: 'published',
-    publishedAt: new Date()
+    publishedAt: existingArticle?.publishedAt || new Date()
   } as any)
 
   await repo.createAuditLog({
