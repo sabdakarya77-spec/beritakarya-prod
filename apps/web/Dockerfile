@@ -25,7 +25,7 @@ COPY packages/config/package.json ./packages/config/
 # Copy source
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
-COPY turbo.json ./
+COPY turbo.json tsconfig.json ./
 # Install dependencies (all packages to ensure devDependencies for build)
 RUN pnpm install --frozen-lockfile
 # Build workspace packages first
