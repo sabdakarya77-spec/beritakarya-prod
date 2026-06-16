@@ -25,7 +25,8 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
 COPY turbo.json pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-# Generate Prisma Client and build
+# Build workspace packages first (types, utils, config), then generate Prisma and build API
+RUN pnpm --filter @beritakarya/types build && pnpm --filter @beritakarya/utils build && pnpm --filter @beritakarya/config build
 RUN cd apps/api && npx prisma generate
 RUN cd apps/api && pnpm run build
 

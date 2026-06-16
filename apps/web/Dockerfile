@@ -25,7 +25,8 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 COPY turbo.json pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-# Build Next.js (standalone output)
+# Build workspace packages first, then Next.js
+RUN pnpm --filter @beritakarya/types build && pnpm --filter @beritakarya/utils build && pnpm --filter @beritakarya/config build
 RUN cd apps/web && pnpm run build
 
 # ---- Runner ----
