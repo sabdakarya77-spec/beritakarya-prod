@@ -26,10 +26,10 @@ export { MenuList, defaultSlashMenuItems } from './menus/SlashMenu'
 export { AIPanel } from './ai/AIPanel'
 export { AIResultCard } from './ai/tabs/AIResultCard'
 export { WriteTab } from './ai/tabs/WriteTab'
-export { OptimizeTab } from './ai/tabs/OptimizeTab'
+export { SEOTab } from './ai/tabs/SEOTab'
 export { ValidateTab } from './ai/tabs/ValidateTab'
 export { ImageTab } from './ai/tabs/ImageTab'
-export { SEOAuditTab } from './ai/tabs/SEOAuditTab'
+export { AnalisisTab } from './ai/tabs/AnalisisTab'
 
 // Media Library Modal
 export { MediaLibraryModal } from './MediaLibraryModal'

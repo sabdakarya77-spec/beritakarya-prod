@@ -1,22 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Pencil, Lightbulb, ShieldCheck, Image, Search, Circle } from 'lucide-react'
+import { Sparkles, Pencil, Search, ShieldCheck, Image, BarChart3, Circle } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { WriteTab } from './tabs/WriteTab'
-import { OptimizeTab } from './tabs/OptimizeTab'
+import { SEOTab } from './tabs/SEOTab'
 import { ValidateTab } from './tabs/ValidateTab'
 import { ImageTab } from './tabs/ImageTab'
-import { SEOAuditTab } from './tabs/SEOAuditTab'
+import { AnalisisTab } from './tabs/AnalisisTab'
 
-type TabId = 'write' | 'optimize' | 'validate' | 'image' | 'seo'
+type TabId = 'write' | 'seo' | 'validate' | 'image' | 'analisis'
 
 const TABS = [
   { id: 'write' as const, label: 'Tulis', icon: Pencil },
-  { id: 'optimize' as const, label: 'Optimasi', icon: Lightbulb },
+  { id: 'seo' as const, label: 'SEO', icon: Search },
   { id: 'validate' as const, label: 'Validasi', icon: ShieldCheck },
   { id: 'image' as const, label: 'Gambar', icon: Image },
-  { id: 'seo' as const, label: 'SEO', icon: Search },
+  { id: 'analisis' as const, label: 'Analisis', icon: BarChart3 },
 ]
 
 interface AIPanelProps {
@@ -91,10 +91,10 @@ export function AIPanel({ isOpen = true, onClose, editor }: AIPanelProps) {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'write' && <WriteTab />}
-        {activeTab === 'optimize' && <OptimizeTab />}
+        {activeTab === 'seo' && <SEOTab />}
         {activeTab === 'validate' && <ValidateTab />}
         {activeTab === 'image' && <ImageTab />}
-        {activeTab === 'seo' && <SEOAuditTab />}
+        {activeTab === 'analisis' && <AnalisisTab />}
       </div>
 
       {/* Footer */}

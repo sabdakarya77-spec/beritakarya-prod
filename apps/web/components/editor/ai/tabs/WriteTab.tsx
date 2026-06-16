@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
-import { useRewrite, useExpand } from '../../../../hooks/useAI'
+import { Loader2, ChevronDown, ChevronRight } from 'lucide-react'
+import { useRewrite, useExpand, useTranscriptToQuote } from '../../../../hooks/useAI'
 
 type Tone = 'formal' | 'santai' | 'berita'
 type Length = 'lebih_pendek' | 'sama' | 'lebih_panjang'
@@ -23,9 +23,12 @@ export function WriteTab() {
   const [text, setText] = useState('')
   const [tone, setTone] = useState<Tone>('berita')
   const [length, setLength] = useState<Length>('sama')
+  const [transcriptText, setTranscriptText] = useState('')
+  const [showTranscript, setShowTranscript] = useState(false)
 
   const rewriteState = useRewrite()
   const expandState = useExpand()
+  const transcriptState = useTranscriptToQuote()
 
   const handleRewrite = async () => {
     if (!text.trim()) return
@@ -35,6 +38,11 @@ export function WriteTab() {
   const handleExpand = async () => {
     if (!text.trim()) return
     await expandState.expand({ content: text })
+  }
+
+  const handleTranscript = async () => {
+    if (!transcriptText.trim()) return
+    await transcriptState.transcript({ transcript: transcriptText })
   }
 
   const applyResult = (result: string) => {
@@ -139,6 +147,66 @@ export function WriteTab() {
       {(rewriteState.error || expandState.error) && (
         <div className="p-2 bg-red-50 text-red-600 text-xs rounded-lg">
           {rewriteState.error || expandState.error}
+        </div>
+      )}
+
+      {/* Divider */}
+      <div className="border-t border-gray-200 dark:border-slate-700" />
+
+      {/* Transcript to Quote - Collapsible */}
+      <button
+        onClick={() => setShowTranscript(!showTranscript)}
+        className="flex items-center gap-1 text-[10px] font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+      >
+        {showTranscript ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        Transkrip → Kutipan Berita
+      </button>
+
+      {showTranscript && (
+        <div className="space-y-3">
+          <textarea
+            value={transcriptText}
+            onChange={(e) => setTranscriptText(e.target.value)}
+            placeholder="Tempel transkrip wawancara di sini..."
+            className="w-full h-24 px-3 py-2 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 resize-none"
+          />
+          <button
+            onClick={handleTranscript}
+            disabled={!transcriptText.trim() || transcriptState.loading}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-teal-600 text-white text-xs font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+          >
+            {transcriptState.loading ? <Loader2 size={14} className="animate-spin" /> : null}
+            Ekstrak Kutipan
+          </button>
+
+          {transcriptState.result && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-medium text-teal-600">Kutipan Hasil</span>
+                <button
+                  onClick={() => applyResult(transcriptState.result!.quote)}
+                  className="text-[10px] px-2 py-1 bg-teal-100 text-teal-700 rounded hover:bg-teal-200"
+                >
+                  Terapkan ke Editor
+                </button>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-xs text-gray-700 dark:text-gray-300 space-y-1.5">
+                <p className="italic">"{transcriptState.result.quote}"</p>
+                <p className="text-[10px] text-gray-500">
+                  — {transcriptState.result.speaker}
+                </p>
+                {transcriptState.result.context && (
+                  <p className="text-[10px] text-gray-400">{transcriptState.result.context}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {transcriptState.error && (
+            <div className="p-2 bg-red-50 text-red-600 text-xs rounded-lg">
+              {transcriptState.error}
+            </div>
+          )}
         </div>
       )}
     </div>
