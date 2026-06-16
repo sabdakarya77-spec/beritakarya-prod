@@ -43,8 +43,10 @@ playwright-report
 test-results
 apps/web/tests
 
-# ── Build Info (akan di-regenerate) ──────────────────────────
+# ── Build Info & Declaration Files (akan di-regenerate) ──────
 *.tsbuildinfo
+*.d.ts
+*.d.ts.map
 
 # ── IDE & OS ──────────────────────────────────────────────────
 .vscode
