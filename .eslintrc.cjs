@@ -28,7 +28,7 @@ module.exports = {
         'plugin:react-hooks/recommended'
       ],
       rules: {
-        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-unused-vars': process.env.CI ? 'off' : ['warn', { argsIgnorePattern: '^_' }],
         '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true, allowShortCircuit: true }],
         '@typescript-eslint/no-namespace': 'off',
@@ -39,7 +39,7 @@ module.exports = {
         'react/react-in-jsx-scope': 'off',
         'react/prop-types': 'off',
         'react/no-unknown-property': ['error', { ignore: ['jsx'] }],
-        'react-hooks/exhaustive-deps': 'off',
+        'react-hooks/exhaustive-deps': 'warn',
         'react-hooks/set-state-in-effect': 'off',
         'react-hooks/no-set-state-in-effect': 'off',
         // Enforce Container usage in public pages

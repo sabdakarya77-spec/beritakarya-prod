@@ -6,8 +6,9 @@
 # ── Environment Files ─────────────────────────────────────────
 .env
 .env.*
-!.env.production.example
-infra/docker/.env
+apps/api/.env
+apps/web/.env
+apps/web/.env.local
 
 # ── Node Modules (akan diinstall ulang di dalam container) ────
 node_modules
@@ -38,6 +39,9 @@ temp
 *.spec.ts
 coverage
 **/__tests__
+playwright-report
+test-results
+apps/web/tests
 
 # ── Build Info (akan di-regenerate) ──────────────────────────
 *.tsbuildinfo
@@ -49,3 +53,7 @@ coverage
 Thumbs.db
 *.swp
 *.swo
+
+# ── Docs (not needed in image) ────────────────────────────────
+*.md
+docs

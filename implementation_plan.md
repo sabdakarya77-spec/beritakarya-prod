@@ -519,13 +519,13 @@ jobs:
 ### Milestone Checklist
 
 #### Fase 1: Foundation (Week 1–2)
-- [ ] 1.1 Verifikasi .env files tidak di git
-- [ ] 1.2 Bersihkan broken docs references
-- [ ] 1.3 Buat Dockerfile (API + Web)
-- [ ] 1.3 Buat docker-compose.yml
+- [x] 1.1 Verifikasi .env files tidak di git ✅ (2026-06-16)
+- [x] 1.2 Bersihkan broken docs references ✅ (2026-06-16)
+- [x] 1.3 Buat Dockerfile (API + Web) ✅ (2026-06-16)
+- [x] 1.3 Buat docker-compose.yml ✅ (2026-06-16)
 - [ ] 1.3 Test `docker-compose up` berhasil
-- [ ] 1.4 Aktifkan ESLint rules (warn)
-- [ ] 1.4 Catat baseline warning count
+- [x] 1.4 Aktifkan ESLint rules (warn) ✅ (2026-06-16)
+- [x] 1.4 Catat baseline warning count ✅ (2026-06-16) — 360 warnings, 0 errors
 
 #### Fase 2: Testing (Week 3–5)
 - [ ] 2.1 Buat API vitest.config.mts dengan threshold

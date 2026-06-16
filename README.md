@@ -28,12 +28,9 @@ beritakarya/                         ← Monorepo Root (Turborepo + pnpm)
 │   ├── types/                       ← Shared TypeScript types
 │   ├── utils/                       ← Shared utilities
 │   └── config/                      ← Shared ESLint/TS config
-├── docs/                            ← Design system, audit, roadmap UI/UX
-├── infra/
-│   ├── docker/                      ← Dockerfile & docker-compose
-│   ├── nginx/                       ← Nginx (dev/staging/prod)
-│   └── scripts/                     ← Setup, SSL, backup
-└── .github/workflows/               ← CI & deploy (build image GHCR)
+├── docs/                            ← Documentation (Coming Soon)
+├── docker-compose.yml               ← Local dev services
+└── .github/workflows/               ← CI pipeline
 ```
 
 ---
@@ -51,8 +48,6 @@ beritakarya/                         ← Monorepo Root (Turborepo + pnpm)
 | **AI**         | OpenAI API (GPT-4o default)                |
 | **Auth**       | JWT HttpOnly cookie + CORS whitelist       |
 | **Container**  | Docker + Docker Compose                    |
-| **Web Server** | Nginx (reverse proxy di VPS)               |
-| **SSL**        | Let's Encrypt (Certbot)                    |
 | **Monitoring** | Sentry, Winston                            |
 
 ---
@@ -123,7 +118,7 @@ Shell bersama halaman informasi: **`PublicInfoShell`** (`components/layout/`). D
 - **Soft delete** — `deletedAt` pada entitas utama
 - **Kuota AI** — Limit harian & budget bulanan per user/role
 
-Ringkasan audit lengkap: [AUDIT_SISTEM.md](./AUDIT_SISTEM.md).
+<!-- TODO: Tambahkan ringkasan audit setelah AUDIT_SISTEM.md dibuat -->
 
 ---
 
@@ -200,8 +195,6 @@ pnpm --filter @beritakarya/web exec playwright test
 |------|----------------|
 | `apps/api/.env.example` | API + Prisma |
 | `apps/web/.env.example` | Next.js (utama: `NEXT_PUBLIC_*` untuk dev lokal) |
-| `.env.production.example` | Referensi VPS |
-| `infra/docker/.env` | Docker di server _(buat manual, di-gitignore)_ |
 
 ---
 
@@ -215,12 +208,10 @@ Workflow artikel: `draft` → `submitted` → `review` → `revision` → `appro
 
 ## Deployment
 
-Panduan VPS: **[VPS_DEPLOYMENT_GUIDE.md](./VPS_DEPLOYMENT_GUIDE.md)**
-
 GitHub Actions:
 
-- **`ci.yml`** — lint, type-check, build, `pnpm audit` (level high)
-- **`deploy.yml`** — test + build & push image Docker ke GHCR (job deploy VPS dapat dinonaktifkan)
+- **`ci.yml`** — lint, type-check, build, test, `pnpm audit` (level high), E2E Playwright
+- **`deploy.yml`** — _(Coming Soon)_ build & push image Docker ke GHCR
 
 Frontend juga dapat di-deploy ke **Vercel** (`apps/web/vercel.json`).
 
@@ -240,11 +231,11 @@ pnpm --filter @beritakarya/web test    # Web (Vitest)
 
 ### Layout & halaman publik
 
-- [Layout System](./docs/design-system/layout-system.md) — `Container`, token, bleed
-- [Homepage Spec](./docs/design-system/homepage-spec.md)
-- [Article Page Spec](./docs/design-system/article-spec.md)
-- [Legal Public Pages](./docs/design-system/legal-public-page-spec.md)
-- [Ads Public Page](./docs/design-system/ads-public-page-spec.md)
+- Layout System — `Container`, token, bleed _(Coming Soon)_
+- Homepage Spec _(Coming Soon)_
+- Article Page Spec _(Coming Soon)_
+- Legal Public Pages _(Coming Soon)_
+- Ads Public Page _(Coming Soon)_
 
 ### Contoh `Container`
 
@@ -271,18 +262,14 @@ import { LegalStandardPage } from '@/components/legal'
 
 ### Roadmap & audit
 
-- [UI/UX Roadmap (checklist S-tier)](./docs/UI_UX_ROADMAP.md)
-- [Audit Sistem](./AUDIT_SISTEM.md)
+- UI/UX Roadmap _(Coming Soon)_
+- Audit Sistem _(Coming Soon)_
 
 ---
 
 ## Backup Database
 
-```bash
-bash infra/scripts/backup-database.sh
-```
-
-Backup di `/var/backups/beritakarya/`, rotasi 7 hari.
+<!-- TODO: Tambahkan instruksi backup database setelah infra/scripts dibuat -->
 
 ---
 
