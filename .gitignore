@@ -44,9 +44,11 @@ build/
 out/
 *.tsbuildinfo
 
-# Packages JS Build output
+# Packages Build output (JS, declaration, source maps)
 packages/*/src/**/*.js
 packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
 
 # Dependencies
 node_modules/
@@ -54,3 +56,10 @@ node_modules/
 
 # Turbo
 .turbo/
+
+# ESLint temp files
+.eslintrc.cjs.tmp*
+
+# Test artifacts
+playwright-report/
+test-results/
