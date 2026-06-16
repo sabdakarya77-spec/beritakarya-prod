@@ -14,11 +14,12 @@ Dokumentasi lengkap untuk BeritaKarya.
 ## Quick Links
 
 - [CLAUDE.md](../CLAUDE.md) — Project overview untuk Claude Code
-- [Implementation Plan](../implementation_plan.md) — Roadmap perbaikan
+- [UI/UX Audit](../audit_UI_UX.md) — Audit komprehensif dan rencana perbaikan UI/UX
 - API Docs — http://localhost:3001/api-docs (Swagger, saat API berjalan)
 
 ## Planned Documentation
 
+- [x] UI/UX Audit & Improvement Plan (`audit_UI_UX.md`)
 - [ ] Design System specs
 - [ ] API Reference (Swagger annotations)
 - [ ] Changelog

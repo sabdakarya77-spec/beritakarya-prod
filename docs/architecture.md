@@ -129,12 +129,38 @@ Request → CORS → Helmet → JWT Verify → Rate Limit → Site Middleware
 
 ```
 components/
-├── layout/           # Container, PublicSiteLayout, PublicInfoShell
+├── ui/               # Reusable UI components (NewsCard, SmartImage, Skeleton, FullScreenSearch, etc.)
+├── layout/           # Navbar, SiteFooter, PublicSiteLayout, Container, MobileBottomNav
+├── berita/           # News-specific components (MagazineBentoHero, dll.)
 ├── editor/           # TipTap rich text editor
 ├── legal/            # Legal document components
 ├── marketing/        # Landing page components
 └── pages/            # Page-level components (SiteHomePage)
 ```
+
+### Accessibility
+
+Frontend mengikuti standar WCAG 2.1 AA:
+
+- **Focus management**: Global `:focus-visible` outline dengan `brand-red`, `prefers-reduced-motion` untuk menonaktifkan animasi
+- **Keyboard navigation**: FullScreenSearch punya focus trap dan Escape handler; Navbar dropdown mendukung Enter/Space/Escape
+- **ARIA attributes**: `role="dialog"` pada overlay, `aria-expanded`/`aria-haspopup` pada dropdown, `role="status"` pada skeleton loaders, `aria-live` pada search results
+- **Skip-to-content**: Link "Langsung ke konten" sebelum navbar untuk keyboard/screen reader users
+- **Touch targets**: Minimum 44px untuk semua elemen interaktif (bookmark buttons, nav icons, social icons, category chips)
+- **Color contrast**: Navbar menggunakan `dark:` prefix untuk theme-aware colors; `--color-*` dan `--status-*` punya dark mode overrides
+
+### Design System Tokens
+
+CSS custom properties di `globals.css` (light/dark):
+
+| Token | Light | Dark | Purpose |
+|-------|-------|------|---------|
+| `--brand-red` | #B91C1C | #EF4444 | Primary brand color |
+| `--brand-text` | #0F172A | #F8FAFC | Primary text |
+| `--brand-text-muted` | #64748B | #94A3B8 | Secondary text |
+| `--bg-main` | #F8FAFC | #020617 | Page background |
+
+Tailwind config memetakan token ini ke `brand-*` classes dengan opacity modifier support.
 
 ## Database Schema
 
