@@ -16,16 +16,19 @@ RUN pnpm install --frozen-lockfile --filter @beritakarya/api...
 # ---- Builder ----
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=deps /app/packages/types/node_modules ./packages/types/node_modules
-COPY --from=deps /app/packages/utils/node_modules ./packages/utils/node_modules
-COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
+# Copy workspace structure
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/types/package.json ./packages/types/
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/config/package.json ./packages/config/
 # Copy source
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
-COPY turbo.json pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-# Build workspace packages first (order matters: types/config before utils)
+COPY turbo.json ./
+# Install dependencies (pnpm handles symlinks correctly within this stage)
+RUN pnpm install --frozen-lockfile --filter @beritakarya/api...
+# Build workspace packages first
 RUN cd packages/types && pnpm run build
 RUN cd packages/config && pnpm run build
 RUN cd packages/utils && pnpm run build
