@@ -211,7 +211,8 @@ Workflow artikel: `draft` → `submitted` → `review` → `revision` → `appro
 GitHub Actions:
 
 - **`ci.yml`** — lint, type-check, build, test, `pnpm audit` (level high), E2E Playwright
-- **`deploy.yml`** — _(Coming Soon)_ build & push image Docker ke GHCR
+- **`deploy.yml`** — build & push Docker images ke GHCR (triggered on push to main)
+- **`backup.yml`** — daily database backup (2 AM UTC / 9 AM WIB)
 
 Frontend juga dapat di-deploy ke **Vercel** (`apps/web/vercel.json`).
 

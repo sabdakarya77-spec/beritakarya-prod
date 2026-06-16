@@ -558,9 +558,9 @@ jobs:
 - [ ] 3.4 Evaluasi JSON columns (tags → tabel) (ditunda)
 
 #### Fase 4: CI/CD (Week 6–8)
-- [ ] 4.1 Deploy workflow (GitHub Actions)
-- [ ] 4.2 Database backup automation
-- [ ] 4.3 Environment parity checklist
+- [x] 4.1 Deploy workflow (GitHub Actions) ✅ (2026-06-16) — build & push to GHCR, staging deploy
+- [x] 4.2 Database backup automation ✅ (2026-06-16) — daily cron, artifact retention 7 days
+- [x] 4.3 Environment parity checklist ✅ (2026-06-16) — Docker HEALTHCHECK added to both Dockerfiles
 
 #### Dokumentasi (Ongoing)
 - [ ] `docs/setup.md`
