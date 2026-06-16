@@ -74,7 +74,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
   const badgeVariant = resolveArticleBadge(article);
   const authorName = article.author?.name || 'Redaksi';
   const categoryLabelClass = cn(
-    "rounded-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.14em]",
+    "rounded-sm px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em]",
     getCategoryColor(article.category?.name)
   );
   const calmMetaClass = "flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-brand-text-muted";
@@ -113,7 +113,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             <div className="absolute bottom-0 left-0 w-full max-w-3xl p-6 pb-20 md:p-8 md:pb-12">
               <div className="mb-3.5 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
-                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
@@ -123,7 +123,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               <p className="mb-5 max-w-2xl line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
                 {excerpt}
               </p>
-              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[10px] font-semibold text-white/70">
+              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[11px] font-semibold text-white/70">
                 <div className="flex items-center gap-1.5">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-[10px] font-black text-white">
                     {authorName[0] || 'R'}
@@ -152,7 +152,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           iconSize={15}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
-          <div className="py-3.5 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
+          <div className="py-3 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
             <div className="flex-1">
               <div className="mb-2 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
@@ -160,7 +160,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h3 className="line-clamp-3 font-sans text-[0.92rem] font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1rem]">
+              <h3 className="line-clamp-3 font-sans text-sm font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
                 {article.title}
               </h3>
               <div className={cn(calmMetaClass, "mt-2.5")}>
@@ -191,7 +191,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             whileHover={{ x: 2 }}
             className="group flex cursor-pointer gap-4 border-b border-gray-100 pb-4 pr-12 dark:border-white/5 md:gap-5 last:border-0"
           >
-            <div className="relative aspect-[16/10] w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
+            <div className="relative aspect-[16/10] w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-28">
               <SmartImage 
                 src={imageUrl} 
                 blur={article.featuredImageBlur}
@@ -210,14 +210,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h3 className="line-clamp-3 font-sans text-[0.98rem] font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1.1rem]">
+              <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
                 {article.title}
               </h3>
               <p className="hidden line-clamp-2 text-xs leading-relaxed text-brand-text-muted/90 dark:text-brand-text-muted md:block">
                 {excerpt}
               </p>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-brand-text-muted">
-                 <span className="flex min-w-0 items-center gap-1"><User size={10}/> <span className="truncate">{authorName}</span></span>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
+                 <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>
                  <span>{date}</span>
               </div>
             </div>
@@ -243,7 +243,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           className="group relative flex cursor-pointer flex-col gap-3 md:gap-4"
         >
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
             <SmartImage 
               src={imageUrl} 
               blur={article.featuredImageBlur}
@@ -264,10 +264,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 {article.category?.name || 'UMUM'}
               </span>
             </div>
-              <h3 className="line-clamp-3 font-sans text-[1.08rem] font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[1.18rem]">
+              <h3 className="line-clamp-2 font-sans text-base font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-lg">
                 {article.title}
               </h3>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[10px] text-brand-text-muted">
+              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] text-brand-text-muted">
                <div className="flex min-w-0 items-center gap-1">
                   <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold dark:bg-white/10">
                     {authorName[0] || 'R'}

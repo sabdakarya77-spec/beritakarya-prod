@@ -57,7 +57,7 @@ export default function SavedArticlesFeed({ site }: SavedArticlesFeedProps) {
       <div className="mb-6 text-[10px] font-black uppercase tracking-[0.16em] text-brand-text-muted">
         {articles.length} artikel tersimpan
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
         {articles.map((article) => (
           <div key={`${article.site}-${article.slug}`} className="space-y-4">
             <NewsCard article={article} site={site} />

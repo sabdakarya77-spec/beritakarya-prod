@@ -421,14 +421,14 @@ Semua varian menggunakan `text-[10px]` untuk metadata (kategori, tanggal, author
 
 ### Fase 2: NewsCard & Grid Consistency (Estimasi: 1-2 jam) — PRIORITAS SEDANG
 
-| # | Task | File | Detail |
-|---|---|---|---|
-| 2.1 | Kecilkan medium variant | `NewsCard.tsx` | Aspect `16/10` → `16/9`, font tetap ≥ `text-[1rem]`, line-clamp 3→2 |
-| 2.2 | Kecilkan horizontal variant | `NewsCard.tsx` | Image `w-24` md `w-28`, line-clamp 3→2 |
-| 2.3 | Kurangi minimal padding | `NewsCard.tsx` | `py-3.5` → `py-3` |
-| 2.4 | Standardize grid gaps | 5 files | Semua 2-col grid → `gap-5 md:gap-6` |
-| 2.5 | Metadata font → 11px | `NewsCard.tsx` | `text-[10px]` → `text-[11px]` |
-| 2.6 | Standardize heading sizes | `NewsCard.tsx` | Gunakan `text-sm`/`text-base`/`text-lg` alih-alih `[0.92rem]` |
+| # | Task | File | Detail | Status |
+|---|---|---|---|---|
+| 2.1 | Kecilkan medium variant | `NewsCard.tsx` | Aspect `16/10` → `16/9`, line-clamp 3→2 | ✅ |
+| 2.2 | Kecilkan horizontal variant | `NewsCard.tsx` | Image `w-24` md `w-28`, line-clamp 3→2 | ✅ |
+| 2.3 | Kurangi minimal padding | `NewsCard.tsx` | `py-3.5` → `py-3` | ✅ |
+| 2.4 | Standardize grid gaps | 4 files | `gap-x-12 gap-y-16` → `gap-5 md:gap-6` | ✅ |
+| 2.5 | Metadata font → 11px | `NewsCard.tsx` | `text-[10px]` → `text-[11px]` | ✅ |
+| 2.6 | Standardize heading sizes | `NewsCard.tsx` | `text-sm`/`text-base`/`text-lg` | ✅ |
 
 ### Fase 3: Performance & Missing Pages (Estimasi: 1-2 jam) — PRIORITAS SEDANG
 
