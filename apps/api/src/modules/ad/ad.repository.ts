@@ -119,7 +119,7 @@ export async function deletePackage(id: string) {
 // ─── Ad Bookings ──────────────────────────────────────────────────────────────
 
 export async function findBookingById<T extends Record<string, boolean> | undefined>(id: string, include?: T) {
-  return prisma.adBooking.findUnique({ where: { id }, include }) as Promise<any>
+  return prisma.adBooking.findUnique({ where: { id }, include }) as Promise<Record<string, unknown>>
 }
 
 export async function findBookingsByUser(userId: string) {

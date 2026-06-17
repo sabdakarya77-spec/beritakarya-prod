@@ -305,9 +305,14 @@ adRouter.post('/bookings/:id/approve',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const booking = await repo.findBookingById(id, { package: true })
-    if (!booking) {
+    const _booking = await repo.findBookingById(id, { package: true })
+    if (!_booking) {
       return res.status(404).json({ success: false, message: 'Pemesanan tidak ditemukan' })
+    }
+    const booking = _booking as unknown as {
+      id: string; siteId: string; userId: string; status: string; paymentStatus: string;
+      startDate: Date; endDate: Date; imageUrl: string | null; linkUrl: string | null;
+      package: { slot: string };
     }
 
     if (booking.paymentStatus !== 'VERIFYING') {
