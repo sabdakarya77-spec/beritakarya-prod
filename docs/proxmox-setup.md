@@ -84,14 +84,21 @@ Internet
     │
     └── Router (192.168.1.1)
             │
-            └── Proxmox Host (192.168.1.100)
+            └── Proxmox Host
                     │
-                    └── vmbr0 (bridge)
+                    ├── vmbr0 (192.168.1.100) ← WAN/LAN bridge
+                    │       (terhubung ke enp0s3 fisik)
+                    │
+                    └── vmbr1 (10.0.0.1/24) ← Internal bridge
+                            │   (isolasi dari LAN)
                             │
                             ├── LXC-1: 10.0.0.11 (Database)
                             ├── LXC-2: 10.0.0.12 (API)
                             ├── LXC-3: 10.0.0.13 (Monitoring)
                             └── VM-4:  10.0.0.14 (AI Stack)
+
+                    NAT: 10.0.0.0/24 → vmbr0 → Internet
+                    (LXC/VM akses internet via NAT masquerade)
 ```
 
 ### 2.2 Host Network Config
@@ -102,6 +109,7 @@ Edit `/etc/network/interfaces`:
 auto lo
 iface lo inet loopback
 
+# Physical interface → bridge ke LAN/WAN
 auto enp0s3
 iface enp0s3 inet manual
 
@@ -112,8 +120,14 @@ iface vmbr0 inet static
     bridge-ports enp0s3
     bridge-stp off
     bridge-fd 0
-    # Internal network untuk LXC/VM
-    post-up ip route add 10.0.0.0/24 dev vmbr0
+
+# Internal bridge untuk LXC/VM (isolated dari LAN)
+auto vmbr1
+iface vmbr1 inet static
+    address 10.0.0.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
 ```
 
 ### 2.3 Apply Network
@@ -126,18 +140,37 @@ systemctl restart networking
 reboot
 ```
 
-### 2.4 Verifikasi
+### 2.4 Enable IP Forwarding & NAT
 
 ```bash
-# Cek bridge
+# Enable IP forwarding
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sysctl -p
+
+# NAT masquerade: LXC/VM bisa akses internet via vmbr0
+iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o vmbr0 -j MASQUERADE
+
+# Persist iptables rules
+apt install -y iptables-persistent
+netfilter-persistent save
+```
+
+### 2.5 Verifikasi
+
+```bash
+# Cek kedua bridge
 ip addr show vmbr0
+ip addr show vmbr1
 
 # Cek routing
 ip route
 
-# Test connectivity
-ping -c 3 192.168.1.1
-ping -c 3 8.8.8.8
+# Cek NAT rule
+iptables -t nat -L POSTROUTING -v
+
+# Test connectivity dari host
+ping -c 3 192.168.1.1    # Router (via vmbr0)
+ping -c 3 8.8.8.8        # Internet
 ```
 
 ---
@@ -287,7 +320,7 @@ Upload ke storage "vm-4-data" → ISO Images → Upload
 | RAM | 2048 MB |
 | Swap | 512 MB |
 | CPU | 2 cores |
-| Network | IPv4: Static `10.0.0.11/24`, Gateway: `10.0.0.1` |
+| Network | Bridge: `vmbr1`, IPv4: Static `10.0.0.11/24`, Gateway: `10.0.0.1` |
 | DNS | `1.1.1.1` |
 
 ### 5.2 Mount Point
@@ -454,7 +487,7 @@ ufw enable
 | RAM | 4096 MB |
 | Swap | 1024 MB |
 | CPU | 4 cores |
-| Network | IPv4: Static `10.0.0.12/24`, Gateway: `10.0.0.1` |
+| Network | Bridge: `vmbr1`, IPv4: Static `10.0.0.12/24`, Gateway: `10.0.0.1` |
 | DNS | `1.1.1.1` |
 
 ### 6.2 Mount Point
@@ -575,7 +608,7 @@ ufw enable
 | RAM | 1024 MB |
 | Swap | 512 MB |
 | CPU | 2 cores |
-| Network | IPv4: Static `10.0.0.13/24`, Gateway: `10.0.0.1` |
+| Network | Bridge: `vmbr1`, IPv4: Static `10.0.0.13/24`, Gateway: `10.0.0.1` |
 | DNS | `1.1.1.1` |
 
 ### 7.2 Mount Point
@@ -672,7 +705,7 @@ ufw enable
 | CPU | Cores | 4 |
 | CPU | Type | host |
 | Memory | MiB | 6144 |
-| Network | Bridge | vmbr0 |
+| Network | Bridge | `vmbr1` |
 | Network | Model | VirtIO (paravirtualized) |
 
 ### 8.2 Tambah GPU Passthrough
@@ -705,7 +738,7 @@ args: -cpu 'host,+topoext,kvm=off'
 4. Saat install:
    - Username: `beritakarya`
    - Password: `<strong-password>`
-   - IP: Static `10.0.0.14/24`, Gateway: `10.0.0.1`
+   - IP: Static `10.0.0.14/24`, Gateway: `10.0.0.1` (via vmbr1)
    - Install OpenSSH server: ✓
 
 ### 8.5 Post-Install Setup di VM-4
@@ -910,10 +943,23 @@ systemctl restart docker
 ### 11.3 Network Connectivity
 
 ```bash
-# Dari host, test semua LXC/VM:
+# Dari host, test semua LXC/VM via vmbr1:
 pct exec 101 -- ping -c 3 10.0.0.12
 pct exec 102 -- ping -c 3 10.0.0.11
 pct exec 103 -- ping -c 3 10.0.0.12
+
+# Cek bridge interfaces
+brctl show vmbr1
+# Harus tampil veth interface untuk setiap running LXC
+
+# Jika LXC tidak bisa akses internet:
+# Cek NAT rule
+iptables -t nat -L POSTROUTING -v
+# Harus ada MASQUERADE untuk 10.0.0.0/24
+
+# Cek IP forwarding
+sysctl net.ipv4.ip_forward
+# Harus = 1
 
 # Cek firewall
 ufw status
@@ -926,7 +972,8 @@ ufw status
 ### Phase 1: Proxmox Base
 - [ ] Install Proxmox VE
 - [ ] Disable enterprise repo, enable no-subscription
-- [ ] Konfigurasi network (vmbr0 bridge)
+- [ ] Konfigurasi network: vmbr0 (WAN/LAN) + vmbr1 (internal 10.0.0.0/24)
+- [ ] Enable IP forwarding & NAT masquerade
 - [ ] Enable IOMMU (amd_iommu=on)
 - [ ] Bind VFIO driver untuk GPU
 - [ ] Buat directory bind-mount (/data/pve/*)
