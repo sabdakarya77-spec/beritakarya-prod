@@ -30,7 +30,7 @@ adRouter.post('/track/:id',
         await repo.incrementAdMetric(id, 'clicks')
         await syncTrackingToBooking(ad.siteId, ad.slot, 'click', ad.bookingId)
       }
-    } catch (e) {
+    } catch (_e) {
       // Ignore if ad not found
     }
 

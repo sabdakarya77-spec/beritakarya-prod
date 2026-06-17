@@ -33,7 +33,7 @@ export class WatermarkService {
       try {
         await fs.access(KYC_TILE_PATH)
         await fs.access(KYC_STAMP_PATH)
-      } catch (err) {
+      } catch (_err) {
         logger.error(`[WatermarkService] Missing watermark assets: ${KYC_TILE_PATH} or ${KYC_STAMP_PATH}`)
         throw new Error('Aset watermark tidak ditemukan di server')
       }

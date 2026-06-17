@@ -17,7 +17,6 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { api } from '../../../../../../lib/api'
-import { cn } from '../../../../../../lib/utils'
 import { useRequireRole } from '../../../../../../hooks/useRequireRole'
 
 interface KYCUser {

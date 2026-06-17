@@ -41,7 +41,7 @@ export default async function manifest({
       if (data?.name) displayName = data.name
       if (data?.description) description = data.description
     }
-  } catch (e) {
+  } catch (_e) {
     // Silent fallback - manifest tetap valid dengan default
   }
 

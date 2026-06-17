@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { EditorSidebar } from './EditorSidebar'
 import { cn } from '../../lib/utils'
 import { useEditorStore } from '../../store/editorStore'
-import { ChevronLeft, ChevronRight, Layout } from 'lucide-react'
 
 interface EditorContentProps {
   children: React.ReactNode

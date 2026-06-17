@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { AlertTriangle, RefreshCw, Home, Bug, ArrowLeft } from 'lucide-react'
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 import Link from 'next/link'
 
 export default function RootError({

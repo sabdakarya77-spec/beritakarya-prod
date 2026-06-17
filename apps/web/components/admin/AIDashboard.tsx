@@ -1,25 +1,23 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { api } from '../../lib/api'
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Activity, 
-  Users, 
+import {
+  TrendingUp,
+  DollarSign,
+  Activity,
+  Users,
   Zap,
   AlertTriangle,
   CheckCircle,
   Clock,
   Download,
-  Sparkles,
   Shield,
   Search,
   Check,
   XCircle,
   Cpu,
   Edit3,
-  X,
-  Settings
+  X
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -107,7 +105,7 @@ export function AIDashboard() {
     } else if (typeof quota.allowedFeatures === 'string') {
       try {
         allowed = JSON.parse(quota.allowedFeatures)
-      } catch (e) {
+      } catch (_e) {
         allowed = []
       }
     }
@@ -521,7 +519,7 @@ export function AIDashboard() {
                         } else if (typeof quota.allowedFeatures === 'string') {
                           try {
                             allowed = JSON.parse(quota.allowedFeatures)
-                          } catch (e) {
+                          } catch (_e) {
                             allowed = []
                           }
                         }

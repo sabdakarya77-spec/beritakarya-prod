@@ -42,7 +42,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       // Let the useEffect handle the redirect once user is set
-    } catch (err) {
+    } catch (_err) {
       // Error is handled by the store
     }
   };

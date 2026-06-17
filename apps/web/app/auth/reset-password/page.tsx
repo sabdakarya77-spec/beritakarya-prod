@@ -7,7 +7,7 @@ import { Loader2, ArrowRight, AlertCircle, CheckCircle, Key, Eye, EyeOff } from 
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const _router = useRouter();
   
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');

@@ -4,7 +4,6 @@ import { useState, useRef, useCallback } from 'react';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { X, Check, ZoomIn } from 'lucide-react';
-import { cn } from '../../lib/utils';
 
 interface AdImageCropperProps {
   file: File;
@@ -43,9 +42,6 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
     const image = imgRef.current;
     const canvas = canvasRef.current;
     if (!image || !canvas || !completedCrop) return;
-
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;

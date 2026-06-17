@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useEditorStore } from '../../../store/editorStore'
-import { AlertCircle, CheckCircle, Search, Eye, Smartphone, Monitor } from 'lucide-react'
+import { AlertCircle, CheckCircle, Eye, Smartphone, Monitor } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 
 export function SEOPanel() {

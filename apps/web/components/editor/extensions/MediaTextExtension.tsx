@@ -13,7 +13,6 @@ type LayoutType = 'left' | 'right' | 'center'
 
 const MediaTextComponent = ({ node, updateAttributes, deleteNode }: any) => {
   const imageUrl: string = node.attrs.imageUrl || ''
-  const text: string = node.attrs.text || ''
   const layout: LayoutType = node.attrs.layout || 'left'
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const { upload, uploading, reset: resetUpload } = useImageUpload()

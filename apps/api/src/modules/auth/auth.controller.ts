@@ -173,7 +173,7 @@ authRouter.post('/logout', asyncHandler(async (req: any, res: Response) => {
   if (refreshToken && req.user?.userId) {
     try {
       await authService.logoutUser(req.user.userId, refreshToken)
-    } catch (err) {
+    } catch (_err) {
       // Silently ignore - cookie is already cleared
     }
   }

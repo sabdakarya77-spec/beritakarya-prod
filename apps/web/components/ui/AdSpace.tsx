@@ -132,12 +132,6 @@ export default function AdSpace({
     'in-feed': "w-full h-40 mb-12"
   };
 
-  const isVideoFile = (url: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -222,7 +216,7 @@ export default function AdSpace({
 
 function AdSlide({
   ad,
-  type,
+  type: _type,
   label,
   onAdClick
 }: {

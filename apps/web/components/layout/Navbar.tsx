@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '../ui/SmartImage';
-import DateTimeWeather from '../ui/DateTimeWeather';
 import { cn } from '../../lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { Container } from './Container';

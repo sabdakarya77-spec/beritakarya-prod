@@ -217,7 +217,7 @@ kycRouter.post('/submit',
   kycUpload,
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.userId
-    const siteId = req.site!
+    const _siteId = req.site!
 
     // req.site bisa berisi nilai virtual ('pusat', 'all') yang bukan ID Site nyata di DB.
     // Untuk operasi database (AuditLog, Notification), gunakan siteId user yang sebenarnya.

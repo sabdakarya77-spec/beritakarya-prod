@@ -1,7 +1,5 @@
-import { SITE_MAP } from '@beritakarya/config'
 import { Metadata } from 'next'
 import { API_URL } from '../../lib/api'
-import { notFound } from 'next/navigation'
 import { constructMetadata } from '../../lib/metadata'
 import { SiteHomePage } from '../../components/pages/SiteHomePage'
 import { JsonLd } from '../../components/ui/JsonLd'

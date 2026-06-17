@@ -1,20 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
   Wallet,
   CheckCircle2,
   BarChart3,
   Eye,
-  CreditCard,
   ArrowRight,
-  Plus,
   RefreshCw,
-  AlertCircle,
-  XCircle,
-  Image as ImageIcon,
-  Upload,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';

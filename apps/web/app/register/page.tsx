@@ -63,7 +63,7 @@ function RegisterForm() {
         .find(row => row.startsWith('siteId='))
         ?.split('=')[1] || 'pusat';
       await register(name, email, password, siteId, roleParam);
-    } catch (err) {
+    } catch (_err) {
       // Error is handled by the store
     }
   };

@@ -243,7 +243,7 @@ adminRouter.get('/quotas', requireAuth, requireAdmin, asyncHandler(async (req, r
     } else if (typeof quota.allowedFeatures === 'string') {
       try {
         allowed = JSON.parse(quota.allowedFeatures)
-      } catch (e) {
+      } catch (_e) {
         allowed = []
       }
     }
@@ -264,7 +264,7 @@ adminRouter.get('/quotas', requireAuth, requireAdmin, asyncHandler(async (req, r
     } else if (typeof user.aiFeaturesAllowed === 'string') {
       try {
         allowed = JSON.parse(user.aiFeaturesAllowed)
-      } catch (e) {
+      } catch (_e) {
         allowed = []
       }
     }

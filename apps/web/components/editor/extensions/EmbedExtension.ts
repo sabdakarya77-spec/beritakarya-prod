@@ -12,13 +12,6 @@ declare module '@tiptap/core' {
 
 export type EmbedType = 'youtube' | 'twitter' | 'instagram' | 'other'
 
-interface EmbedAttributes {
-  url: string
-  embedType: EmbedType
-  title?: string
-  html?: string
-}
-
 /**
  * Custom Embed extension untuk Tiptap
  * Mendukung YouTube, Twitter, Instagram, dan custom embeds

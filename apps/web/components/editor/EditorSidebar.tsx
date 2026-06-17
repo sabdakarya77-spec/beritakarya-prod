@@ -1,14 +1,13 @@
 'use client'
 
 import { cn } from '../../lib/utils'
-import { ChevronRight, PanelRightClose, FileText, Settings, Search, History, Sparkles, Save, Clock, User } from 'lucide-react'
+import { PanelRightClose, FileText, Settings, Search, History, Sparkles, Save, Clock } from 'lucide-react'
 import { SEOPanel } from './seo/SEOPanel'
 import { TabSettings } from './tabs/TabSettings'
 import { TabContent } from './tabs/TabContent'
 import { AIPanel } from './ai/AIPanel'
 import { useEditorStore } from '../../store/editorStore'
-import { STATUS_CONFIG, getStatusConfig } from '@beritakarya/config'
-import type { ArticleStatusKey } from '@beritakarya/config'
+import { getStatusConfig } from '@beritakarya/config'
 
 interface EditorSidebarProps {
   isOpen: boolean

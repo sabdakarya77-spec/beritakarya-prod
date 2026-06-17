@@ -55,7 +55,7 @@ const CALLOUT_CONFIG: Record<CalloutVariant, {
 /**
  * CalloutView - React component untuk callout block
  */
-export function CalloutView({ node, updateAttributes, selected, deleteNode }: NodeViewProps) {
+export function CalloutView({ node, updateAttributes, selected, deleteNode: _deleteNode }: NodeViewProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [showVariantPicker, setShowVariantPicker] = useState(false)
   

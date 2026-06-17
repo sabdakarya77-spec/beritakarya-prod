@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express'
+import { Router, Response } from 'express'
 import { requireAuth } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'

@@ -3,17 +3,8 @@ import { loginAs } from './helpers/auth';
 import {
   mockAdPackages,
   mockAdBookingsMy,
-  mockAdBookingsAll,
-  mockAdPublic,
-  mockCreateBooking,
-  mockApproveBooking,
-  mockRejectBooking,
-  mockPayBooking,
   mockMediaUpload,
   mockAllAdEndpoints,
-  MOCK_PACKAGES,
-  MOCK_BOOKINGS,
-  MOCK_ADS,
 } from './helpers/api-mock';
 
 const SITE = 'pusat';

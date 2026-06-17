@@ -132,7 +132,10 @@ export function SmartImage({
 
   // Filter out non-Image props that could cause React errors when spread onto <img>
   // These props are valid for custom usage but not valid DOM attributes for <img>
-  const { text, content, body, ...validImageProps } = props as any;
+  const validImageProps = { ...(props as any) };
+  delete validImageProps.text;
+  delete validImageProps.content;
+  delete validImageProps.body;
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && (navigator as any).connection) {

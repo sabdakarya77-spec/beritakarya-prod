@@ -28,7 +28,7 @@ interface AIPanelProps {
   editor?: any
 }
 
-export function AIPanel({ isOpen = true, onClose, editor }: AIPanelProps) {
+export function AIPanel({ isOpen = true, onClose: _onClose, editor: _editor }: AIPanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>('write')
 
   if (!isOpen) return null

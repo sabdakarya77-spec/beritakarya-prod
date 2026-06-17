@@ -34,7 +34,7 @@ const ITEMS_PER_PAGE = 12
 export default function AuthorsPage() {
   const params = useParams()
   const siteId = params.site as string
-  const siteName = siteId === 'pusat' ? 'Pusat' : siteId.charAt(0).toUpperCase() + siteId.slice(1)
+  const _siteName = siteId === 'pusat' ? 'Pusat' : siteId.charAt(0).toUpperCase() + siteId.slice(1)
 
   const [authors, setAuthors] = useState<Author[]>([])
   const [loading, setLoading] = useState(true)

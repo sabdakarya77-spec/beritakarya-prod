@@ -586,7 +586,7 @@ userRouter.post('/heartbeat',
     if (process.env.REDIS_HOST) {
       try {
         await redis.set(`user:online:${userId}`, '1', 'EX', 60)
-      } catch (err) {
+      } catch (_err) {
         // ignore
       }
     }

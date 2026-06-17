@@ -46,7 +46,7 @@ export default function MediaManagerPage() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setItems((prev) => [data.data, ...prev.filter((item) => item.id !== data.data.id)]);
-    } catch (e) {
+    } catch (_e) {
       alert('Upload gagal');
     } finally {
       setUploading(false);
@@ -59,7 +59,7 @@ export default function MediaManagerPage() {
       await api.delete(`/media/${id}`);
       setItems(prev => prev.filter(m => m.id !== id));
       setSelectedMedia(null);
-    } catch (e) {
+    } catch (_e) {
       alert('Gagal menghapus');
     }
   };
@@ -74,7 +74,7 @@ export default function MediaManagerPage() {
       });
       setItems(prev => prev.map(m => m.id === data.data.id ? data.data : m));
       setSelectedMedia(data.data);
-    } catch (e) {
+    } catch (_e) {
       alert('Gagal update');
     }
   };

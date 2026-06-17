@@ -32,7 +32,7 @@ export interface MediaItem {
 export function useMediaLibrary(siteId?: string) {
   const [items, setItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
+  const [, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [total, setTotal] = useState(0)
 

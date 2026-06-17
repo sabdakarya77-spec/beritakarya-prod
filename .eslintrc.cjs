@@ -29,7 +29,7 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'warn',
-        '@typescript-eslint/no-unused-vars': process.env.CI ? 'off' : ['warn', { argsIgnorePattern: '^_' }],
+        '@typescript-eslint/no-unused-vars': process.env.CI ? 'off' : ['warn', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
         '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true, allowShortCircuit: true }],
         '@typescript-eslint/no-namespace': 'off',
         '@typescript-eslint/no-require-imports': 'off',

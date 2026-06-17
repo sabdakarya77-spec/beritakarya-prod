@@ -10,18 +10,14 @@ import {
   ListOrdered, 
   Quote, 
   Code, 
-  Image, 
+  Image,
   AlertCircle,
   Video,
   Minus,
-  Link,
-  Table,
   Grid,
   Columns,
   GalleryHorizontal,
-  FileText
 } from 'lucide-react'
-import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
 
 export interface SlashMenuItem {
@@ -220,7 +216,7 @@ export const defaultSlashMenuItems: SlashMenuItem[] = [
     title: 'Image',
     description: 'Upload or embed an image',
     icon: <Image size={18} className="text-gray-600 dark:text-gray-400" />,
-    command: (editor, onOpenMediaLibrary: () => void, onOpenUrlInput: () => void) => {
+    command: (editor, onOpenMediaLibrary: () => void, _onOpenUrlInput: () => void) => {
       // Command ini akan dipanggil dengan callback untuk membuka modal
       // Di handleCommand di TiptapEditor, kita akan pass onOpenMediaLibrary
       if (onOpenMediaLibrary) {

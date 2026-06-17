@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Check, ExternalLink, RefreshCw, X, MessageSquare, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Bell, Check, ExternalLink, RefreshCw, MessageSquare, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';

@@ -75,7 +75,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
         text: 'Komentar Anda telah dikirim dan menunggu moderasi redaksi.'
       });
       fetchComments();
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Gagal mengirim komentar. Silakan coba lagi.' });
     } finally {
       setIsSubmitting(false);

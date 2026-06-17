@@ -4,10 +4,6 @@ const SITE_NAME = 'BeritaKarya'
 const SITE_DEFAULT_DESCRIPTION =
   'Portal berita terpercaya dari berbagai penjuru daerah. Liputan terkini, investigasi, dan analisis tajam.'
 const SITE_DEFAULT_LOGO = '/logo.png'
-const SITE_SOCIAL = {
-  twitter: '@beritakarya',
-  facebook: 'beritakarya',
-}
 
 function getBaseUrl() {
   return process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'

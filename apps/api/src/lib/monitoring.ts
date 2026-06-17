@@ -80,7 +80,7 @@ class MetricsCollector {
       if (Object.keys(summary).length === 0) return
 
       await redis.set(REDIS_KEY, JSON.stringify(summary), 'EX', REDIS_TTL)
-    } catch (e) {
+    } catch (_e) {
       // Silent fail — metrics persistence is best-effort
     }
   }
@@ -108,7 +108,7 @@ class MetricsCollector {
       }
 
       logger.info(`[Metrics] Loaded ${Object.keys(summary).length} metric keys from Redis`)
-    } catch (e) {
+    } catch (_e) {
       // Silent fail — will start fresh
     }
   }

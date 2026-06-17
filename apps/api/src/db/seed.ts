@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   // 1. Seed Site 'pusat'
-  const site = await prisma.site.upsert({
+  await prisma.site.upsert({
     where: { id: 'pusat' },
     update: {
       trendingTopics: ['Nasional', 'Politik', 'Ekonomi', 'Teknologi', 'Daerah', 'Hukum']

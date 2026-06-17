@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-  Layout,
   Image as ImageIcon,
   Code as CodeIcon,
   Save,

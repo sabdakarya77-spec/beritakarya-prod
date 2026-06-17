@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  ShieldCheck, 
-  Upload, 
-  FileText, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  ShieldCheck,
+  Upload,
+  CheckCircle2,
+  AlertCircle,
   Info,
   Loader2,
   Lock,
@@ -29,7 +28,6 @@ export default function KYCPage() {
   const { user } = useAuthStore()
   const router = useRouter()
 
-  const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<'none' | 'pending' | 'verified' | 'rejected'>('none')
   const [error, setError] = useState<string | null>(null)

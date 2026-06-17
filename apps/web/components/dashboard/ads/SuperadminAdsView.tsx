@@ -8,11 +8,10 @@ import {
   XCircle,
   AlertCircle,
   ExternalLink,
-  RefreshCw,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';
-import { AD_SLOT_DEFINITIONS, type AdSlotId } from '../../../lib/constants';
+import { AD_SLOT_DEFINITIONS } from '../../../lib/constants';
 import { AdSlotCard } from './AdSlotCard';
 import { LeaderboardManager } from './LeaderboardManager';
 import type { Ad, AdPackage, AdBooking } from './types';
@@ -35,7 +34,7 @@ interface Props {
 }
 
 export function SuperadminAdsView({
-  site,
+  site: _site,
   role,
   ads,
   packages,
@@ -171,7 +170,7 @@ export function SuperadminAdsView({
               key={slot.id}
               slot={slot}
               data={ads.find(a => a.slot === slot.id)}
-              onSave={(p) => {/* handled by parent */}}
+              onSave={(_p) => {/* handled by parent */}}
               onUpload={onUpload}
               isSaving={savingAdId === slot.id}
             />

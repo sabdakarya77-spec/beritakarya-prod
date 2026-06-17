@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { JWTPayload } from '@beritakarya/types'
 
 /**
  * NOTE: Express Request augmentation is in types/express.ts (single source of truth).

@@ -3,13 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { 
-  MessageSquare, 
-  Check, 
-  Trash2, 
-  Clock, 
-  FileText, 
+  MessageSquare,
+  Check,
+  Trash2,
+  Clock,
+  FileText,
   AlertCircle,
-  Filter,
   Search,
   ChevronRight,
   Shield

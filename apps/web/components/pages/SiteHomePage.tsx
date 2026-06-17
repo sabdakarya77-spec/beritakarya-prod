@@ -1,4 +1,3 @@
-import { SITE_MAP } from '@beritakarya/config'
 import NewsCard from '../ui/NewsCard'
 import PublicSiteLayout from '../layout/PublicSiteLayout'
 import AdSpace from '../ui/AdSpace'

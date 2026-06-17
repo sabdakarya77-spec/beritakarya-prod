@@ -6,7 +6,7 @@ import { CATEGORIES_CONFIG, CategoryItem } from '../../../lib/constants'
 import { api } from '../../../lib/api'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
-import { Image as ImageIconIcon, Tag, Flag, Zap, Star, Sparkles, ChevronDown, Upload, ImageIcon, X, FolderOpen, AlertCircle, FileText, Camera, Video } from 'lucide-react'
+import { Image as ImageIconIcon, Tag, Zap, Star, Sparkles, ChevronDown, Upload, X, FolderOpen, FileText, Camera, Video } from 'lucide-react'
 import { useImageUpload } from '../../../hooks/useImageUpload'
 import { cn } from '../../../lib/utils'
 

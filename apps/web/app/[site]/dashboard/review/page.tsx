@@ -79,7 +79,7 @@ export default function ReviewQueuePage() {
        try {
          const statsRes = await api.get('/articles/stats', { params: { site } });
          setStats(statsRes.data.data || {});
-       } catch (statsErr) {
+       } catch (_statsErr) {
          console.warn('[review] Stats endpoint not available, using defaults');
          setStats({});
        }

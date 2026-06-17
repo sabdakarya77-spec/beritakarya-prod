@@ -19,7 +19,6 @@ import {
 import { cn } from '../../lib/utils'
 import type { ArticleStatus } from '@beritakarya/types'
 import { STATUS_CONFIG, getStatusConfig } from '@beritakarya/config'
-import type { ArticleStatusKey } from '@beritakarya/config'
 import { useEditorStore } from '../../store/editorStore'
 
 interface EditorTopbarProps {
@@ -39,7 +38,7 @@ interface EditorTopbarProps {
 
 export function EditorTopbar({
   siteId,
-  isLoading,
+  isLoading: _isLoading,
   saveError,
   saving,
   isDirty,

@@ -7,7 +7,7 @@ interface AuditLogsWidgetProps {
   site: string;
 }
 
-export function AuditLogsWidget({ logs, site }: AuditLogsWidgetProps) {
+export function AuditLogsWidget({ logs, site: _site }: AuditLogsWidgetProps) {
   return (
     <div className="dash-card">
       <div className="dash-card-header">

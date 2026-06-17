@@ -10,7 +10,7 @@ interface Props {
   model?: string
 }
 
-export const AIResultCard = React.memo(function AIResultCard({ label, content, onApply, showCompare = false, originalContent = '', model }: Props) {
+export const AIResultCard = React.memo(function AIResultCard({ label, content, onApply, showCompare = false, originalContent = '', model: _model }: Props) {
   const [applied, setApplied] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 

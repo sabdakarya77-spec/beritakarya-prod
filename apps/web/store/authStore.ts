@@ -18,7 +18,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
   user: null,
   isLoading: false,
   error: null,
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>()(
     try {
       // Backend handles cookie clearing and token blacklisting
       await api.post('/auth/logout')
-    } catch (err) {
+    } catch {
       // Ignore - cookies may already be expired/invalid
     } finally {
       set({ user: null })
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState>()(
       // Just try to fetch current user, if cookies are valid it will succeed
       const { data } = await api.get('/auth/me')
       set({ user: data.data.user, isLoading: false })
-    } catch (err) {
+    } catch {
       set({ user: null, isLoading: false })
     }
   },

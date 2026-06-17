@@ -50,7 +50,6 @@ export function TiptapEditor({
   const {
     blocks,
     setBlocks,
-    saveArticle,
     isLoading,
   } = useEditorStore()
 

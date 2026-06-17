@@ -32,7 +32,7 @@ export default function NewsletterForm() {
         setStatus('error')
         setMessage(json.error?.message || 'Gagal berlangganan. Coba lagi nanti.')
       }
-    } catch (err) {
+    } catch {
       setStatus('error')
       setMessage('Terjadi kesalahan koneksi.')
     }

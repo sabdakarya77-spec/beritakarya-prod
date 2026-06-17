@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import jwt from 'jsonwebtoken'
 import { requireAuth, requireRole, requireSuperadmin } from './auth.middleware'
 import { mockReq, mockRes, mockNext, mockJWTPayload } from '../test/fixtures'

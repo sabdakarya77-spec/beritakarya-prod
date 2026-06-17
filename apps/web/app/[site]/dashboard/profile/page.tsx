@@ -47,7 +47,7 @@ export default function ProfilePage() {
   // Profile state
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
-  const [email, setEmail] = useState('');
+  const [_email, setEmail] = useState('');
   const [role, setRole] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   
@@ -80,7 +80,7 @@ export default function ProfilePage() {
           setRole(profileData.role || user.role || '');
           setIsVerified(profileData.isVerified ?? user.isVerified ?? false);
         }
-      } catch (err) {
+      } catch (_err) {
         // Fallback to user data from auth store
         setName(user.name || '');
         setEmail(user.email || '');
