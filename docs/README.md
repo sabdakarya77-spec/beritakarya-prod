@@ -8,7 +8,8 @@ Dokumentasi lengkap untuk BeritaKarya.
 |----------|-------------|
 | [Setup Guide](setup.md) | Panduan instalasi dan konfigurasi lokal |
 | [Architecture](architecture.md) | Arsitektur sistem dan design decisions |
-| [Deployment](deployment.md) | Panduan deploy ke berbagai platform |
+| **[Deployment Architecture](ssl_plan_vercel.md)** | **Panduan deploy utama** (Vercel + Cloudflare + Home Server) |
+| [Deployment](deployment.md) | Ringkasan deploy & CI/CD |
 | [Discussion Notes](discussion-notes.md) | Diskusi teknis: impor berita, Google Index, AI features |
 | [Contributing](../CONTRIBUTING.md) | Cara berkontribusi ke project |
 

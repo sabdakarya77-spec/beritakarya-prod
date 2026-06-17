@@ -208,13 +208,15 @@ Workflow artikel: `draft` → `submitted` → `review` → `revision` → `appro
 
 ## Deployment
 
+Arsitektur: **Vercel** (frontend) + **Cloudflare** (DNS/SSL/Tunnel) + **Home Server** (API/DB).
+
+Panduan lengkap: [`docs/ssl_plan_vercel.md`](docs/ssl_plan_vercel.md)
+
 GitHub Actions:
 
 - **`ci.yml`** — lint, type-check, build, test, `pnpm audit` (level high), E2E Playwright
 - **`deploy.yml`** — build & push Docker images ke GHCR (triggered on push to main)
 - **`backup.yml`** — daily database backup (2 AM UTC / 9 AM WIB)
-
-Frontend juga dapat di-deploy ke **Vercel** (`apps/web/vercel.json`).
 
 ---
 
