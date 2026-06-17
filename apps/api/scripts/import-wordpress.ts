@@ -634,7 +634,7 @@ async function main() {
             siteId,
             authorId,
             categoryId,
-            blocks,
+            blocks: blocks as any,
             status: 'draft',
             publishedAt: article.publishedAt,
             wordCount,
