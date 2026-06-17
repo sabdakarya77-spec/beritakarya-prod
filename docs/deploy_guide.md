@@ -407,6 +407,16 @@ cloudflared tunnel info beritakarya-api
   - [ ] Klik Verify di Vercel
   - [ ] Setelah verified, TXT record bisa dihapus
 
+### Phase C2: Database (LXC-1 — Native, Tanpa Docker)
+- [ ] Install PostgreSQL 15: `apt install -y postgresql-15 postgresql-client-15`
+- [ ] Buat user & database: `CREATE USER beritakarya; CREATE DATABASE beritakarya OWNER beritakarya;`
+- [ ] Tune PostgreSQL untuk 2 GB RAM (shared_buffers=512MB, effective_cache_size=1536MB)
+- [ ] Edit pg_hba.conf: allow connection dari `10.0.0.0/24`
+- [ ] Install Redis 7: `apt install -y redis-server`
+- [ ] Konfigurasi Redis: password, maxmemory 512MB, bind 0.0.0.0
+- [ ] Enable services: `systemctl enable postgresql redis-server`
+- [ ] Test koneksi dari LXC-2: `psql -h 10.0.0.11 -U beritakarya -d beritakarya`
+
 ### Phase D: Cloudflare Tunnel (API)
 - [ ] Install `cloudflared` di LXC-2
 - [ ] `cloudflared tunnel login` → pilih `beritakarya.co`

@@ -334,76 +334,73 @@ JSON
 ### Service
 
 ```
-LXC-1: Database Stack
+LXC-1: Database Stack (Native — Tanpa Docker)
 │
-├── PostgreSQL 15
+├── PostgreSQL 15 (systemd)
 │   ├── Port: 5432 (internal only)
-│   ├── Data: /data/pve/lxc-1-db/postgres/
-│   ├── Config: tuned untuk 2 GB RAM
+│   ├── Data: /var/lib/postgresql/15/main/
+│   ├── Config: /etc/postgresql/15/main/postgresql.conf
 │   │   ├── shared_buffers = 512MB
 │   │   ├── effective_cache_size = 1536MB
 │   │   ├── work_mem = 16MB
 │   │   └── max_connections = 100
-│   └── Database: beritakarya
+│   ├── Database: beritakarya
+│   └── Service: systemctl enable/start postgresql
 │
-├── Redis 7
+├── Redis 7 (systemd)
 │   ├── Port: 6379 (internal only)
-│   ├── Data: /data/pve/lxc-1-db/redis/
+│   ├── Data: /var/lib/redis/
+│   ├── Config: /etc/redis/redis.conf
 │   ├── Maxmemory: 512MB
 │   ├── Policy: allkeys-lru
-│   └── Password protected: ya
+│   ├── Password protected: ya
+│   └── Service: systemctl enable/start redis-server
 │
-└── Docker Compose
-    └── docker-compose.yml (2 service)
+└── Mengapa Tanpa Docker?
+    ├── Database adalah service paling kritis — tidak boleh ada layer tambahan
+    ├── LXC sudah provide isolasi — Docker redundant
+    ├── Docker daemon crash = database mati (single point of failure)
+    ├── Recovery lebih mudah: systemctl restart postgresql
+    ├── Backup lebih simpel: pg_dump langsung, tidak perlu masuk container
+    └── Overhead lebih kecil: direct filesystem access
 ```
 
-### Docker Compose
+### Install & Konfigurasi (Native)
 
-```yaml
-# /opt/lxc-1-db/docker-compose.yml
-version: "3.9"
+```bash
+# Install PostgreSQL 15
+apt update && apt install -y postgresql-15 postgresql-client-15
 
-services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: bk-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: beritakarya
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - /data/pve/lxc-1-db/postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d beritakarya"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    deploy:
-      resources:
-        limits:
-          memory: 2G
+# Konfigurasi PostgreSQL
+sudo -u postgres psql -c "CREATE USER beritakarya WITH PASSWORD '<strong-password>';"
+sudo -u postgres psql -c "CREATE DATABASE beritakarya OWNER beritakarya;"
 
-  redis:
-    image: redis:7-alpine
-    container_name: bk-redis
-    restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
-    volumes:
-      - /data/pve/lxc-1-db/redis:/data
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    deploy:
-      resources:
-        limits:
-          memory: 768M
+# Edit config: /etc/postgresql/15/main/postgresql.conf
+# shared_buffers = 512MB
+# effective_cache_size = 1536MB
+# work_mem = 16MB
+# max_connections = 100
+
+# Edit HBA: /etc/postgresql/15/main/pg_hba.conf
+# host beritakarya beritakarya 10.0.0.0/24 md5
+
+# Restart
+systemctl enable postgresql
+systemctl restart postgresql
+
+# Install Redis 7
+apt install -y redis-server
+
+# Edit config: /etc/redis/redis.conf
+# requirepass <strong-password>
+# maxmemory 512mb
+# maxmemory-policy allkeys-lru
+# bind 0.0.0.0
+# protected-mode yes
+
+# Restart
+systemctl enable redis-server
+systemctl restart redis-server
 ```
 
 ### Backup Strategy
@@ -486,8 +483,12 @@ LXC-2: API Stack
 │   ├── Index: articles
 │   └── Master key: protected
 │
-└── Docker Compose
-    └── docker-compose.yml (3 service)
+└── Docker Compose (3 service)
+    └── Mengapa Docker di LXC-2?
+        ├── 3 service (Caddy + API + Meilisearch) lebih mudah di-manage
+        ├── Update tinggal docker compose pull
+        ├── Consistent deployment
+        └── LXC-1 (database) TANPA Docker karena service paling kritis
 ```
 
 ### Docker Compose
@@ -725,8 +726,11 @@ LXC-3: Monitoring & Utilities
 │   ├── Datasource: Prometheus
 │   └── Data: /data/pve/lxc-3-monitor/grafana/
 │
-└── Docker Compose
-    └── docker-compose.yml (3-4 service)
+└── Docker Compose (3-4 service)
+    └── Mengapa Docker di LXC-3?
+        ├── 3 service (Uptime Kuma + Prometheus + Grafana) lebih mudah di-manage
+        ├── Monitoring bukan service kritis — toleransi restart
+        └── Update tinggal docker compose pull
 ```
 
 ### Docker Compose
@@ -1105,44 +1109,47 @@ const OLLAMA_URL = process.env.OLLAMA_URL || 'http://10.0.0.14:11434';
 2. [ ] Konfigurasi network (bridge vmbr0, static IP)
 3. [ ] Buat 3 LXC container (Debian 12 minimal)
 4. [ ] Setup bind-mount storage di setiap LXC
-5. [ ] Install Docker + Docker Compose di setiap LXC
+5. [ ] Install Docker + Docker Compose di LXC-2 dan LXC-3 (bukan LXC-1)
 6. [ ] Enable IOMMU untuk GPU passthrough (amd_iommu=on)
 
-### Phase 2: Database (LXC-1)
-6. [ ] Deploy PostgreSQL + Redis
-7. [ ] Run Prisma migration
-8. [ ] Seed database
-9. [ ] Setup backup cron
+### Phase 2: Database (LXC-1 — Native, Tanpa Docker)
+6. [ ] Install PostgreSQL 15 via apt
+7. [ ] Konfigurasi PostgreSQL (tuned untuk 2 GB RAM)
+8. [ ] Install Redis 7 via apt
+9. [ ] Konfigurasi Redis (password, maxmemory)
+10. [ ] Run Prisma migration dari LXC-2
+11. [ ] Seed database dari LXC-2
+12. [ ] Setup backup cron
 
-### Phase 3: API (LXC-2)
-10. [ ] Build Docker image untuk Express API
-11. [ ] Deploy Caddy + Express + Meilisearch
-12. [ ] Setup environment variables
-13. [ ] Test API locally (curl dari Proxmox host)
+### Phase 3: API (LXC-2 — Docker)
+13. [ ] Build Docker image untuk Express API
+14. [ ] Deploy Caddy + Express + Meilisearch via Docker Compose
+15. [ ] Setup environment variables
+16. [ ] Test API locally (curl dari Proxmox host)
 
 ### Phase 4: Tunnel & Deploy
-14. [ ] Setup Cloudflare Tunnel di LXC-2
-15. [ ] Konfigurasi DNS (api.beritakarya.co → tunnel)
-16. [ ] Update Vercel env: `NEXT_PUBLIC_API_URL=https://api.beritakarya.co`
-17. [ ] Deploy web ke Vercel
-18. [ ] Test end-to-end
+17. [ ] Setup Cloudflare Tunnel di LXC-2
+18. [ ] Konfigurasi DNS (api.beritakarya.co → tunnel)
+19. [ ] Update Vercel env: `NEXT_PUBLIC_API_URL=https://api.beritakarya.co`
+20. [ ] Deploy web ke Vercel
+21. [ ] Test end-to-end
 
-### Phase 5: Monitoring (LXC-3)
-19. [ ] Deploy Uptime Kuma + Prometheus + Grafana
-20. [ ] Konfigurasi monitoring targets
-21. [ ] Setup alerts (Telegram/Email)
+### Phase 5: Monitoring (LXC-3 — Docker)
+22. [ ] Deploy Uptime Kuma + Prometheus + Grafana via Docker Compose
+23. [ ] Konfigurasi monitoring targets
+24. [ ] Setup alerts (Telegram/Email)
 
 ### Phase 6: AI Stack (VM-4)
-22. [ ] Buat VM dengan GPU passthrough (RX 6700 XT)
-23. [ ] Install ROCm driver
-24. [ ] Install Ollama + download model (llama3:8b)
-25. [ ] Deploy Open WebUI (optional)
-26. [ ] Integrasi Express API → Ollama (fallback dari OpenAI)
-27. [ ] Test inference performance
+25. [ ] Buat VM dengan GPU passthrough (RX 6700 XT)
+26. [ ] Install ROCm driver
+27. [ ] Install Ollama + download model (llama3:8b)
+28. [ ] Deploy Open WebUI (optional)
+29. [ ] Integrasi Express API → Ollama (fallback dari OpenAI)
+30. [ ] Test inference performance
 
 ### Phase 7: Hardening
-28. [ ] Firewall rules
-29. [ ] SSH key-only
-30. [ ] Fail2ban
-25. [ ] SSL/TLS verification
+31. [ ] Firewall rules
+32. [ ] SSH key-only
+33. [ ] Fail2ban
+34. [ ] SSL/TLS verification
 26. [ ] Load testing
