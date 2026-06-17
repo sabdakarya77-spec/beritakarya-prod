@@ -546,8 +546,32 @@ services:
 ```caddyfile
 # /opt/lxc-2-app/Caddyfile
 
-# Cloudflare Tunnel → Caddy → Express
-:443 {
+# Cloudflare Tunnel → Caddy (:80) → Express (:3001)
+# TLS sudah di-terminate oleh Cloudflare di edge mereka.
+# Traffic dari tunnel ke Caddy adalah HTTP internal (tidak expose ke internet).
+:80 {
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Hilangkan header yang membocorkan info server
+        -Server
+        -X-Powered-By
+    }
+
+    # Rate limiting (backup dari Cloudflare WAF)
+    # 100 request/detik per IP — cukup untuk normal usage, block brute force
+    rate_limit {
+        zone dynamic {
+            key {remote_host}
+            events 100
+            window 1s
+        }
+    }
+
     # API endpoints
     handle /api/* {
         reverse_proxy api:3001
@@ -569,6 +593,8 @@ services:
     }
 }
 ```
+
+> **Catatan**: Caddy perlu build dengan plugin `rate_limit`. Gunakan image `caddy:2-builder` atau [xcaddy](https://github.com/caddyserver/xcaddy) untuk build custom image dengan module `github.com/mholt/caddy-ratelimit`.
 
 ### Environment Variables
 
@@ -618,16 +644,25 @@ NODE_ENV=production
 │  │  request │     │  TLS termin. │     │  Tunnel agent  │  │
 │  └──────────┘     │  DDoS prot.  │     └───────┬────────┘  │
 │                   │  CDN cache   │             │            │
-│                   └──────────────┘             │            │
+│                   └──────────────┘      HTTP internal       │
+│                                         (TLS sudah selesai) │
 │                                                │            │
 │                                    ┌───────────▼──────────┐ │
-│                                    │  Caddy :443          │ │
+│                                    │  Caddy :80           │ │
 │                                    │  (localhost)         │ │
+│                                    │  + security headers  │ │
+│                                    │  + rate limiting     │ │
 │                                    └───────────┬──────────┘ │
 │                                                │            │
 │                                    ┌───────────▼──────────┐ │
 │                                    │  Express API :3001   │ │
 │                                    └──────────────────────┘ │
+│                                                             │
+│  Config (~/.cloudflared/config.yml):                        │
+│  ingress:                                                   │
+│    - hostname: api.beritakarya.co                           │
+│      service: http://localhost:80  ← ke Caddy, bukan :3001  │
+│    - service: http_status:404                               │
 │                                                             │
 │  Setup:                                                     │
 │  1. Install cloudflared di LXC-2                            │

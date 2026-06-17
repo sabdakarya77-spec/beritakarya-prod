@@ -167,11 +167,11 @@ credentials-file: /root/.cloudflared/a1b2c3d4-e5f6-7890-abcd-ef1234567890.json
 
 ingress:
   - hostname: api.beritakarya.co
-    service: http://localhost:3001
-    originRequest:
-      noTLSVerify: true
+    service: http://localhost:80   # ← ke Caddy dulu (TLS sudah di-terminate Cloudflare)
   - service: http_status:404
 ```
+
+> **Mengapa port 80?** Cloudflare Tunnel sudah handle TLS di edge mereka. Traffic dari tunnel ke Caddy adalah HTTP internal (tidak expose ke internet). Caddy kemudian proxy ke Express `:3001`. Jika langsung ke `:3001`, layer security Caddy (headers, rate limiting) tidak aktif.
 
 ### 3.5 Route DNS
 
@@ -204,17 +204,60 @@ curl https://api.beritakarya.co/health
 
 ---
 
-## Step 4: Update Vercel Environment
+## Step 4: Setup Domain di Vercel
 
-### 4.1 Vercel Dashboard
+> **Penting**: Langkah ini wajib dilakukan sebelum DNS Cloudflare aktif. Vercel harus mengenal domain kita terlebih dahulu.
 
-1. Project Settings → Environment Variables
+### 4.1 Tambah Domain di Vercel Dashboard
+
+1. Buka [vercel.com](https://vercel.com) → pilih project `beritakarya`
+2. **Settings** → **Domains**
+3. Tambahkan satu per satu:
+
+| Domain | Catatan |
+|--------|---------|
+| `beritakarya.co` | Domain utama |
+| `www.beritakarya.co` | Redirect ke root |
+| `*.beritakarya.co` | **Wildcard** — semua site multi-tenant |
+
+> **Vercel Hobby plan mendukung wildcard domain** (`*.beritakarya.co`). Fitur ini gratis dan tidak membutuhkan upgrade ke Pro.
+
+### 4.2 Verifikasi Domain (TXT Record)
+
+Setelah menambahkan domain, Vercel akan meminta verifikasi. Biasanya Vercel memberikan dua opsi:
+
+**Opsi A — CNAME sudah cukup** (jika record sudah ada di Cloudflare):
+```
+Vercel akan deteksi CNAME @ → 76.76.21.21 secara otomatis ✅
+```
+
+**Opsi B — TXT Record** (jika Vercel minta manual verify):
+```
+# Vercel akan tampilkan kode seperti ini:
+Type : TXT
+Name : _vercel
+Value: <kode-unik-dari-vercel>
+```
+
+Tambahkan di Cloudflare DNS:
+1. Cloudflare Dashboard → DNS → Add Record
+2. Type: `TXT`
+3. Name: `_vercel`
+4. Content: `<kode-unik-dari-vercel>`
+5. **Proxy: DNS Only (grey cloud)** ← penting, jangan Proxied
+6. Save → kembali ke Vercel → klik **Verify**
+
+> TXT record untuk verifikasi harus **DNS Only** (tidak boleh Proxied). Vercel membaca record ini langsung, tidak bisa melalui Cloudflare proxy.
+
+### 4.3 Update Environment Variables
+
+1. Vercel Dashboard → Project Settings → Environment Variables
 2. Update:
    ```
    NEXT_PUBLIC_API_URL=https://api.beritakarya.co
    ```
 
-### 4.2 Redeploy
+### 4.4 Redeploy
 
 Push ke `main` atau trigger manual deploy di Vercel.
 
@@ -241,11 +284,14 @@ SSL/TLS → Edge Certificates → **Always Use HTTPS**: ON
 
 ### 5.3 HSTS
 
+> [!CAUTION]
+> **Enable HSTS TERAKHIR** — setelah semua test end-to-end lulus (Step 7 di bawah). HSTS dengan `Max Age: 2 tahun` + `includeSubDomains` berarti browser akan **memblokir akses HTTP ke semua subdomain selama 2 tahun** tanpa bisa di-override manual. Jika ada konfigurasi yang salah saat awal, ini sangat sulit diperbaiki.
+
 SSL/TLS → Edge Certificates → HSTS:
 - Enable HSTS: ON
 - Max Age: `63072000` (2 tahun)
 - Include Subdomains: ON
-- Preload: ON
+- Preload: ON ← hanya aktifkan setelah domain stabil minimal 1 minggu
 
 ### 5.4 Automatic HTTPS Rewrites
 
@@ -318,7 +364,9 @@ echo | openssl s_client -connect beritakarya.co:443 -servername beritakarya.co 2
 | `521 Web Server Is Down` | Express API mati | Cek `docker compose ps` di LXC-2 |
 | DNS tidak resolve | Nameserver belum propagate | Tunggu atau flush DNS |
 | Cookie tidak tersimpan | Domain mismatch | Cek `COOKIE_DOMAIN=.beritakarya.co` |
-| Subdomain 404 | Wildcard CNAME belum ada | Tambah CNAME `*` → `cname.vercel-dns.com` |
+| Subdomain 404 di browser | Wildcard CNAME belum ada di Cloudflare | Tambah CNAME `*` → `cname.vercel-dns.com` |
+| Subdomain 404 dari Vercel | `*.beritakarya.co` belum ditambah di Vercel | Tambah domain wildcard di Vercel Dashboard → Settings → Domains |
+| Domain "Invalid" di Vercel | TXT verifikasi belum ada atau Proxied | Tambah TXT `_vercel` dengan **DNS Only** (grey cloud) |
 
 ### Tunnel Logs
 
@@ -334,21 +382,62 @@ cloudflared tunnel info beritakarya-api
 
 ## Checklist Migrasi
 
-- [ ] Tambah domain ke Cloudflare (Free plan)
+> Ikuti urutan ini. Beberapa langkah bergantung pada langkah sebelumnya.
+
+### Phase A: Cloudflare Setup
+- [ ] Tambah domain `beritakarya.co` ke Cloudflare (Free plan)
 - [ ] Update nameserver di Namecheap → Cloudflare
+- [ ] Tunggu propagasi (~5-30 menit, bisa sampai 24 jam)
+- [ ] Verifikasi: `nslookup -type=NS beritakarya.co` → harus tampil `ns1.cloudflare.com`
+
+### Phase B: DNS Records
 - [ ] Tambah DNS records di Cloudflare:
-  - [ ] A `@` → `76.76.21.21` (Vercel IP)
-  - [ ] CNAME `www` → `cname.vercel-dns.com`
-  - [ ] CNAME `*` → `cname.vercel-dns.com` (wildcard untuk multi-tenant)
+  - [ ] A `@` → `76.76.21.21` (Proxied ☁️)
+  - [ ] CNAME `www` → `cname.vercel-dns.com` (Proxied ☁️)
+  - [ ] CNAME `*` → `cname.vercel-dns.com` (Proxied ☁️) ← wildcard multi-tenant
+
+### Phase C: Vercel Domain Setup
+- [ ] Buka Vercel Dashboard → Project → Settings → Domains
+- [ ] Tambahkan `beritakarya.co`
+- [ ] Tambahkan `www.beritakarya.co`
+- [ ] Tambahkan `*.beritakarya.co` ← wildcard untuk semua site multi-tenant
+- [ ] Jika Vercel minta verifikasi TXT:
+  - [ ] Tambah TXT record `_vercel` di Cloudflare **dengan DNS Only (grey cloud)**
+  - [ ] Klik Verify di Vercel
+  - [ ] Setelah verified, TXT record bisa dihapus
+
+### Phase D: Cloudflare Tunnel (API)
 - [ ] Install `cloudflared` di LXC-2
-- [ ] Buat dan route Cloudflare Tunnel → `api.beritakarya.co`
-- [ ] Setup systemd service untuk `cloudflared`
-- [ ] Set SSL mode ke "Full" di Cloudflare
-- [ ] Enable "Always Use HTTPS"
-- [ ] Update `NEXT_PUBLIC_API_URL` di Vercel
-- [ ] Test end-to-end (frontend → API → database)
-- [ ] Test subdomain routing (`nganjuk.beritakarya.co`)
+- [ ] `cloudflared tunnel login` → pilih `beritakarya.co`
+- [ ] `cloudflared tunnel create beritakarya-api`
+- [ ] Buat `~/.cloudflared/config.yml` (service: `http://localhost:80`)
+- [ ] `cloudflared tunnel route dns beritakarya-api api.beritakarya.co`
+- [ ] Setup systemd service untuk auto-start
+- [ ] Verifikasi: `curl https://api.beritakarya.co/health`
+
+### Phase E: SSL & Security Cloudflare
+- [ ] Set SSL/TLS mode ke **Full** (bukan Flexible, bukan Full Strict)
+- [ ] Enable **Always Use HTTPS**
+- [ ] Enable **Automatic HTTPS Rewrites**
+- [ ] (Opsional) Setup Firewall/WAF rules
+
+### Phase F: Vercel Environment & Deploy
+- [ ] Update `NEXT_PUBLIC_API_URL=https://api.beritakarya.co` di Vercel
+- [ ] Redeploy project di Vercel
+
+### Phase G: Testing End-to-End
+- [ ] Test frontend: `curl -I https://beritakarya.co`
+- [ ] Test wildcard subdomain: `curl -I https://nganjuk.beritakarya.co`
+- [ ] Test API tunnel: `curl https://api.beritakarya.co/health`
+- [ ] Test auth flow (login → cookie → dashboard)
+- [ ] Test multi-tenant (buka subdomain berbeda)
 - [ ] Hapus DNS record lama ke IP VPS (`152.42.185.222`)
+
+### Phase H: Hardening (Terakhir, setelah semua stabil)
+- [ ] Enable **HSTS** di Cloudflare (Max Age 2 tahun, includeSubDomains)
+- [ ] Enable **HSTS Preload** (hanya setelah domain stabil ≥1 minggu)
+- [ ] Setup monitoring (Uptime Kuma)
+- [ ] Setup backup cron
 
 ---
 
