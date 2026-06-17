@@ -108,6 +108,19 @@ Project **sudah dirancang untuk split deployment**:
 │                                       │  │  RAM: 1-2 GB         │  ││
 │                                       │  │  CPU: 2 core         │  ││
 │                                       │  └───────────────────────┘  ││
+│                                       │                             ││
+│                                       │  ┌───────────────────────┐  ││
+│                                       │  │  VM-4: AI Stack       │  ││
+│                                       │  │  (GPU Passthrough)    │  ││
+│                                       │  │                       │  ││
+│                                       │  │  - Ollama (LLM)       │  ││
+│                                       │  │  - ROCm + RX 6700 XT  │  ││
+│                                       │  │  - Open WebUI         │  ││
+│                                       │  │                       │  ││
+│                                       │  │  IP: 10.0.0.14       │  ││
+│                                       │  │  RAM: 6-8 GB         │  ││
+│                                       │  │  CPU: 4-6 core       │  ││
+│                                       │  └───────────────────────┘  ││
 │                                       └─────────────────────────────┘│
 │                                                                       │
 │   ┌─────────────────────────────────────────────────────────────────┐ │
@@ -788,6 +801,170 @@ services:
 
 ---
 
+## VM-4: AI Stack (GPU Passthrough)
+
+### Profil
+
+| Item | Detail |
+|------|--------|
+| **Nama** | `vm-4-ai` |
+| **OS** | Ubuntu 22.04 LTS / Debian 12 |
+| **RAM** | 6 GB (burst 8 GB) |
+| **CPU** | 4-6 core |
+| **Disk** | 50 GB (root) + model storage `/data/pve/vm-4-ai/models/` |
+| **IP** | `10.0.0.14` (static) |
+| **GPU** | AMD RX 6700 XT (12 GB VRAM) — PCIe Passthrough |
+| **Fungsi** | Local LLM inference, AI features backend |
+
+### Kenapa VM Bukan LXC?
+
+| Aspek | VM | LXC |
+|-------|-----|-----|
+| GPU Passthrough | ✅ Native support | ❌ Tidak bisa |
+| IOMMU isolation | ✅ Penuh | ❌ Berbagi host kernel |
+| ROCm driver | ✅ Install langsung | ❌ Kompatibilitas terbatas |
+| Kernel module | ✅ Bisa modprobe | ❌ Terbatas |
+
+GPU passthrough **wajib pakai VM** karena butuh akses langsung ke PCIe device.
+
+### Service
+
+```
+VM-4: AI Stack
+│
+├── Ollama
+│   ├── Port: 11434 (REST API)
+│   ├── Models: llama3, mistral, codellama (sesuai kebutuhan)
+│   ├── GPU: AMD RX 6700 XT via ROCm
+│   ├── VRAM: 12 GB (model hingga ~7B-13B quantized)
+│   └── Data: /data/pve/vm-4-ai/ollama/
+│
+├── Open WebUI (optional)
+│   ├── Port: 3000 (web UI)
+│   ├── Backend: Ollama API
+│   └── Fungsi: Chat interface untuk testing
+│
+└── Systemd Services
+    ├── ollama.service
+    └── open-webui.service (optional)
+```
+
+### GPU Passthrough Setup (Proxmox)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                GPU PASSTHROUGH FLOW                           │
+│                                                             │
+│  1. Enable IOMMU di Proxmox host:                           │
+│     ┌─────────────────────────────────────────────────────┐ │
+│     │ /etc/default/grub:                                  │ │
+│     │ GRUB_CMDLINE_LINUX="amd_iommu=on iommu=pt"         │ │
+│     │ update-grub && reboot                               │ │
+│     └─────────────────────────────────────────────────────┘ │
+│                                                             │
+│  2. Bind VFIO driver:                                       │
+│     ┌─────────────────────────────────────────────────────┐ │
+│     │ /etc/modprobe.d/vfio.conf:                          │ │
+│     │ options vfio-pci ids=1002:73df,1002:ab28            │ │
+│     │ (GPU audio device)                                   │ │
+│     └─────────────────────────────────────────────────────┘ │
+│                                                             │
+│  3. VM config:                                              │
+│     ┌─────────────────────────────────────────────────────┐ │
+│     │ /etc/pve/qemu-server/400.conf:                      │ │
+│     │ hostpci0: 0000:03:00,pcie=1,x-vga=1                │ │
+│     │ args: -cpu 'host,+topoext,kvm=off'                  │ │
+│     └─────────────────────────────────────────────────────┘ │
+│                                                             │
+│  4. Install ROCm di VM:                                     │
+│     ┌─────────────────────────────────────────────────────┐ │
+│     │ wget https://repo.radeon.com/amdgpu-install/...     │ │
+│     │ apt install -y rocm-hip-runtime rocm-dev            │ │
+│     │ usermod -aG video,render $USER                       │ │
+│     └─────────────────────────────────────────────────────┘ │
+│                                                             │
+│  5. Install Ollama dengan ROCm:                             │
+│     ┌─────────────────────────────────────────────────────┐ │
+│     │ curl -fsSL https://ollama.com/install.sh | sh       │ │
+│     │ HSA_OVERRIDE_GFX_VERSION=10.3.0 ollama serve        │ │
+│     │ (RX 6700 XT = gfx1031, override ke gfx1030)        │ │
+│     └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Docker Compose (opsional, untuk Open WebUI)
+
+```yaml
+# /opt/vm-4-ai/docker-compose.yml
+version: "3.9"
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: bk-open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    volumes:
+      - /data/pve/vm-4-ai/open-webui:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+```
+
+### Environment Variables
+
+```bash
+# /opt/vm-4-ai/.env
+
+# Ollama
+OLLAMA_HOST=0.0.0.0:11434
+OLLAMA_MODELS=/data/pve/vm-4-ai/ollama/models
+HSA_OVERRIDE_GFX_VERSION=10.3.0  # RX 6700 XT compatibility
+
+# GPU
+CUDA_VISIBLE_DEVICES=0
+ROCR_VISIBLE_DEVICES=0
+```
+
+### Integrasi dengan Express API
+
+```typescript
+// apps/api/src/ai/ollama-client.ts
+// Express API → Ollama REST API (10.0.0.14:11434)
+
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://10.0.0.14:11434';
+
+// Endpoint yang bisa pakai Ollama (fallback dari OpenAI):
+// - /ai/rewrite → llama3
+// - /ai/grammar → llama3
+// - /ai/summarize → llama3
+// - /ai/translate → llama3
+```
+
+### Resource Allocation
+
+| Resource | Allocation |
+|----------|------------|
+| RAM | 6-8 GB (sisa untuk model loading) |
+| CPU | 4-6 core (inference parallel) |
+| VRAM | 12 GB (RX 6700 XT full) |
+| Disk | ~50 GB (OS + models) |
+
+### Model Recommendation
+
+| Model | VRAM | Use Case |
+|-------|------|----------|
+| llama3:8b-q4 | ~5 GB | General text (rewrite, grammar) |
+| mistral:7b-q4 | ~4 GB | Fast inference, summarization |
+| codellama:7b-q4 | ~5 GB | Code-related tasks |
+| llama3:70b-q4 | ~40 GB | ❌ Terlalu besar untuk 12 GB VRAM |
+
+> **Catatan**: Model quantized (Q4) menghemat VRAM signifikan. Dengan 12 GB VRAM, model 7B-13B berjalan lancar.
+
+---
+
 ## Network Topology
 
 ```
@@ -833,6 +1010,13 @@ services:
 │  │           │               │                │                  │   │
 │  │           └───────────────┼────────────────┘                  │   │
 │  │                           │                                   │   │
+│  │                    ┌──────▼──────┐                            │   │
+│  │                    │   VM-4      │                            │   │
+│  │                    │  AI Stack   │                            │   │
+│  │                    │ 10.0.0.14   │                            │   │
+│  │                    │ (GPU PT)    │                            │   │
+│  │                    └─────────────┘                            │   │
+│  │                           │                                   │   │
 │  │                    Internal Network                           │   │
 │  │                    10.0.0.0/24                                │   │
 │  │                    (bridge: vmbr0)                            │   │
@@ -841,7 +1025,7 @@ services:
 │  Firewall Rules:                                                     │
 │  ├── Tidak perlu port forwarding (Cloudflare Tunnel pakai outbound) │
 │  ├── SSH → Proxmox host only (dari LAN)                             │
-│  ├── LXC inter-communication: allowed (10.0.0.x)                   │
+│  ├── LXC/VM inter-communication: allowed (10.0.0.x)                │
 │  └── Cloudflare Tunnel: outbound only (tidak perlu open port)       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -861,28 +1045,35 @@ services:
 │  ├── LXC-1 Database      ████████░░░░░░░░  2-4 GB           │
 │  ├── LXC-2 API Stack     ████████████░░░░  4-6 GB           │
 │  ├── LXC-3 Monitoring    ████░░░░░░░░░░░░  1-2 GB           │
+│  ├── VM-4 AI Stack       ████████████████░  6-8 GB           │
 │  ├── ──────────────────────────────────────                  │
-│  ├── Total Used          ████████████████░  9-14 GB          │
-│  └── Free                ████████████████░  18-23 GB         │
+│  ├── Total Used          ████████████████░  15-22 GB         │
+│  └── Free                ██████████░░░░░░  10-17 GB         │
 │                                                              │
 │  CPU:                                                        │
 │  ├── Proxmox Host        ██░░░░░░░░░░░░░░  1 core           │
 │  ├── LXC-1 Database      ████░░░░░░░░░░░░  2 core           │
 │  ├── LXC-2 API Stack     ████████░░░░░░░░  4 core           │
 │  ├── LXC-3 Monitoring    ████░░░░░░░░░░░░  2 core           │
+│  ├── VM-4 AI Stack       ████████░░░░░░░░  4-6 core          │
 │  ├── ──────────────────────────────────────                  │
-│  ├── Total Used          ██████████████░░  9 core            │
-│  └── Free                ████░░░░░░░░░░░░  7 core            │
+│  ├── Total Used          ████████████████░  13-15 core       │
+│  └── Free                ██░░░░░░░░░░░░░░  1-3 core         │
+│                                                              │
+│  GPU:                                                        │
+│  ├── AMD RX 6700 XT      ████████████████░  12 GB VRAM      │
+│  └── Passthrough → VM-4 (dedicated)                         │
 │                                                              │
 │  Disk:                                                       │
-│  ├── Proxmox + LXC root  ████████░░░░░░░░  ~50 GB           │
+│  ├── Proxmox + LXC/VM    ████████░░░░░░░░  ~70 GB           │
 │  ├── PostgreSQL data     ████░░░░░░░░░░░░  ~20 GB           │
 │  ├── Meilisearch index   ██░░░░░░░░░░░░░░  ~10 GB           │
+│  ├── AI models (Ollama)  ████████░░░░░░░░  ~30 GB           │
 │  ├── Backups             ████████████░░░░  ~100 GB          │
 │  ├── Docker images       ████████░░░░░░░░  ~30 GB           │
 │  ├── ──────────────────────────────────────                  │
-│  ├── Total Used          ████████████░░░░  ~210 GB          │
-│  └── Free                ██████████████████  ~790 GB        │
+│  ├── Total Used          ██████████████░░  ~260 GB          │
+│  └── Free                ████████████████░  ~740 GB         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -899,6 +1090,9 @@ services:
 | Uptime tidak se-stabil cloud | UPS, monitoring (Uptime Kuma), graceful degradation di code |
 | Cron jobs (Vercel → Home) | Ganti dengan local cron atau external service (cron-job.org) |
 | HTTPS wajib | Cloudflare Tunnel auto-handle TLS |
+| GPU passthrough untuk AI | VM khusus dengan IOMMU + PCIe passthrough (RX 6700 XT) |
+| ROCm compatibility RX 6700 XT | `HSA_OVERRIDE_GFX_VERSION=10.3.0` (gfx1031 → gfx1030) |
+| Model AI terlalu besar untuk VRAM | Quantized model (Q4) — 7B-13B muat di 12 GB VRAM |
 
 ---
 
@@ -912,6 +1106,7 @@ services:
 3. [ ] Buat 3 LXC container (Debian 12 minimal)
 4. [ ] Setup bind-mount storage di setiap LXC
 5. [ ] Install Docker + Docker Compose di setiap LXC
+6. [ ] Enable IOMMU untuk GPU passthrough (amd_iommu=on)
 
 ### Phase 2: Database (LXC-1)
 6. [ ] Deploy PostgreSQL + Redis
@@ -937,9 +1132,17 @@ services:
 20. [ ] Konfigurasi monitoring targets
 21. [ ] Setup alerts (Telegram/Email)
 
-### Phase 6: Hardening
-22. [ ] Firewall rules
-23. [ ] SSH key-only
-24. [ ] Fail2ban
+### Phase 6: AI Stack (VM-4)
+22. [ ] Buat VM dengan GPU passthrough (RX 6700 XT)
+23. [ ] Install ROCm driver
+24. [ ] Install Ollama + download model (llama3:8b)
+25. [ ] Deploy Open WebUI (optional)
+26. [ ] Integrasi Express API → Ollama (fallback dari OpenAI)
+27. [ ] Test inference performance
+
+### Phase 7: Hardening
+28. [ ] Firewall rules
+29. [ ] SSH key-only
+30. [ ] Fail2ban
 25. [ ] SSL/TLS verification
 26. [ ] Load testing
