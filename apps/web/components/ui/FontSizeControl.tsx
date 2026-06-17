@@ -47,7 +47,7 @@ export default function FontSizeControl() {
     return () => {
       observerRef.current?.disconnect();
     };
-  }, []);
+  }, [fontSize]);
 
   useEffect(() => {
     if (contentElRef.current) {

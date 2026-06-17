@@ -49,6 +49,7 @@ export default function CategoriesDashboard() {
 
   useEffect(() => {
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCategories deps (isGlobalView, siteId) already tracked
   }, [isGlobalView, siteId]);
 
   // Auto-generate slug from name

@@ -33,14 +33,17 @@ export default function EditorialCalendar() {
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
+  const monthStartISO = monthStart.toISOString();
+  const monthEndISO = monthEnd.toISOString();
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
         const { data } = await api.get('/articles', {
           params: {
             limit: 100,
-            startDate: monthStart.toISOString(),
-            endDate: monthEnd.toISOString(),
+            startDate: monthStartISO,
+            endDate: monthEndISO,
           }
         });
         setArticles(data.data.articles || data.data.items || []);
@@ -49,7 +52,7 @@ export default function EditorialCalendar() {
       }
     };
     fetchArticles();
-  }, [site, monthStart.toISOString(), monthEnd.toISOString()]);
+  }, [site, monthStartISO, monthEndISO]);
 
   const getArticlesForDay = (day: Date) => {
     return articles.filter(a => {

@@ -191,7 +191,7 @@ export default function AuditLogPage() {
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
-  }, [page, searchAction, filterEntityType]);
+  }, [page, searchAction, filterEntityType, stats]);
 
   useEffect(() => {
     const controller = new AbortController();

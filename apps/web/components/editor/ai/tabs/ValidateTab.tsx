@@ -30,6 +30,7 @@ export function ValidateTab() {
     if (docText && !text) {
       setText(docText)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getFullDocumentText depends only on blocks (tracked); text excluded as guard-only
   }, [blocks])
 
   const handlePullText = () => {

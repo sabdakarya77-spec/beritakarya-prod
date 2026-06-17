@@ -1,0 +1,36 @@
+﻿
+> beritakarya@1.0.0 lint D:\beritakarya-v.0.1
+> turbo run lint
+
+node.exe : • turbo 2.9.14
+At C:\nvm4w\nodejs\pnpm.ps1:16 char:5
++     & "$basedir/node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs"  ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (• turbo 2.9.14:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+   • Packages in scope: @beritakarya/api, @beritakarya/config, @beritakarya/types, @beritakarya/utils, @beritakarya/web
+   • Running lint in 5 packages
+   • Remote caching disabled
+
+@beritakarya/api:lint: cache hit, replaying logs 80aa88a13d5c2698
+@beritakarya/api:lint: 
+@beritakarya/api:lint: > @beritakarya/api@1.0.0 lint D:\beritakarya-v.0.1\apps\api
+@beritakarya/api:lint: > cross-env ESLINT_USE_FLAT_CONFIG=false eslint src --ext .ts
+@beritakarya/api:lint: 
+@beritakarya/api:lint: Warning: React version was set to "detect" in eslint-plugin-react settings, but the "react" package is not installed. Assuming latest React version for linting.
+@beritakarya/api:lint: (node:12020) ESLintRCWarning: You are using an eslintrc configuration file, which is deprecated and support will be removed in v10.0.0. Please migrate to an eslint.config.js file. See https://eslint.org/docs/latest/use/configure/migration-guide for details. An eslintrc configuration file is used because you have the ESLINT_USE_FLAT_CONFIG environment variable set to false. If you want to use an eslint.config.js file, remove the environment variable. If you want to find the location of the eslintrc configuration file, use the --debug flag.
+@beritakarya/api:lint: (Use `node --trace-warnings ...` to show where the warning was created)
+@beritakarya/web:lint: cache hit, replaying logs 94eee488ee4d5c79
+@beritakarya/web:lint: 
+@beritakarya/web:lint: > @beritakarya/web@1.0.0 lint D:\beritakarya-v.0.1\apps\web
+@beritakarya/web:lint: > cross-env ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx
+@beritakarya/web:lint: 
+@beritakarya/web:lint: (node:4464) ESLintRCWarning: You are using an eslintrc configuration file, which is deprecated and support will be removed in v10.0.0. Please migrate to an eslint.config.js file. See https://eslint.org/docs/latest/use/configure/migration-guide for details. An eslintrc configuration file is used because you have the ESLINT_USE_FLAT_CONFIG environment variable set to false. If you want to use an eslint.config.js file, remove the environment variable. If you want to find the location of the eslintrc configuration file, use the --debug flag.
+@beritakarya/web:lint: (Use `node --trace-warnings ...` to show where the warning was created)
+
+ Tasks:    2 successful, 2 total
+Cached:    2 cached, 2 total
+  Time:    145ms >>> FULL TURBO
+

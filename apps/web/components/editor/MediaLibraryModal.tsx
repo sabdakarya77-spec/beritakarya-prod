@@ -122,7 +122,7 @@ export function MediaLibraryModal({
     } finally {
       resetUpload()
     }
-  }, [upload, user?.id, allowMultiple, onSelect, onClose, resetUpload])
+  }, [upload, user?.id, siteIdFromStore, allowMultiple, onSelect, onClose, resetUpload])
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`

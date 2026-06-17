@@ -80,7 +80,7 @@ export function SiteCategoriesDialog({
     return () => {
       cancelled = true
     }
-  }, [open, site?.id, onClose, onToast])
+  }, [open, site, onClose, onToast])
 
   const handleSave = async () => {
     if (!site) return

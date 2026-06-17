@@ -70,6 +70,7 @@ export default function ModerationPage() {
     }, 500);
     fetchStats();
     return () => { clearTimeout(timer); controller.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchQueue deps (search, status) already tracked
   }, [search, status]);
 
   const handleApprove = async (id: string) => {

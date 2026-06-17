@@ -31,7 +31,7 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
     setLinkUrl(data?.linkUrl || '');
     setCode(data?.code || '');
     setIsActive(data ? data.isActive : true);
-  }, [data?.id, data?.imageUrl, data?.linkUrl, data?.code, data?.isActive]);
+  }, [data]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

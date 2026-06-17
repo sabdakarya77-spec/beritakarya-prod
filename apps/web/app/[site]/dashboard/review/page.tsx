@@ -91,7 +91,10 @@ export default function ReviewQueuePage() {
      }
    };
 
-  useEffect(() => { load(); }, [site, activeTab]);
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load deps (site, activeTab) already tracked
+  }, [site, activeTab]);
 
   // Sinkronisasi state dari URL — hanya depend pada searchParams, bukan activeTab
   // (activeTab adalah OUTPUT efek ini; memasukkannya ke deps menyebabkan flicker saat klik tab)

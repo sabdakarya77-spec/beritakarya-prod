@@ -66,6 +66,7 @@ export default function KYCDetailReviewPage() {
 
   useEffect(() => {
     fetchUser()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUser deps (userId, siteId) already tracked
   }, [userId, siteId])
 
   const handleVerify = async (status: 'approved' | 'rejected') => {

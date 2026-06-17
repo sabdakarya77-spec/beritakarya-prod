@@ -102,6 +102,7 @@ export default function ArticlesPage() {
       load(controller.signal);
     }, 500);
     return () => { clearTimeout(timer); controller.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load deps (site, filter, searchQuery, page) already tracked
   }, [site, filter, searchQuery, page]);
 
   // Reset page when filter/search changes

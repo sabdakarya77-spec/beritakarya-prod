@@ -186,7 +186,7 @@ export function useRewrite() {
         error: error instanceof Error ? error.message : 'Failed to rewrite',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, rewrite }
 }
@@ -219,7 +219,7 @@ export function useExpand() {
         error: error instanceof Error ? error.message : 'Failed to expand',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, expand }
 }
@@ -253,7 +253,7 @@ export function useTranscriptToQuote() {
         error: error instanceof Error ? error.message : 'Failed to convert transcript',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, transcript }
 }
@@ -286,7 +286,7 @@ export function useHeadlines() {
         error: error instanceof Error ? error.message : 'Failed to generate headlines',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, generate }
 }
@@ -324,7 +324,7 @@ export function useSEO() {
         error: error instanceof Error ? error.message : 'Failed to generate SEO',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, generate }
 }
@@ -356,7 +356,7 @@ export function useCaption() {
         error: error instanceof Error ? error.message : 'Failed to generate caption',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, generate }
 }
@@ -395,7 +395,7 @@ export function useGrammar() {
         error: error instanceof Error ? error.message : 'Failed to check grammar',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, check }
 }
@@ -431,7 +431,7 @@ export function useReadability() {
         error: error instanceof Error ? error.message : 'Failed to analyze readability',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, analyze }
 }
@@ -469,7 +469,7 @@ export function useFactCheck() {
         error: error instanceof Error ? error.message : 'Failed to fact check',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, check }
 }
@@ -508,7 +508,7 @@ export function useObjectivity() {
         error: error instanceof Error ? error.message : 'Failed to analyze objectivity',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, analyze }
 }
@@ -552,7 +552,7 @@ export function useSummarize() {
         error: error instanceof Error ? error.message : 'Failed to summarize',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, generate }
 }
@@ -596,7 +596,7 @@ export function useTranslate() {
         error: error instanceof Error ? error.message : 'Failed to translate',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, translate }
 }
@@ -640,7 +640,7 @@ export function useImageGen() {
         error: error instanceof Error ? error.message : 'Failed to generate image',
       })
     }
-  }, [])
+  }, [setState])
 
   return { ...state, generate }
 }

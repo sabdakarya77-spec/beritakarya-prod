@@ -104,6 +104,7 @@ export default function KYCReviewPage() {
   useEffect(() => {
     fetchUsers()
     fetchStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUsers/fetchStats deps (siteId, page, filter) already tracked
   }, [siteId, page, filter])
 
   const handleSearch = (e: React.FormEvent) => {

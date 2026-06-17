@@ -2,7 +2,7 @@
 
 import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Trash2, ChevronLeft, ChevronRight, Upload, Image as ImageIcon, X } from 'lucide-react'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
@@ -16,7 +16,7 @@ interface GalleryImage {
 }
 
 const GalleryComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps) => {
-  const images: GalleryImage[] = node.attrs.images || []
+  const images: GalleryImage[] = useMemo(() => node.attrs.images || [], [node.attrs.images])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const { upload, uploading, reset: resetUpload } = useImageUpload()

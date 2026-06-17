@@ -70,6 +70,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchSites()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only fetch; fetchSites depends only on stable setters
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

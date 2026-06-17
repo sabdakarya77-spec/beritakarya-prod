@@ -52,6 +52,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
 
   useEffect(() => {
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchComments depends only on articleId (tracked)
   }, [articleId]);
 
   const handleSubmit = async (e: React.FormEvent) => {

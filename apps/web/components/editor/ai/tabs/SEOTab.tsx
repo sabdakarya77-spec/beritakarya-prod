@@ -55,7 +55,7 @@ export function SEOTab() {
       if (seoState.result.metaTitle) updateArticleData({ metaTitle: seoState.result.metaTitle })
       if (seoState.result.metaDescription) updateArticleData({ metaDescription: seoState.result.metaDescription })
     }
-  }, [seoState.result])
+  }, [seoState.result, updateArticleData])
 
   // ── Client-side validation ──
   const titleLength = storeTitle?.length || 0

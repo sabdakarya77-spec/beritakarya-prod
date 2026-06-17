@@ -2,7 +2,7 @@
 
 import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Trash2, Grid, Upload, Image as ImageIcon, X } from 'lucide-react'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
@@ -16,7 +16,7 @@ interface ImageGridItem {
 }
 
 const ImageGridComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps) => {
-  const images: ImageGridItem[] = node.attrs.images || []
+  const images: ImageGridItem[] = useMemo(() => node.attrs.images || [], [node.attrs.images])
   const cols = node.attrs.cols || 2
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const { upload, uploading, reset: resetUpload } = useImageUpload()

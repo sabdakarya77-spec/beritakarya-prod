@@ -36,6 +36,7 @@ export function AnalisisTab() {
   useEffect(() => {
     const docText = getFullText()
     if (docText && !text) setText(docText)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getFullText depends only on blocks (tracked); text excluded as guard-only
   }, [blocks])
 
   const handlePullText = () => setText(getFullText())

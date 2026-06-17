@@ -120,6 +120,7 @@ export default function AdsDashboard() {
     const controller = new AbortController();
     fetchData(controller.signal);
     return () => { controller.abort(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchData deps (site, user) already tracked; stable state setters excluded
   }, [site, user]);
 
   // Ad Management Handlers

@@ -58,7 +58,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
     return () => {
       observerRef.current?.disconnect();
     };
-  }, []);
+  }, [fontSize]);
 
   useEffect(() => {
     if (contentElRef.current) {

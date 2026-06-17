@@ -63,6 +63,7 @@ export default function UsersDashboard() {
   useEffect(() => {
     fetchUsers();
     fetchSites();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUsers/fetchSites deps (showAll) already tracked
   }, [showAll]);
 
   if (!isAllowed) return null;
