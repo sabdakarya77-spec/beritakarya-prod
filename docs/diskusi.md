@@ -2,7 +2,7 @@
 
 > **Status**: 📋 Plan — Belum diimplementasikan
 >
-> **Dokumen deploy utama**: [`docs/ssl_plan_vercel.md`](./ssl_plan_vercel.md) — **SATU-SATUNYA** sumber kebenaran untuk deployment.
+> **Dokumen deploy utama**: [`docs/deploy_guide.md`](./deploy_guide.md) — **SATU-SATUNYA** sumber kebenaran untuk deployment.
 >
 > **Update terakhir**: 17 Juni 2026
 
@@ -904,7 +904,7 @@ services:
 
 ## Langkah Implementasi
 
-> **Lihat juga**: [`docs/ssl_plan_vercel.md`](./ssl_plan_vercel.md) untuk panduan detail Cloudflare + DNS setup.
+> **Lihat juga**: [`docs/deploy_guide.md`](./deploy_guide.md) untuk panduan detail Cloudflare + DNS setup.
 
 ### Phase 1: Proxmox Setup
 1. [ ] Install Proxmox VE di home server
