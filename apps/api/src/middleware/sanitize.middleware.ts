@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom'
 import DOMPurify from 'dompurify'
 
 const { window } = new JSDOM('')
-const purify = DOMPurify(window as any)
+const purify = DOMPurify(window as unknown as Parameters<typeof DOMPurify>[0])
 
 // Hook: hanya izinkan properti CSS text-align pada atribut style
 // Ini mencegah CSS injection (expression(), javascript:, dll) sambil
@@ -87,7 +87,7 @@ function isBlockObject(value: unknown): boolean {
   return typeof obj.type === 'string' && KNOWN_BLOCK_TYPES.has(obj.type)
 }
 
-function sanitizeBlockValue(value: unknown, key: string): any {
+function sanitizeBlockValue(value: unknown, key: string): unknown {
   // Sanitize known HTML content fields within blocks using the rich-text config
   if (typeof value === 'string' && BLOCK_HTML_CONTENT_FIELDS.has(key)) {
     return purify.sanitize(value, BLOCK_CONTENT_CONFIG)
@@ -96,7 +96,7 @@ function sanitizeBlockValue(value: unknown, key: string): any {
   return value
 }
 
-function sanitizeValue(value: any, key?: string, parentIsBlocks?: boolean): any {
+function sanitizeValue(value: unknown, key?: string, parentIsBlocks?: boolean): unknown {
   // Jangan sanitize field password atau email untuk mencegah kerusakan data kredensial
   if (key === 'password' || key === 'email') {
     return value
@@ -111,7 +111,7 @@ function sanitizeValue(value: any, key?: string, parentIsBlocks?: boolean): any 
   if (key === 'blocks' && Array.isArray(value)) {
     return value.map((item: unknown) => {
       if (isBlockObject(item)) {
-        const result: Record<string, any> = {}
+        const result: Record<string, unknown> = {}
         for (const [k, v] of Object.entries(item as Record<string, unknown>)) {
           result[k] = sanitizeBlockValue(v, k)
         }
@@ -129,8 +129,8 @@ function sanitizeValue(value: any, key?: string, parentIsBlocks?: boolean): any 
     return value.map(v => sanitizeValue(v, undefined, parentIsBlocks))
   }
   if (value && typeof value === 'object') {
-    const result: Record<string, any> = {}
-    for (const [k, v] of Object.entries(value)) {
+    const result: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       result[k] = sanitizeValue(v, k, parentIsBlocks)
     }
     return result

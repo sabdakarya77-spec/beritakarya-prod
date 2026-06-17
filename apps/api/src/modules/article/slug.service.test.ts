@@ -64,7 +64,7 @@ describe('createArticleWithSlugRetry', () => {
         title: 'Test',
         slug: 'test-2',
         siteId: 'bandung'
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof repo.createArticle>>)
 
     const result = await createArticleWithSlugRetry({
       title: 'Test',

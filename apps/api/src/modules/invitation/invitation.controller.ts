@@ -107,10 +107,10 @@ invitationRouter.post('/',
         }
       })
 
-      return { success: true, invitation: createdInvitation }
+      return { success: true as const, invitation: createdInvitation }
     }).catch(err => {
       if (err.message === 'PENDING_INVITATION_EXISTS') {
-        return { success: false, error: 'PENDING_INVITATION_EXISTS' }
+        return { success: false as const, error: 'PENDING_INVITATION_EXISTS' }
       }
       throw err
     })
@@ -122,7 +122,7 @@ invitationRouter.post('/',
       })
     }
 
-    const invitation = (result as any).invitation
+    const invitation = result.invitation
     const expiresAt = invitation.expiresAt
     const inviteSiteId = invitation.siteId
 
@@ -211,7 +211,7 @@ invitationRouter.get('/',
     const status = req.query.status as string // 'pending' | 'accepted' | 'expired'
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
 
     // Filter by site for wapimred
     if (req.user!.role === 'wapimred') {

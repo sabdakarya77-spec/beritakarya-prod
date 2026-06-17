@@ -2,8 +2,21 @@ import jwt from 'jsonwebtoken'
 import { prisma } from '../db/client'
 import { logger } from '../lib/logger'
 
+interface GoogleIndexingConfig {
+  clientEmail: string
+  privateKey: string
+  isActive: boolean
+}
+
+interface GoogleIndexingResult {
+  success: boolean
+  message?: string
+  data?: unknown
+  error?: string
+}
+
 export class GoogleIndexingService {
-  private async getAccessToken(config: any): Promise<string> {
+  private async getAccessToken(config: GoogleIndexingConfig): Promise<string> {
     const clientEmail = config.clientEmail
     // Replace literal '\n' characters if they exist in the raw pasted string
     const privateKey = config.privateKey.replace(/\\n/g, '\n')
@@ -39,7 +52,7 @@ export class GoogleIndexingService {
     return data.access_token
   }
 
-  public async submitUrl(siteId: string, url: string, type: 'URL_UPDATED' | 'URL_DELETED' = 'URL_UPDATED'): Promise<any> {
+  public async submitUrl(siteId: string, url: string, type: 'URL_UPDATED' | 'URL_DELETED' = 'URL_UPDATED'): Promise<GoogleIndexingResult> {
     try {
       const site = await prisma.site.findUnique({
         where: { id: siteId }
@@ -49,9 +62,9 @@ export class GoogleIndexingService {
         return { success: false, message: 'Google Indexing tidak dikonfigurasi untuk situs ini.' }
       }
 
-      const config = typeof site.googleIndexingConfig === 'string' 
-        ? JSON.parse(site.googleIndexingConfig) 
-        : (site.googleIndexingConfig as any)
+      const config = typeof site.googleIndexingConfig === 'string'
+        ? JSON.parse(site.googleIndexingConfig) as GoogleIndexingConfig
+        : (site.googleIndexingConfig as unknown as GoogleIndexingConfig)
 
       if (!config || !config.clientEmail || !config.privateKey || !config.isActive) {
         return { success: false, message: 'Google Indexing dinonaktifkan atau kredensial kosong.' }
@@ -78,9 +91,9 @@ export class GoogleIndexingService {
 
       const result = await res.json()
       return { success: true, data: result }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Google Indexing API failed:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
 }

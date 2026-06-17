@@ -4,8 +4,16 @@ import { API_URL } from '../../lib/api'
 const SITEMAP_MAX_PAGES = 50 // Safety cap
 const DEFAULT_IMAGE = '/logo.png'
 
+interface SitemapArticle {
+  slug: string
+  publishedAt?: string
+  updatedAt?: string
+  featuredImage?: string | null
+  blocks?: Array<{ type?: string; url?: string }>
+}
+
 async function getArticles(site: string) {
-  const all: any[] = []
+  const all: SitemapArticle[] = []
 
   try {
     for (let page = 1; page <= SITEMAP_MAX_PAGES; page++) {

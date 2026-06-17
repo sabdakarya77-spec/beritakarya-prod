@@ -3,19 +3,20 @@ import request from 'supertest'
 import express from 'express'
 import { mediaRouter } from './media.controller'
 import { errorMiddleware } from '../../middleware/error.middleware'
+import type { Request, Response, NextFunction } from 'express'
 
 // Mock auth middleware so we don't need real tokens
 vi.mock('../../middleware/auth.middleware', () => ({
-  requireAuth: (_: any, __: any, next: any) => next()
+  requireAuth: (_: Request, __: Response, next: NextFunction) => next()
 }))
 
 // Mock site middleware so we don't need a real site header
 vi.mock('../../middleware/site.middleware', () => ({
-  siteMiddleware: (_: any, __: any, next: any) => {
+  siteMiddleware: (_: Request, __: Response, next: NextFunction) => {
     _.site = 'bandung'
     next()
   },
-  requireSiteAccess: (_: any, __: any, next: any) => next()
+  requireSiteAccess: (_: Request, __: Response, next: NextFunction) => next()
 }))
 
 // Mock sharp so we don't need real images or binary dependencies in test
@@ -41,7 +42,7 @@ describe('Media Upload Endpoint', () => {
         filename: 'document.txt',
         contentType: 'text/plain'
       })
-    
+
     expect(res.status).toBe(400)
     expect(res.body.success).toBe(false)
     expect(res.body.error.message).toMatch(/JPG, PNG, WebP,.*GIF/i)
@@ -51,7 +52,7 @@ describe('Media Upload Endpoint', () => {
     const res = await request(app)
       .post('/api/v1/media/upload')
       .send({})
-    
+
     expect(res.status).toBe(400)
     expect(res.body.success).toBe(false)
   })

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import axios from 'axios'
 import { api } from '../../../../../../lib/api'
 import { useRequireRole } from '../../../../../../hooks/useRequireRole'
 
@@ -82,8 +83,8 @@ export default function KYCDetailReviewPage() {
         notes
       })
       router.push(`/${siteId}/dashboard/review/kyc`)
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || `Gagal melakukan ${status}`)
+    } catch (err: unknown) {
+      setError((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) ?? `Gagal melakukan ${status}`)
     } finally {
       setSubmitting(false)
     }

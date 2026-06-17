@@ -60,10 +60,13 @@ export function SiteCategoriesDialog({
         setMasterTree(data.data.masterTree || [])
         setIsConfigured(data.data.isConfigured)
         setSelectedIds(data.data.assignedCategoryIds || [])
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (!cancelled) {
+          const msg = error && typeof error === 'object' && 'response' in error
+            ? (error as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+            : undefined
           onToast(
-            error.response?.data?.error?.message || 'Gagal memuat kategori situs',
+            msg || 'Gagal memuat kategori situs',
             'error'
           )
           onClose()
@@ -90,9 +93,12 @@ export function SiteCategoriesDialog({
       onToast(`Kategori untuk ${site.name} berhasil disimpan`)
       onSaved?.()
       onClose()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined
       onToast(
-        error.response?.data?.error?.message || 'Gagal menyimpan kategori',
+        msg || 'Gagal menyimpan kategori',
         'error'
       )
     } finally {
@@ -122,9 +128,12 @@ export function SiteCategoriesDialog({
           setSelectedIds(reload.data.data.assignedCategoryIds || [])
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error && typeof error === 'object' && 'response' in error
+        ? (error as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined
       onToast(
-        error.response?.data?.error?.message || 'Gagal memuat kategori global',
+        msg || 'Gagal memuat kategori global',
         'error'
       )
     } finally {

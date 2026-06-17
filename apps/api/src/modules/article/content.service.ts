@@ -9,7 +9,15 @@ const PHOTO_JOURNALISM_MIN_WORDS = 15
 // Video exclusive specific requirements
 const VIDEO_EXCLUSIVE_MIN_WORDS = 15
 
-export function extractTextFromBlocks(blocks: any[] | undefined): string {
+/** Shape of a content block stored in Article.blocks JSON field. */
+export interface ArticleBlock {
+  type: string
+  content?: string
+  images?: string[]
+  [key: string]: unknown
+}
+
+export function extractTextFromBlocks(blocks: ArticleBlock[] | undefined): string {
   if (!Array.isArray(blocks)) return ''
   return blocks
     .filter((b) => b?.type === 'paragraph' || b?.type === 'heading')
@@ -23,7 +31,7 @@ export function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length
 }
 
-export function buildMetaDescriptionExcerpt(blocks: any[] | undefined, maxLen = 160): string {
+export function buildMetaDescriptionExcerpt(blocks: ArticleBlock[] | undefined, maxLen = 160): string {
   const text = extractTextFromBlocks(blocks)
   if (!text) return ''
   return text.length <= maxLen ? text : `${text.slice(0, maxLen - 3).trim()}...`
@@ -39,7 +47,7 @@ export function trimExcerpt(text: string | undefined, maxLen = 160): string {
  * Menghitung jumlah foto di gallery block.
  * Digunakan untuk validasi foto jurnalistik.
  */
-export function countGalleryImages(blocks: any[] | undefined): number {
+export function countGalleryImages(blocks: ArticleBlock[] | undefined): number {
   if (!Array.isArray(blocks)) return 0
   const gallery = blocks.find((b) => b?.type === 'gallery')
   if (!gallery || !Array.isArray(gallery.images)) return 0
@@ -51,7 +59,7 @@ export function countGalleryImages(blocks: any[] | undefined): number {
  * - Minimal 3 foto di galeri
  * - Minimal 15 kata (narasi foto)
  */
-export function validatePhotoJournalismRequirements(blocks: any[] | undefined): void {
+export function validatePhotoJournalismRequirements(blocks: ArticleBlock[] | undefined): void {
   if (!blocks) return
 
   const imageCount = countGalleryImages(blocks)
@@ -75,7 +83,7 @@ export function validatePhotoJournalismRequirements(blocks: any[] | undefined): 
  * Menghitung jumlah embed block (video).
  * Digunakan untuk validasi video eksklusif.
  */
-export function countEmbedBlocks(blocks: any[] | undefined): number {
+export function countEmbedBlocks(blocks: ArticleBlock[] | undefined): number {
   if (!Array.isArray(blocks)) return 0
   return blocks.filter((b) => b?.type === 'embed').length
 }
@@ -85,7 +93,7 @@ export function countEmbedBlocks(blocks: any[] | undefined): number {
  * - Minimal 1 video embed
  * - Minimal 15 kata narasi
  */
-export function validateVideoExclusiveRequirements(blocks: any[] | undefined): void {
+export function validateVideoExclusiveRequirements(blocks: ArticleBlock[] | undefined): void {
   if (!blocks) return
 
   const embedCount = countEmbedBlocks(blocks)
@@ -113,7 +121,7 @@ export type ArticleContentLimitOptions = {
 }
 
 export function validateArticleContentLimits(
-  blocks?: any[],
+  blocks?: ArticleBlock[],
   options: ArticleContentLimitOptions = {}
 ): void {
   if (!blocks) return
@@ -153,7 +161,7 @@ export function validateArticleContentLimits(
   }
 }
 
-export function applySeoDefaults<T extends { title: string; blocks?: any[]; excerpt?: string; metaDescription?: string }>(
+export function applySeoDefaults<T extends { title: string; blocks?: ArticleBlock[]; excerpt?: string; metaDescription?: string }>(
   input: T
 ): T & { metaDescription?: string } {
   if (input.metaDescription?.trim()) return input

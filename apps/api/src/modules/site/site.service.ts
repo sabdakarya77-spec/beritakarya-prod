@@ -1,5 +1,6 @@
 import { prisma } from '../../db/client'
 import { logger } from '../../lib/logger'
+import type { Prisma } from '@prisma/client'
 
 /**
  * Field-field "aset korporat" yang diwariskan dari site 'pusat' ke
@@ -179,9 +180,10 @@ export class SiteService {
     const pusat = await prisma.site.findUnique({ where: { id: 'pusat' } })
     const corporateDefaults: Record<string, unknown> = {}
     if (pusat) {
+      const pusatRecord = pusat as Record<string, unknown>
       for (const field of CORPORATE_ASSET_FIELDS) {
-        if (!isEmptyValue((pusat as any)[field])) {
-          corporateDefaults[field] = (pusat as any)[field]
+        if (!isEmptyValue(pusatRecord[field])) {
+          corporateDefaults[field] = pusatRecord[field]
         }
       }
     }
@@ -249,7 +251,7 @@ export class SiteService {
       phone: string
       address: string
       description: string
-      trendingTopics: any
+      trendingTopics: Prisma.InputJsonValue
     }>,
     actorUserId: string
   ) {
@@ -278,14 +280,14 @@ export class SiteService {
       }
     }
 
-    const updateData = { ...data }
+    const updateData: Record<string, unknown> = { ...data }
     if (data.trendingTopics && typeof data.trendingTopics === 'object') {
       updateData.trendingTopics = JSON.stringify(data.trendingTopics)
     }
 
     const updated = await prisma.site.update({
       where: { id: siteId },
-      data: updateData
+      data: updateData as Prisma.SiteUpdateInput
     })
 
     await this.logAudit(actorUserId, 'site.updated', {
@@ -321,9 +323,11 @@ export class SiteService {
         where: { id: 'pusat' }
       })
       if (pusat) {
+        const siteRecord = site as Record<string, unknown>
+        const pusatRecord = pusat as Record<string, unknown>
         for (const field of CORPORATE_ASSET_FIELDS) {
-          if (isEmptyValue((site as any)[field]) && !isEmptyValue((pusat as any)[field])) {
-            ;(site as any)[field] = (pusat as any)[field]
+          if (isEmptyValue(siteRecord[field]) && !isEmptyValue(pusatRecord[field])) {
+            siteRecord[field] = pusatRecord[field]
           }
         }
       }
@@ -352,7 +356,7 @@ export class SiteService {
     }
   }
 
-  async updateSiteSettings(siteId: string, data: any, actorUserId: string) {
+  async updateSiteSettings(siteId: string, data: Record<string, unknown>, actorUserId: string) {
     const existing = await prisma.site.findUnique({
       where: { id: siteId }
     })
@@ -364,7 +368,7 @@ export class SiteService {
     if (data.domain && data.domain !== existing.domain) {
       const domainExists = await prisma.site.findFirst({
         where: {
-          domain: data.domain,
+          domain: data.domain as string,
           id: { not: siteId }
         }
       })
@@ -376,7 +380,7 @@ export class SiteService {
       }
     }
 
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
     const allowedFields = [
       'name', 'domain', 'description', 'logoUrl', 'faviconUrl', 'ogImageUrl', 'footerText',
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
@@ -398,7 +402,7 @@ export class SiteService {
 
     await prisma.site.update({
       where: { id: siteId },
-      data: updateData
+      data: updateData as Prisma.SiteUpdateInput
     })
 
     await this.logAudit(actorUserId, 'site.settings_updated', {
@@ -477,17 +481,17 @@ export class SiteService {
   private async logAudit(
     userId: string,
     action: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
   ) {
     try {
       await prisma.auditLog.create({
         data: {
           userId: userId || 'system',
-          siteId: details.siteId || 'pusat',
+          siteId: (details.siteId as string) || 'pusat',
           action,
           entityType: 'site',
-          entityId: details.siteId || 'system',
-          newValue: details
+          entityId: (details.siteId as string) || 'system',
+          newValue: details as Prisma.InputJsonValue
         }
       })
     } catch (error) {

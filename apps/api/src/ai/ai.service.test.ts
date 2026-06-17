@@ -20,8 +20,8 @@ vi.mock('openai', () => {
 })
 
 vi.mock('opossum', () => {
-  const MockBreaker = vi.fn().mockImplementation(function (this: any, action: any) {
-    this.fire = vi.fn().mockImplementation((...args: any[]) => action(...args))
+  const MockBreaker = vi.fn().mockImplementation(function (this: Record<string, unknown>, action: (...args: unknown[]) => unknown) {
+    this.fire = vi.fn().mockImplementation((...args: unknown[]) => action(...args))
     this.on = vi.fn().mockReturnThis()
     this.stats = { state: 'closed' }
     return this
@@ -31,8 +31,6 @@ vi.mock('opossum', () => {
     __esModule: true
   }
 })
-
-
 
 import { callAI, chatComplete } from './base.service'
 

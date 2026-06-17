@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { Mail, Plus, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
 import { useRequireRole } from '../../../../hooks/useRequireRole';
+import axios from 'axios';
 
 interface Invitation {
   id: string;
@@ -39,7 +40,7 @@ export default function InvitationsDashboard() {
     try {
       const { data } = await api.get('/invitations', { params: { limit: 100 } });
       if (data.success) setInvitations(data.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError('Gagal mengambil data undangan');
     } finally {
@@ -64,10 +65,10 @@ export default function InvitationsDashboard() {
       setToast({ message: 'Undangan berhasil dikirim', type: 'success' });
       setEmail('');
       fetchInvitations();
-    } catch (err: any) {
-      setToast({ 
-        message: err.response?.data?.error?.message || 'Gagal mengirim undangan', 
-        type: 'error' 
+    } catch (err: unknown) {
+      setToast({
+        message: (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal mengirim undangan',
+        type: 'error'
       });
     } finally {
       setSubmitLoading(false);

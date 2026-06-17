@@ -1,6 +1,6 @@
 'use client'
 
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
 import { useState, useCallback } from 'react'
 import { Trash2, Grid, Upload, Image as ImageIcon, X } from 'lucide-react'
@@ -15,7 +15,7 @@ interface ImageGridItem {
   caption?: string
 }
 
-const ImageGridComponent = ({ node, updateAttributes, deleteNode }: any) => {
+const ImageGridComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps) => {
   const images: ImageGridItem[] = node.attrs.images || []
   const cols = node.attrs.cols || 2
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)

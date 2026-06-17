@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, Bookmark, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { CategoryItem } from '../../lib/constants';
+import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 import { useSavedArticles } from '../../hooks/useSavedArticles';
@@ -14,7 +14,7 @@ interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   categories: CategoryItem[];
-  siteConfig: any;
+  siteConfig: SiteConfig;
   selectedCategory: string;
   onCategoryClick: (slug: string) => void;
 }

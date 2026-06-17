@@ -37,7 +37,7 @@ articleRouter.get('/scheduled/due', ...withSite, asyncHandler(async (req: Reques
   res.json({ success: true, data: items })
 }))
 
-articleRouter.get('/stats', ...withSite, asyncHandler(async (req: any, res: any) => {
+articleRouter.get('/stats', ...withSite, asyncHandler(async (req: Request, res: Response) => {
   const stats = await service.getArticleStats(req.site!)
   res.json({ success: true, data: stats })
 }))
@@ -54,13 +54,13 @@ articleRouter.get('/:id', ...withSite, asyncHandler(async (req: Request, res: Re
 }))
 
 articleRouter.post('/', articleWriteLimiter, ...withSite, asyncHandler(async (req: Request, res: Response) => {
-  const input = createArticleSchema.parse(req.body)
+  const input = createArticleSchema.parse(req.body) as Parameters<typeof service.createArticle>[0]
   const article = await service.createArticle(input, req.user!, req.site!)
   res.status(201).json({ success: true, data: article })
 }))
 
 articleRouter.put('/:id', articleUpdateLimiter, ...withSite, asyncHandler(async (req: Request, res: Response) => {
-  const input = updateArticleSchema.parse(req.body)
+  const input = updateArticleSchema.parse(req.body) as Parameters<typeof service.updateArticle>[2]
   const article = await service.updateArticle(req.params.id, req.site!, input, req.user!)
   res.json({ success: true, data: article })
 }))

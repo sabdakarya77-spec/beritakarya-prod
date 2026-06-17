@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express'
+import { Prisma } from '@prisma/client'
 import multer from 'multer'
 import os from 'os'
 import fs from 'fs/promises'
@@ -33,7 +34,7 @@ const withSite = [requireAuth, siteMiddleware, requireSiteAccess]
 kycRouter.get('/',
   ...withSite,
   requireRole(['superadmin', 'wapimred']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site!
     const page = parseInt(req.query.page as string) || 1
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
@@ -41,7 +42,7 @@ kycRouter.get('/',
     const status = req.query.status as string
     const skip = (page - 1) * limit
 
-    const where: any = { siteId, deletedAt: null }
+    const where: Prisma.UserWhereInput = { siteId, deletedAt: null }
 
     if (search) {
       where.OR = [
@@ -96,7 +97,7 @@ kycRouter.get('/',
 kycRouter.get('/stats',
   ...withSite,
   requireRole(['superadmin', 'wapimred']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site!
     const now = new Date()
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -138,7 +139,7 @@ kycRouter.get('/stats',
 
     // NEW: Calculate Trend Data (Last 7 Days)
     // [B-2] Optimized: use raw query for GROUP BY DATE to support PostgreSQL casting
-    const trendDataRaw = await prisma.$queryRaw<any[]>`
+    const trendDataRaw = await prisma.$queryRaw<{ date: Date; count: number }[]>`
       SELECT 
         "kycSubmittedAt"::date as date, 
         COUNT(*)::int as count 
@@ -181,7 +182,7 @@ kycRouter.get('/stats',
 kycRouter.get('/:id',
   ...withSite,
   requireRole(['superadmin', 'wapimred']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const user = await prisma.user.findFirst({
       where: { id, deletedAt: null },
@@ -221,7 +222,7 @@ kycRouter.post('/submit',
 
     // req.site bisa berisi nilai virtual ('pusat', 'all') yang bukan ID Site nyata di DB.
     // Untuk operasi database (AuditLog, Notification), gunakan siteId user yang sebenarnya.
-    const dbSiteId = (req.user as any)?.siteId || null
+    const dbSiteId = req.user?.siteId || null
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
     const idCard = files?.['idCard']?.[0]
@@ -390,12 +391,12 @@ kycRouter.post('/submit',
 
       // 4. Notify Admins
       // Cari admin berdasarkan siteId user yang sebenarnya, atau semua superadmin
-      const adminWhere = dbSiteId
+      const adminWhere: Prisma.UserWhereInput = dbSiteId
         ? { siteId: dbSiteId, role: { in: ['superadmin', 'wapimred'] } }
         : { role: { in: ['superadmin'] } } // Jika tidak ada siteId, notify semua superadmin
 
       const admins = await prisma.user.findMany({
-        where: adminWhere as any,
+        where: adminWhere,
         select: { id: true, siteId: true }
       })
 
@@ -413,7 +414,7 @@ kycRouter.post('/submit',
       }
 
       res.status(200).json({ success: true, data: { message: 'KYC submitted successfully' } })
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('KYC submission failed:', error)
 
       // [A-4] Increment failed attempts on processing error; lock after 3 failures

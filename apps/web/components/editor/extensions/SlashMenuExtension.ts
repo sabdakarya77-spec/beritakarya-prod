@@ -1,8 +1,8 @@
 import { Extension } from '@tiptap/core'
-import Suggestion from '@tiptap/suggestion'
+import Suggestion, { type SuggestionProps, type SuggestionKeyDownProps } from '@tiptap/suggestion'
 import { ReactRenderer } from '@tiptap/react'
 import tippy, { type Instance as TippyInstance } from 'tippy.js'
-import MenuList, { defaultSlashMenuItems } from '../menus/SlashMenu'
+import MenuList, { defaultSlashMenuItems, type SlashMenuItem, type SlashMenuRef, type SlashMenuProps } from '../menus/SlashMenu'
 
 export const SlashMenuExtension = Extension.create({
   name: 'slashMenu',
@@ -20,22 +20,22 @@ export const SlashMenuExtension = Extension.create({
             item.description.toLowerCase().includes(query.toLowerCase())
           )
         },
-        command: ({ editor, range, props }: any) => {
+        command: ({ editor, range, props }: { editor: import('@tiptap/core').Editor; range: import('@tiptap/core').Range; props: SlashMenuItem }) => {
           // IMPORTANT: Delete the "/" query text FIRST, then run item command.
           // If command runs first it changes document structure and invalidates the range.
           editor.chain().focus().deleteRange(range).run()
           props.command(editor)
         },
         render: () => {
-          let component: ReactRenderer | null = null
+          let component: ReactRenderer<SlashMenuRef, SlashMenuProps> | null = null
           let popup: TippyInstance | null = null
 
           return {
-            onStart: (props: any) => {
+            onStart: (props: SuggestionProps<SlashMenuItem, SlashMenuItem>) => {
               component = new ReactRenderer(MenuList, {
                 props: {
                   ...props,
-                  command: (item: any) => {
+                  command: (item: SlashMenuItem) => {
                     props.command(item)
                   },
                 },
@@ -64,10 +64,10 @@ export const SlashMenuExtension = Extension.create({
               }) as unknown as TippyInstance
             },
 
-            onUpdate(props: any) {
+            onUpdate(props: SuggestionProps<SlashMenuItem, SlashMenuItem>) {
               component?.updateProps({
                 ...props,
-                command: (item: any) => {
+                command: (item: SlashMenuItem) => {
                   props.command(item)
                 },
               })
@@ -76,22 +76,22 @@ export const SlashMenuExtension = Extension.create({
                 return
               }
 
-              ;(popup as any)?.setProps?.({
-                getReferenceClientRect: props.clientRect,
+              popup?.setProps({
+                getReferenceClientRect: () => props.clientRect?.() as DOMRect,
               })
             },
 
-            onKeyDown(props: any) {
+            onKeyDown(props: SuggestionKeyDownProps) {
               if (props.event.key === 'Escape') {
-                ;(popup as any)?.hide?.()
+                popup?.hide()
                 return true
               }
 
-              return (component as any)?.ref?.onKeyDown(props) || false
+              return component?.ref?.onKeyDown(props) || false
             },
 
             onExit() {
-              ;(popup as any)?.destroy?.()
+              popup?.destroy()
               component?.destroy()
               popup = null
               component = null

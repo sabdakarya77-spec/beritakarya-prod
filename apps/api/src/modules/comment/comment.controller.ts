@@ -1,5 +1,6 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 import { prisma } from '../../db/client'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -11,11 +12,11 @@ const createCommentSchema = z.object({
   parentId: z.string().uuid().optional()
 })
 
-export const commentRouter = Router() as any
+export const commentRouter = Router()
 
 commentRouter.get('/article/:articleId',
   siteMiddleware,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const comments = await service.getArticleComments(req.params.articleId, req.site!)
     res.json({ success: true, data: comments })
   })
@@ -25,7 +26,7 @@ commentRouter.post('/article/:articleId',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { content, parentId } = createCommentSchema.parse(req.body)
     const comment = await service.addComment(
       req.params.articleId,
@@ -41,8 +42,8 @@ commentRouter.get('/',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
-    const { siteId } = req
+  asyncHandler(async (req: Request, res: Response) => {
+    const siteId = req.site!
     const page = parseInt(req.query.page as string) || 1
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
     const skip = (page - 1) * limit
@@ -78,8 +79,8 @@ commentRouter.get('/stats',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
-    const { siteId } = req
+  asyncHandler(async (req: Request, res: Response) => {
+    const siteId = req.site!
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 
@@ -106,18 +107,18 @@ commentRouter.get('/moderation',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
-    const { siteId } = req
+  asyncHandler(async (req: Request, res: Response) => {
+    const siteId = req.site!
     const { status, search } = req.query
     const page = parseInt(req.query.page as string) || 1
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
     const skip = (page - 1) * limit
     
     const VALID_STATUSES = ['pending', 'approved', 'spam']
-    const where: any = { siteId }
+    const where: Prisma.CommentWhereInput = { siteId }
     if (status && status !== 'all') {
       if (VALID_STATUSES.includes(status as string)) {
-        where.status = status
+        where.status = status as string
       } else {
         where.status = 'pending' // Fallback to pending if invalid
       }
@@ -166,15 +167,15 @@ commentRouter.patch('/:id/approve',
   siteMiddleware,
   requireSiteAccess,
   requireRole(['wapimred', 'superadmin']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
-    const siteId = req.site
-    
+    const siteId = req.site!
+
     const updated = await prisma.comment.updateMany({
       where: { id, siteId },
       data: { status: 'approved' }
     })
-    
+
     if (updated.count === 0) {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Comment not found' } })
     }
@@ -187,9 +188,9 @@ commentRouter.patch('/:id/reject',
   siteMiddleware,
   requireSiteAccess,
   requireRole(['wapimred', 'superadmin']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
-    const siteId = req.site
+    const siteId = req.site!
     
     const updated = await prisma.comment.updateMany({
       where: { id, siteId },
@@ -206,7 +207,7 @@ commentRouter.patch('/:id/reject',
 commentRouter.get('/:id',
   requireAuth,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const comment = await prisma.comment.findUnique({
       where: { id },
@@ -228,9 +229,9 @@ commentRouter.get('/:id',
 commentRouter.post('/',
   requireAuth,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { articleId, content } = req.body
-    const siteId = req.site
+    const siteId = req.site!
 
     // Verify article belongs to same site
     const article = await prisma.article.findFirst({
@@ -247,7 +248,7 @@ commentRouter.post('/',
       data: {
         siteId,
         articleId,
-        authorId: req.user?.userId,
+        authorId: req.user!.userId,
         content
       },
       include: {
@@ -261,7 +262,7 @@ commentRouter.post('/',
 commentRouter.put('/:id',
   requireAuth,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { content } = req.body
     const siteId = req.site
@@ -297,7 +298,7 @@ commentRouter.put('/:id',
 commentRouter.delete('/:id',
   requireAuth,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
 

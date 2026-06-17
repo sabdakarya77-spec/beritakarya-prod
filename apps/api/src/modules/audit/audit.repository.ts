@@ -1,4 +1,5 @@
 import { prisma } from '../../db/client'
+import type { Prisma } from '@prisma/client'
 
 export async function findAuditLogs(
   siteId: string,
@@ -12,7 +13,7 @@ export async function findAuditLogs(
 ) {
   const { action, entityType, userId, page = 1, limit = 30 } = opts
 
-  const where: any = {
+  const where: Prisma.AuditLogWhereInput = {
     siteId,
     ...(action && { action: { contains: action, mode: 'insensitive' } }),
     ...(entityType && { entityType }),
@@ -30,14 +31,14 @@ export async function findAuditLogs(
   ])
 
   // Enrich with user info in-memory to avoid relation constraint
-  const userIds = [...new Set(items.map((i: any) => i.userId))]
+  const userIds = [...new Set(items.map((i) => i.userId))]
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     select: { id: true, name: true, role: true, email: true },
   })
-  const userMap = Object.fromEntries(users.map((u: any) => [u.id, u]))
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]))
 
-  const enriched = items.map((log: any) => ({
+  const enriched = items.map((log) => ({
     ...log,
     user: userMap[log.userId] ?? { id: log.userId, name: 'Pengguna Dihapus', role: 'unknown', email: '' },
   }))
@@ -63,7 +64,7 @@ export async function getAuditStats(siteId: string) {
   return {
     total,
     last7d,
-    byAction: byAction.map((a: any) => ({ action: a.action, count: a._count.action })),
+    byAction: byAction.map((a) => ({ action: a.action, count: a._count.action })),
   }
 }
 
@@ -74,14 +75,14 @@ export async function findAllAuditLogsForExport(siteId: string) {
     take: 1000 // Limit to 1000 for safety
   })
 
-  const userIds = [...new Set(items.map((i: any) => i.userId))]
+  const userIds = [...new Set(items.map((i) => i.userId))]
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     select: { id: true, name: true }
   })
-  const userMap = Object.fromEntries(users.map((u: any) => [u.id, u]))
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]))
 
-  return items.map((log: any) => ({
+  return items.map((log) => ({
     ...log,
     user: userMap[log.userId]
   }))

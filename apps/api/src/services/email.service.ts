@@ -75,7 +75,7 @@ class EmailService {
           throw new Error(`Resend REST API returned status ${response.status}: ${errText}`)
         }
 
-        const data: any = await response.json()
+        const data: { id?: string } = await response.json() as { id?: string }
         logger.info(`Email successfully sent via Resend REST API. ID: ${data.id}`)
         return true
       } catch (error) {

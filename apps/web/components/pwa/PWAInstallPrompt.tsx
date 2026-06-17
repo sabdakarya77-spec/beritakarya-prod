@@ -33,7 +33,7 @@ export function PWAInstallPrompt({
 
     // 1. Cek apakah sudah berjalan di mode standalone (sudah terinstal & dibuka)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    const isSafariStandalone = (window.navigator as any).standalone === true
+    const isSafariStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true
     if (isStandalone || isSafariStandalone) {
       return
     }

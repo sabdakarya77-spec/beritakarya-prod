@@ -3,8 +3,15 @@
 import { TrendingUp, Eye } from 'lucide-react';
 import Link from 'next/link';
 
+interface TopContentItem {
+  id: string;
+  title: string;
+  category?: { name?: string };
+  viewCount?: number;
+}
+
 interface TopContentProps {
-  topContent: any[];
+  topContent: TopContentItem[];
   site: string;
 }
 

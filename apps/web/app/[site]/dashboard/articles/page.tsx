@@ -62,7 +62,7 @@ export default function ArticlesPage() {
   const load = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const params: any = {
+      const params: Record<string, string | number> = {
         site,
         search: searchQuery,
         page,
@@ -82,14 +82,14 @@ export default function ArticlesPage() {
       try {
         const statsRes = await api.get('/articles/stats', { params: { site }, signal });
         if (!signal?.aborted) setGlobalStats(statsRes.data.data || {});
-      } catch (statsErr: any) {
-        if (statsErr?.name !== 'CanceledError') {
+      } catch (_statsErr: unknown) {
+        if (!signal?.aborted) {
           console.warn('[articles] Stats endpoint not available, using defaults');
           setGlobalStats({});
         }
       }
-    } catch (e: any) {
-      if (e?.name !== 'CanceledError') console.error(e);
+    } catch (e: unknown) {
+      if (!signal?.aborted) console.error(e);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
@@ -126,8 +126,11 @@ export default function ArticlesPage() {
       // Redirect ke halaman post baru tanpa membuat draft di database
       // Draft akan dibuat hanya saat user benar-benar menyimpan (save/auto-save)
       router.push(`/${site}/dashboard/articles/new`);
-    } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Gagal membuat post baru');
+    } catch (e: unknown) {
+      const msg = e && typeof e === 'object' && 'response' in e
+        ? (e as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined
+      alert(msg || 'Gagal membuat post baru');
     } finally {
       setIsCreating(false);
     }
@@ -138,8 +141,11 @@ export default function ArticlesPage() {
     try {
       await api.put(`/articles/${articleId}`, { status: 'submitted' });
       await load();
-    } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Gagal mengirim ke editor');
+    } catch (e: unknown) {
+      const msg = e && typeof e === 'object' && 'response' in e
+        ? (e as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined
+      alert(msg || 'Gagal mengirim ke editor');
     } finally {
       setActionLoading(null);
     }
@@ -179,8 +185,11 @@ export default function ArticlesPage() {
         params: reason ? { reason } : undefined
       })
       await load()
-    } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Gagal menghapus post')
+    } catch (e: unknown) {
+      const msg = e && typeof e === 'object' && 'response' in e
+        ? (e as { response?: { data?: { error?: { message?: string } } } }).response?.data?.error?.message
+        : undefined
+      alert(msg || 'Gagal menghapus post')
     } finally {
       setActionLoading(null)
     }
@@ -195,8 +204,11 @@ export default function ArticlesPage() {
       } else {
         alert('Info: ' + (data.message || 'Respons dari API'));
       }
-    } catch (e: any) {
-      alert(e.response?.data?.error?.message || e.response?.data?.message || 'Gagal memanggil Google Indexing API. Pastikan kredensial di Pengaturan Situs sudah aktif & benar!');
+    } catch (e: unknown) {
+      const resp = e && typeof e === 'object' && 'response' in e
+        ? (e as { response?: { data?: { error?: { message?: string }; message?: string } } }).response?.data
+        : undefined
+      alert(resp?.error?.message || resp?.message || 'Gagal memanggil Google Indexing API. Pastikan kredensial di Pengaturan Situs sudah aktif & benar!');
     } finally {
       setActionLoading(null);
     }

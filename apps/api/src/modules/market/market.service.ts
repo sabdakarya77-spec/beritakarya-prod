@@ -88,11 +88,11 @@ async function fetchYahooFinance(symbol: string): Promise<MarketIndicator | null
       changePct: parseFloat(changePct.toFixed(2)),
       up: change >= 0,
     }
-  } catch (err: any) {
-    if (err?.name === 'AbortError') {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
       logger.warn(`[Market] Timeout fetching ${symbol}`)
     } else {
-      logger.warn(`[Market] Error fetching ${symbol}:`, err?.message)
+      logger.warn(`[Market] Error fetching ${symbol}:`, err instanceof Error ? err.message : err)
     }
     return null
   } finally {

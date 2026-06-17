@@ -10,24 +10,41 @@ import { resolveArticleBadge } from '../../lib/resolveArticleBadge';
 import ArticleBookmarkButton from '../ui/ArticleBookmarkButton';
 
 interface PremiumHeroProps {
-  article: any;
+  article: {
+    id?: string;
+    title: string;
+    slug: string;
+    featuredImage?: string | null;
+    featuredImageBlur?: string | null;
+    featuredImageColor?: string | null;
+    publishedAt?: string | null;
+    createdAt?: string | null;
+    readingTimeMin?: number | null;
+    isBreaking?: boolean;
+    isExclusive?: boolean;
+    isFeatured?: boolean;
+    status?: string;
+    author?: { name?: string | null } | null;
+    category?: { name?: string | null } | null;
+    blocks?: Array<{ type: string; content?: string; url?: string }>;
+  };
   site: string;
 }
 
 export function PremiumHero({ article, site }: PremiumHeroProps) {
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'shared'>('idle');
-  
+
   const imageUrl = useMemo(() => {
-    return article?.featuredImage || article?.blocks?.find((b: any) => b.type === 'image')?.url || '/placeholder.jpg';
+    return article?.featuredImage || article?.blocks?.find(b => b.type === 'image')?.url || '/placeholder.jpg';
   }, [article]);
 
   const excerpt = useMemo(() => {
-    return article?.blocks?.find((b: any) => b.type === 'paragraph')?.content || '';
+    return article?.blocks?.find(b => b.type === 'paragraph')?.content || '';
   }, [article]);
 
   const date = useMemo(() => {
     if (!article?.publishedAt && !article?.createdAt) return '';
-    return new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
+    return new Date(article.publishedAt || article.createdAt || '').toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
@@ -57,8 +74,8 @@ export function PremiumHero({ article, site }: PremiumHeroProps) {
         await navigator.clipboard.writeText(articleUrl);
         setShareState('copied');
       }
-    } catch (error: any) {
-      if (error?.name !== 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name !== 'AbortError') {
         await navigator.clipboard.writeText(articleUrl);
         setShareState('copied');
       }

@@ -16,9 +16,45 @@ import { API_URL } from '../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../lib/siteSettings'
 
 // ─────────────────────────────────────────────
+// Types for API-fetched data
+// ─────────────────────────────────────────────
+interface ArticleBlock {
+  type: string
+  url?: string
+  embedType?: string
+  images?: { url: string; alt?: string; caption?: string }[]
+  content?: string
+}
+
+interface HomeArticle {
+  id: string
+  title: string
+  slug: string
+  excerpt?: string
+  featuredImage?: string
+  contentType?: string
+  publishedAt?: string
+  createdAt?: string
+  isFeatured?: boolean
+  isExclusive?: boolean
+  readingTimeMin?: number
+  wordCount?: number
+  author?: { name: string }
+  category?: { name: string; slug?: string; parentSlug?: string }
+  blocks?: ArticleBlock[]
+}
+
+interface CategoryTreeNode {
+  id: string
+  name: string
+  slug: string
+  subCategories?: { name: string; slug: string }[]
+}
+
+// ─────────────────────────────────────────────
 // Helper: resolve nama kategori dari slug
 // ─────────────────────────────────────────────
-function resolveCategoryName(slug: string, categoriesTree: any[] = []): string {
+function resolveCategoryName(slug: string, categoriesTree: CategoryTreeNode[] = []): string {
   if (slug === 'terbaru') return 'Terbaru'
   if (slug === 'tersimpan') return 'Tersimpan'
   for (const cat of categoriesTree) {
@@ -35,21 +71,21 @@ function resolveCategoryName(slug: string, categoriesTree: any[] = []): string {
 // ─────────────────────────────────────────────
 // Helpers for Fallback Article Thumbnails
 // ─────────────────────────────────────────────
-function getPhotoThumbnail(article: any): string | null {
+function getPhotoThumbnail(article: HomeArticle): string | null {
   if (article.featuredImage) return article.featuredImage
 
   if (Array.isArray(article.blocks)) {
-    const galleryBlock = article.blocks.find((b: any) => b.type === 'gallery')
+    const galleryBlock = article.blocks.find((b: ArticleBlock) => b.type === 'gallery')
     if (galleryBlock?.images?.[0]?.url) {
       return galleryBlock.images[0].url
     }
 
-    const imageBlock = article.blocks.find((b: any) => b.type === 'image')
+    const imageBlock = article.blocks.find((b: ArticleBlock) => b.type === 'image')
     if (imageBlock?.url) {
       return imageBlock.url
     }
 
-    const gridBlock = article.blocks.find((b: any) => b.type === 'imageGrid')
+    const gridBlock = article.blocks.find((b: ArticleBlock) => b.type === 'imageGrid')
     if (gridBlock?.images?.[0]?.url) {
       return gridBlock.images[0].url
     }
@@ -58,11 +94,11 @@ function getPhotoThumbnail(article: any): string | null {
   return '/placeholder.jpg'
 }
 
-function getVideoThumbnail(article: any): string | null {
+function getVideoThumbnail(article: HomeArticle): string | null {
   if (article.featuredImage) return article.featuredImage
 
   if (Array.isArray(article.blocks)) {
-    const embedBlock = article.blocks.find((b: any) => b.type === 'embed' && b.embedType === 'youtube')
+    const embedBlock = article.blocks.find((b: ArticleBlock) => b.type === 'embed' && b.embedType === 'youtube')
     if (embedBlock?.url) {
       const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/
       const match = embedBlock.url.match(regExp)
@@ -182,7 +218,7 @@ async function getMarketSnapshot() {
 //  videoStories           — dari sisa: maks 3
 //  popular                — 5 artikel non-hero (boleh overlap, untuk sidebar)
 // ─────────────────────────────────────────────────────────────────────────
-function distributeArticles(articles: any[]) {
+function distributeArticles(articles: HomeArticle[]) {
   const empty = {
     hero: [], fokusRedaksi: [], feedFeatured: [], feedStream: [],
     editorChoice: [], opinion: [], photoJournal: [], videoStories: [], popular: []
@@ -195,44 +231,44 @@ function distributeArticles(articles: any[]) {
   const videoSlugs = ['video', 'dokumenter-reportase', 'podcast-audio']
 
   // 1. Ekstrak Foto Jurnalistik dari seluruh artikel (tidak terbatas dari afterFeed)
-  const photoJournal = articles.filter((a: any) => {
-    const catSlug = a.category?.slug?.toLowerCase()
-    const parentSlug = a.category?.parentSlug?.toLowerCase()
+  const photoJournal = articles.filter((a: HomeArticle) => {
+    const catSlug = a.category?.slug?.toLowerCase() || ''
+    const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
     return a.contentType === 'photo_journalism' || photoSlugs.includes(catSlug) || photoSlugs.includes(parentSlug)
   }).slice(0, 3)
-  const photoJournalIds = new Set(photoJournal.map((a: any) => a.id))
+  const photoJournalIds = new Set(photoJournal.map((a: HomeArticle) => a.id))
 
   // 2. Ekstrak Video dari seluruh artikel (tidak terbatas dari afterFeed)
-  const videoStories = articles.filter((a: any) => {
-    const catSlug = a.category?.slug?.toLowerCase()
-    const parentSlug = a.category?.parentSlug?.toLowerCase()
+  const videoStories = articles.filter((a: HomeArticle) => {
+    const catSlug = a.category?.slug?.toLowerCase() || ''
+    const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
     return a.contentType === 'video_exclusive' || videoSlugs.includes(catSlug) || videoSlugs.includes(parentSlug)
   }).slice(0, 3)
-  const videoStoriesIds = new Set(videoStories.map((a: any) => a.id))
+  const videoStoriesIds = new Set(videoStories.map((a: HomeArticle) => a.id))
 
   // 3. Saring artikel umum (non-foto dan non-video) untuk masuk ke feed utama (Hero, Fokus, dll.)
-  const generalArticles = articles.filter((a: any) => !photoJournalIds.has(a.id) && !videoStoriesIds.has(a.id))
+  const generalArticles = articles.filter((a: HomeArticle) => !photoJournalIds.has(a.id) && !videoStoriesIds.has(a.id))
 
   // Zona 1 — Hero: 4 artikel paling awal dari generalArticles
   const hero = generalArticles.slice(0, 4)
-  const heroIds = new Set(hero.map((a: any) => a.id))
+  const heroIds = new Set(hero.map((a: HomeArticle) => a.id))
 
   // Zona 2 — Fokus Redaksi: prioritaskan isFeatured/isExclusive yang belum di hero
   const featuredPool = generalArticles
     .slice(4)
-    .filter((a: any) => a.isFeatured || a.isExclusive)
+    .filter((a: HomeArticle) => a.isFeatured || a.isExclusive)
     .slice(0, 4)
   // Fallback ke urutan biasa jika featured tidak cukup
   const fokusRedaksi = featuredPool.length >= 2 ? featuredPool : generalArticles.slice(4, 8)
 
   // Kumpulkan semua ID yang sudah dipakai
   const usedIds = new Set([
-    ...hero.map((a: any) => a.id),
-    ...fokusRedaksi.map((a: any) => a.id),
+    ...hero.map((a: HomeArticle) => a.id),
+    ...fokusRedaksi.map((a: HomeArticle) => a.id),
   ])
 
   // Artikel sisa yang belum dipakai di hero atau fokusRedaksi
-  const remaining = generalArticles.filter((a: any) => !usedIds.has(a.id))
+  const remaining = generalArticles.filter((a: HomeArticle) => !usedIds.has(a.id))
 
   // Zona 4 — Feed utama: 2 horizontal + 6 medium
   const feedFeatured = remaining.slice(0, 2)
@@ -240,17 +276,17 @@ function distributeArticles(articles: any[]) {
 
   // Zona 5+ — Editorial extras (full-width, di bawah zona sidebar)
   const afterFeed = remaining.slice(8)
-  const editorChoice = afterFeed.filter((a: any) => a.isFeatured).slice(0, 3)
+  const editorChoice = afterFeed.filter((a: HomeArticle) => a.isFeatured).slice(0, 3)
 
   // Opinion: ambil dari artikel dengan kategori opini/analisis
-  const opinion = afterFeed.filter((a: any) => {
-    const catSlug = a.category?.slug?.toLowerCase()
-    const parentSlug = a.category?.parentSlug?.toLowerCase()
+  const opinion = afterFeed.filter((a: HomeArticle) => {
+    const catSlug = a.category?.slug?.toLowerCase() || ''
+    const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
     return opinionSlugs.includes(catSlug) || opinionSlugs.includes(parentSlug)
   }).slice(0, 3)
 
   // Sidebar populer: dari artikel non-hero (boleh overlap dengan section lain)
-  const popular = articles.filter((a: any) => !heroIds.has(a.id)).slice(0, 5)
+  const popular = articles.filter((a: HomeArticle) => !heroIds.has(a.id)).slice(0, 5)
 
   return { hero, fokusRedaksi, feedFeatured, feedStream, editorChoice, opinion, photoJournal, videoStories, popular }
 }
@@ -380,7 +416,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
                 {/* Kolom kanan — 3 artikel stacked vertikal */}
                 <div className="flex flex-col gap-3">
-                  {fokusRedaksi.slice(1, 4).map((article: any) => (
+                  {fokusRedaksi.slice(1, 4).map((article: HomeArticle) => (
                     <NewsCard
                       key={article.id}
                       article={article}
@@ -469,7 +505,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   {/* 2 Kartu Horizontal Besar (artikel[8..9]) */}
                   {mainFeedFeatured.length > 0 && (
                     <div className="flex flex-col gap-5">
-                      {mainFeedFeatured.map((article: any) => (
+                      {mainFeedFeatured.map((article: HomeArticle) => (
                         <NewsCard
                           key={article.id}
                           article={article}
@@ -510,7 +546,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         </Link>
                       </div>
                       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:gap-6">
-                        {mainFeedStream.map((article: any) => (
+                        {mainFeedStream.map((article: HomeArticle) => (
                           <NewsCard
                             key={article.id}
                             article={article}
@@ -639,7 +675,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </h4>
                   </div>
                   <div className="flex flex-col">
-                    {popular.map((article: any, index: number) => (
+                    {popular.map((article: HomeArticle, index: number) => (
                       <Link
                         key={article.id}
                         href={`/${siteParam}/artikel/${article.slug}`}
@@ -728,7 +764,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-                    {editorChoice.map((article: any) => (
+                    {editorChoice.map((article: HomeArticle) => (
                       <div
                         key={article.id}
                         className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md"
@@ -774,7 +810,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-                    {opinionArticles.map((article: any) => (
+                    {opinionArticles.map((article: HomeArticle) => (
                       <div key={article.id} className="flex h-full flex-col justify-between gap-3">
                         <div>
                           <span className={`${sectionMetaClass} mb-1.5 block uppercase tracking-[0.12em]`}>
@@ -786,7 +822,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                             </h4>
                           </Link>
                           <p className="line-clamp-3 text-xs leading-relaxed text-brand-text-muted">
-                            {article.excerpt || article.blocks?.find((b: any) => b.type === 'paragraph')?.content || ''}
+                            {article.excerpt || article.blocks?.find((b: ArticleBlock) => b.type === 'paragraph')?.content || ''}
                           </p>
                         </div>
                         <div className="mt-3 flex items-center gap-2 border-t border-black/5 pt-3 dark:border-white/5">
@@ -815,7 +851,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                    {photoJournal.map((article: any) => {
+                    {photoJournal.map((article: HomeArticle) => {
                       const photoImg = getPhotoThumbnail(article)
                       return (
                         <Link
@@ -860,7 +896,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-                    {videoStories.map((article: any) => {
+                    {videoStories.map((article: HomeArticle) => {
                       const videoImg = getVideoThumbnail(article)
                       return (
                         <Link

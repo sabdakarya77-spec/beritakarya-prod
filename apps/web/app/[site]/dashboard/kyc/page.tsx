@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import axios from 'axios'
 import { api } from '../../../../lib/api'
 import { useAuthStore } from '../../../../store/authStore'
 import { cn } from '../../../../lib/utils'
@@ -133,8 +134,8 @@ export default function KYCPage() {
       })
       setSuccess(true)
       setStatus('pending')
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Gagal mengirim pengajuan KYC')
+    } catch (err: unknown) {
+      setError((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) ?? 'Gagal mengirim pengajuan KYC')
     } finally {
       setSubmitting(false)
     }

@@ -1,5 +1,5 @@
 import { prisma } from '../../db/client'
-import { Role } from '@prisma/client'
+import { Role, Prisma } from '@prisma/client'
 import { parsePagination, buildPaginatedResponse } from '@beritakarya/utils'
 
 // ─── Invitation CRUD ──────────────────────────────────────────────────────────
@@ -26,7 +26,7 @@ export async function findPendingInvitation(email: string) {
 }
 
 export async function findInvitations(
-  where: Record<string, any>,
+  where: Record<string, unknown>,
   params: { page?: number; limit?: number } = {}
 ) {
   const { page, limit, skip } = parsePagination(params)
@@ -56,7 +56,7 @@ export async function createInvitation(data: {
   expiresAt: Date
 }) {
   return prisma.invitation.create({
-    data: data as any,
+    data: data as unknown as Parameters<typeof prisma.invitation.create>[0]['data'],
     include: {
       invitedByUser: {
         select: { name: true, email: true },
@@ -91,7 +91,7 @@ export async function createAuditLog(data: {
   action: string
   entityType: string
   entityId: string
-  newValue?: any
+  newValue?: Prisma.InputJsonValue
 }) {
   return prisma.auditLog.create({ data })
 }

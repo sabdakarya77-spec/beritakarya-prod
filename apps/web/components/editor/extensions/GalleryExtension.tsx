@@ -1,6 +1,6 @@
 'use client'
 
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
 import { useState, useCallback } from 'react'
 import { Trash2, ChevronLeft, ChevronRight, Upload, Image as ImageIcon, X } from 'lucide-react'
@@ -15,7 +15,7 @@ interface GalleryImage {
   caption?: string
 }
 
-const GalleryComponent = ({ node, updateAttributes, deleteNode }: any) => {
+const GalleryComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps) => {
   const images: GalleryImage[] = node.attrs.images || []
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)

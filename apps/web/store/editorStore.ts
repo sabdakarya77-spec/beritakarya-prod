@@ -278,8 +278,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const isCurrText = currentBlock.type === 'paragraph' || currentBlock.type === 'heading' || currentBlock.type === 'quote'
       
       if (isPrevText && isCurrText) {
-        const prevContent = (prevBlock as any).content || ''
-        const currContent = (currentBlock as any).content || ''
+        const prevContent = ('content' in prevBlock ? prevBlock.content : '') || ''
+        const currContent = ('content' in currentBlock ? currentBlock.content : '') || ''
         const mergedContent = prevContent + currContent
         
         const stripHtml = (html: string) => {
@@ -362,9 +362,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         undoStack: [],
         activeBlockId: blocks[0]?.id ?? null
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load article:', err)
-      const message = err?.response?.data?.message || err?.message || 'Gagal memuat artikel'
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string }
+      const message = axiosErr?.response?.data?.message || axiosErr?.message || 'Gagal memuat artikel'
       set({ isLoading: false, saveError: message })
     }
   },
@@ -372,9 +373,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   saveArticle: async () => {
     const s = get()
     // Don't save if it's a new article with no data at all
-    const firstBlock = s.blocks[0] as any
+    const firstBlock = s.blocks[0]
     const hasEditorialData = Boolean(s.categoryId || (s.tags && s.tags.length > 0) || s.featuredImage || s.isBreaking || s.isExclusive || s.isFeatured)
-    if (!s.articleId && !s.title.trim() && !hasEditorialData && s.blocks.length <= 1 && (!firstBlock || !firstBlock.content)) return
+    const hasFirstBlockContent = firstBlock && 'content' in firstBlock && typeof firstBlock.content === 'string' && firstBlock.content.trim()
+    if (!s.articleId && !s.title.trim() && !hasEditorialData && s.blocks.length <= 1 && !hasFirstBlockContent) return
 
     set({ saving: true, saveError: null })
     try {
@@ -414,19 +416,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       }
       // Reset error counter on success — auto-save kembali ke interval normal 15s
       consecutiveSaveErrors = 0
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save article:', err)
       consecutiveSaveErrors++
-      const apiError = err?.response?.data?.error
-      const details = apiError?.details as { field?: string; message?: string }[] | undefined
+      const axiosErr = err as { response?: { data?: { error?: { message?: string; details?: { field?: string; message?: string }[] }; message?: string } }; message?: string }
+      const apiError = axiosErr?.response?.data?.error
+      const details = apiError?.details
       const detailText = details?.length
         ? details.map((d) => d.message || d.field).filter(Boolean).join('; ')
         : ''
       const message =
         detailText ||
         apiError?.message ||
-        err?.response?.data?.message ||
-        err?.message ||
+        axiosErr?.response?.data?.message ||
+        axiosErr?.message ||
         'Gagal menyimpan artikel'
       set({ saving: false, saveError: message, lastSaved: null, isDirty: true })
     }
@@ -498,15 +501,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const countWords = () => {
       const textBlocks = s.blocks.filter(b => b.type === 'paragraph' || b.type === 'heading')
       return textBlocks.reduce((acc, b) => {
-        const content = (b as any).content || ''
+        const content = ('content' in b ? b.content : '') || ''
         return acc + content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
       }, 0)
     }
 
     if (s.contentType === 'photo_journalism') {
       // Foto Jurnalistik: wajib minimal 3 foto di galeri
-      const gallery = s.blocks.find((b: any) => b.type === 'gallery')
-      const imageCount = (gallery as any)?.images?.length || 0
+      const gallery = s.blocks.find(b => b.type === 'gallery')
+      const imageCount = (gallery && 'images' in gallery ? gallery.images?.length || 0 : 0)
       if (imageCount < 3) missing.push(`Galeri foto wajib minimal 3 foto (saat ini: ${imageCount})`)
       // Foto Jurnalistik: wajib minimal 15 kata narasi
       const wc = countWords()
@@ -520,7 +523,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       if (wc < 15) missing.push(`Narasi video wajib minimal 15 kata (saat ini: ${wc})`)
     } else {
       // Artikel biasa: wajib minimal 1 paragraf
-      const paragraphCount = s.blocks.filter(b => b.type === 'paragraph' && (b as any).content?.trim()).length
+      const paragraphCount = s.blocks.filter(b => b.type === 'paragraph' && ('content' in b ? b.content : '')?.trim()).length
       if (paragraphCount < 1) missing.push('Konten artikel masih kosong')
     }
 
@@ -540,15 +543,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const countWords = () => {
       const textBlocks = s.blocks.filter(b => b.type === 'paragraph' || b.type === 'heading')
       return textBlocks.reduce((acc, b) => {
-        const content = (b as any).content || ''
+        const content = ('content' in b ? b.content : '') || ''
         return acc + content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length
       }, 0)
     }
 
     if (s.contentType === 'photo_journalism') {
       // Foto Jurnalistik: cek galeri dan narasi
-      const gallery = s.blocks.find((b: any) => b.type === 'gallery')
-      const imageCount = (gallery as any)?.images?.length || 0
+      const gallery = s.blocks.find(b => b.type === 'gallery')
+      const imageCount = (gallery && 'images' in gallery ? gallery.images?.length || 0 : 0)
       if (imageCount >= 3 && countWords() >= 15) score += 20
     } else if (s.contentType === 'video_exclusive') {
       // Video Eksklusif: cek embed dan narasi
@@ -556,7 +559,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       if (embedCount >= 1 && countWords() >= 15) score += 20
     } else {
       // Artikel biasa: cek paragraf
-      if (s.blocks.some(b => b.type === 'paragraph' && (b as any).content?.trim())) score += 20
+      if (s.blocks.some(b => b.type === 'paragraph' && ('content' in b ? b.content : '')?.trim())) score += 20
     }
 
     return score

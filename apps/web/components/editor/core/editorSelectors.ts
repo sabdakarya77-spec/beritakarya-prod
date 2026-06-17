@@ -24,8 +24,8 @@ export function isDocumentEmpty(blocks: Block[]): boolean {
     if ('content' in block && typeof block.content === 'string') {
       return !block.content.trim()
     }
-    if ('items' in block && Array.isArray((block as any).items)) {
-      return !(block as any).items.some((item: string) => item.trim())
+    if ('items' in block && Array.isArray(block.items)) {
+      return !block.items.some((item: string) => item.trim())
     }
     if ('url' in block && typeof block.url === 'string') {
       return !block.url.trim()

@@ -88,6 +88,24 @@ export interface AdSlotDefinition {
   publicMockup: string;
 }
 
+export interface SiteConfig {
+  id: string;
+  name: string;
+  domain?: string | null;
+  logoUrl?: string | null;
+  description?: string | null;
+  phone?: string | null;
+  contactEmail?: string | null;
+  address?: string | null;
+  footerText?: string | null;
+  trendingTopics?: unknown[];
+  socialLinks?: Record<string, string | null | undefined>;
+  appearance?: {
+    primaryColor?: string | null;
+  };
+  [key: string]: unknown;
+}
+
 export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
   {
     id: 'leaderboard',

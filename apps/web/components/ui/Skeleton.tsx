@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 interface SkeletonProps {
@@ -18,7 +18,7 @@ export default function Skeleton({ variant = 'card', className }: SkeletonProps)
     animate: { x: '100%' },
   };
 
-  const shimmerTransition: any = {
+  const shimmerTransition: Transition = {
     duration: 2,
     repeat: Infinity,
     ease: [0.4, 0, 0.2, 1], // Cubic-bezier for smoother feel

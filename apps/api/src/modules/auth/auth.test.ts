@@ -32,8 +32,8 @@ describe('auth.service', () => {
       id: 'user-1', email: 'test@test.com', name: 'Test',
       role: 'reporter', siteId: 'bandung', passwordHash: hash,
       createdAt: new Date(), updatedAt: new Date()
-    } as any)
-    vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as any)
+    } as unknown as Awaited<ReturnType<typeof prisma.user.findFirst>>)
+    vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as unknown as Awaited<ReturnType<typeof prisma.refreshToken.create>>)
 
     const result = await loginUser('test@test.com', 'password123')
     expect(result.accessToken).toBeDefined()
@@ -44,7 +44,7 @@ describe('auth.service', () => {
     const hash = await bcrypt.hash('benar123', 10)
     vi.mocked(prisma.user.findFirst).mockResolvedValue({
       id: 'user-1', email: 'test@test.com', passwordHash: hash
-    } as any)
+    } as unknown as Awaited<ReturnType<typeof prisma.user.findFirst>>)
 
     await expect(loginUser('test@test.com', 'salah123'))
       .rejects.toThrow('Email atau password salah')

@@ -10,8 +10,35 @@ import { resolveArticleBadge } from '../../lib/resolveArticleBadge';
 import { getCategoryColor } from '../../lib/constants';
 import ArticleBookmarkButton from './ArticleBookmarkButton';
 
+interface NewsCardBlock {
+  type: string;
+  content?: string;
+  url?: string;
+  embedType?: string;
+  images?: Array<{ url?: string }>;
+}
+
+interface NewsCardArticle {
+  id?: string;
+  slug: string;
+  title: string;
+  featuredImage?: string | null;
+  featuredImageBlur?: string | null;
+  featuredImageColor?: string | null;
+  readingTimeMin?: number | null;
+  publishedAt?: string | null;
+  createdAt?: string | null;
+  category?: { name?: string | null } | null;
+  author?: { name?: string | null } | null;
+  blocks?: NewsCardBlock[];
+  isBreaking?: boolean;
+  isExclusive?: boolean;
+  isFeatured?: boolean;
+  status?: string;
+}
+
 interface NewsCardProps {
-  article: any;
+  article: NewsCardArticle;
   variant?: 'large' | 'medium' | 'minimal' | 'horizontal';
   site?: string;
   priority?: boolean;
@@ -31,7 +58,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
     if (Array.isArray(article.blocks)) {
       // 1. YouTube embed block thumbnail fallback
-      const embedBlock = article.blocks.find((b: any) => b.type === 'embed' && b.embedType === 'youtube');
+      const embedBlock = article.blocks.find((b) => b.type === 'embed' && b.embedType === 'youtube');
       if (embedBlock?.url) {
         const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
         const match = embedBlock.url.match(regExp);
@@ -41,19 +68,19 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
       }
 
       // 2. Gallery block fallback
-      const galleryBlock = article.blocks.find((b: any) => b.type === 'gallery');
+      const galleryBlock = article.blocks.find((b) => b.type === 'gallery');
       if (galleryBlock?.images?.[0]?.url) {
         return galleryBlock.images[0].url;
       }
 
       // 3. Single image block fallback
-      const imageBlock = article.blocks.find((b: any) => b.type === 'image');
+      const imageBlock = article.blocks.find((b) => b.type === 'image');
       if (imageBlock?.url) {
         return imageBlock.url;
       }
 
       // 4. Image grid block fallback
-      const gridBlock = article.blocks.find((b: any) => b.type === 'imageGrid');
+      const gridBlock = article.blocks.find((b) => b.type === 'imageGrid');
       if (gridBlock?.images?.[0]?.url) {
         return gridBlock.images[0].url;
       }
@@ -61,9 +88,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
     return '/placeholder.jpg';
   })();
-  const excerpt = article.blocks?.find((b: any) => b.type === 'paragraph')?.content || '';
+  const excerpt = article.blocks?.find((b) => b.type === 'paragraph')?.content || '';
   const articleHref = `/${site}/artikel/${article.slug}`;
-  const date = new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
+  const date = new Date(article.publishedAt || article.createdAt || '').toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -74,7 +101,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
   const authorName = article.author?.name || 'Redaksi';
   const categoryLabelClass = cn(
     "rounded-sm px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em]",
-    getCategoryColor(article.category?.name)
+    getCategoryColor(article.category?.name ?? undefined)
   );
   const calmMetaClass = "flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-brand-text-muted";
   const defaultImageClass = 'object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.03]';

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
 import { cn } from '../../../../lib/utils';
@@ -120,8 +121,8 @@ export default function ProfilePage() {
       if (response.data.success) {
         setProfileMessage({ type: 'success', text: 'Profil berhasil disimpan' });
       }
-    } catch (err: any) {
-      setProfileMessage({ type: 'error', text: err.response?.data?.error?.message || 'Gagal menyimpan profil' });
+    } catch (err: unknown) {
+      setProfileMessage({ type: 'error', text: (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) ?? 'Gagal menyimpan profil' });
     } finally {
       setSaving(false);
     }
@@ -155,8 +156,8 @@ export default function ProfilePage() {
         setNewPassword('');
         setConfirmPassword('');
       }
-    } catch (err: any) {
-      setPasswordMessage({ type: 'error', text: err.response?.data?.error?.message || 'Gagal mengubah password' });
+    } catch (err: unknown) {
+      setPasswordMessage({ type: 'error', text: (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) ?? 'Gagal mengubah password' });
     } finally {
       setChangingPassword(false);
     }

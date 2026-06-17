@@ -44,12 +44,12 @@ describe('getSiteAssignmentFilter', () => {
   it('isConfigured true dengan expandedGlobalIds', async () => {
     vi.mocked(prisma.siteCategory.findMany).mockResolvedValue([
       { categoryId: 'grandchild' }
-    ] as any)
+    ] as unknown as Awaited<ReturnType<typeof prisma.siteCategory.findMany>>)
     vi.mocked(prisma.category.findMany).mockResolvedValue([
       { id: 'parent', parentId: null },
       { id: 'child', parentId: 'parent' },
       { id: 'grandchild', parentId: 'child' }
-    ] as any)
+    ] as unknown as Awaited<ReturnType<typeof prisma.category.findMany>>)
 
     const result = await getSiteAssignmentFilter('bandung')
     expect(result.isConfigured).toBe(true)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -20,8 +20,8 @@ interface AuditLog {
   action: string;
   entityType: string | null;
   entityId: string | null;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   ipAddress: string | null;
   createdAt: string;
   user: { id: string; name: string; role: string; email: string };
@@ -34,7 +34,7 @@ interface AuditStats {
 }
 
 // ─── Action Config ────────────────────────────────────────────────
-const ACTION_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
+const ACTION_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
   'post.create': { label: 'Post Dibuat',     icon: FileText, color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
   'post.update': { label: 'Post Diubah',     icon: FileText, color: 'text-amber-600',  bg: 'bg-amber-50 dark:bg-amber-900/20' },
   'post.publish': { label: 'Post Terbit',    icon: FileText, color: 'text-green-600',  bg: 'bg-green-50 dark:bg-green-900/20' },
@@ -101,23 +101,25 @@ function DetailModal({ log, onClose }: { log: AuditLog; onClose: () => void }) {
             ))}
           </div>
 
-          {(log.oldValue || log.newValue) && (
+          {(log.oldValue != null || log.newValue != null) && (
             <div className="space-y-4">
-              {log.oldValue && (
+              {log.oldValue != null && (
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-red-500 mb-2">State Sebelumnya</p>
                   <pre className="text-[10px] bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-300 rounded-xl p-4 overflow-auto max-h-40 font-mono leading-relaxed">
-                    {JSON.stringify(typeof log.oldValue === 'object' ? 
-                      { title: log.oldValue.title, status: log.oldValue.status } : log.oldValue, null, 2)}
+                    {JSON.stringify(typeof log.oldValue === 'object' && log.oldValue !== null
+                      ? { title: (log.oldValue as Record<string, unknown>).title, status: (log.oldValue as Record<string, unknown>).status }
+                      : log.oldValue, null, 2)}
                   </pre>
                 </div>
               )}
-              {log.newValue && (
+              {log.newValue != null && (
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-green-500 mb-2">State Sesudahnya</p>
                   <pre className="text-[10px] bg-green-50 dark:bg-green-900/10 text-green-800 dark:text-green-300 rounded-xl p-4 overflow-auto max-h-40 font-mono leading-relaxed">
-                    {JSON.stringify(typeof log.newValue === 'object' ? 
-                      { title: log.newValue.title, status: log.newValue.status } : log.newValue, null, 2)}
+                    {JSON.stringify(typeof log.newValue === 'object' && log.newValue !== null
+                      ? { title: (log.newValue as Record<string, unknown>).title, status: (log.newValue as Record<string, unknown>).status }
+                      : log.newValue, null, 2)}
                   </pre>
                 </div>
               )}
@@ -177,15 +179,15 @@ export default function AuditLogPage() {
         try {
           const statsRes = await api.get('/audit/stats', { signal });
           if (!signal?.aborted) setStats(statsRes.data.data);
-        } catch (statsErr: any) {
-          if (statsErr?.name !== 'CanceledError') {
+        } catch (_statsErr: unknown) {
+          if (!signal?.aborted) {
             console.warn('[audit] Stats endpoint not available, using defaults');
             setStats({ total: 0, last7d: 0, byAction: [] });
           }
         }
       }
-    } catch (e: any) {
-      if (e?.name !== 'CanceledError') console.error(e);
+    } catch (e: unknown) {
+      if (!signal?.aborted) console.error(e);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }

@@ -56,8 +56,8 @@ export default function ModerationPage() {
         signal
       });
       if (!signal?.aborted) setComments(data.data);
-    } catch (err: any) {
-      if (err?.name !== 'CanceledError') console.error('Failed to fetch moderation queue:', err);
+    } catch (err: unknown) {
+      if (!signal?.aborted) console.error('Failed to fetch moderation queue:', err);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }

@@ -1,5 +1,6 @@
 import { prisma } from '../../db/client'
 import { PaymentStatus } from '@prisma/client'
+import type { Prisma, AdStatus } from '@prisma/client'
 import { parsePagination, buildPaginatedResponse } from '@beritakarya/utils'
 
 // ─── Advertisement CRUD ───────────────────────────────────────────────────────
@@ -45,7 +46,7 @@ export async function createAd(data: {
   })
 }
 
-export async function updateAd(id: string, data: Record<string, any>) {
+export async function updateAd(id: string, data: Prisma.AdvertisementUpdateInput) {
   return prisma.advertisement.update({
     where: { id },
     data,
@@ -107,7 +108,7 @@ export async function createPackage(data: {
   return prisma.adPackage.create({ data })
 }
 
-export async function updatePackage(id: string, data: Record<string, any>) {
+export async function updatePackage(id: string, data: Prisma.AdPackageUpdateInput) {
   return prisma.adPackage.update({ where: { id }, data })
 }
 
@@ -117,8 +118,8 @@ export async function deletePackage(id: string) {
 
 // ─── Ad Bookings ──────────────────────────────────────────────────────────────
 
-export async function findBookingById(id: string, include?: Record<string, boolean>): Promise<any> {
-  return prisma.adBooking.findUnique({ where: { id }, include })
+export async function findBookingById<T extends Record<string, boolean> | undefined>(id: string, include?: T) {
+  return prisma.adBooking.findUnique({ where: { id }, include }) as Promise<any>
 }
 
 export async function findBookingsByUser(userId: string) {
@@ -145,12 +146,12 @@ export async function createBooking(data: {
   startDate: Date
   endDate: Date
   paymentStatus?: PaymentStatus
-  status?: string
+  status?: AdStatus
 }) {
-  return prisma.adBooking.create({ data: data as any })
+  return prisma.adBooking.create({ data })
 }
 
-export async function updateBooking(id: string, data: Record<string, any>) {
+export async function updateBooking(id: string, data: Prisma.AdBookingUpdateInput) {
   return prisma.adBooking.update({ where: { id }, data })
 }
 
@@ -174,10 +175,10 @@ export async function findAdBySiteAndSlot(siteId: string, slot: string) {
   return prisma.advertisement.findFirst({ where: { siteId, slot } })
 }
 
-export async function createOrUpdateAdForSlot(siteId: string, slot: string, data: Record<string, any>) {
+export async function createOrUpdateAdForSlot(siteId: string, slot: string, data: Prisma.AdvertisementUpdateInput) {
   const existing = await findAdBySiteAndSlot(siteId, slot)
   if (existing) {
     return prisma.advertisement.update({ where: { id: existing.id }, data })
   }
-  return prisma.advertisement.create({ data: { siteId, slot, ...data } })
+  return prisma.advertisement.create({ data: { siteId, slot, ...data } as Prisma.AdvertisementCreateInput })
 }

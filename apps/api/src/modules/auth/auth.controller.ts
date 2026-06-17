@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express'
+import { Router, Request, Response, CookieOptions } from 'express'
+import { Role } from '@prisma/client'
 import { z } from 'zod'
 import * as authService from './auth.service'
 import { asyncHandler } from '../../utils/asyncHandler'
@@ -13,8 +14,8 @@ import bcrypt from 'bcryptjs'
 
 export const authRouter: Router = Router()
 
-const getCookieOptions = (isProd: boolean, maxAge: number) => {
-  const options: any = {
+const getCookieOptions = (isProd: boolean, maxAge: number): CookieOptions => {
+  const options: CookieOptions = {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
@@ -26,8 +27,8 @@ const getCookieOptions = (isProd: boolean, maxAge: number) => {
   return options
 }
 
-const getClearCookieOptions = (isProd: boolean) => {
-  const options: any = {
+const getClearCookieOptions = (isProd: boolean): CookieOptions => {
+  const options: CookieOptions = {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax'
@@ -38,9 +39,9 @@ const getClearCookieOptions = (isProd: boolean) => {
   return options
 }
 
-authRouter.get('/me', requireAuth, asyncHandler(async (req: any, res: Response) => {
+authRouter.get('/me', requireAuth, asyncHandler(async (req: Request, res: Response) => {
   const user = await prisma.user.findUnique({
-    where: { id: req.user.userId },
+    where: { id: req.user!.userId },
     select: { id: true, name: true, email: true, role: true, siteId: true, isVerified: true, kycStatus: true, kycNotes: true, kycSubmittedAt: true }
   })
   res.json({ success: true, data: { user } })
@@ -75,7 +76,7 @@ const resetPasswordSchema = z.object({
 
 authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = loginSchema.parse(req.body)
-  
+
   // Check account lockout
   if (await checkAccountLockout(email)) {
     return res.status(429).json({
@@ -86,7 +87,7 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
       }
     })
   }
-  
+
   try {
     // [MULTI-SITE] Validasi kredensial dulu (return user, bukan token)
     const user = await authService.validateLoginCredentials(email, password)
@@ -115,7 +116,7 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
     // Site check passed, generate token pair
     const result = await authService.generateTokenPair(user)
     await resetFailedAttempts(email)
-    
+
     // Set httpOnly cookies
     const isProd = process.env.NODE_ENV === 'production'
     res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
@@ -133,9 +134,9 @@ authRouter.post('/register', asyncHandler(async (req: Request, res: Response) =>
   const role = input.role === 'advertiser' ? 'advertiser' : 'reader'
   const result = await authService.registerUser(
     input.email, input.password, input.name,
-    role as any, input.siteId
+    role as Role, input.siteId
   )
-  
+
   // Set httpOnly cookies
   const isProd = process.env.NODE_ENV === 'production'
   res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
@@ -146,13 +147,13 @@ authRouter.post('/register', asyncHandler(async (req: Request, res: Response) =>
 
 authRouter.post('/refresh', asyncHandler(async (req: Request, res: Response) => {
   let refreshToken = req.body.refreshToken || (req.cookies ? req.cookies.refreshToken : undefined)
-  
+
   if (!refreshToken) {
     return res.status(400).json({ success: false, message: 'Refresh token is required' })
   }
 
   const result = await authService.refreshAccessToken(refreshToken)
-  
+
   // Update cookies
   const isProd = process.env.NODE_ENV === 'production'
   res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
@@ -161,9 +162,9 @@ authRouter.post('/refresh', asyncHandler(async (req: Request, res: Response) => 
   res.json({ success: true, data: { user: result.user } })
 }))
 
-authRouter.post('/logout', asyncHandler(async (req: any, res: Response) => {
+authRouter.post('/logout', asyncHandler(async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken || (req.cookies ? req.cookies.refreshToken : undefined)
-  
+
   // Clear cookies regardless of auth status
   const isProd = process.env.NODE_ENV === 'production'
   res.clearCookie('accessToken', getClearCookieOptions(isProd))
@@ -187,10 +188,10 @@ authRouter.post('/forgot-password', asyncHandler(async (req: Request, res: Respo
 }))
 
 // POST /api/v1/auth/change-password - Change password for authenticated user
-authRouter.post('/change-password', 
-  requireAuth, 
-  asyncHandler(async (req: any, res: Response) => {
-    const userId = req.user.userId
+authRouter.post('/change-password',
+  requireAuth,
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId
     const { currentPassword, newPassword } = req.body
 
     if (!currentPassword || !newPassword) {

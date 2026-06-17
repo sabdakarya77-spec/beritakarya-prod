@@ -75,9 +75,9 @@ interface SmartImageProps extends Omit<ImageProps, 'src' | 'blurDataURL'> {
   dominantColor?: string | null
   wrapperClassName?: string
   // Additional custom props that might be passed but not valid for <img>
-  text?: any
-  content?: any
-  body?: any
+  text?: unknown
+  content?: string
+  body?: unknown
 }
 
 const getThumbUrl = (url: string) => {
@@ -132,14 +132,13 @@ export function SmartImage({
 
   // Filter out non-Image props that could cause React errors when spread onto <img>
   // These props are valid for custom usage but not valid DOM attributes for <img>
-  const validImageProps = { ...(props as any) };
-  delete validImageProps.text;
-  delete validImageProps.content;
-  delete validImageProps.body;
+  const { text: _text, content: _content, body: _body, ...validImageProps } = props;
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && (navigator as any).connection) {
-      const conn = (navigator as any).connection
+    type NetworkInformation = { effectiveType?: string; saveData?: boolean };
+    const nav = navigator as Navigator & { connection?: NetworkInformation; mozConnection?: NetworkInformation; webkitConnection?: NetworkInformation };
+    const conn = nav.connection ?? nav.mozConnection ?? nav.webkitConnection;
+    if (conn) {
       if (conn.effectiveType === '2g' || conn.effectiveType === '3g' || conn.saveData) {
         setIsSlow(true)
       }

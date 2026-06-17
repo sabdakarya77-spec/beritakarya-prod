@@ -2,6 +2,7 @@
 
 import { AlertCircle, Plus } from 'lucide-react';
 import type { Ad } from './types';
+import type { AdSlotDefinition } from '../../../lib/constants';
 import { LeaderboardBannerRow } from './LeaderboardBannerRow';
 
 export function LeaderboardManager({
@@ -15,7 +16,7 @@ export function LeaderboardManager({
   savingId
 }: {
   ads: Ad[];
-  slotDef: any;
+  slotDef: AdSlotDefinition;
   onAdd: () => void;
   onUpdate: (id: string, payload: Partial<Ad>) => void;
   onDelete: (id: string) => void;

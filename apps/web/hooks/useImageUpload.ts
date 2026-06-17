@@ -67,9 +67,10 @@ export function useImageUpload() {
       setState({ uploading: false, progress: 100, error: null, result })
       return result
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 5. Error Handling
-      const msg = err.response?.data?.error?.message || 'Upload gagal, coba lagi'
+      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
+      const msg = axiosErr.response?.data?.error?.message || 'Upload gagal, coba lagi'
       setState({ uploading: false, progress: 0, error: msg, result: null })
       return null
     }

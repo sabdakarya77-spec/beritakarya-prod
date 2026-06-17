@@ -20,6 +20,7 @@ import {
   CheckCircle2
 } from 'lucide-react'
 import { useRequireRole } from '../../../../hooks/useRequireRole'
+import axios from 'axios'
 
 interface Site {
   id: string
@@ -60,8 +61,8 @@ export default function AdminDashboardPage() {
       if (data.success) {
         setSites(data.data)
       }
-    } catch (error: any) {
-      showToast(error.response?.data?.error?.message || 'Gagal memuat data situs', 'error')
+    } catch (error: unknown) {
+      showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || 'Gagal memuat data situs', 'error')
     } finally {
       setLoading(false)
     }
@@ -83,8 +84,8 @@ export default function AdminDashboardPage() {
       showToast(editingSite ? 'Situs berhasil diperbarui' : 'Situs berhasil dibuat')
       setDialogOpen(false)
       fetchSites()
-    } catch (error: any) {
-      showToast(error.response?.data?.error?.message || 'Gagal menyimpan situs', 'error')
+    } catch (error: unknown) {
+      showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || 'Gagal menyimpan situs', 'error')
     }
   }
 
@@ -120,8 +121,8 @@ export default function AdminDashboardPage() {
       await api.delete(`/sites/${deleteConfirm}`)
       showToast('Situs berhasil dihapus')
       fetchSites()
-    } catch (error: any) {
-      showToast(error.response?.data?.error?.message || 'Gagal menghapus situs', 'error')
+    } catch (error: unknown) {
+      showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || 'Gagal menghapus situs', 'error')
     } finally {
       setDeleteConfirm(null)
     }

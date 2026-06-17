@@ -39,6 +39,13 @@ import {
 } from './article.service'
 import { prisma } from '../../db/client'
 import type { JWTPayload } from '@beritakarya/types'
+import type { User, Category } from '@prisma/client'
+
+// Derive mock return types from repository function signatures
+type ArticleWithDetails = NonNullable<Awaited<ReturnType<typeof repo.findArticleById>>>
+type ArticleList = Awaited<ReturnType<typeof repo.findArticlesByIds>>
+type CreateVersionReturn = Awaited<ReturnType<typeof repo.createVersion>>
+type SoftDeleteReturn = Awaited<ReturnType<typeof repo.softDeleteArticle>>
 
 const reporterBandung: JWTPayload = {
   userId: 'u-1', role: 'reporter', siteId: 'bandung', iat: 0, exp: 0
@@ -73,10 +80,10 @@ describe('getArticles — Meilisearch hydrate', () => {
     vi.mocked(searchService.searchArticles).mockResolvedValue({
       hits: [{ id: 'art-1', title: 'partial' }],
       estimatedTotalHits: 1
-    } as any)
+    })
     vi.mocked(repo.findArticlesByIds).mockResolvedValue([
       mockArticle({ id: 'art-1', viewCount: 42, author: { name: 'Rep', role: 'reporter' } })
-    ] as any)
+    ] as unknown as ArticleList)
 
     const result = await getArticles('bandung', { search: 'test' })
 
@@ -88,7 +95,7 @@ describe('getArticles — Meilisearch hydrate', () => {
 describe('getArticleById — multi-site isolation', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as unknown as User)
   })
 
   it('throw 404 jika artikel tidak ditemukan di site', async () => {
@@ -99,7 +106,7 @@ describe('getArticleById — multi-site isolation', () => {
   })
 
   it('berhasil jika artikel ada di site yang benar', async () => {
-    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle() as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle() as unknown as ArticleWithDetails)
     const result = await getArticleById('art-1', 'bandung')
     expect(result.id).toBe('art-1')
   })
@@ -108,12 +115,12 @@ describe('getArticleById — multi-site isolation', () => {
 describe('createArticle — siteId injection', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as unknown as User)
   })
 
   it('inject siteId dari request, bukan dari body', async () => {
     vi.mocked(repo.slugExists).mockResolvedValue(false)
-    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as any)
+    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as unknown as ArticleWithDetails)
 
     await createArticle({ title: 'Artikel Baru' }, reporterBandung, 'bandung')
 
@@ -127,7 +134,7 @@ describe('createArticle — siteId injection', () => {
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(false)
-    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as any)
+    vi.mocked(repo.createArticle).mockResolvedValue(mockArticle() as unknown as ArticleWithDetails)
 
     await createArticle({ title: 'Artikel Baru' }, reporterBandung, 'bandung')
 
@@ -140,24 +147,24 @@ describe('createArticle — siteId injection', () => {
 describe('updateArticle — ownership', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as unknown as User)
   })
 
   it('reporter hanya bisa edit artikel miliknya', async () => {
     vi.mocked(repo.findArticleById).mockResolvedValue(
-      mockArticle({ authorId: 'user-lain' }) as any
+      mockArticle({ authorId: 'user-lain' }) as unknown as ArticleWithDetails
     )
     const err = await updateArticle('art-1', 'bandung', { title: 'baru' }, reporterBandung).catch(e => e)
     expect(err.statusCode).toBe(403)
   })
 
   it('editor pusat bisa edit artikel siapapun', async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as unknown as User)
     vi.mocked(repo.findArticleById).mockResolvedValue(
-      mockArticle({ authorId: 'user-lain' }) as any
+      mockArticle({ authorId: 'user-lain' }) as unknown as ArticleWithDetails
     )
     vi.mocked(repo.slugExists).mockResolvedValue(false)
-    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle() as any)
+    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle() as unknown as ArticleWithDetails)
 
     await expect(
       updateArticle('art-1', 'bandung', { title: 'baru' }, editorPusat)
@@ -165,11 +172,11 @@ describe('updateArticle — ownership', () => {
   })
 
   it('resolve category slug to UUID when updating article category', async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
-    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ authorId: 'user-lain' }) as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as unknown as User)
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ authorId: 'user-lain' }) as unknown as ArticleWithDetails)
     vi.mocked(prisma.category.findUnique).mockResolvedValue(null)
-    vi.mocked(prisma.category.findFirst).mockResolvedValue({ id: 'cat-1' } as any)
-    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle({ categoryId: 'cat-1' }) as any)
+    vi.mocked(prisma.category.findFirst).mockResolvedValue({ id: 'cat-1' } as unknown as Category)
+    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle({ categoryId: 'cat-1' }) as unknown as ArticleWithDetails)
 
     await updateArticle('art-1', 'bandung', { categoryId: 'nasional' }, editorPusat)
 
@@ -189,23 +196,23 @@ describe('updateArticle — ownership', () => {
 describe('publishArticle', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as unknown as User)
     vi.mocked(repo.getNextVersionNumber).mockResolvedValue(1)
-    vi.mocked(repo.createVersion).mockResolvedValue({ id: 'v-1' } as any)
+    vi.mocked(repo.createVersion).mockResolvedValue({ id: 'v-1' } as unknown as CreateVersionReturn)
   })
 
   it('menolak publish dari status draft', async () => {
-    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ status: 'draft' }) as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ status: 'draft' }) as unknown as ArticleWithDetails)
     const err = await publishArticle('art-1', 'bandung', editorPusat).catch((e) => e)
     expect(err.statusCode).toBe(400)
   })
 
   it('set status published dari approved', async () => {
     vi.mocked(repo.findArticleById).mockResolvedValue(
-      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as any
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as unknown as ArticleWithDetails
     )
     vi.mocked(repo.updateArticle).mockResolvedValue(
-      mockArticle({ status: 'published', slug: 'test' }) as any
+      mockArticle({ status: 'published', slug: 'test' }) as unknown as ArticleWithDetails
     )
     await publishArticle('art-1', 'bandung', editorPusat)
     expect(repo.updateArticle).toHaveBeenCalledWith(
@@ -222,10 +229,10 @@ describe('publishArticle', () => {
 
   it('re-indexes Meilisearch and invalidates Redis cache on publish', async () => {
     vi.mocked(repo.findArticleById).mockResolvedValue(
-      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as any
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as unknown as ArticleWithDetails
     )
     vi.mocked(repo.updateArticle).mockResolvedValue(
-      mockArticle({ status: 'published', slug: 'test' }) as any
+      mockArticle({ status: 'published', slug: 'test' }) as unknown as ArticleWithDetails
     )
     await publishArticle('art-1', 'bandung', editorPusat)
     expect(searchService.indexArticle).toHaveBeenCalled()
@@ -236,20 +243,20 @@ describe('publishArticle', () => {
 describe('deleteArticle — permission', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as any)
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'reporter', kycStatus: 'APPROVED' } as unknown as User)
   })
 
   it('reporter dari site lain tidak bisa delete', async () => {
     vi.mocked(repo.findArticleById).mockResolvedValue(
-      mockArticle({ authorId: 'u-1', siteId: 'bandung' }) as any
+      mockArticle({ authorId: 'u-1', siteId: 'bandung' }) as unknown as ArticleWithDetails
     )
     const err = await deleteArticle('art-1', 'bandung', reporterSurabaya).catch(e => e)
     expect(err.statusCode).toBe(403)
   })
 
   it('reporter bisa soft-delete artikel miliknya sendiri', async () => {
-    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ slug: 'test' }) as any)
-    vi.mocked(repo.softDeleteArticle).mockResolvedValue({ id: 'art-1', slug: 'test' } as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ slug: 'test' }) as unknown as ArticleWithDetails)
+    vi.mocked(repo.softDeleteArticle).mockResolvedValue({ id: 'art-1', slug: 'test' } as unknown as SoftDeleteReturn)
     await expect(deleteArticle('art-1', 'bandung', reporterBandung)).resolves.not.toThrow()
     expect(repo.softDeleteArticle).toHaveBeenCalledWith('art-1')
     expect(searchService.deleteIndexedArticle).toHaveBeenCalledWith('art-1')

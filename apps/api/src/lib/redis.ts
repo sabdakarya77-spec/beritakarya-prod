@@ -5,7 +5,7 @@ import { logger } from './logger'
 // Jika REDIS_HOST tidak diset, semua operasi cache akan di-skip secara silent.
 // Untuk produksi serverless, gunakan Upstash Redis (diakses lewat @upstash/redis REST API).
 
-let redis: any = null
+let redis: import('ioredis').Redis | null = null
 
 async function initRedis() {
   if (!process.env.REDIS_HOST) {
@@ -15,7 +15,7 @@ async function initRedis() {
 
   try {
     const Redis = require('ioredis')
-    redis = new Redis({
+    const client: import('ioredis').Redis = new Redis({
       host: process.env.REDIS_HOST,
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD || undefined,
@@ -26,11 +26,12 @@ async function initRedis() {
       lazyConnect: true,
     })
 
-    redis.on('error', (err: Error) => {
+    client.on('error', (err: Error) => {
       logger.warn('[Redis] Connection error (non-fatal):', err.message)
     })
 
-    await redis.connect()
+    await client.connect()
+    redis = client
     logger.info('[Redis] Connected successfully')
   } catch (err) {
     logger.warn('[Redis] Failed to connect (falling back to no-op cache):', err)
@@ -59,7 +60,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function setCache(key: string, value: any, ttlSeconds: number = 3600) {
+export async function setCache(key: string, value: unknown, ttlSeconds: number = 3600) {
   if (!redis) return
   try {
     await redisReady

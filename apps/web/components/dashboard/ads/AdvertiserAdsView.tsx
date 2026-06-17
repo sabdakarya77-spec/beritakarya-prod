@@ -64,8 +64,11 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
       setAdvEndDate('');
       setAdvPaymentProof('');
       onRefresh();
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal mengajukan booking');
+    } catch (error: unknown) {
+      const message = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+        : undefined;
+      alert(message || 'Gagal mengajukan booking');
     } finally {
       setIsSubmittingBooking(false);
     }

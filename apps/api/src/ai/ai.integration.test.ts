@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import request from 'supertest'
 import express from 'express'
+import type { Request, Response, NextFunction } from 'express'
 
 // Must be mocked before any import that transitively loads base.service.ts,
 // because OpenAI is instantiated at module level (not inside a function).
@@ -19,23 +20,23 @@ vi.mock('./write.service', () => ({
 }))
 
 vi.mock('../middleware/auth.middleware', () => ({
-  requireAuth: (_: any, __: any, next: any) => {
-    _.user = { userId: 'u1', role: 'reporter', siteId: 'bandung' }
+  requireAuth: (_: Request, __: Response, next: NextFunction) => {
+    (_.user as unknown as Record<string, unknown>) = { userId: 'u1', role: 'reporter', siteId: 'bandung' }
     next()
   }
 }))
 
 vi.mock('../middleware/aiQuota.middleware', () => ({
-  checkAIPermissions: (_: any, __: any, next: any) => {
+  checkAIPermissions: (req: Request, __: Response, next: NextFunction) => {
     // Mock user quota context
-    _.aiQuota = { allowedFeatures: ['rewrite', 'expand'] }
-    _.aiUserId = 'u1'
+    (req as unknown as Record<string, unknown>).aiQuota = { allowedFeatures: ['rewrite', 'expand'] };
+    (req as unknown as Record<string, unknown>).aiUserId = 'u1';
     next()
   }
 }))
 
 vi.mock('../lib/rateLimit', () => ({
-  aiLimiter: (_: any, __: any, next: any) => next()
+  aiLimiter: (_: Request, __: Response, next: NextFunction) => next()
 }))
 
 vi.mock('./usage.service', () => ({

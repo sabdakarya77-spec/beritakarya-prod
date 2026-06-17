@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import OpenAI from 'openai'
 import { logger } from '../lib/logger'
 import { env } from '../lib/env'
@@ -5,6 +6,11 @@ import { getCache, setCache } from '../lib/redis'
 import { createHash } from 'crypto'
 import { createOpenAIBreaker } from '../lib/circuitBreaker'
 import { prisma } from '../db/client'
+
+/** Request shape for AI tracking endpoints (user context + AI quota fields) */
+interface AIRequest extends Request {
+  aiUserId?: string
+}
 
 let client: OpenAI | null = null
 
@@ -38,6 +44,17 @@ let lastUsage: { prompt_tokens: number; completion_tokens: number } | null = nul
 
 export function getLastUsage() {
   return lastUsage
+}
+
+/** Safely extract error info from an unknown throw value */
+function getErrorInfo(err: unknown): { message: string; status?: number; code?: string } {
+  if (err instanceof Error) {
+    const info: { message: string; status?: number; code?: string } = { message: err.message }
+    if ('status' in err) info.status = (err as { status: unknown }).status as number
+    if ('code' in err) info.code = (err as { code: unknown }).code as string
+    return info
+  }
+  return { message: String(err) }
 }
 
 // Generate cache key from prompt + options
@@ -85,18 +102,19 @@ export async function callAI<T>(
     try {
       const data = await fn()
       return { success: true, data }
-    } catch (err: any) {
-      lastError = err
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      const info = getErrorInfo(err)
       const isRetryable =
-        err?.status === 429 ||
-        err?.status >= 500 ||
-        err?.code === 'ETIMEDOUT' ||
-        err?.code === 'ECONNRESET'
+        info.status === 429 ||
+        (info.status !== undefined && info.status >= 500) ||
+        info.code === 'ETIMEDOUT' ||
+        info.code === 'ECONNRESET'
 
       if (!isRetryable || attempt === maxRetries) break
 
       const delay = Math.pow(2, attempt - 1) * 1000
-      logger.warn(`AI retry attempt ${attempt}/${maxRetries} in ${delay}ms — ${err.message}`)
+      logger.warn(`AI retry attempt ${attempt}/${maxRetries} in ${delay}ms — ${info.message}`)
       await new Promise(r => setTimeout(r, delay))
     }
   }
@@ -156,8 +174,9 @@ export async function chatComplete(
         completion_tokens: response.usage.completion_tokens
       }
     }
-  } catch (err: any) {
-    logger.error('OpenAI circuit breaker error:', err.message)
+  } catch (err: unknown) {
+    const info = getErrorInfo(err)
+    logger.error('OpenAI circuit breaker error:', info.message)
 
     // Circuit is open, return fallback message
     // @ts-expect-error - opossum circuit breaker has stats.state
@@ -180,12 +199,12 @@ export async function chatComplete(
 
 export async function callAIWithTracking<T>(
   fn: () => Promise<T>,
-  req: any, // Request object with user info
+  req: AIRequest,
   action: string,
   maxRetries = 3
 ): Promise<AIResult<T>> {
   const start = Date.now()
-  
+
   // Execute AI call with retry logic
   let result: AIResult<T> | null = null
   let lastError: Error | null = null
@@ -195,18 +214,19 @@ export async function callAIWithTracking<T>(
       const data = await fn()
       result = { success: true, data }
       break
-    } catch (err: any) {
-      lastError = err
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      const info = getErrorInfo(err)
       const isRetryable =
-        err?.status === 429 ||
-        err?.status >= 500 ||
-        err?.code === 'ETIMEDOUT' ||
-        err?.code === 'ECONNRESET'
+        info.status === 429 ||
+        (info.status !== undefined && info.status >= 500) ||
+        info.code === 'ETIMEDOUT' ||
+        info.code === 'ECONNRESET'
 
       if (!isRetryable || attempt === maxRetries) break
 
       const delay = Math.pow(2, attempt - 1) * 1000
-      logger.warn(`AI retry attempt ${attempt}/${maxRetries} in ${delay}ms — ${err.message}`)
+      logger.warn(`AI retry attempt ${attempt}/${maxRetries} in ${delay}ms — ${info.message}`)
       await new Promise(r => setTimeout(r, delay))
     }
   }
@@ -237,9 +257,9 @@ export async function callAIWithTracking<T>(
  * Track AI usage with cost estimation and quota accounting
  */
 async function accountAIUsage(
-  req: any,
+  req: AIRequest,
   action: string,
-  result: AIResult<any>,
+  result: AIResult<unknown>,
   latencyMs: number
 ) {
   const userId = req?.aiUserId || req?.user?.userId

@@ -8,14 +8,16 @@ import { Prisma } from '@prisma/client'
 import '../types/express'
 
 export function errorMiddleware(
-  err: any,
+  err: unknown,
   req: Request,
   res: Response,
   _next: NextFunction
 ) {
+  const errObj = err instanceof Error ? err : new Error(String(err))
+  const errWithCode = err as Record<string, unknown> | undefined
   logger.error({
-    message: err.message,
-    stack: err.stack,
+    message: errObj.message,
+    stack: errObj.stack,
     path: req.path,
     method: req.method,
     requestId: req.headers['x-request-id'],
@@ -67,17 +69,17 @@ export function errorMiddleware(
     })
   }
 
-  const statusCode = err.statusCode || 500
+  const statusCode = (typeof errWithCode?.statusCode === 'number' ? errWithCode.statusCode : undefined) || 500
   const isClientError = statusCode >= 400 && statusCode < 500
   const message =
     env.NODE_ENV === 'production' && !isClientError
       ? 'Terjadi kesalahan server'
-      : err.message || 'Terjadi kesalahan server'
+      : errObj.message || 'Terjadi kesalahan server'
 
   res.status(statusCode).json({
     success: false,
     error: {
-      code: err.code || (isClientError ? 'CLIENT_ERROR' : 'SERVER_ERROR'),
+      code: (typeof errWithCode?.code === 'string' ? errWithCode.code : undefined) || (isClientError ? 'CLIENT_ERROR' : 'SERVER_ERROR'),
       message
     }
   })

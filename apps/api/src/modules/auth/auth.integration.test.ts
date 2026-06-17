@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import request from 'supertest'
 import express from 'express'
+import { Role } from '@prisma/client'
 import { authRouter } from './auth.controller'
 import { errorMiddleware } from '../../middleware/error.middleware'
 
@@ -31,7 +32,17 @@ app.use(express.json())
 app.use('/api/v1/auth', authRouter)
 app.use(errorMiddleware)
 
-const mockUser = {
+interface MockUserShape {
+  id: string
+  email: string
+  name: string
+  role: Role | string
+  siteId: string | null
+  isVerified: boolean
+  kycStatus: string
+}
+
+const mockUser: MockUserShape = {
   id: 'u-1',
   email: 'test@test.com',
   name: 'Test',
@@ -39,9 +50,15 @@ const mockUser = {
   siteId: 'bandung',
   isVerified: true,
   kycStatus: 'APPROVED'
-} as any
+}
 
-const mockTokens = {
+interface MockTokensShape {
+  accessToken: string
+  refreshToken: string
+  user: MockUserShape
+}
+
+const mockTokens: MockTokensShape = {
   accessToken: 'mock-access-token',
   refreshToken: 'mock-refresh-token',
   user: mockUser
@@ -54,8 +71,8 @@ describe('POST /api/v1/auth/login', () => {
   })
 
   it('200 dengan token saat login berhasil (tidak ada site check)', async () => {
-    vi.mocked(authService.validateLoginCredentials).mockResolvedValue(mockUser)
-    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as any)
+    vi.mocked(authService.validateLoginCredentials).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof authService.validateLoginCredentials>>)
+    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const res = await request(app)
       .post('/api/v1/auth/login')
@@ -100,7 +117,7 @@ describe('POST /api/v1/auth/login', () => {
       ...mockUser,
       role: 'wapimred',
       siteId: 'nganjuk'
-    })
+    } as unknown as Awaited<ReturnType<typeof authService.validateLoginCredentials>>)
 
     const res = await request(app)
       .post('/api/v1/auth/login')
@@ -119,8 +136,8 @@ describe('POST /api/v1/auth/login', () => {
       ...mockUser,
       role: 'superadmin',
       siteId: null
-    })
-    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as any)
+    } as unknown as Awaited<ReturnType<typeof authService.validateLoginCredentials>>)
+    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const res = await request(app)
       .post('/api/v1/auth/login')
@@ -137,8 +154,8 @@ describe('POST /api/v1/auth/login', () => {
       ...mockUser,
       role: 'advertiser',
       siteId: null
-    })
-    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as any)
+    } as unknown as Awaited<ReturnType<typeof authService.validateLoginCredentials>>)
+    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const res = await request(app)
       .post('/api/v1/auth/login')
@@ -151,8 +168,8 @@ describe('POST /api/v1/auth/login', () => {
 
   it('[MULTI-SITE] 200 saat requestSite null (server-to-server / no origin)', async () => {
     vi.mocked(extractSiteIdFromRequest).mockReturnValue(null)
-    vi.mocked(authService.validateLoginCredentials).mockResolvedValue(mockUser)
-    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as any)
+    vi.mocked(authService.validateLoginCredentials).mockResolvedValue(mockUser as unknown as Awaited<ReturnType<typeof authService.validateLoginCredentials>>)
+    vi.mocked(authService.generateTokenPair).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const res = await request(app)
       .post('/api/v1/auth/login')
@@ -179,7 +196,7 @@ describe('POST /api/v1/auth/register', () => {
   })
 
   it('menerima role reader dan advertiser, menolak sisanya', async () => {
-    vi.mocked(authService.registerUser).mockResolvedValue(mockTokens as any)
+    vi.mocked(authService.registerUser).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const readerRes = await request(app)
       .post('/api/v1/auth/register')

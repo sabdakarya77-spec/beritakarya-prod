@@ -6,6 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { API_URL } from '../../lib/api';
 
+interface SearchResultArticle {
+  id: string;
+  slug: string;
+  title: string;
+  featuredImage?: string;
+  category?: { name?: string };
+}
+
 interface FullScreenSearchProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,7 +28,7 @@ export default function FullScreenSearch({
   trendingTopics = ['Politik', 'Ekonomi', 'Investigasi', 'Teknologi', 'Gaya Hidup', 'Hiburan'],
 }: FullScreenSearchProps) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResultArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +174,7 @@ export default function FullScreenSearch({
                       <p className="text-red-400 text-sm">{error}</p>
                     ) : results.length > 0 ? (
                       <div className="flex flex-col gap-4">
-                        {results.map((art: any) => (
+                        {results.map((art) => (
                           <Link
                             key={art.id}
                             href={`/${site}/artikel/${art.slug}`}

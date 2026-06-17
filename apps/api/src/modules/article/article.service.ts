@@ -7,18 +7,21 @@ import {
   updateArticleWithSlugRetry
 } from './slug.service'
 import type { JWTPayload } from '@beritakarya/types'
-import type { ContentType } from '@prisma/client'
+import type { ContentType, Prisma } from '@prisma/client'
 import { sendNotification } from '../notification/notification.controller'
 import { prisma } from '../../db/client'
 import { recordView } from '../analytics/analytics.service'
 import * as searchService from './search.service'
 import { getCache, setCache, deleteCache } from '../../lib/redis'
 import { googleIndexingService } from '../../services/google-indexing.service'
-import { applySeoDefaults, validateArticleContentLimits } from './content.service'
+import { applySeoDefaults, validateArticleContentLimits, type ArticleBlock } from './content.service'
 import { finalizeArticlePublish } from './publish.service'
 import { parseArticleBlocks } from './article.validator'
 
 const PUBLISH_ALLOWED_STATUSES = ['approved', 'scheduled'] as const
+
+/** Inferred return type of findPublishedArticleBySlug (for Redis cache). */
+type CachedArticle = NonNullable<Awaited<ReturnType<typeof repo.findPublishedArticleBySlug>>>
 
 export function assertCanPublish(
   article: { status: string },
@@ -51,7 +54,7 @@ export async function getArticles(
       siteId,
       status: query.status
     })
-    
+
     if (searchResult?.hits?.length) {
       const ids = searchResult.hits
         .map((hit: { id?: string }) => hit.id)
@@ -91,8 +94,8 @@ export async function getArticles(
     }
   }
 
-  const opts: any = { ...query }
-  
+  const opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number; authorId?: string } = { ...query }
+
   // If user is a reporter or kontributor, they can only see their own articles
   if (user?.role === 'reporter' || user?.role === 'kontributor') {
     opts.authorId = user.userId
@@ -120,20 +123,20 @@ export async function getArticleBySlug(slug: string, siteId: string) {
 }
 
 export async function getPublishedArticleBySlug(
-  slug: string, 
-  siteId: string, 
+  slug: string,
+  siteId: string,
   meta?: { ipAddress?: string; userAgent?: string; referrer?: string }
 ) {
   const cacheKey = `article:${siteId}:${slug}`
-  const cached = await getCache<any>(cacheKey)
-  
+  const cached = await getCache<CachedArticle>(cacheKey)
+
   let article = cached
   if (!article) {
     article = await repo.findPublishedArticleBySlug(slug, siteId)
     if (!article) throw new AppError('Post tidak ditemukan', 404)
     await setCache(cacheKey, article, 3600) // Cache for 1 hour
   }
-  
+
   // Async recording (don't block the response)
   recordView({
     siteId,
@@ -141,7 +144,7 @@ export async function getPublishedArticleBySlug(
     path: `/artikel/${slug}`,
     ...meta
   }).catch(err => logger.error('Failed to record view:', err))
-  
+
   return article
 }
 
@@ -149,7 +152,7 @@ export async function createArticle(
   input: {
     title: string;
     excerpt?: string;
-    blocks?: any[];
+    blocks?: ArticleBlock[];
     categoryId?: string | null;
     tags?: string[];
     contentType?: string;
@@ -212,7 +215,7 @@ export async function createArticle(
       authorId: user.userId,
       categoryId: resolvedCategoryId,
       tags: input.tags ?? [],
-      blocks: withSeo.blocks ?? [],
+      blocks: (withSeo.blocks ?? []) as unknown as Prisma.InputJsonValue[],
       contentType: (input.contentType as ContentType) ?? 'article',
       metaTitle: input.metaTitle,
       metaDescription: withSeo.metaDescription,
@@ -235,8 +238,9 @@ export async function createArticle(
     searchService.indexArticle(article).catch(err => logger.error('Failed to index article:', err))
 
     return article
-  } catch (err: any) {
-    logger.error('[createArticle] Error:', err?.message || err, err?.stack ? `\nStack: ${err.stack}` : '')
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err))
+    logger.error('[createArticle] Error:', error.message, error.stack ? `\nStack: ${error.stack}` : '')
     throw err
   }
 }
@@ -244,7 +248,7 @@ export async function createArticle(
 export async function updateArticle(
   id: string, siteId: string,
   input: Partial<{
-    title: string; excerpt: string; blocks: any[]; metaTitle: string; metaDescription: string;
+    title: string; excerpt: string; blocks: ArticleBlock[]; metaTitle: string; metaDescription: string;
     categoryId: string | null; tags: string[]; status: string;
     contentType: string;
     isBreaking: boolean; isExclusive: boolean; isFeatured: boolean;
@@ -321,7 +325,7 @@ export async function updateArticle(
     validateArticleContentLimits(input.blocks, { requireMinWords, contentType: effectiveContentType })
   }
 
-  let data: any = { ...input }
+  let data: Record<string, unknown> = { ...input }
 
   // Resolve categoryId from slug to UUID if provided
   if (input.categoryId !== undefined) {
@@ -337,7 +341,7 @@ export async function updateArticle(
     })
     if (withSeo.metaDescription) data.metaDescription = withSeo.metaDescription
   }
-  
+
   // [S-Tier] Propagate blur hash and dominant color if featuredImage is updated
   if ('featuredImage' in input) {
     if (input.featuredImage) {
@@ -366,8 +370,8 @@ export async function updateArticle(
   // Auto-calculate word count and reading time if blocks changed
   if (input.blocks) {
     const textContent = input.blocks
-      .filter((b: any) => b.type === 'paragraph' || b.type === 'heading')
-      .map((b: any) => b.content)
+      .filter((b: ArticleBlock) => b.type === 'paragraph' || b.type === 'heading')
+      .map((b: ArticleBlock) => b.content)
       .join(' ')
     const words = textContent.trim().split(/\s+/).length
     data.wordCount = words
@@ -466,8 +470,8 @@ export async function publishArticle(
 
   assertCanPublish(article, user, options?.forcePublish)
   validateArticleContentLimits(
-    Array.isArray(article.blocks) ? (article.blocks as any[]) : [],
-    { requireMinWords: true, contentType: (article as any).contentType ?? 'article' }
+    Array.isArray(article.blocks) ? (article.blocks as ArticleBlock[]) : [],
+    { requireMinWords: true, contentType: article.contentType ?? 'article' }
   )
 
   await saveArticleVersion(id, user.userId, siteId)
@@ -595,7 +599,7 @@ export async function saveArticleVersion(articleId: string, authorId: string, si
   return repo.createVersion({
     articleId,
     title: article.title,
-    blocks: article.blocks as any[],
+    blocks: article.blocks as unknown as Prisma.InputJsonValue[],
     version: versionNumber,
     authorId
   })
@@ -615,7 +619,7 @@ export async function restoreArticleVersion(versionId: string, siteId: string, u
 
   const updated = await repo.updateArticle(article.id, siteId, {
     title: version.title,
-    blocks: version.blocks as any[]
+    blocks: version.blocks as unknown as Prisma.InputJsonValue[]
   })
 
   await repo.createAuditLog({
@@ -637,7 +641,7 @@ export async function getArticleStats(siteId: string) {
     where: { siteId, deletedAt: null },
     _count: { id: true }
   })
-  
+
   const stats = counts.reduce((acc, curr) => {
     acc[curr.status] = curr._count.id
     return acc
@@ -666,7 +670,7 @@ export async function indexGoogleArticle(id: string, siteId: string) {
   if (!site?.domain) {
     throw new AppError(`Domain tidak dikonfigurasi untuk site ${siteId}`, 500)
   }
-  
+
   const domain = site.domain
   const protocol = domain.includes('localhost') || domain.includes('127.0.0.1') ? 'http' : 'https'
   const articleUrl = `${protocol}://${domain}/artikel/${article.slug}`
@@ -705,4 +709,3 @@ async function resolveCategoryId(categoryId: string | null | undefined, siteId: 
   // Slug tidak ditemukan — throw error agar tidak silent null
   throw new AppError(`Kategori "${categoryId}" tidak ditemukan di database`, 400)
 }
-

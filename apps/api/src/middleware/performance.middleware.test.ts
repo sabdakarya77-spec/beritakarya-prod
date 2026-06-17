@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { EventEmitter } from 'events'
+import type { Response } from 'express'
 
 vi.mock('../lib/monitoring', () => ({
   metrics: {
@@ -18,7 +19,7 @@ describe('performanceMiddleware', () => {
 
   it('memanggil next() segera', () => {
     const req = mockReq()
-    const res = new EventEmitter() as any
+    const res = new EventEmitter() as unknown as Response
     res.statusCode = 200
     const next = mockNext()
 
@@ -29,7 +30,7 @@ describe('performanceMiddleware', () => {
 
   it('mencatat metrics saat response selesai', () => {
     const req = mockReq({ method: 'GET', path: '/api/v1/articles', route: { path: '/api/v1/articles' } })
-    const res = new EventEmitter() as any
+    const res = new EventEmitter() as unknown as Response
     res.statusCode = 200
     const next = mockNext()
 
@@ -47,7 +48,7 @@ describe('performanceMiddleware', () => {
 
   it('menandai error jika status >= 400', () => {
     const req = mockReq({ method: 'POST', path: '/api/v1/auth/login' })
-    const res = new EventEmitter() as any
+    const res = new EventEmitter() as unknown as Response
     res.statusCode = 401
     const next = mockNext()
 
@@ -64,7 +65,7 @@ describe('performanceMiddleware', () => {
 
   it('fallback ke req.path jika req.route tidak ada', () => {
     const req = mockReq({ method: 'GET', path: '/unknown' })
-    const res = new EventEmitter() as any
+    const res = new EventEmitter() as unknown as Response
     res.statusCode = 200
     const next = mockNext()
 

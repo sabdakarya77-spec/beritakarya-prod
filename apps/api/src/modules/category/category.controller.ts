@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { categoryService } from './category.service'
+import { AppError } from '../../utils/AppError'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { publicLimiter } from '../../lib/rateLimit'
@@ -33,6 +34,17 @@ categoryRouter.delete('/:id',
  * All routes are prefixed with /api/v1/categories
  */
 
+function getErrorStatus(error: unknown): number {
+  if (error instanceof AppError) return error.statusCode
+  if (error instanceof Error && 'statusCode' in error) return (error as Error & { statusCode: number }).statusCode
+  return 500
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
 /**
  * GET /api/v1/categories
  * Fetches categories based on user role and query parameter:
@@ -43,8 +55,8 @@ categoryRouter.delete('/:id',
 export async function getCategories(req: Request, res: Response) {
   try {
     const { view } = req.query
-    const user = (req as any).user
-    const siteId = (req as any).site || (req.query.site as string) || (req.headers['x-site-id'] as string)
+    const user = req.user
+    const siteId = req.site || (req.query.site as string) || (req.headers['x-site-id'] as string)
 
     // Superadmin-only routes
     if (view === 'global' || view === 'all') {
@@ -76,11 +88,11 @@ export async function getCategories(req: Request, res: Response) {
     }
 
     res.json({ success: true, data: categories })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_FETCH_FAILED', message: error.message }
+      error: { code: 'CATEGORY_FETCH_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -95,8 +107,8 @@ export async function getCategories(req: Request, res: Response) {
 export async function getCategoryTree(req: Request, res: Response) {
   try {
     const { view } = req.query
-    const user = (req as any).user
-    const siteId = (req as any).site || (req.query.site as string) || (req.headers['x-site-id'] as string)
+    const user = req.user
+    const siteId = req.site || (req.query.site as string) || (req.headers['x-site-id'] as string)
 
     // Superadmin-only routes
     if (view === 'global' || view === 'all') {
@@ -128,11 +140,11 @@ export async function getCategoryTree(req: Request, res: Response) {
     }
 
     res.json({ success: true, data: categories })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_TREE_FAILED', message: error.message }
+      error: { code: 'CATEGORY_TREE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -145,8 +157,8 @@ export async function getCategoryTree(req: Request, res: Response) {
 export async function createCategory(req: Request, res: Response) {
   try {
     const { name, slug, siteId, description, parentId, order, color } = req.body
-    const user = (req as any).user
-    const actorUserId = user?.userId
+    const user = req.user
+    const actorUserId = user!.userId
 
     // Validation: non-superadmin cannot create global categories
     if (siteId === null || siteId === undefined) {
@@ -180,11 +192,11 @@ export async function createCategory(req: Request, res: Response) {
     )
 
     res.status(201).json({ success: true, data: category })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_CREATE_FAILED', message: error.message }
+      error: { code: 'CATEGORY_CREATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -198,7 +210,7 @@ export async function updateCategory(req: Request, res: Response) {
   try {
     const { id } = req.params
     const { name, description, siteId, parentId, order, color } = req.body
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     const category = await categoryService.updateCategory(
       id,
@@ -214,11 +226,11 @@ export async function updateCategory(req: Request, res: Response) {
     )
 
     res.json({ success: true, data: category })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_UPDATE_FAILED', message: error.message }
+      error: { code: 'CATEGORY_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -234,11 +246,11 @@ export async function seedGlobalCategories(req: Request, res: Response) {
       typeof sourceSiteId === 'string' && sourceSiteId ? sourceSiteId : 'pusat'
     )
     res.json({ success: true, data: result })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'GLOBAL_CATEGORY_SEED_FAILED', message: error.message }
+      error: { code: 'GLOBAL_CATEGORY_SEED_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -250,16 +262,16 @@ export async function seedGlobalCategories(req: Request, res: Response) {
 export async function deleteCategory(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     await categoryService.deleteCategory(id, actorUserId)
 
     res.json({ success: true, message: 'Category deleted' })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_DELETE_FAILED', message: error.message }
+      error: { code: 'CATEGORY_DELETE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -276,11 +288,11 @@ export async function syncFromTemplate(req: Request, res: Response) {
   try {
     const result = await categoryService.syncFromTemplate()
     res.json({ success: true, data: result })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'CATEGORY_SYNC_FAILED', message: error.message }
+      error: { code: 'CATEGORY_SYNC_FAILED', message: getErrorMessage(error) }
     })
   }
 }

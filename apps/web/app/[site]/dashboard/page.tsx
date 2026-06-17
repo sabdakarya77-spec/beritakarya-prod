@@ -54,15 +54,55 @@ interface DashboardRoleSignal {
   tone: string;
 }
 
+interface TrafficDataPoint {
+  date: string
+  views: number
+}
+
+interface TopContentItem {
+  id: string
+  title: string
+  slug?: string
+  views?: number
+  viewCount?: number
+}
+
+interface EngagementStats {
+  rate: number
+  [key: string]: unknown
+}
+
+interface KYCRequest {
+  id: string
+  name: string
+  email: string
+  kycSubmittedAt?: string | null
+  userId?: string
+  status?: string
+  createdAt?: string
+  user?: { name?: string; email?: string }
+}
+
+interface AuditLog {
+  id: string
+  action: string
+  userId: string
+  createdAt: string
+  user?: { name?: string }
+  entityType?: string
+  entityId?: string
+  details?: string
+}
+
 export default function DashboardOverview() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
   const [articles, setArticles] = useState<Article[]>([]);
-  const [trafficData, setTrafficData] = useState<any[]>([]);
-  const [topContent, setTopContent] = useState<any[]>([]);
-  const [engagementStats, setEngagementStats] = useState<any>(null);
-  const [kycRequests, setKycRequests] = useState<any[]>([]);
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [trafficData, setTrafficData] = useState<TrafficDataPoint[]>([]);
+  const [topContent, setTopContent] = useState<TopContentItem[]>([]);
+  const [engagementStats, setEngagementStats] = useState<EngagementStats | null>(null);
+  const [kycRequests, setKycRequests] = useState<KYCRequest[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('Selamat');
   const [currentDate, setCurrentDate] = useState('');
@@ -105,12 +145,12 @@ export default function DashboardOverview() {
             if (controller.signal.aborted) return;
             setKycRequests(kycRes.data.data || []);
             setAuditLogs(auditRes.data.data?.items || []);
-          } catch (err: any) {
-            if (err?.name !== 'CanceledError') console.error('Failed to load admin stats:', err);
+          } catch (err: unknown) {
+            if ((err as { name?: string })?.name !== 'CanceledError') console.error('Failed to load admin stats:', err);
           }
         }
-      } catch (err: any) {
-        if (err?.name !== 'CanceledError') console.error('Failed to load dashboard data:', err);
+      } catch (err: unknown) {
+        if ((err as { name?: string })?.name !== 'CanceledError') console.error('Failed to load dashboard data:', err);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }

@@ -172,7 +172,7 @@ adRouter.get('/packages',
 adRouter.post('/bookings',
   requireAuth,
   requireRole(['advertiser']),
-  asyncHandler(async (req: any, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { packageId, siteId, imageUrl, linkUrl, startDate } = req.body
 
     const pkg = await repo.findPackageById(packageId)
@@ -191,7 +191,7 @@ adRouter.post('/bookings',
     computedEndDate.setDate(computedEndDate.getDate() + pkg.durationDays)
 
     const booking = await repo.createBooking({
-      userId: req.user.userId,
+      userId: req.user!.userId,
       siteId,
       packageId,
       imageUrl: imageUrl || null,
@@ -207,8 +207,8 @@ adRouter.post('/bookings',
 adRouter.get('/bookings/my',
   requireAuth,
   requireRole(['advertiser']),
-  asyncHandler(async (req: any, res: Response) => {
-    const bookings = await repo.findBookingsByUser(req.user.userId)
+  asyncHandler(async (req: Request, res: Response) => {
+    const bookings = await repo.findBookingsByUser(req.user!.userId)
     res.json({ success: true, data: bookings })
   })
 )
@@ -217,12 +217,12 @@ adRouter.get('/bookings/my',
 adRouter.post('/bookings/:id/pay',
   requireAuth,
   requireRole(['advertiser']),
-  asyncHandler(async (req: any, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { paymentProof } = req.body
 
     const existing = await repo.findBookingById(id)
-    if (!existing || existing.userId !== req.user.userId) {
+    if (!existing || existing.userId !== req.user!.userId) {
       return res.status(403).json({ success: false, message: 'Akses ditolak' })
     }
 

@@ -69,9 +69,9 @@ export class StorageService {
       )
       logger.info(`[Storage] Uploaded to ${bucket}/${remoteKey}`)
       return remoteKey
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(`[Storage] uploadBuffer failed for ${bucket}/${remoteKey}:`, error)
-      const message = error?.message || 'Unknown storage error'
+      const message = error instanceof Error ? error.message : 'Unknown storage error'
       throw new AppError(`Gagal mengunggah ke storage: ${message}`, 500, 'STORAGE_UPLOAD_FAILED')
     }
   }

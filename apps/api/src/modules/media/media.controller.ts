@@ -29,18 +29,24 @@ const upload = multer({
   },
 })
 
+// ─── Sharp Dynamic Import Helper ──────────────────────────────────────────────
+
+async function loadSharp() {
+  try {
+    const mod = await import('sharp')
+    return mod.default
+  } catch {
+    throw new AppError('Library pemrosesan gambar tidak tersedia. Pastikan sharp terinstall.', 500, 'SHARP_NOT_AVAILABLE')
+  }
+}
+
 // ─── Ad-specific image processing (compress to max size) ───────────────────
 
 const AD_MAX_WIDTH = 1200
 const AD_MAX_SIZE_BYTES = 200 * 1024 // 200 KB
 
 async function processAdImage(buffer: Buffer): Promise<{ buffer: Buffer; width: number; height: number }> {
-  let sharp: any
-  try {
-    sharp = (await import('sharp')).default
-  } catch {
-    throw new AppError('Library pemrosesan gambar tidak tersedia.', 500, 'SHARP_NOT_AVAILABLE')
-  }
+  const sharp = await loadSharp()
 
   // Resize to max width, keep aspect ratio
   let processed = await sharp(buffer)
@@ -74,22 +80,22 @@ interface ProcessResult {
   originalFormat: string
 }
 
+interface ImageMetadata {
+  width?: number | null
+  height?: number | null
+  format?: string | null
+}
+
 async function processImage(
   buffer: Buffer,
   options: { skipWatermark?: boolean } = {}
 ): Promise<ProcessResult> {
-  let sharp: any
-  try {
-    sharp = (await import('sharp')).default
-  } catch (err) {
-    logger.error('[Media] Failed to import sharp:', err)
-    throw new AppError('Library pemrosesan gambar tidak tersedia. Pastikan sharp terinstall.', 500, 'SHARP_NOT_AVAILABLE')
-  }
+  const sharp = await loadSharp()
 
-  let meta: any
+  let meta: ImageMetadata
   try {
     meta = await sharp(buffer).metadata()
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('[Media] Failed to read image metadata:', err)
     throw new AppError('Tidak dapat membaca metadata gambar. File mungkin corrupted atau format tidak didukung.', 500, 'INVALID_IMAGE_METADATA')
   }
@@ -103,7 +109,7 @@ async function processImage(
   if ((meta.width ?? 0) > maxW) {
     try {
       processedBuffer = await sharp(buffer).resize(maxW).toBuffer()
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('[Media] Failed to resize image:', err)
       throw new AppError('Gagal meresize gambar', 500, 'IMAGE_RESIZE_FAILED')
     }
@@ -119,7 +125,7 @@ async function processImage(
 
       const currentMeta = await sharp(processedBuffer).metadata()
       const currentW = currentMeta.width || maxW
-      
+
       // Hitung lebar watermark ideal: 12% dari lebar gambar, minimal 100px, maksimal 300px
       const targetWatermarkWidth = Math.min(300, Math.max(100, Math.floor(currentW * 0.12)))
 
@@ -135,7 +141,7 @@ async function processImage(
           blend: 'over',
         },
       ])
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('[Media] Failed to add watermark:', err)
       throw new AppError('Gagal menambahkan watermark', 500, 'WATERMARK_FAILED')
     }
@@ -149,14 +155,14 @@ async function processImage(
       .withMetadata({
         exif: {
           IFD0: {
-            Copyright: `\u00A9 ${new Date().getFullYear()} BERITAKARYA.co. All rights reserved. Unauthorized use prohibited.`,
+            Copyright: `© ${new Date().getFullYear()} BERITAKARYA.co. All rights reserved. Unauthorized use prohibited.`,
             Artist: 'BERITAKARYA Editorial'
           }
         }
       })
       .webp({ quality: 82 })
       .toBuffer()
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('[Media] Failed to convert to WebP:', err)
     throw new AppError('Gagal mengkonversi gambar ke format WebP', 500, 'WEBP_CONVERSION_FAILED')
   }
@@ -165,12 +171,12 @@ async function processImage(
   let thumbBuffer: Buffer
   try {
     thumbBuffer = await sharp(buffer).resize(400).webp({ quality: 70 }).toBuffer()
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('[Media] Failed to create thumbnail:', err)
     throw new AppError('Gagal membuat thumbnail', 500, 'THUMBNAIL_FAILED')
   }
 
-  // ── BlurHash (tiny 10×10 WebP base64) ──
+  // ── BlurHash (tiny 10x10 WebP base64) ──
   let blurHash = ''
   try {
     const blurBuffer: Buffer = await sharp(buffer)
@@ -193,7 +199,7 @@ async function processImage(
   } catch { /* non-critical */ }
 
   // ── Final dimensions from the processed full image ──
-  let finalMeta: any
+  let finalMeta: ImageMetadata
   try {
     finalMeta = await sharp(fullBuffer).metadata()
   } catch (err) {
@@ -227,7 +233,7 @@ mediaRouter.post(
 
     const isLogo = req.query.type === 'logo'
     const isGallery = req.query.purpose === 'gallery'
-    // Gallery uploads (foto jurnalistik) must ALWAYS have watermark — cannot be skipped
+    // Gallery uploads (foto jurnalistik) must ALWAYS have watermark -- cannot be skipped
     const skipWatermark =
       !isGallery && (isLogo || req.query.skipWatermark === 'true' || req.query.purpose === 'editorial')
 
@@ -256,10 +262,10 @@ mediaRouter.post(
       const existingMedia = await repo.findMediaByContentHash(req.site!, contentHash)
       if (existingMedia) {
         logger.info(`[Media] Deduplikasi: file identik sudah ada (id=${existingMedia.id}), melewati upload`)
-        return res.json({ 
-          success: true, 
-          data: existingMedia, 
-          meta: { deduplicated: true, message: 'File identik sudah ada di site ini' } 
+        return res.json({
+          success: true,
+          data: existingMedia,
+          meta: { deduplicated: true, message: 'File identik sudah ada di site ini' }
         })
       }
     }
@@ -331,7 +337,7 @@ mediaRouter.post(
   })
 )
 
-// ─── GET /api/v1/media — list media ──────────────────────────────────────────
+// ─── GET /api/v1/media -- list media ──────────────────────────────────────────
 
 mediaRouter.get(
   '/',
@@ -351,7 +357,7 @@ mediaRouter.get(
   })
 )
 
-// ─── PATCH /api/v1/media/:id — update metadata ───────────────────────────────
+// ─── PATCH /api/v1/media/:id -- update metadata ───────────────────────────────
 
 mediaRouter.patch(
   '/:id',

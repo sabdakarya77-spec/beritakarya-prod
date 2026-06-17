@@ -1,4 +1,5 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
+import { Prisma } from '@prisma/client'
 import { prisma } from '../../db/client'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -7,11 +8,11 @@ import { redis } from '../../lib/redis'
 import { emailService } from '../../services/email.service'
 import { logger } from '../../lib/logger'
 
-export const userRouter = Router() as any
+export const userRouter = Router()
 
 userRouter.get('/public/:id',
   siteMiddleware,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site
     const { id } = req.params
 
@@ -119,8 +120,8 @@ userRouter.get('/public/:id',
 
 // GET /api/v1/users/authors - Get all authors with published articles for public listing
 userRouter.get('/authors',
-  asyncHandler(async (req: any, res: any) => {
-    const siteId = req.query.site || req.site
+  asyncHandler(async (req: Request, res: Response) => {
+    const siteId = (req.query.site as string) || req.site!
     const limit = parseInt(req.query.limit as string) || 50
 
     // Get all users who have published articles on this site
@@ -186,7 +187,7 @@ userRouter.get('/',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site
     const page = parseInt(req.query.page as string) || 1
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
@@ -219,7 +220,7 @@ userRouter.get('/',
     if (process.env.REDIS_HOST && users.length > 0) {
       try {
         const keys = users.map(u => `user:online:${u.id}`)
-        const values = await redis.mget(...keys)
+        const values = await redis!.mget(...keys)
         users.forEach((u, i) => {
           if (values[i]) onlineSet.add(u.id)
         })
@@ -250,7 +251,7 @@ userRouter.get('/stats',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site
     const users = await prisma.user.findMany({
       where: {
@@ -289,7 +290,7 @@ userRouter.get('/stats',
     if (process.env.REDIS_HOST) {
       try {
         const keys = userIds.map(id => `user:online:${id}`)
-        const values = await redis.mget(...keys)
+        const values = await redis!.mget(...keys)
         userIds.forEach((id, i) => {
           if (values[i]) onlineSet.add(id)
         })
@@ -320,8 +321,8 @@ userRouter.get('/stats',
 // GET /api/v1/users/profile - Get current user's profile
 userRouter.get('/profile',
   requireAuth,
-  asyncHandler(async (req: any, res: any) => {
-    const userId = req.user.userId
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -348,16 +349,16 @@ userRouter.get('/profile',
 // PUT /api/v1/users/profile - Update current user's profile
 userRouter.put('/profile',
   requireAuth,
-  asyncHandler(async (req: any, res: any) => {
-    const userId = req.user.userId
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId
     const { name, bio } = req.body
 
-    const updateData: any = {}
-    
+    const updateData: Prisma.UserUncheckedUpdateInput = {}
+
     if (name !== undefined) {
       updateData.name = name.trim()
     }
-    
+
     if (bio !== undefined) {
       updateData.bio = bio ? bio.trim() : null
     }
@@ -391,7 +392,7 @@ userRouter.get('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
     const user = await prisma.user.findFirst({
@@ -421,7 +422,7 @@ userRouter.put('/:id/role',
   siteMiddleware,
   requireSiteAccess,
   requireRole(['superadmin', 'wapimred']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { role, siteId } = req.body
 
@@ -442,7 +443,7 @@ userRouter.put('/:id/role',
     const currentRequestSiteId = req.site
 
     // Verify user exists
-    const userQuery: any = { id, deletedAt: null }
+    const userQuery: Prisma.UserWhereInput = { id, deletedAt: null }
     if (req.user!.role !== 'superadmin') {
       userQuery.siteId = currentRequestSiteId
     }
@@ -462,7 +463,7 @@ userRouter.put('/:id/role',
     const oldSiteId = user.siteId
 
     // Compile update fields
-    const updateData: any = { role }
+    const updateData: Prisma.UserUncheckedUpdateInput = { role }
 
     // Only superadmin can assign/change branches (siteId)
     if (req.user!.role === 'superadmin') {
@@ -515,7 +516,7 @@ userRouter.put('/:id/role',
         updated.name,
         oldRole,
         updated.role,
-        req.user!.name || 'Superadmin',
+        'Superadmin',
         updated.siteId
       )
     } catch (emailErr) {
@@ -531,7 +532,7 @@ userRouter.delete('/:id',
   siteMiddleware,
   requireSiteAccess,
   requireRole(['superadmin']),
-  asyncHandler(async (req: any, res: any) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
 
@@ -579,13 +580,13 @@ userRouter.delete('/:id',
  */
 userRouter.post('/heartbeat',
   requireAuth,
-  asyncHandler(async (req: any, res: any) => {
-    const userId = req.user.userId
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId
     // Set online status in Redis with 60s expiration
     // This supports a 30s polling interval from the frontend
     if (process.env.REDIS_HOST) {
       try {
-        await redis.set(`user:online:${userId}`, '1', 'EX', 60)
+        await redis!.set(`user:online:${userId}`, '1', 'EX', 60)
       } catch (_err) {
         // ignore
       }

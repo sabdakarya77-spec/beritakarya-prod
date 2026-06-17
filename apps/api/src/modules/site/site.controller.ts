@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express'
+import { AppError } from '../../utils/AppError'
 import { siteService } from './site.service'
 import { siteCategoryService } from './site-category.service'
 import { logger } from '../../lib/logger'
@@ -41,6 +42,23 @@ siteRouter.post('/:id/wapimred',
  * All endpoints require superadmin role
  */
 
+function getErrorStatus(error: unknown): number {
+  if (error instanceof AppError) return error.statusCode
+  if (error instanceof Error && 'statusCode' in error) return (error as Error & { statusCode: number }).statusCode
+  return 500
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
+function getErrorCode(error: unknown, fallback: string): string {
+  if (error instanceof AppError) return error.code
+  if (error instanceof Error && 'code' in error) return (error as Error & { code: string }).code
+  return fallback
+}
+
 /**
  * GET /api/v1/sites
  * Get all sites (superadmin only)
@@ -51,11 +69,11 @@ export async function getSites(req: Request, res: Response) {
     const { includeStats } = req.query
     const sites = await siteService.getAllSites(includeStats === 'true')
     res.json({ success: true, data: sites })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITES_FETCH_FAILED', message: error.message }
+      error: { code: 'SITES_FETCH_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -76,11 +94,11 @@ export async function getSiteSettings(req: Request, res: Response) {
     
     const settings = await siteService.getSiteSettings(siteId)
     res.json({ success: true, data: settings })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_SETTINGS_FETCH_FAILED', message: error.message }
+      error: { code: 'SITE_SETTINGS_FETCH_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -100,8 +118,8 @@ export async function updateSiteSettings(req: Request, res: Response) {
     }
 
     // Role check: Only superadmin or wapimred of the site can update settings
-    const userRole = (req as any).user?.role
-    const userSiteId = (req as any).user?.siteId
+    const userRole = req.user?.role
+    const userSiteId = req.user?.siteId
 
     if (userRole !== 'superadmin') {
       if (userRole !== 'wapimred' || userSiteId !== siteId) {
@@ -143,19 +161,19 @@ export async function updateSiteSettings(req: Request, res: Response) {
       if (stripped.length > 0) {
         // Catat di audit log agar ada jejak kalau wapimred coba-coba kirim field terlarang
         logger.warn(
-          `[SECURITY] wapimred userId=${(req as any).user?.userId} coba update field superadmin-only: ${stripped.join(', ')}`
+          `[SECURITY] wapimred userId=${req.user?.userId} coba update field superadmin-only: ${stripped.join(', ')}`
         )
       }
     }
 
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
     const settings = await siteService.updateSiteSettings(siteId, body, actorUserId)
     res.json({ success: true, data: settings })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_SETTINGS_UPDATE_FAILED', message: error.message }
+      error: { code: 'SITE_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -169,13 +187,13 @@ export async function getSiteCategoryAssignments(req: Request, res: Response) {
     const { siteId } = req.params
     const data = await siteCategoryService.getCategoryAssignments(siteId)
     res.json({ success: true, data })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
       error: {
-        code: error.code || 'SITE_CATEGORIES_FETCH_FAILED',
-        message: error.message
+        code: getErrorCode(error, 'SITE_CATEGORIES_FETCH_FAILED'),
+        message: getErrorMessage(error)
       }
     })
   }
@@ -189,7 +207,7 @@ export async function updateSiteCategoryAssignments(req: Request, res: Response)
   try {
     const { siteId } = req.params
     const { categoryIds } = req.body
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     if (!Array.isArray(categoryIds)) {
       return res.status(400).json({
@@ -208,13 +226,13 @@ export async function updateSiteCategoryAssignments(req: Request, res: Response)
     )
 
     res.json({ success: true, data })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
       error: {
-        code: error.code || 'SITE_CATEGORIES_UPDATE_FAILED',
-        message: error.message
+        code: getErrorCode(error, 'SITE_CATEGORIES_UPDATE_FAILED'),
+        message: getErrorMessage(error)
       }
     })
   }
@@ -229,11 +247,11 @@ export async function getSiteById(req: Request, res: Response) {
     const { id } = req.params
     const site = await siteService.getSiteById(id)
     res.json({ success: true, data: site })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_FETCH_FAILED', message: error.message }
+      error: { code: 'SITE_FETCH_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -260,11 +278,11 @@ export async function createSite(req: Request, res: Response) {
     })
 
     res.status(201).json({ success: true, data: site })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_CREATE_FAILED', message: error.message }
+      error: { code: 'SITE_CREATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -277,7 +295,7 @@ export async function updateSite(req: Request, res: Response) {
   try {
     const { id } = req.params
     const { domain, name, logoUrl, contactEmail, phone, address, description, trendingTopics } = req.body
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     const site = await siteService.updateSite(
       id,
@@ -286,11 +304,11 @@ export async function updateSite(req: Request, res: Response) {
     )
 
     res.json({ success: true, data: site })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_UPDATE_FAILED', message: error.message }
+      error: { code: 'SITE_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -303,16 +321,16 @@ export async function updateSite(req: Request, res: Response) {
 export async function deleteSite(req: Request, res: Response) {
   try {
     const { id } = req.params
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     await siteService.deleteSite(id, actorUserId)
 
     res.json({ success: true, message: 'Site deleted' })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'SITE_DELETE_FAILED', message: error.message }
+      error: { code: 'SITE_DELETE_FAILED', message: getErrorMessage(error) }
     })
   }
 }
@@ -325,7 +343,7 @@ export async function assignWapimred(req: Request, res: Response) {
   try {
     const { id } = req.params  // siteId
     const { wapimredId } = req.body
-    const actorUserId = (req as any).user?.userId
+    const actorUserId = req.user!.userId
 
     const user = await siteService.assignWapimred(id, wapimredId, actorUserId)
 
@@ -338,11 +356,11 @@ export async function assignWapimred(req: Request, res: Response) {
         siteId: user.siteId
       }
     })
-  } catch (error: any) {
-    const statusCode = error.statusCode || 500
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
     res.status(statusCode).json({
       success: false,
-      error: { code: 'WAPIMRED_ASSIGN_FAILED', message: error.message }
+      error: { code: 'WAPIMRED_ASSIGN_FAILED', message: getErrorMessage(error) }
     })
   }
 }

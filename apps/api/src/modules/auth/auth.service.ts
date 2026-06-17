@@ -137,7 +137,7 @@ export async function resetPassword(email: string, token: string, newPassword: s
   const secret = env.RESET_SECRET || ACCESS_SECRET!
   
   try {
-    const decoded = jwt.verify(token, secret) as any
+    const decoded = jwt.verify(token, secret) as jwt.JwtPayload & { userId?: string; purpose?: string }
     if (decoded.userId !== user.id || decoded.purpose !== 'reset-password') {
       throw new AppError('Token tidak valid', 401, 'UNAUTHORIZED')
     }
@@ -166,15 +166,15 @@ export async function resetPassword(email: string, token: string, newPassword: s
   return { success: true, message: 'Password berhasil diubah' }
 }
 
-export async function generateTokenPair(user: any) {
+export async function generateTokenPair(user: { id: string; role: Role; siteId: string | null; email: string; name: string; isVerified: boolean; kycStatus: string; kycNotes?: string | null; kycSubmittedAt?: Date | null }) {
   const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
     userId: user.id,
     role: user.role,
     siteId: user.siteId
   }
   const accessToken = jwt.sign(payload, ACCESS_SECRET!, {
-    expiresIn: ACCESS_EXPIRES
-  } as any)
+    expiresIn: ACCESS_EXPIRES as string
+  } as jwt.SignOptions)
 
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + REFRESH_EXPIRES_DAYS)

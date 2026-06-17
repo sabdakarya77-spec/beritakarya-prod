@@ -76,8 +76,23 @@ export function toggleSavedArticle(article: SavedArticle) {
   return true;
 }
 
-export function createSavedArticlePayload(article: any, site: string): SavedArticle {
-  const excerpt = article.blocks?.find((block: any) => block.type === 'paragraph')?.content || '';
+interface ArticleInput {
+  id?: string
+  slug: string
+  title: string
+  featuredImage?: string | null
+  featuredImageBlur?: string | null
+  featuredImageColor?: string | null
+  readingTimeMin?: number | null
+  publishedAt?: string | null
+  createdAt?: string | null
+  category?: { name?: string | null } | null
+  author?: { name?: string | null } | null
+  blocks?: Array<{ type: string; content?: string; url?: string }>
+}
+
+export function createSavedArticlePayload(article: ArticleInput, site: string): SavedArticle {
+  const excerpt = article.blocks?.find(block => block.type === 'paragraph')?.content || '';
 
   return {
     id: article.id || article.slug,

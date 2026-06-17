@@ -9,7 +9,7 @@ import { getCategoryColor } from '../../lib/constants';
 
 type HeroArticle = {
   id: string | number;
-  title?: string;
+  title: string;
   slug?: string;
   featuredImage?: string | null;
   featuredImageBlur?: string | null;
@@ -54,7 +54,7 @@ const getHeroImagePosition = (article: HeroArticle, variant: 'lead' | 'side') =>
   return variant === 'lead' ? '50% 26%' : '50% 22%';
 };
 
-export function MagazineBentoHero({ articles, site }: { articles: any[], site: string }) {
+export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[], site: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [timerTrigger, setTimerTrigger] = useState(0);
 
@@ -117,7 +117,7 @@ export function MagazineBentoHero({ articles, site }: { articles: any[], site: s
                 {/* Overlay Konten Teks */}
                 <div className="absolute bottom-0 left-0 w-full p-5 sm:p-7 md:p-8 lg:p-10">
                   <div className="mb-2.5 sm:mb-3">
-                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.category?.name))}>
+                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.category?.name ?? undefined))}>
                       {currentArticle.category?.name || 'Headline'}
                     </span>
                   </div>
@@ -133,7 +133,7 @@ export function MagazineBentoHero({ articles, site }: { articles: any[], site: s
 
         {/* Kanan: Navigasi Menu Vertikal (Hanya tampil di Desktop) */}
         <div className="hidden lg:flex lg:col-span-4 flex-col gap-3 h-full justify-between rounded-2xl bg-slate-900 border border-white/5 p-3">
-          {heroArticles.map((article: any, idx: number) => {
+          {heroArticles.map((article, idx) => {
             const isActive = idx === activeIndex;
             return (
               <button

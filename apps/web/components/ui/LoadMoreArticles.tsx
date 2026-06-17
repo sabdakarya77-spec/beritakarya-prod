@@ -5,6 +5,21 @@ import NewsCard from './NewsCard';
 import { Loader2, ChevronDown } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 
+interface LoadMoreArticleItem {
+  id: string;
+  slug: string;
+  title: string;
+  featuredImage?: string | null;
+  featuredImageBlur?: string | null;
+  featuredImageColor?: string | null;
+  readingTimeMin?: number | null;
+  publishedAt?: string | null;
+  createdAt?: string | null;
+  category?: { name?: string | null } | null;
+  author?: { name?: string | null } | null;
+  blocks?: Array<{ type: string; content?: string; url?: string; embedType?: string; images?: Array<{ url?: string }> }>;
+}
+
 interface LoadMoreArticlesProps {
   siteId: string;
   category?: string;
@@ -18,7 +33,7 @@ export default function LoadMoreArticles({
   search,
   initialPage = 1 
 }: LoadMoreArticlesProps) {
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<LoadMoreArticleItem[]>([]);
   const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);

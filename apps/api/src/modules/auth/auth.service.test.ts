@@ -24,19 +24,20 @@ vi.mock('../../db/client', () => ({
 
 
 import { Role } from '@prisma/client'
+import type { User, RefreshToken, BlacklistedToken } from '@prisma/client'
 import { prisma } from '../../db/client'
 import { loginUser, registerUser, refreshAccessToken, logoutUser } from './auth.service'
 
 const mockUser = async (overrides = {}) => {
   const hash = await bcrypt.hash('password123', 10)
   return {
-    id: 'u-1', 
-    email: 'test@bandung.com', 
+    id: 'u-1',
+    email: 'test@bandung.com',
     name: 'Test User',
-    role: Role.reporter, 
-    siteId: 'bandung', 
+    role: Role.reporter,
+    siteId: 'bandung',
     passwordHash: hash,
-    createdAt: new Date(), 
+    createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides
   }
@@ -48,8 +49,8 @@ describe('loginUser', () => {
   })
 
   it('berhasil dengan kredensial valid', async () => {
-    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as any)
-    vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: 'rt' } as any)
+    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as unknown as User)
+    vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: 'rt' } as unknown as RefreshToken)
 
     const result = await loginUser('test@bandung.com', 'password123')
     expect(result.accessToken).toBeDefined()
@@ -65,7 +66,7 @@ describe('loginUser', () => {
   })
 
   it('gagal: password salah', async () => {
-    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as any)
+    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as unknown as User)
     await expect(loginUser('test@bandung.com', 'salah'))
       .rejects.toThrow('Email atau password salah')
   })
@@ -77,16 +78,16 @@ describe('registerUser', () => {
   })
 
   it('gagal jika email sudah terdaftar', async () => {
-    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as any)
+    vi.mocked(prisma.user.findFirst).mockResolvedValue(await mockUser() as unknown as User)
     await expect(registerUser('test@bandung.com', 'pass123', 'User', Role.reporter, 'bandung'))
       .rejects.toThrow('Email sudah terdaftar')
   })
 
   it('berhasil register user baru', async () => {
     vi.mocked(prisma.user.findFirst).mockResolvedValue(null)
-    vi.mocked(prisma.user.create).mockResolvedValue(await mockUser() as any)
-    vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: 'rt' } as any)
-    
+    vi.mocked(prisma.user.create).mockResolvedValue(await mockUser() as unknown as User)
+    vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: 'rt' } as unknown as RefreshToken)
+
     const result = await registerUser('baru@bandung.com', 'Pass123!', 'Baru', Role.reporter, 'bandung')
     expect(result.accessToken).toBeDefined()
   })
@@ -107,11 +108,11 @@ describe('refreshAccessToken', () => {
   it('gagal jika token sudah expired', async () => {
     vi.mocked(prisma.blacklistedToken.findUnique).mockResolvedValue(null)
     vi.mocked(prisma.refreshToken.findUnique).mockResolvedValue({
-      token: 'old', 
+      token: 'old',
       userId: 'u-1',
       expiresAt: new Date(Date.now() - 1000),
       user: await mockUser()
-    } as any)
+    } as unknown as RefreshToken)
     await expect(refreshAccessToken('old'))
       .rejects.toThrow('Refresh token tidak valid atau sudah expired')
   })
@@ -120,9 +121,9 @@ describe('refreshAccessToken', () => {
 describe('logoutUser', () => {
   it('menghapus refresh token dari DB', async () => {
     const fakeToken = { id: 'rt-1', token: 'some-refresh-token', userId: 'u-1', expiresAt: new Date() }
-    vi.mocked(prisma.refreshToken.findUnique).mockResolvedValue(fakeToken as any)
-    vi.mocked(prisma.blacklistedToken.create).mockResolvedValue({} as any)
-    vi.mocked(prisma.refreshToken.delete).mockResolvedValue(fakeToken as any)
+    vi.mocked(prisma.refreshToken.findUnique).mockResolvedValue(fakeToken as unknown as RefreshToken)
+    vi.mocked(prisma.blacklistedToken.create).mockResolvedValue({} as unknown as BlacklistedToken)
+    vi.mocked(prisma.refreshToken.delete).mockResolvedValue(fakeToken as unknown as RefreshToken)
 
     await logoutUser('u-1', 'some-refresh-token')
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { Editor } from '@tiptap/react'
 import { Sparkles, Pencil, Search, ShieldCheck, Image, BarChart3, Wand2, Circle } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 import { WriteTab } from './tabs/WriteTab'
@@ -25,7 +26,7 @@ const TABS = [
 interface AIPanelProps {
   isOpen?: boolean
   onClose?: () => void
-  editor?: any
+  editor?: Editor
 }
 
 export function AIPanel({ isOpen = true, onClose: _onClose, editor: _editor }: AIPanelProps) {

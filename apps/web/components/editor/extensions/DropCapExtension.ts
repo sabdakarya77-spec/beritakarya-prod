@@ -1,4 +1,5 @@
 import Paragraph from '@tiptap/extension-paragraph'
+import type { RawCommands, Editor, SingleCommands } from '@tiptap/core'
 
 /**
  * Custom Paragraph extension with dropCap support.
@@ -34,7 +35,7 @@ export const DropCapParagraph = Paragraph.extend({
       ...this.parent?.(),
       toggleDropCap:
         () =>
-        ({ commands, editor }: { commands: any; editor: any }) => {
+        ({ commands, editor }: { commands: SingleCommands; editor: Editor }) => {
           if (!editor.isActive('paragraph')) return false
           return commands.updateAttributes('paragraph', {
             dropCap: !editor.getAttributes('paragraph').dropCap,
@@ -42,10 +43,10 @@ export const DropCapParagraph = Paragraph.extend({
         },
       setDropCap:
         (value: boolean) =>
-        ({ commands }: { commands: any }) => {
+        ({ commands }: { commands: SingleCommands }) => {
           return commands.updateAttributes('paragraph', { dropCap: value })
         },
-    } as never
+    } as Partial<RawCommands>
   },
 })
 

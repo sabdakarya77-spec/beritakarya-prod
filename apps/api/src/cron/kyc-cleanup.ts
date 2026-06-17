@@ -57,7 +57,7 @@ export async function runKYCCleanup() {
   }
 }
 
-async function purgeKYCData(user: any, reason: string) {
+async function purgeKYCData(user: { id: string; name: string; idCardPath: string | null; familyCardPath: string | null }, reason: string) {
   try {
     const isCloudEnabled = process.env.STORAGE_TYPE === 's3' || process.env.STORAGE_TYPE === 'r2'
 

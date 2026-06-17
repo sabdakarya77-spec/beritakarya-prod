@@ -41,8 +41,8 @@ export async function checkAIPermissions(
         return
       }
       // Store quota info for post-call accounting
-      ;(req as any).aiQuota = result.quota
-      ;(req as any).aiUserId = userId
+      req.aiQuota = result.quota
+      req.aiUserId = userId
       next()
     })
     .catch(_error => {
@@ -111,7 +111,7 @@ async function checkPermissions(
   }
 
   // Model restriction check (applies to the request model if specified)
-  const requestedModel = (req.body as any)?.model || env.AI_MODEL
+  const requestedModel = (req.body as Record<string, unknown> | undefined)?.model as string | undefined || env.AI_MODEL
   if (modelRestriction && requestedModel !== modelRestriction) {
     return {
       allowed: false,

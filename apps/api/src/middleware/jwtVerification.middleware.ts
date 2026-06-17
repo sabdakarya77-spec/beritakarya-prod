@@ -37,7 +37,7 @@ export function jwtVerify(req: Request, res: Response, next: NextFunction) {
   } catch (error) {
     // Simpan error di request tetapi izinkan lanjut ke middleware berikutnya
     // Security akan ditangani oleh requireAuth jika diperlukan
-    (req as any).authError = error
+    req.authError = error
     next()
   }
 }

@@ -3,6 +3,15 @@ import { env } from '../../lib/env'
 import { createMeilisearchBreaker } from '../../lib/circuitBreaker'
 import { logger } from '../../lib/logger'
 
+export interface MeilisearchSearchResult {
+  hits: Array<{ id?: string; [key: string]: unknown }>
+  estimatedTotalHits?: number
+  limit?: number
+  offset?: number
+  processingTimeMs?: number
+  query?: string
+}
+
 // ─── Client Setup ─────────────────────────────────────────────────────────────
 
 const isEnabled = !!env.MEILISEARCH_KEY && !!env.MEILISEARCH_HOST
@@ -15,7 +24,7 @@ const index = client ? client.index('articles') : null
 
 // ─── Core Meilisearch Operations ─────────────────────────────────────────────
 
-async function _indexArticle(article: any): Promise<void> {
+async function _indexArticle(article: Record<string, unknown>): Promise<void> {
   if (!index) return
   await index.addDocuments([{
     id: article.id,
@@ -41,7 +50,7 @@ async function _deleteIndexedArticle(id: string): Promise<void> {
 async function _searchArticles(
   query: string,
   filters: { siteId: string; status?: string }
-): Promise<any> {
+): Promise<MeilisearchSearchResult | null> {
   if (!index) return null
   const safeSiteId = filters.siteId.replace(/[^a-zA-Z0-9-]/g, '')
   let filter = `siteId = "${safeSiteId}"`
@@ -68,7 +77,7 @@ const searchBreaker   = createMeilisearchBreaker(_searchArticles, 'search')
  * Index an article into Meilisearch.
  * If Meilisearch is unavailable, the circuit opens and calls are skipped silently.
  */
-export async function indexArticle(article: any): Promise<void> {
+export async function indexArticle(article: Record<string, unknown>): Promise<void> {
   if (!isEnabled) return
   try {
     await indexBreaker.fire(article)
@@ -97,7 +106,7 @@ export async function deleteIndexedArticle(id: string): Promise<void> {
 export async function searchArticles(
   query: string,
   filters: { siteId: string; status?: string }
-): Promise<any | null> {
+): Promise<MeilisearchSearchResult | null> {
   if (!isEnabled) return null
   try {
     return await searchBreaker.fire(query, filters)

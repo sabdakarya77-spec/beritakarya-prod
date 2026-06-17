@@ -1,17 +1,24 @@
 import { prisma } from '../../db/client'
 import { getSiteAssignmentFilter } from '../site/site-category.utils'
 import { CATEGORY_TREE_CONFIG } from '@beritakarya/config'
+import type { Prisma } from '@prisma/client'
 
 const categoryInclude = {
   site: true,
   parent: true
 } as const
 
+/** Category returned from Prisma with site and parent relations included. */
+type CategoryWithRelations = Prisma.CategoryGetPayload<{ include: typeof categoryInclude }>
+
+/** Category tree node with nested subCategories array. */
+type CategoryTreeNode = CategoryWithRelations & { subCategories: CategoryTreeNode[] }
+
 export class CategoryService {
   // Helper: Convert flat list to recursive tree structure
-  buildCategoryTree(categories: any[]): any[] {
-    const map = new Map<string, any>()
-    const roots: any[] = []
+  buildCategoryTree(categories: CategoryWithRelations[]): CategoryTreeNode[] {
+    const map = new Map<string, CategoryTreeNode>()
+    const roots: CategoryTreeNode[] = []
 
     // Initialize map with nodes having empty children array
     for (const cat of categories) {
@@ -22,14 +29,14 @@ export class CategoryService {
     for (const cat of categories) {
       const node = map.get(cat.id)
       if (cat.parentId && map.has(cat.parentId)) {
-        map.get(cat.parentId).subCategories.push(node)
+        map.get(cat.parentId)!.subCategories.push(node!)
       } else {
-        roots.push(node)
+        roots.push(node!)
       }
     }
 
     // Sort recursively by order
-    const sortRecursive = (nodes: any[]) => {
+    const sortRecursive = (nodes: CategoryTreeNode[]) => {
       nodes.sort((a, b) => (a.order || 0) - (b.order || 0))
       nodes.forEach(node => sortRecursive(node.subCategories))
     }
@@ -39,10 +46,10 @@ export class CategoryService {
   }
 
   // Helper: Deduplicate categories by slug AND name, preferring site-specific over global
-  deduplicateCategories(categories: any[], siteId: string): any[] {
+  deduplicateCategories(categories: CategoryWithRelations[], siteId: string): CategoryWithRelations[] {
     // Dedup by both slug AND name (case-insensitive).
     // Site-specific wins over global when slugs or names collide.
-    const dedupMap = new Map<string, any>()
+    const dedupMap = new Map<string, CategoryWithRelations>()
     for (const cat of categories) {
       const slugKey = `slug:${cat.slug}`
       const nameKey = `name:${cat.name.toLowerCase()}`
@@ -56,14 +63,14 @@ export class CategoryService {
     }
 
     // Collect unique categories from name-based dedup (catches cross-slug name dupes)
-    const uniqueById = new Map<string, any>()
+    const uniqueById = new Map<string, CategoryWithRelations>()
     for (const cat of dedupMap.values()) {
       if (!uniqueById.has(cat.id)) uniqueById.set(cat.id, cat)
     }
 
     // Defensive: second-pass dedup by name — prevents two entries with same name
     // but different slugs (e.g. 'gaya-hidup' vs 'lifestyle') from both surviving.
-    const uniqueByName = new Map<string, any>()
+    const uniqueByName = new Map<string, CategoryWithRelations>()
     for (const cat of uniqueById.values()) {
       const nameKey = cat.name.toLowerCase()
       const existing = uniqueByName.get(nameKey)
@@ -86,7 +93,7 @@ export class CategoryService {
 
     return deduplicated.map(cat => {
       if (cat.parentId && idMapping.has(cat.parentId)) {
-        return { ...cat, parentId: idMapping.get(cat.parentId) }
+        return { ...cat, parentId: idMapping.get(cat.parentId)! }
       }
       return cat
     })
@@ -138,7 +145,7 @@ export class CategoryService {
   async getGlobalCategories() {
     return await prisma.category.findMany({
       where: { isGlobal: true },
-      include: { 
+      include: {
       site: true,
       parent: true
       },

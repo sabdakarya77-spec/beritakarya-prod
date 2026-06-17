@@ -99,8 +99,8 @@ export function Editor({ articleId, siteId }: EditorProps) {
 
   // Calculate word count from blocks
   const wordCount = blocks.reduce((count, block) => {
-    const content = (block as any).content || ''
-    const items = (block as any).items || []
+    const content = 'content' in block && typeof block.content === 'string' ? block.content : ''
+    const items = 'items' in block && Array.isArray(block.items) ? block.items : []
     
     // Count words in content
     const textContent = content.replace(/<[^>]*>/g, ' ').trim()

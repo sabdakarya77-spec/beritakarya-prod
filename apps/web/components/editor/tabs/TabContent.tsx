@@ -17,8 +17,8 @@ export function TabContent() {
 
   // Estimate reading time (200 words per minute) - accurate sync including list items
   const wordCount = blocks.reduce((count, block) => {
-    const content = (block as any).content || ''
-    const items = (block as any).items || []
+    const content = 'content' in block && typeof block.content === 'string' ? block.content : ''
+    const items = 'items' in block && Array.isArray(block.items) ? block.items : []
     
     // Count words in content
     const textContent = content.replace(/<[^>]*>/g, ' ').trim()

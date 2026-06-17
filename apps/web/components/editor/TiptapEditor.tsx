@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
+import type { Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
@@ -13,6 +14,7 @@ import { TiptapEditorToolbar } from './TiptapEditorToolbar'
 import { BubbleMenuBar } from './menus/BubbleMenuBar'
 import { FloatingMenuBar } from './menus/FloatingMenu'
 import { useEditorStore } from '../../store/editorStore'
+import type { Block, TextAlign as TextAlignType, ImageItem } from '@beritakarya/types'
 
 // Custom extensions imports
 import { CalloutExtension } from './extensions/CalloutExtension'
@@ -23,6 +25,21 @@ import { ImageGridExtension } from './extensions/ImageGridExtension'
 import { MediaTextExtension } from './extensions/MediaTextExtension'
 import { SlashMenuExtension } from './extensions/SlashMenuExtension'
 import { DropCapParagraph } from './extensions/DropCapExtension'
+
+/** Represents a ProseMirror JSON node from editor.getJSON() */
+interface JSONNode {
+  type: string
+  text?: string
+  content?: JSONNode[]
+  marks?: JSONMark[]
+  attrs?: Record<string, unknown>
+}
+
+/** Represents a ProseMirror JSON mark */
+interface JSONMark {
+  type: string
+  attrs?: Record<string, unknown>
+}
 
 interface TiptapEditorProps {
   initialContent?: string
@@ -147,10 +164,10 @@ export function TiptapEditor({
       blocks.length > 0 &&
       blocks.some(b => {
         if (b.type === 'paragraph' || b.type === 'heading' || b.type === 'quote' || b.type === 'callout')
-          return (b as any).content?.trim()
+          return 'content' in b && typeof b.content === 'string' && b.content.trim()
         if (b.type === 'image' || b.type === 'embed' || b.type === 'gallery' || b.type === 'imageGrid' || b.type === 'mediaText')
           return true
-        if (b.type === 'list') return (b as any).items?.length > 0
+        if (b.type === 'list') return 'items' in b && Array.isArray(b.items) && b.items.length > 0
         return false
       })
 
@@ -225,11 +242,11 @@ export function TiptapEditor({
 /**
  * Convert Tiptap JSON content to Block[] with stable ID mapping and custom extension support
  */
-function convertTiptapToBlocks(editor: any, oldBlocks: any[] = []): any[] {
+function convertTiptapToBlocks(editor: Editor, oldBlocks: Block[] = []): Block[] {
   const doc = editor.getJSON()
-  const content = doc.content || []
+  const content: JSONNode[] = doc.content || []
 
-  return content.map((node: any, index: number) => {
+  return content.map((node: JSONNode, index: number): Block => {
     let blockId = ''
 
     // Konversi tipe tiptap ke tipe block kita demi pencocokan ID
@@ -244,7 +261,7 @@ function convertTiptapToBlocks(editor: any, oldBlocks: any[] = []): any[] {
       blockId = oldBlockAtIndex.id
     } else {
       // Pencocokan 2: cari blok lama terdekat dengan tipe yang sama yang belum diklaim
-      const foundBlock = oldBlocks.find(b => b.type === mappedType && !content.some((n: any, idx: number) => idx < index && oldBlocks[idx]?.id === b.id))
+      const foundBlock = oldBlocks.find(b => b.type === mappedType && !content.some((n: JSONNode, idx: number) => idx < index && oldBlocks[idx]?.id === b.id))
       if (foundBlock) {
         blockId = foundBlock.id
       } else {
@@ -261,100 +278,98 @@ function convertTiptapToBlocks(editor: any, oldBlocks: any[] = []): any[] {
       case 'paragraph':
         return {
           ...baseBlock,
-          type: 'paragraph',
+          type: 'paragraph' as const,
           content: extractTextContent(node),
           dropCap: node.attrs?.dropCap === true,
-          textAlign: node.attrs?.textAlign,
+          textAlign: node.attrs?.textAlign as TextAlignType | undefined,
         }
       case 'heading':
         return {
           ...baseBlock,
-          type: 'heading',
-          level: node.attrs?.level || 2,
+          type: 'heading' as const,
+          level: ((node.attrs?.level as number) || 2) as 1 | 2 | 3 | 4 | 5 | 6,
           content: extractTextContent(node),
-          textAlign: node.attrs?.textAlign,
+          textAlign: node.attrs?.textAlign as TextAlignType | undefined,
         }
       case 'blockquote':
       case 'quote':
         return {
           ...baseBlock,
-          type: 'quote',
+          type: 'quote' as const,
           content: extractTextContent(node),
-          attribution: node.attrs?.attribution || '',
-          variant: node.attrs?.variant || 'default',
+          attribution: (node.attrs?.attribution as string) || '',
         }
       case 'callout':
         return {
           ...baseBlock,
-          type: 'callout',
+          type: 'callout' as const,
           content: extractTextContent(node),
-          variant: node.attrs?.variant || 'editorial',
-          icon: node.attrs?.icon || '💡',
+          variant: ((node.attrs?.variant as string) || 'editorial') as 'info' | 'warning' | 'error' | 'success' | 'editorial' | 'tip',
+          icon: (node.attrs?.icon as string) || '💡',
         }
       case 'embed':
         return {
           ...baseBlock,
-          type: 'embed',
-          url: node.attrs?.src || '',
-          embedType: node.attrs?.embedType || 'other',
+          type: 'embed' as const,
+          url: (node.attrs?.src as string) || '',
+          embedType: ((node.attrs?.embedType as string) || 'other') as 'youtube' | 'twitter' | 'instagram' | 'other',
         }
       case 'gallery':
         return {
           ...baseBlock,
-          type: 'gallery',
-          images: node.attrs?.images || [],
+          type: 'gallery' as const,
+          images: (node.attrs?.images as ImageItem[]) || [],
         }
       case 'imageGrid':
         return {
           ...baseBlock,
-          type: 'imageGrid',
-          columns: node.attrs?.cols === 3 ? 3 : 2,
-          images: node.attrs?.images || [],
+          type: 'imageGrid' as const,
+          columns: (node.attrs?.cols === 3 ? 3 : 2) as 2 | 3,
+          images: (node.attrs?.images as ImageItem[]) || [],
         }
       case 'mediaText':
         // [FIX] Map Tiptap attrs (imageUrl, altText, text, layout, caption)
         // to API block schema (url, alt, content, align, caption) per article.validator.ts
         return {
           ...baseBlock,
-          type: 'mediaText',
-          url: node.attrs?.imageUrl || '',
-          alt: node.attrs?.altText || '',
-          content: node.attrs?.text || '',
-          align: node.attrs?.layout || 'left',
-          ...(node.attrs?.caption ? { caption: node.attrs.caption } : {}),
+          type: 'mediaText' as const,
+          url: (node.attrs?.imageUrl as string) || '',
+          alt: (node.attrs?.altText as string) || '',
+          content: (node.attrs?.text as string) || '',
+          align: ((node.attrs?.layout as string) || 'left') as 'left' | 'right',
         }
       case 'image':
         return {
           ...baseBlock,
-          type: 'image',
-          url: node.attrs?.src || '',
-          alt: node.attrs?.alt || '',
-          caption: node.attrs?.title || '',
+          type: 'image' as const,
+          url: (node.attrs?.src as string) || '',
+          alt: (node.attrs?.alt as string) || '',
+          caption: (node.attrs?.title as string) || '',
         }
       case 'bulletList':
         return {
           ...baseBlock,
-          type: 'list',
+          type: 'list' as const,
           ordered: false,
           items: extractListItems(node),
         }
       case 'orderedList':
         return {
           ...baseBlock,
-          type: 'list',
+          type: 'list' as const,
           ordered: true,
           items: extractListItems(node),
         }
       case 'codeBlock':
         return {
           ...baseBlock,
-          type: 'paragraph',
+          type: 'paragraph' as const,
           content: extractTextContent(node),
         }
       default:
         return {
           ...baseBlock,
-          type: 'paragraph',
+          type: 'paragraph' as const,
           content: extractTextContent(node),
         }
     }
@@ -364,15 +379,15 @@ function convertTiptapToBlocks(editor: any, oldBlocks: any[] = []): any[] {
 /**
  * Extract text content from Tiptap node with marks
  */
-function extractTextContent(node: any): string {
+function extractTextContent(node: JSONNode): string {
   if (!node.content) return ''
 
   return node.content
-    .map((child: any) => {
+    .map((child: JSONNode) => {
       if (child.type === 'text') {
         let text = child.text || ''
         if (child.marks) {
-          child.marks.forEach((mark: any) => {
+          child.marks.forEach((mark: JSONMark) => {
             switch (mark.type) {
               case 'bold':
                 text = `<strong>${text}</strong>`
@@ -403,7 +418,7 @@ function extractTextContent(node: any): string {
       if (child.type === 'hardBreak') return '<br>'
       if (child.type === 'taskList') {
         // Handle task list items
-        const items = child.content?.map((item: any) => {
+        const items = child.content?.map((item: JSONNode) => {
           const text = extractTextContent(item)
           const checked = item.attrs?.checked
           return `<li>${checked ? '☑' : '☐'} ${text}</li>`
@@ -418,21 +433,21 @@ function extractTextContent(node: any): string {
 /**
  * Extract list items from list node
  */
-function extractListItems(node: any): string[] {
+function extractListItems(node: JSONNode): string[] {
   if (!node.content) return []
 
-  return node.content.map((item: any) => extractTextContent(item))
+  return node.content.map((item: JSONNode) => extractTextContent(item))
 }
 
 /**
  * Convert Block[] to HTML for Tiptap
  */
-function convertBlocksToHTML(blocks: any[]): string {
+function convertBlocksToHTML(blocks: Block[]): string {
   if (!blocks || blocks.length === 0) return ''
 
   return blocks
     .map((block) => {
-      const content = block.content || ''
+      const content = 'content' in block && typeof block.content === 'string' ? block.content : ''
 
       switch (block.type) {
         case 'paragraph': {
@@ -471,7 +486,7 @@ function convertBlocksToHTML(blocks: any[]): string {
         case 'mediaText': {
           const mtUrl = block.url || ''
           const mtAlt = block.alt || ''
-          const mtLayout = block.align || block.layout || 'left'
+          const mtLayout = block.align || 'left'
           const mtCaption = block.caption || ''
           return `<div data-media-text="" data-layout="${mtLayout}" data-image-url="${mtUrl}" data-alt-text="${mtAlt}" data-caption="${mtCaption}">${content}</div>`
         }

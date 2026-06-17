@@ -11,7 +11,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock Next.js image
 vi.mock('next/image', () => ({
-  default: (props: any) => props
+  default: (props: Record<string, unknown>) => props
 }))
 
 // Mock axios api client

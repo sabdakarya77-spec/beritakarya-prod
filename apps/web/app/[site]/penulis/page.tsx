@@ -180,7 +180,7 @@ export default function AuthorsPage() {
               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Urutkan:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'articles')}
                 className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 outline-none transition-all focus:border-brand-red/30 dark:border-white/10 dark:bg-slate-900 dark:text-gray-300"
               >
                 <option value="recent">Terbaru</option>

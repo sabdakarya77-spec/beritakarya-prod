@@ -1,5 +1,6 @@
 import { prisma } from '../../db/client'
 import { KycStatus } from '@prisma/client'
+import type { Prisma, Role } from '@prisma/client'
 import { parsePagination, buildPaginatedResponse } from '@beritakarya/utils'
 
 // ─── KYC User Queries ────────────────────────────────────────────────────────
@@ -11,7 +12,7 @@ export async function findKycUsers(
 ) {
   const { page, limit, skip } = parsePagination(params)
 
-  const where: any = { siteId, deletedAt: null }
+  const where: Prisma.UserWhereInput = { siteId, deletedAt: null }
 
   if (filters.search) {
     where.OR = [
@@ -137,7 +138,7 @@ export async function getKycStats(siteId: string) {
 }
 
 export async function getKycTrendData(siteId: string, oneWeekAgo: Date) {
-  return prisma.$queryRaw<any[]>`
+  return prisma.$queryRaw<{ date: Date; count: number }[]>`
     SELECT
       "kycSubmittedAt"::date as date,
       COUNT(*)::int as count
@@ -194,7 +195,7 @@ export async function updateKycVerification(
       kycNotes: data.kycNotes,
       kycReviewedBy: data.kycReviewedBy,
       kycReviewedAt: new Date(),
-      ...(data.role ? { role: data.role as any } : {}),
+      ...(data.role ? { role: data.role as Role } : {}),
     },
   })
 }
@@ -226,7 +227,7 @@ export async function createAuditLog(data: {
   action: string
   entityType: string
   entityId: string
-  newValue?: any
+  newValue?: Prisma.InputJsonValue
 }) {
   return prisma.auditLog.create({ data })
 }
@@ -246,8 +247,8 @@ export async function createKycViewLog(data: {
 
 export async function findAdminsBySite(siteId: string | null) {
   const where = siteId
-    ? { siteId, role: { in: ['superadmin', 'wapimred'] as any } }
-    : { role: { in: ['superadmin'] as any } }
+    ? { siteId, role: { in: ['superadmin', 'wapimred'] as Role[] } }
+    : { role: { in: ['superadmin'] as Role[] } }
   return prisma.user.findMany({
     where,
     select: { id: true, siteId: true },

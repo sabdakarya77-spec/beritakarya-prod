@@ -11,8 +11,8 @@ export function ValidateTab() {
   // Menggabungkan seluruh teks dari blok dokumen
   const getFullDocumentText = () => {
     return blocks.reduce((acc, block) => {
-      const content = (block as any).content || ''
-      const items = (block as any).items || []
+      const content = 'content' in block && typeof block.content === 'string' ? block.content : ''
+      const items = 'items' in block && Array.isArray(block.items) ? block.items : []
       
       const cleanText = content.replace(/<[^>]*>/g, ' ').trim()
       const listText = items.map((item: string) => item.replace(/<[^>]*>/g, ' ').trim()).join('\n')

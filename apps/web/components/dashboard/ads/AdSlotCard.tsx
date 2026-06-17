@@ -13,8 +13,9 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import type { Ad } from './types';
+import type { AdSlotDefinition } from '../../../lib/constants';
 
-export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: any, data: Ad | undefined, onSave: (p: Partial<Ad>) => void, onUpload: (file: File, slotId?: string) => Promise<string>, isSaving: boolean }) {
+export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: AdSlotDefinition, data: Ad | undefined, onSave: (p: Partial<Ad>) => void, onUpload: (file: File, slotId?: string) => Promise<string>, isSaving: boolean }) {
   const [mode, setMode] = useState<'image' | 'script'>(data?.imageUrl ? 'image' : 'script');
   const [imageUrl, setImageUrl] = useState(data?.imageUrl || '');
   const [linkUrl, setLinkUrl] = useState(data?.linkUrl || '');

@@ -32,7 +32,7 @@ class MetricsCollector {
   }
 
   getSummary() {
-    const result: Record<string, any> = {}
+    const result: Record<string, unknown> = {}
     for (const [key, m] of this.metrics.entries()) {
       result[key] = {
         count: m.count,
@@ -98,7 +98,7 @@ class MetricsCollector {
       if (!data) return
 
       const summary = JSON.parse(data)
-      for (const [key, m] of Object.entries(summary as Record<string, any>)) {
+      for (const [key, m] of Object.entries(summary as Record<string, { count: number; avgMs: number; errors: number; lastReset: string }>)) {
         this.metrics.set(key, {
           count: m.count || 0,
           totalMs: (m.avgMs || 0) * (m.count || 0),

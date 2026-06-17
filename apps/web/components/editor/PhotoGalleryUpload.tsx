@@ -31,11 +31,12 @@ export function PhotoGalleryUpload({ onImagesChange }: PhotoGalleryUploadProps) 
   const { blocks, updateBlock, addBlock } = useEditorStore()
   
   // Find existing gallery block or create one
-  const existingGalleryBlock = blocks.find(b => b.type === 'gallery') as any
-  const initialImages: GalleryImage[] = existingGalleryBlock?.images?.map((img: ImageItem, idx: number) => ({
+  const existingGalleryBlock = blocks.find(b => b.type === 'gallery')
+  const galleryImages = existingGalleryBlock && 'images' in existingGalleryBlock ? existingGalleryBlock.images : []
+  const initialImages: GalleryImage[] = (galleryImages as ImageItem[]).map((img: ImageItem, idx: number) => ({
     ...img,
     id: `existing-${idx}`,
-  })) || []
+  }))
   
   const [images, setImages] = useState<GalleryImage[]>(initialImages)
   const [uploading, setUploading] = useState(false)
@@ -43,7 +44,7 @@ export function PhotoGalleryUpload({ onImagesChange }: PhotoGalleryUploadProps) 
 
   // Narrative text for photo journalism
   const existingParagraph = blocks.find(b => b.type === 'paragraph')
-  const [narrativeText, setNarrativeText] = useState((existingParagraph as any)?.content || '')
+  const [narrativeText, setNarrativeText] = useState(existingParagraph && 'content' in existingParagraph && typeof existingParagraph.content === 'string' ? existingParagraph.content : '')
 
   // Auto-sync images to editor store whenever they change
   useEffect(() => {
@@ -159,8 +160,10 @@ export function PhotoGalleryUpload({ onImagesChange }: PhotoGalleryUploadProps) 
     if (files.length === 0) return
     
     // Create a fake event to reuse the handler
-    const fakeInput = { target: { files } } as any
-    handleFileSelect(fakeInput)
+    const syntheticEvent = {
+      target: { files, value: '' },
+    } as unknown as React.ChangeEvent<HTMLInputElement>
+    handleFileSelect(syntheticEvent)
   }, [handleFileSelect])
   
   const handleDragOver = (e: React.DragEvent) => {

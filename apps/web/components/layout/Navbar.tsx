@@ -9,11 +9,11 @@ import { cn } from '../../lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { Container } from './Container';
 
-import { CategoryItem } from '../../lib/constants';
+import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { useSavedArticles } from '../../hooks/useSavedArticles';
 
 interface NavbarProps {
-  siteConfig: any;
+  siteConfig: SiteConfig;
   categories: CategoryItem[];
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;

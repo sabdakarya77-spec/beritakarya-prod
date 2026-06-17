@@ -31,8 +31,8 @@ describe('errorMiddleware', () => {
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(400)
-    expect(res.body.error.code).toBe('UNIQUE_CONSTRAINT_ERROR')
-    expect(res.body.error.message).toContain('Email sudah terdaftar')
+    expect(res.body.error!.code).toBe('UNIQUE_CONSTRAINT_ERROR')
+    expect(res.body.error!.message).toContain('Email sudah terdaftar')
   })
 
   it('menangani Prisma P2002 (field lain)', () => {
@@ -47,7 +47,7 @@ describe('errorMiddleware', () => {
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(400)
-    expect(res.body.error.message).toContain('slug')
+    expect(res.body.error!.message).toContain('slug')
   })
 
   it('menangani ZodError', () => {
@@ -60,8 +60,8 @@ describe('errorMiddleware', () => {
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(400)
-    expect(res.body.error.code).toBe('VALIDATION_ERROR')
-    expect(res.body.error.details).toBeDefined()
+    expect(res.body.error!.code).toBe('VALIDATION_ERROR')
+    expect(res.body.error!.details).toBeDefined()
   })
 
   it('menangani AppError', () => {
@@ -72,8 +72,8 @@ describe('errorMiddleware', () => {
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(404)
-    expect(res.body.error.code).toBe('NOT_FOUND')
-    expect(res.body.error.message).toBe('Not found')
+    expect(res.body.error!.code).toBe('NOT_FOUND')
+    expect(res.body.error!.message).toBe('Not found')
   })
 
   it('menangani generic error (500)', () => {
@@ -84,19 +84,17 @@ describe('errorMiddleware', () => {
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(500)
-    expect(res.body.error.code).toBe('SERVER_ERROR')
+    expect(res.body.error!.code).toBe('SERVER_ERROR')
   })
 
   it('menangani error dengan custom statusCode', () => {
-    const err = new Error('Rate limited') as any
-    err.statusCode = 429
-    err.code = 'RATE_LIMITED'
+    const err = Object.assign(new Error('Rate limited'), { statusCode: 429, code: 'RATE_LIMITED' })
     const req = mockReq()
     const res = mockRes()
 
     errorMiddleware(err, req, res, () => {})
 
     expect(res.statusCode).toBe(429)
-    expect(res.body.error.code).toBe('RATE_LIMITED')
+    expect(res.body.error!.code).toBe('RATE_LIMITED')
   })
 })

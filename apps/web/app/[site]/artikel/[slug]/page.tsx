@@ -27,6 +27,17 @@ interface Props {
   params: { site: string; slug: string }
 }
 
+interface RelatedArticle {
+  id: string
+  slug: string
+  title: string
+  featuredImage?: string
+  readingTimeMin?: number
+  category?: { name?: string }
+  author?: { id?: string; name?: string }
+  blocks?: Block[]
+}
+
 import { constructMetadata } from '../../../../lib/metadata'
 import { cn } from '../../../../lib/utils'
 import { JsonLd } from '../../../../components/ui/JsonLd'
@@ -50,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteName = siteSettings?.name || fallbackConfig?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1));
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico';
 
-  const excerpt = article.blocks.find((b: any) => b.type === 'paragraph')?.content || ''
-  const coverImage = article.featuredImage || article.blocks.find((b: any) => b.type === 'image')?.url || '/logo.png'
+  const excerpt = article.blocks.find((b: Block) => b.type === 'paragraph')?.content || ''
+  const coverImage = article.featuredImage || article.blocks.find((b: Block) => b.type === 'image')?.url || '/logo.png'
 
   return constructMetadata({
     title: article.metaTitle || `${article.title} - ${siteName}`,
@@ -93,7 +104,7 @@ async function getRelatedArticles(site: string, currentSlug: string, category?: 
     if (!res.ok) return []
     const json = await res.json()
     const articles = json.data?.articles || json.data?.items || []
-    return articles.filter((a: any) => a.slug !== currentSlug).slice(0, 3)
+    return articles.filter((a: { slug: string }) => a.slug !== currentSlug).slice(0, 3)
   } catch {
     return []
   }
@@ -115,7 +126,7 @@ async function getPopularArticles(site: string, currentSlug: string) {
     if (!res.ok) return []
     const json = await res.json()
     const articles = json.data?.articles || json.data?.items || []
-    return articles.filter((a: any) => a.slug !== currentSlug).slice(0, 4)
+    return articles.filter((a: { slug: string }) => a.slug !== currentSlug).slice(0, 4)
   } catch {
     return []
   }
@@ -141,11 +152,11 @@ export default async function ArticlePage({ params }: Props) {
     getRelatedArticles(siteParam, slugParam, article.category?.name),
     getPopularArticles(siteParam, slugParam)
   ])
-  const coverImage = article.featuredImage || article.blocks.find((b: any) => b.type === 'image')?.url || '/placeholder.jpg'
-  const coverImageBlock = article.blocks.find((b: any) => b.type === 'image' && b.url === coverImage)
-    || article.blocks.find((b: any) => b.type === 'image')
+  const coverImage = article.featuredImage || article.blocks.find((b: Block) => b.type === 'image')?.url || '/placeholder.jpg'
+  const coverImageBlock = article.blocks.find((b: Block) => b.type === 'image' && b.url === coverImage)
+    || article.blocks.find((b: Block) => b.type === 'image')
   const coverImageCaption = coverImageBlock?.caption || null
-  const excerpt = article.blocks.find((b: any) => b.type === 'paragraph')?.content || ''
+  const excerpt = article.blocks.find((b: Block) => b.type === 'paragraph')?.content || ''
   const articleUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/artikel/${slugParam}`
   const authorProfileUrl = article.author?.id
     ? `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/penulis/${article.author.id}`
@@ -339,7 +350,7 @@ export default async function ArticlePage({ params }: Props) {
                                     <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
                                       <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
                                         <SmartImage
-                                          src={rel.featuredImage || rel.blocks?.find((b: any) => b.type === 'image')?.url}
+                                          src={rel.featuredImage || rel.blocks?.find((b: Block) => b.type === 'image')?.url}
                                           context="card"
                                           alt={rel.title}
                                           fill
@@ -435,7 +446,7 @@ export default async function ArticlePage({ params }: Props) {
                           {/* Hero row: 2 horizontal cards */}
                           {relatedArticles.length >= 2 && (
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                              {relatedArticles.slice(0, 2).map((rel: any) => (
+                              {relatedArticles.slice(0, 2).map((rel: RelatedArticle) => (
                                 <NewsCard key={rel.id} article={rel} variant="horizontal" site={siteParam} />
                               ))}
                             </div>
@@ -443,7 +454,7 @@ export default async function ArticlePage({ params }: Props) {
                           {/* Medium cards below */}
                           {relatedArticles.length > 2 && (
                             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                              {relatedArticles.slice(2).map((rel: any) => (
+                              {relatedArticles.slice(2).map((rel: RelatedArticle) => (
                                 <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
                               ))}
                             </div>
@@ -565,7 +576,7 @@ export default async function ArticlePage({ params }: Props) {
                     </p>
                     <div className="space-y-4">
                       {sidebarRelatedArticles.length > 0 ? (
-                        sidebarRelatedArticles.map((rel: any) => (
+                        sidebarRelatedArticles.map((rel: RelatedArticle) => (
                           <NewsCard key={rel.id} article={rel} variant="minimal" site={siteParam} />
                         ))
                       ) : (
@@ -597,7 +608,7 @@ export default async function ArticlePage({ params }: Props) {
                         Paling Populer
                       </div>
                       <div className="space-y-3">
-                        {popularArticles.map((pop: any, idx: number) => (
+                        {popularArticles.map((pop: RelatedArticle, idx: number) => (
                           <Link
                             key={pop.id}
                             href={`/${siteParam}/artikel/${pop.slug}`}
@@ -669,7 +680,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
         />
       )
     case 'heading':
-      const Tag = `h${block.level}` as any
+      const Tag = `h${block.level}` as keyof JSX.IntrinsicElements
       const headingSizeClass =
         block.level === 2
           ? 'text-[calc(1.35rem*var(--article-font-scale,1))] md:text-[calc(1.75rem*var(--article-font-scale,1))]'

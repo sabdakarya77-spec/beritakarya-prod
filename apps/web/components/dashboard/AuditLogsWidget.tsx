@@ -2,8 +2,18 @@
 
 import { Activity } from 'lucide-react';
 
+interface AuditLog {
+  id: string;
+  action: string;
+  userId: string;
+  user?: { name?: string };
+  entityType?: string;
+  entityId?: string;
+  createdAt: string;
+}
+
 interface AuditLogsWidgetProps {
-  logs: any[];
+  logs: AuditLog[];
   site: string;
 }
 

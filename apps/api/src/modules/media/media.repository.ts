@@ -25,7 +25,7 @@ export async function findMediaBySite(
   limit: number = 30,
   userId?: string
 ) {
-  const where: any = { siteId }
+  const where: { siteId: string; userId?: string } = { siteId }
   if (userId) {
     where.userId = userId
   }

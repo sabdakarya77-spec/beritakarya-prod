@@ -50,7 +50,7 @@ interface MockArticleOverrides {
   slug?: string
   excerpt?: string
   content?: string
-  blocks?: any[]
+  blocks?: Array<Record<string, unknown>>
   status?: string
   authorId?: string
   siteId?: string
@@ -113,7 +113,7 @@ export function mockSite(overrides: MockSiteOverrides = {}) {
 
 // ─── Mock Request/Response Helpers ─────────────────────────────────────────────
 
-export function mockReq(overrides: Record<string, any> = {}) {
+export function mockReq(overrides: Record<string, unknown> = {}) {
   return {
     headers: {},
     cookies: {},
@@ -126,19 +126,32 @@ export function mockReq(overrides: Record<string, any> = {}) {
     site: undefined,
     authError: undefined,
     ...overrides,
-  } as any
+  } as unknown as import('express').Request
 }
 
-export function mockRes() {
-  const res: any = {
+import type { Response } from 'express'
+
+// Test-only response body shape — intentionally permissive for test assertions
+export interface MockResponseBody {
+  success?: boolean
+  error?: { code: string; message?: string; [key: string]: unknown }
+  data?: unknown
+  message?: string
+  [key: string]: unknown
+}
+
+export type MockResponse = Response & { body: MockResponseBody; headers: Record<string, string> }
+
+export function mockRes(): MockResponse {
+  const res = {
     statusCode: 200,
     headers: {} as Record<string, string>,
-    body: null,
+    body: null as unknown as MockResponseBody,
     status(code: number) {
       res.statusCode = code
       return res
     },
-    json(data: any) {
+    json(data: MockResponseBody) {
       res.body = data
       return res
     },
@@ -150,7 +163,7 @@ export function mockRes() {
       return res
     },
   }
-  return res
+  return res as unknown as MockResponse
 }
 
 export function mockNext() {
@@ -159,7 +172,7 @@ export function mockNext() {
 
 // ─── Mock JWTPayload ───────────────────────────────────────────────────────────
 
-export function mockJWTPayload(overrides: Record<string, any> = {}) {
+export function mockJWTPayload(overrides: Record<string, unknown> = {}) {
   return {
     userId: 'u-1',
     email: 'test@bandung.com',

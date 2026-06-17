@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { prepareLegalDocumentContent, ALL_LEGAL_PAGES } from './legalPages'
+import { prepareLegalDocumentContent, ALL_LEGAL_PAGES, type LegalPageConfig } from './legalPages'
 
 describe('prepareLegalDocumentContent', () => {
   it('menghapus heading CMS yang mengulang judul halaman', () => {
@@ -42,7 +42,7 @@ describe('ALL_LEGAL_PAGES', () => {
     const expectedSlugs = ['about', 'editorial', 'ethics', 'kebijakan-privasi', 'media-siber', 'terms']
     const expectedKeys = ['aboutUs', 'editorial', 'codeOfEthics', 'privacyPolicy', 'mediaSiber', 'termsOfService']
 
-    ALL_LEGAL_PAGES.forEach((page: any) => {
+    ALL_LEGAL_PAGES.forEach((page: LegalPageConfig) => {
       expect(page.id).toBeDefined()
       expect(page.title).toBeDefined()
       expect(page.intro).toBeDefined()
@@ -57,10 +57,10 @@ describe('ALL_LEGAL_PAGES', () => {
   it('menghasilkan URL href yang benar berdasarkan site ID', () => {
     const testSite = 'jabar'
 
-    const aboutPage = ALL_LEGAL_PAGES.find((p: any) => p.id === 'aboutUs')
+    const aboutPage = ALL_LEGAL_PAGES.find((p: LegalPageConfig) => p.id === 'aboutUs')
     expect(aboutPage!.href(testSite)).toBe('/jabar/p/about')
 
-    const privacyPage = ALL_LEGAL_PAGES.find((p: any) => p.id === 'privacyPolicy')
+    const privacyPage = ALL_LEGAL_PAGES.find((p: LegalPageConfig) => p.id === 'privacyPolicy')
     expect(privacyPage!.href(testSite)).toBe('/jabar/kebijakan-privasi')
   })
 })

@@ -10,11 +10,12 @@ export async function checkQuotaThresholds(
   userId: string,
   dailyRequests: number,
   monthlySpend: number,
-  user: any,
-  roleQuota: any
+  user: unknown,
+  roleQuota: { dailyRequests: number; monthlyBudget: number | import('@prisma/client').Prisma.Decimal }
 ) {
   const warningKey = `ai:quota:warned:${userId}`
-  
+  const monthlyBudgetNum = Number(roleQuota.monthlyBudget)
+
   // Check daily quota (80% warning)
   if (dailyRequests >= roleQuota.dailyRequests * 0.8) {
     const alreadyWarned = await getCache<boolean>(warningKey)
@@ -30,13 +31,13 @@ export async function checkQuotaThresholds(
   }
 
   // Check monthly budget (80% warning)
-  if (monthlySpend >= roleQuota.monthlyBudget * 0.8) {
+  if (monthlySpend >= monthlyBudgetNum * 0.8) {
     const alreadyWarned = await getCache<boolean>(`${warningKey}:budget`)
     if (!alreadyWarned) {
       await createQuotaNotification(
         userId,
         'Monthly budget warning',
-        `You've used ${Math.round((monthlySpend / roleQuota.monthlyBudget) * 100)}% of your monthly AI budget ($${monthlySpend.toFixed(2)}/$${roleQuota.monthlyBudget}).`,
+        `You've used ${Math.round((monthlySpend / monthlyBudgetNum) * 100)}% of your monthly AI budget ($${monthlySpend.toFixed(2)}/$${monthlyBudgetNum}).`,
         'warning'
       )
       await setCache(`${warningKey}:budget`, true, 3600)

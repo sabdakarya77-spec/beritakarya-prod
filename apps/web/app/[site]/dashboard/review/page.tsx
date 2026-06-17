@@ -15,6 +15,7 @@ import {
   Loader2, RefreshCw, Zap
 } from 'lucide-react';
 import StatusBadge from '../../../../components/ui/StatusBadge';
+import axios from 'axios'
 import { cn } from '../../../../lib/utils';
 
 interface Article {
@@ -28,7 +29,7 @@ interface Article {
   wordCount?: number;
   readingTimeMin?: number;
   reviewNotes?: string;
-  blocks?: any[];
+  blocks?: import('@beritakarya/types').Block[];
   isBreaking?: boolean;
 }
 
@@ -161,8 +162,8 @@ export default function ReviewQueuePage() {
       setReviewNotes('');
       await load();
       addToast(`Berhasil memproses artikel`, 'success');
-    } catch (e: any) {
-      addToast(e.response?.data?.error?.message || 'Gagal memproses post', 'error');
+    } catch (e: unknown) {
+      addToast((axios.isAxiosError(e) ? e.response?.data?.error?.message : undefined) ?? 'Gagal memproses post', 'error');
     } finally {
       setActionLoading(null);
     }

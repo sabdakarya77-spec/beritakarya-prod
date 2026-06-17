@@ -30,7 +30,7 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const crop = centerCrop(
-      makeAspectCrop({ unit: '%', width: 90 }, aspectRatio, width, height),
+      makeAspectCrop({ x: 0, y: 0, unit: '%', width: 90, height: 90 }, aspectRatio, width, height),
       width,
       height
     );
@@ -97,8 +97,8 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
             <div className="flex justify-center">
               <ReactCrop
                 crop={crop}
-                onChange={(_: any, percentCrop: any) => setCrop(percentCrop)}
-                onComplete={(_: any, percentCrop: any) => setCompletedCrop(percentCrop)}
+                onChange={(_pixelCrop: Crop, percentCrop: Crop) => setCrop(percentCrop)}
+                onComplete={(_pixelCrop: Crop, percentCrop: Crop) => setCompletedCrop(percentCrop)}
                 aspect={aspectRatio}
                 minWidth={50}
               >

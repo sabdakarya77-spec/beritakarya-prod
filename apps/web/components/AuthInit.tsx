@@ -24,9 +24,10 @@ export function AuthInit() {
     const sendHeartbeat = async () => {
       try {
         await api.post('/users/heartbeat');
-      } catch (e: any) {
+      } catch (e: unknown) {
         // Jika 401, stop heartbeat dan trigger re-auth check
-        if (e.response?.status === 401) {
+        const axiosErr = e as { response?: { status?: number } };
+        if (axiosErr.response?.status === 401) {
           console.warn('[AUTH] Heartbeat received 401, checking session...')
           checkAuth();
         }

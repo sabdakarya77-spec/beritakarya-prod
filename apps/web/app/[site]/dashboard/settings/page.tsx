@@ -33,6 +33,7 @@ import { useAuthStore } from '../../../../store/authStore'
 import { ALL_LEGAL_PAGES } from '../../../../lib/legalPages'
 import { LegalRichTextEditor } from '../../../../components/dashboard/settings/LegalRichTextEditor'
 import { useRequireRole } from '../../../../hooks/useRequireRole'
+import axios from 'axios'
 
 type SettingsTab = 'basic' | 'contact' | 'google' | 'info' | 'trending'
 type LegalFieldKey =
@@ -161,9 +162,9 @@ export default function SettingsPage() {
     try {
       const { data } = await api.post('/media/upload?type=logo', formData)
       setSettings({ ...settings, logoUrl: data.data.url })
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to upload logo', err)
-      alert(err.response?.data?.error?.message || 'Gagal mengunggah logo')
+      alert((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal mengunggah logo')
     } finally {
       setUploadingLogo(false)
     }
@@ -245,8 +246,8 @@ export default function SettingsPage() {
       } else {
         setMessage({ type: 'error', text: data.error?.message || 'Gagal menyimpan pengaturan' })
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Terjadi kesalahan koneksi'
+    } catch (err: unknown) {
+      const msg = (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Terjadi kesalahan koneksi'
       setMessage({ type: 'error', text: msg })
     } finally {
       setSaving(false)
@@ -753,7 +754,7 @@ export default function SettingsPage() {
                               <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{key} URL</label>
                               <input
                                 type="text"
-                                value={(settings.socialLinks as any)[key]}
+                                value={(settings.socialLinks as Record<string, string>)[key]}
                                 onChange={(e) => setSettings({
                                   ...settings,
                                   socialLinks: { ...settings.socialLinks, [key]: e.target.value }
@@ -914,7 +915,7 @@ export default function SettingsPage() {
                       <button
                         key={legalPage.id}
                         type="button"
-                        onClick={() => setActiveLegalSubTab(legalPage.id as any)}
+                        onClick={() => setActiveLegalSubTab(legalPage.id as LegalFieldKey)}
                         className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                           isSubActive
                             ? 'bg-brand-red/10 text-brand-red border border-brand-red/20'

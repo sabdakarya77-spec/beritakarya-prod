@@ -20,7 +20,7 @@ describe('siteMiddleware', () => {
     vi.mocked(prisma.site.findMany).mockResolvedValue([
       { id: 'bandung' },
       { id: 'pusat' },
-    ] as any)
+    ] as unknown as Awaited<ReturnType<typeof prisma.site.findMany>>)
   })
 
   it('meloloskan siteId yang valid dari query param', async () => {
@@ -53,7 +53,7 @@ describe('siteMiddleware', () => {
     await siteMiddleware(req, res, next)
 
     expect(res.statusCode).toBe(400)
-    expect(res.body.error.code).toBe('SITE_REQUIRED')
+    expect(res.body.error!.code).toBe('SITE_REQUIRED')
     expect(next).not.toHaveBeenCalled()
   })
 
@@ -105,7 +105,7 @@ describe('requireSiteAccess', () => {
     requireSiteAccess(req, res, next)
 
     expect(res.statusCode).toBe(403)
-    expect(res.body.error.code).toBe('SITE_FORBIDDEN')
+    expect(res.body.error!.code).toBe('SITE_FORBIDDEN')
   })
 
   it('meloloskan superadmin ke semua site', () => {

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowLeft, CalendarDays, Eye, FileText, Flame, Globe, Mail, Tags, User2, Users } from 'lucide-react'
 import { SITE_MAP } from '@beritakarya/config'
+import type { Block } from '@beritakarya/types'
 import PublicSiteLayout from '../../../../components/layout/PublicSiteLayout'
 import { Container } from '../../../../components/layout/Container'
 import NewsCard from '../../../../components/ui/NewsCard'
@@ -13,6 +14,26 @@ import { fetchSiteSettings, buildPublicSiteConfig } from '../../../../lib/siteSe
 
 interface Props {
   params: { site: string; id: string }
+}
+
+interface AuthorArticle {
+  id: string
+  slug: string
+  title: string
+  readingTimeMin?: number
+  category?: { name?: string }
+  featuredImage?: string
+  publishedAt?: string
+  createdAt?: string
+  author?: { name?: string }
+  blocks?: Block[]
+}
+
+interface OtherAuthor {
+  id: string
+  name: string
+  role: string
+  publishedCount?: number
 }
 
 interface AuthorProfileResponse {
@@ -27,7 +48,7 @@ interface AuthorProfileResponse {
     publishedCount: number
     totalViews: number
   }
-  recentArticles: any[]
+  recentArticles: AuthorArticle[]
 }
 
 // ─── Fetch helpers ──────────────────────────────────────────────────
@@ -51,7 +72,7 @@ async function getOtherAuthors(siteId: string, currentId: string) {
     if (!res.ok) return []
     const json = await res.json()
     const authors = json?.data || []
-    return authors.filter((a: any) => a.id !== currentId).slice(0, 4)
+    return authors.filter((a: { id: string }) => a.id !== currentId).slice(0, 4) as OtherAuthor[]
   } catch {
     return []
   }
@@ -108,7 +129,7 @@ function getRoleBadgeClass(role: string) {
 
 // ─── Expertise extraction ───────────────────────────────────────────
 
-function extractExpertise(articles: any[]): { name: string; count: number }[] {
+function extractExpertise(articles: AuthorArticle[]): { name: string; count: number }[] {
   const categoryMap = new Map<string, number>()
   for (const article of articles) {
     const cat = article.category?.name
@@ -389,7 +410,7 @@ export default async function AuthorProfilePage({ params }: Props) {
                         Artikel dari {profile.name.split(' ')[0]}
                       </div>
                       <div className="space-y-3">
-                        {recentArticles.slice(0, 4).map((article: any, idx: number) => (
+                        {recentArticles.slice(0, 4).map((article, idx: number) => (
                           <Link
                             key={article.id}
                             href={`/${siteParam}/artikel/${article.slug}`}
@@ -445,7 +466,7 @@ export default async function AuthorProfilePage({ params }: Props) {
                         Rekan Penulis
                       </div>
                       <div className="space-y-3">
-                        {otherAuthors.map((author: any) => (
+                        {otherAuthors.map((author) => (
                           <Link
                             key={author.id}
                             href={`/${siteParam}/penulis/${author.id}`}

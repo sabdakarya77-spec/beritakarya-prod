@@ -183,8 +183,8 @@ export default function OrderAdPage() {
 
       // Done! Success step
       setStep(4);
-    } catch (err: any) {
-      setError(err.message || 'Terjadi kesalahan sistem, silakan hubungi pusat bantuan.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem, silakan hubungi pusat bantuan.');
     } finally {
       setSubmitting(false);
     }

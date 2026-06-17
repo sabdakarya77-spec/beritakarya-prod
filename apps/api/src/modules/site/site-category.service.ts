@@ -42,13 +42,13 @@ export class SiteCategoryService {
     return uniqueIds
   }
 
-  private filterTreeToAssignedIds(tree: any[], assignedIdSet: Set<string>): any[] {
-    const filterNode = (node: any): any | null => {
-      const filteredChildren = (node.subCategories || [])
+  private filterTreeToAssignedIds(tree: Record<string, unknown>[], assignedIdSet: Set<string>): Record<string, unknown>[] {
+    const filterNode = (node: Record<string, unknown>): Record<string, unknown> | null => {
+      const filteredChildren = ((node.subCategories as Record<string, unknown>[]) || [])
         .map(filterNode)
         .filter(Boolean)
 
-      const isAssigned = assignedIdSet.has(node.id)
+      const isAssigned = assignedIdSet.has(node.id as string)
       if (!isAssigned && filteredChildren.length === 0) {
         return null
       }
@@ -59,7 +59,7 @@ export class SiteCategoryService {
       }
     }
 
-    return tree.map(filterNode).filter(Boolean)
+    return tree.map(filterNode).filter((n): n is Record<string, unknown> => n !== null)
   }
 
   async getCategoryAssignments(siteId: string) {
@@ -78,7 +78,7 @@ export class SiteCategoryService {
       globalCategories.filter((c) => !c.deletedAt)
     )
 
-    let assignedTree: any[] = []
+    let assignedTree: Record<string, unknown>[] = []
     if (isConfigured) {
       const globalIndex = await loadGlobalCategoryIndex()
       const expandedIds = expandWithAncestors(assignedCategoryIds, globalIndex)

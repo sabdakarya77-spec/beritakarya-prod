@@ -3,8 +3,15 @@
 import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
+interface KYCRequest {
+  id: string;
+  name: string;
+  email: string;
+  kycSubmittedAt?: string | null;
+}
+
 interface KYCRequestsWidgetProps {
-  requests: any[];
+  requests: KYCRequest[];
   site: string;
 }
 

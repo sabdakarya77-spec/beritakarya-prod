@@ -61,8 +61,8 @@ export async function getActiveReaderCount(siteId: string): Promise<number> {
     const now = Date.now()
     const key = `site:${siteId}:active_readers`
     // Cleanup first to be accurate
-    await redis.zremrangebyscore(key, 0, now - 300000)
-    return await redis.zcard(key)
+    await redis!.zremrangebyscore(key, 0, now - 300000)
+    return await redis!.zcard(key)
   } catch {
     return 0
   }

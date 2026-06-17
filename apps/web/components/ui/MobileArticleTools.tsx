@@ -15,7 +15,20 @@ import {
 type MobileArticleToolsProps = {
   title: string;
   url: string;
-  article: any;
+  article: {
+    id?: string;
+    slug: string;
+    title: string;
+    featuredImage?: string | null;
+    featuredImageBlur?: string | null;
+    featuredImageColor?: string | null;
+    readingTimeMin?: number | null;
+    publishedAt?: string | null;
+    createdAt?: string | null;
+    category?: { name?: string | null } | null;
+    author?: { name?: string | null } | null;
+    blocks?: Array<{ type: string; content?: string }>;
+  };
   site: string;
 };
 

@@ -15,6 +15,14 @@ import type { Ad, AdPackage, AdBooking } from '../../../../components/dashboard/
 import { AdvertiserAdsView } from '../../../../components/dashboard/ads/AdvertiserAdsView';
 import { SuperadminAdsView } from '../../../../components/dashboard/ads/SuperadminAdsView';
 
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  const err = error as {
+    response?: { data?: { error?: { message?: string }; message?: string } }
+    message?: string
+  }
+  return err?.response?.data?.error?.message || err?.response?.data?.message || err?.message || fallback
+}
+
 export default function AdsDashboard() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
@@ -101,8 +109,8 @@ export default function AdsDashboard() {
         setPackages(pkgsRes.data.data || []);
         setBookings(bookingsRes.data.data || []);
       }
-    } catch (error: any) {
-      if (error?.name !== 'CanceledError') console.error('Gagal mengambil data dashboard iklan', error);
+    } catch (error: unknown) {
+      if ((error as { name?: string })?.name !== 'CanceledError') console.error('Gagal mengambil data dashboard iklan', error);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
@@ -119,8 +127,8 @@ export default function AdsDashboard() {
     try {
       await api.post('/ads', { slot: 'leaderboard', isActive: true });
       await fetchData();
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal menambah banner');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal menambah banner'));
     }
   };
 
@@ -129,8 +137,8 @@ export default function AdsDashboard() {
     try {
       await api.patch(`/ads/${adId}`, payload);
       await fetchData();
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal menyimpan iklan');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal menyimpan iklan'));
     } finally {
       setSavingAdId(null);
     }
@@ -141,8 +149,8 @@ export default function AdsDashboard() {
     try {
       await api.delete(`/ads/${adId}`);
       await fetchData();
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal menghapus iklan');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal menghapus iklan'));
     }
   };
 
@@ -158,8 +166,8 @@ export default function AdsDashboard() {
     try {
       await api.patch('/ads/reorder', { items: reorderPayload });
       await fetchData();
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal mengurutkan iklan');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal mengurutkan iklan'));
     }
   };
 
@@ -170,8 +178,8 @@ export default function AdsDashboard() {
       await api.post(`/ads/bookings/${id}/approve`);
       await fetchData();
       alert('Sukses menyetujui iklan! Iklan kini telah disinkronkan dan aktif di website cabang.');
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal menyetujui iklan');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal menyetujui iklan'));
     }
   };
 
@@ -180,8 +188,8 @@ export default function AdsDashboard() {
       await api.post(`/ads/bookings/${bookingId}/reject`, { rejectionNotes: notes });
       await fetchData();
       alert('Sukses menolak pengajuan iklan.');
-    } catch (error: any) {
-      alert(error.response?.data?.error?.message || error.response?.data?.message || 'Gagal menolak iklan');
+    } catch (error: unknown) {
+      alert(getApiErrorMessage(error, 'Gagal menolak iklan'));
     }
   };
 

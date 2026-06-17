@@ -20,7 +20,7 @@ export class FileValidator {
   static async validateFile(
     filePath: string,
     _originalName: string
-  ): Promise<{ valid: boolean; error?: string; metadata?: any }> {
+  ): Promise<{ valid: boolean; error?: string; metadata?: Record<string, unknown> }> {
     try {
       const stats = await fs.stat(filePath)
       if (stats.size > this.MAX_FILE_SIZE) {
@@ -71,7 +71,7 @@ export class FileValidator {
           lowResolution
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('File validation error:', error)
       return { valid: false, error: 'Validasi file gagal' }
     }

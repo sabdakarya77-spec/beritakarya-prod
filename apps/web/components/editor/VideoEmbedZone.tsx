@@ -13,15 +13,15 @@ export function VideoEmbedZone({ onVideoChange }: VideoEmbedZoneProps) {
   const { blocks, updateBlock, addBlock } = useEditorStore()
 
   // Find existing embed block
-  const existingEmbedBlock = blocks.find(b => b.type === 'embed') as any
-  const initialUrl = existingEmbedBlock?.url || ''
+  const existingEmbedBlock = blocks.find(b => b.type === 'embed')
+  const initialUrl = existingEmbedBlock && 'url' in existingEmbedBlock ? existingEmbedBlock.url : ''
 
   const [videoUrl, setVideoUrl] = useState(initialUrl)
-  const [videoTitle, setVideoTitle] = useState(existingEmbedBlock?.title || '')
+  const [videoTitle, setVideoTitle] = useState(existingEmbedBlock && 'title' in existingEmbedBlock ? (existingEmbedBlock.title as string) || '' : '')
 
   // Narrative text for video exclusive
   const existingParagraph = blocks.find(b => b.type === 'paragraph')
-  const [narrativeText, setNarrativeText] = useState((existingParagraph as any)?.content || '')
+  const [narrativeText, setNarrativeText] = useState(existingParagraph && 'content' in existingParagraph && typeof existingParagraph.content === 'string' ? existingParagraph.content : '')
   
   // Detect video type from URL
   // eslint-disable-next-line react-hooks/preserve-manual-memoization

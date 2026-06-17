@@ -8,13 +8,19 @@ import AISummary from '../ui/AISummary';
 import MobileBottomNav from './MobileBottomNav';
 import MobileMenu from './MobileMenu';
 import FullScreenSearch from '../ui/FullScreenSearch';
-import { CATEGORIES_CONFIG, CategoryItem } from '../../lib/constants';
+import { CATEGORIES_CONFIG, CategoryItem, type SiteConfig } from '../../lib/constants';
 import { api } from '../../lib/api';
 import { Container } from './Container';
 
+interface ApiCategory {
+  name: string;
+  slug: string;
+  subCategories?: ApiCategory[];
+}
+
 interface PublicSiteLayoutProps {
   children: React.ReactNode;
-  siteConfig: any;
+  siteConfig: SiteConfig;
   initialCategory?: string;
 }
 
@@ -32,19 +38,20 @@ export default function PublicSiteLayout({ children, siteConfig, initialCategory
         });
           if (data.success && data.data && data.data.length > 0) {
           // Filter out sistem categories (terbaru & tersimpan) from API response to avoid duplicates
-          const filteredCategories = data.data.filter(
-            (cat: any) => cat.slug !== 'terbaru' && cat.slug !== 'tersimpan'
+          const apiCategories = data.data as ApiCategory[];
+          const filteredCategories = apiCategories.filter(
+            (cat) => cat.slug !== 'terbaru' && cat.slug !== 'tersimpan'
           )
-          const mapped = [
+          const mapped: CategoryItem[] = [
             { name: 'Terbaru', slug: 'terbaru' },
-            ...filteredCategories.map((cat: any) => ({
+            ...filteredCategories.map((cat) => ({
               name: cat.name,
               slug: cat.slug,
-              subCategories: cat.subCategories?.map((sub: any) => ({
+              subCategories: cat.subCategories?.map((sub) => ({
                 name: sub.name,
                 slug: sub.slug,
                 // Map 3rd-level sub-subcategories (Navbar supports 3 levels)
-                subCategories: sub.subCategories?.map((subsub: any) => ({
+                subCategories: sub.subCategories?.map((subsub) => ({
                   name: subsub.name,
                   slug: subsub.slug
                 }))
@@ -120,7 +127,7 @@ export default function PublicSiteLayout({ children, siteConfig, initialCategory
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 
         site={siteConfig.id} 
-        trendingTopics={siteConfig.trendingTopics || undefined}
+        trendingTopics={(siteConfig.trendingTopics as string[]) || undefined}
       />
     </div>
   );

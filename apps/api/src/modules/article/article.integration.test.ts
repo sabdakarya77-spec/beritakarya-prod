@@ -4,19 +4,20 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import { articleRouter } from './article.controller'
 import { errorMiddleware } from '../../middleware/error.middleware'
+import type { Request, Response, NextFunction } from 'express'
 
 vi.mock('./article.service')
 vi.mock('../../lib/rateLimit', () => ({
-  apiLimiter: (_: any, __: any, n: any) => n(),
-  articleWriteLimiter: (_: any, __: any, n: any) => n(),
-  articleUpdateLimiter: (_: any, __: any, n: any) => n()
+  apiLimiter: (_: Request, __: Response, n: NextFunction) => n(),
+  articleWriteLimiter: (_: Request, __: Response, n: NextFunction) => n(),
+  articleUpdateLimiter: (_: Request, __: Response, n: NextFunction) => n()
 }))
 vi.mock('../../middleware/site.middleware', () => ({
-  siteMiddleware: (req: any, _: any, next: any) => {
+  siteMiddleware: (req: Request, _: Response, next: NextFunction) => {
     req.site = (req.query.site as string) || 'bandung'
     next()
   },
-  requireSiteAccess: (req: any, res: any, next: any) => {
+  requireSiteAccess: (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) return next()
     if (['reporter', 'kontributor'].includes(req.user.role) && req.user.siteId !== req.site) {
       return res.status(403).json({ success: false, error: { code: 'SITE_FORBIDDEN', message: 'Akses ditolak' } })
@@ -25,7 +26,7 @@ vi.mock('../../middleware/site.middleware', () => ({
   }
 }))
 vi.mock('../../middleware/auth.middleware', () => ({
-  requireAuth: (req: any, res: any, next: any) => {
+  requireAuth: (req: Request, res: Response, next: NextFunction) => {
     const auth = req.headers.authorization
     if (!auth) {
       return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED' } })
@@ -39,6 +40,10 @@ vi.mock('../../middleware/auth.middleware', () => ({
 }))
 
 import * as articleService from './article.service'
+
+// Derive mock return types from service function signatures
+type GetArticlesReturn = Awaited<ReturnType<typeof articleService.getArticles>>
+type PublishedArticleReturn = NonNullable<Awaited<ReturnType<typeof articleService.getPublishedArticleBySlug>>>
 
 const app = express()
 app.use(express.json())
@@ -63,11 +68,11 @@ describe('Multi-site isolation — GET /articles', () => {
   })
 
   it('reporter bandung BISA akses site bandung', async () => {
-    vi.mocked(articleService.getArticles).mockResolvedValue(mockArticles as any)
+    vi.mocked(articleService.getArticles).mockResolvedValue(mockArticles as unknown as GetArticlesReturn)
     const res = await request(app)
       .get('/api/v1/articles?site=bandung')
       .set('Authorization', `Bearer ${tokenBandung}`)
-    
+
     expect(res.status).toBe(200)
     expect(res.body.success).toBe(true)
   })
@@ -76,17 +81,17 @@ describe('Multi-site isolation — GET /articles', () => {
     const res = await request(app)
       .get('/api/v1/articles?site=surabaya')
       .set('Authorization', `Bearer ${tokenBandung}`)
-    
+
     expect(res.status).toBe(403)
     expect(res.body.error.code).toBe('SITE_FORBIDDEN')
   })
 
   it('wapimred pusat BISA akses site manapun', async () => {
-    vi.mocked(articleService.getArticles).mockResolvedValue(mockArticles as any)
+    vi.mocked(articleService.getArticles).mockResolvedValue(mockArticles as unknown as GetArticlesReturn)
     const res = await request(app)
       .get('/api/v1/articles?site=surabaya')
       .set('Authorization', `Bearer ${tokenEditor}`)
-    
+
     expect(res.status).toBe(200)
   })
 
@@ -108,7 +113,7 @@ describe('Public article route — GET /articles/slug/:slug', () => {
       slug: 'artikel-publik',
       status: 'published',
       siteId: 'bandung'
-    } as any)
+    } as unknown as PublishedArticleReturn)
 
     const res = await request(app).get('/api/v1/articles/slug/artikel-publik?site=bandung')
 

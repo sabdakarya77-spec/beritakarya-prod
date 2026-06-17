@@ -190,7 +190,7 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
 
 export async function createArticle(data: {
   title: string; slug: string; excerpt?: string; siteId: string
-  authorId: string; categoryId?: string | null; tags?: any; blocks?: any[]
+  authorId: string; categoryId?: string | null; tags?: Prisma.InputJsonValue; blocks?: Prisma.InputJsonValue[]
   contentType?: ContentType;
   metaTitle?: string; metaDescription?: string
   isBreaking?: boolean; isExclusive?: boolean; isFeatured?: boolean;
@@ -215,8 +215,8 @@ export async function createArticle(data: {
 export async function updateArticle(
   id: string, siteId: string,
   data: Partial<{
-    title: string; slug: string; excerpt: string; blocks: any[]; metaTitle: string; metaDescription: string;
-    status: string; categoryId: string | null; tags: any;
+    title: string; slug: string; excerpt: string; blocks: Prisma.InputJsonValue[]; metaTitle: string; metaDescription: string;
+    status: string; categoryId: string | null; tags: Prisma.InputJsonValue;
     contentType: ContentType;
     isBreaking: boolean; isExclusive: boolean; isFeatured: boolean;
     wordCount: number; readingTimeMin: number; publishedAt: Date;
@@ -227,7 +227,7 @@ export async function updateArticle(
 ) {
   return prisma.article.update({
     where: { id },
-    data: data as any,
+    data: data as Prisma.ArticleUpdateInput,
     select: {
       id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
@@ -268,13 +268,13 @@ export async function slugExists(slug: string, siteId: string, excludeId?: strin
 export async function createAuditLog(data: {
   userId: string; siteId: string; action: string;
   entityType: string; entityId: string;
-  oldValue?: any; newValue?: any;
+  oldValue?: Prisma.InputJsonValue; newValue?: Prisma.InputJsonValue;
 }) {
-  return (prisma as any).auditLog.create({ data })
+  return prisma.auditLog.create({ data })
 }
 
 export async function createVersion(data: {
-  articleId: string; title: string; blocks: any[]; version: number; authorId: string
+  articleId: string; title: string; blocks: Prisma.InputJsonValue[]; version: number; authorId: string
 }) {
   return prisma.articleVersion.create({ data })
 }

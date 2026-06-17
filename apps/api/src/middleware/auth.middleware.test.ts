@@ -23,7 +23,7 @@ describe('requireAuth', () => {
     requireAuth(req, res, next)
 
     expect(res.statusCode).toBe(401)
-    expect(res.body.error.code).toBe('UNAUTHORIZED')
+    expect(res.body.error!.code).toBe('UNAUTHORIZED')
     expect(next).not.toHaveBeenCalled()
   })
 
@@ -36,7 +36,7 @@ describe('requireAuth', () => {
     requireAuth(req, res, next)
 
     expect(res.statusCode).toBe(401)
-    expect(res.body.error.code).toBe('TOKEN_EXPIRED')
+    expect(res.body.error!.code).toBe('TOKEN_EXPIRED')
   })
 
   it('menolak request dengan error token invalid', () => {
@@ -48,7 +48,7 @@ describe('requireAuth', () => {
     requireAuth(req, res, next)
 
     expect(res.statusCode).toBe(401)
-    expect(res.body.error.code).toBe('INVALID_TOKEN')
+    expect(res.body.error!.code).toBe('INVALID_TOKEN')
   })
 })
 
@@ -73,7 +73,7 @@ describe('requireRole', () => {
     middleware(req, res, next)
 
     expect(res.statusCode).toBe(403)
-    expect(res.body.error.code).toBe('FORBIDDEN')
+    expect(res.body.error!.code).toBe('FORBIDDEN')
     expect(next).not.toHaveBeenCalled()
   })
 
@@ -86,7 +86,7 @@ describe('requireRole', () => {
     middleware(req, res, next)
 
     expect(res.statusCode).toBe(401)
-    expect(res.body.error.code).toBe('UNAUTHORIZED')
+    expect(res.body.error!.code).toBe('UNAUTHORIZED')
   })
 
   it('mendukung multiple roles', () => {
@@ -120,7 +120,7 @@ describe('requireSuperadmin', () => {
     requireSuperadmin(req, res, next)
 
     expect(res.statusCode).toBe(403)
-    expect(res.body.error.code).toBe('FORBIDDEN')
+    expect(res.body.error!.code).toBe('FORBIDDEN')
   })
 
   it('menolak request tanpa user (401)', () => {

@@ -6,6 +6,7 @@ import { api } from '../../../../lib/api';
 import { useToastStore } from '../../../../store/toastStore';
 import { useAuthStore } from '../../../../store/authStore';
 import { useRequireRole } from '../../../../hooks/useRequireRole';
+import axios from 'axios';
 
 interface User {
   id: string;
@@ -39,8 +40,8 @@ export default function UsersDashboard() {
       if (data.success) {
         setUsers(data.data);
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.error?.message || 'Gagal mengambil data pengguna';
+    } catch (err: unknown) {
+      const msg = (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal mengambil data pengguna';
       setError(msg);
       console.error('Gagal mengambil users', err);
     } finally {
@@ -261,8 +262,8 @@ export default function UsersDashboard() {
                               await api.put(`/users/${user.id}/role`, { role: newRole, siteId: user.siteId });
                               addToast(`Berhasil mengubah peran ${user.name}`, 'success');
                               fetchUsers();
-                            } catch (err: any) {
-                              addToast(err.response?.data?.error?.message || 'Gagal mengubah peran', 'error');
+                            } catch (err: unknown) {
+                              addToast((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal mengubah peran', 'error');
                             }
                           }
                         }}
@@ -288,8 +289,8 @@ export default function UsersDashboard() {
                                 await api.put(`/users/${user.id}/role`, { role: user.role, siteId: newSiteId });
                                 addToast(`Berhasil memindahkan wilayah ${user.name} ke ${siteName}`, 'success');
                                 fetchUsers();
-                              } catch (err: any) {
-                                addToast(err.response?.data?.error?.message || 'Gagal memindahkan wilayah', 'error');
+                              } catch (err: unknown) {
+                                addToast((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal memindahkan wilayah', 'error');
                               }
                             }
                           }}
@@ -310,8 +311,8 @@ export default function UsersDashboard() {
                                 await api.delete(`/users/${user.id}`);
                                 addToast(`Berhasil menghapus akun ${user.name}`, 'success');
                                 fetchUsers();
-                              } catch (err: any) {
-                                addToast(err.response?.data?.error?.message || 'Gagal menghapus akun', 'error');
+                              } catch (err: unknown) {
+                                addToast((axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal menghapus akun', 'error');
                               }
                             }
                           }}

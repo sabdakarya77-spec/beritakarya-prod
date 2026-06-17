@@ -1,15 +1,15 @@
 'use client'
 
 import { forwardRef, useEffect, useImperativeHandle, useState, useCallback } from 'react'
-import { 
-  Type, 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  Code, 
+import {
+  Type,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  Code,
   Image,
   AlertCircle,
   Video,
@@ -19,16 +19,17 @@ import {
   GalleryHorizontal,
 } from 'lucide-react'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
+import type { Editor } from '@tiptap/react'
 
 export interface SlashMenuItem {
   title: string
   description: string
   icon: React.ReactNode
-  command: (editor: any, ...args: any[]) => void
+  command: (editor: Editor, ...args: unknown[]) => void
 }
 
 export interface SlashMenuProps {
-  editor: any
+  editor: Editor
   items: SlashMenuItem[]
   command: (item: SlashMenuItem) => void
 }
@@ -89,15 +90,15 @@ const MenuList = forwardRef<{ onKeyDown: (props: { event: KeyboardEvent }) => bo
             onClick={() => selectItem(index)}
             className={`
               w-full flex items-center gap-3 px-4 py-3 text-left transition-colors
-              ${index === selectedIndex 
-                ? 'bg-brand-red/10 text-brand-red' 
+              ${index === selectedIndex
+                ? 'bg-brand-red/10 text-brand-red'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700'}
             `}
           >
             <div className={`
               flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center
-              ${index === selectedIndex 
-                ? 'bg-brand-red/20' 
+              ${index === selectedIndex
+                ? 'bg-brand-red/20'
                 : 'bg-gray-100 dark:bg-slate-700'}
             `}>
               {item.icon}
@@ -116,13 +117,13 @@ const MenuList = forwardRef<{ onKeyDown: (props: { event: KeyboardEvent }) => bo
 MenuList.displayName = 'MenuList'
 
 // Hook untuk handle Image command dengan modal
-export function useImageCommand(editor: any) {
+export function useImageCommand(editor: Editor | null | undefined) {
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)
   const [showUrlInput, setShowUrlInput] = useState(false)
 
   const handleMediaSelect = useCallback((media: MediaItem) => {
     if (editor) {
-      editor.chain().focus().setImage({ 
+      editor.chain().focus().setImage({
         src: media.url,
         alt: media.altText || ''
       }).run()
@@ -216,9 +217,10 @@ export const defaultSlashMenuItems: SlashMenuItem[] = [
     title: 'Image',
     description: 'Upload or embed an image',
     icon: <Image size={18} className="text-gray-600 dark:text-gray-400" />,
-    command: (editor, onOpenMediaLibrary: () => void, _onOpenUrlInput: () => void) => {
+    command: (_editor, ...args) => {
       // Command ini akan dipanggil dengan callback untuk membuka modal
       // Di handleCommand di TiptapEditor, kita akan pass onOpenMediaLibrary
+      const onOpenMediaLibrary = args[0] as (() => void) | undefined
       if (onOpenMediaLibrary) {
         onOpenMediaLibrary()
       }

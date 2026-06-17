@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { requireAuth, requireRole } from '../middleware/auth.middleware'
 import { prisma } from '../db/client'
-import { Role } from '@prisma/client'
+import { Prisma, Role } from '@prisma/client'
 import { asyncHandler } from '../utils/asyncHandler'
 
 const adminRouter = Router()
@@ -35,7 +35,7 @@ adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req:
   })
 
   // By role using raw query (for proper joins)
-  const byRole = await prisma.$queryRaw<any[]>`
+  const byRole = await prisma.$queryRaw<{ role: string; requests: number; cost: number; totalTokens: number }[]>`
     SELECT 
       u.role,
       COUNT(DISTINCT ua.id)::int as requests,
@@ -73,7 +73,7 @@ adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req:
   })
 
   // By site (branch)
-  const bySite = await prisma.$queryRaw<any[]>`
+  const bySite = await prisma.$queryRaw<{ site: string; requests: number; cost: number; activeUsers: number }[]>`
     SELECT 
       s.domain as site,
       COUNT(DISTINCT ua.id)::int as requests,
@@ -89,7 +89,7 @@ adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req:
   `
 
   // Top users by cost
-  const topUsers = await prisma.$queryRaw<any[]>`
+  const topUsers = await prisma.$queryRaw<{ name: string; email: string; role: string; requests: number; cost: number }[]>`
     SELECT 
       u.name,
       u.email,
@@ -108,7 +108,7 @@ adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req:
 
   // Monthly budget status
   const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const budgetStatus = await prisma.$queryRaw<any[]>`
+  const budgetStatus = await prisma.$queryRaw<{ role: string; requests: number; currentSpend: number; monthlyBudget: number; percentUsed: number }[]>`
     SELECT 
       u.role,
       COUNT(DISTINCT ua.id)::int as requests,
@@ -127,7 +127,7 @@ adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req:
   `
 
   // Daily usage trend
-  const dailyTrend = await prisma.$queryRaw<any[]>`
+  const dailyTrend = await prisma.$queryRaw<{ date: Date; requests: number; cost: number; activeUsers: number }[]>`
     SELECT 
       ua."createdAt"::date as date,
       COUNT(*)::int as requests,
@@ -218,7 +218,7 @@ adminRouter.get('/quotas', requireAuth, requireAdmin, asyncHandler(async (req, r
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   
-  const userUsage = await prisma.$queryRaw<any[]>`
+  const userUsage = await prisma.$queryRaw<{ userId: string; requests: number; cost: number; tokens: number }[]>`
     SELECT 
       ua."userId",
       COUNT(*)::int as requests,
@@ -301,7 +301,7 @@ adminRouter.patch('/users/:userId/quota', requireAuth, requireAdmin, asyncHandle
     aiModelRestriction
   } = req.body
 
-  const updateData: any = {}
+  const updateData: Prisma.UserUpdateInput = {}
   if (aiEnabled !== undefined) updateData.aiEnabled = aiEnabled
   if (aiDailyLimit !== undefined) updateData.aiDailyLimit = aiDailyLimit
   if (aiMonthlyBudget !== undefined) updateData.aiMonthlyBudget = aiMonthlyBudget
@@ -350,7 +350,7 @@ adminRouter.patch('/roles/:role/quota', requireAuth, requireAdmin, asyncHandler(
     modelRestriction
   } = req.body
 
-  const updateData: any = {}
+  const updateData: Prisma.RoleQuotaUpdateInput = {}
   if (dailyRequests !== undefined) updateData.dailyRequests = dailyRequests
   if (dailyTokens !== undefined) updateData.dailyTokens = dailyTokens
   if (monthlyBudget !== undefined) updateData.monthlyBudget = monthlyBudget
@@ -383,7 +383,7 @@ adminRouter.get('/alerts', requireAuth, requireAdmin, asyncHandler(async (req, r
   const offset = parseInt(req.query.offset as string) || 0
   const { type, isRead, userId } = req.query
 
-  const where: any = {}
+  const where: Prisma.NotificationWhereInput = {}
 
   // Filter: only AI-related alert types for admin view
   const alertTypes = ['quota_warning', 'quota_exceeded', 'budget_warning', 'ai_disabled', 'unusual_spike']

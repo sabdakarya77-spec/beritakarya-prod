@@ -7,6 +7,14 @@ declare global {
       user?: JWTPayload
       site?: string
       authError?: unknown
+      aiQuota?: {
+        dailyRequests: number
+        dailyTokens: number
+        monthlyBudget: number
+        allowedFeatures: string[]
+        modelRestriction?: string
+      }
+      aiUserId?: string
     }
   }
 }

@@ -21,7 +21,7 @@ notificationRouter.get('/stream', ...withSite, (req: Request, res: Response) => 
   res.setHeader('X-Accel-Buffering', 'no') // Disable Nginx proxy buffering
   res.flushHeaders()
 
-  const onNotification = (notification: any) => {
+  const onNotification = (notification: { userId: string; siteId: string }) => {
     if (notification.userId === userId && notification.siteId === siteId) {
       res.write(`data: ${JSON.stringify(notification)}\n\n`)
     }

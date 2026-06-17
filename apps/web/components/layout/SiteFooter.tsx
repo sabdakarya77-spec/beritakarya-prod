@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Mail, Phone } from 'lucide-react';
 import { SiFacebook, SiInstagram, SiTelegram, SiTiktok, SiWhatsapp, SiX, SiYoutube } from 'react-icons/si';
 
-import { CategoryItem } from '../../lib/constants';
+import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { Container } from './Container';
 import { ALL_LEGAL_PAGES } from '../../lib/legalPages';
 
 interface SiteFooterProps {
-  siteConfig: any;
+  siteConfig: SiteConfig;
   categories: CategoryItem[];
 }
 

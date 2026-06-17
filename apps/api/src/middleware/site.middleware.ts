@@ -16,7 +16,7 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 async function refreshCache() {
   try {
     const sites = await prisma.site.findMany({ select: { id: true } })
-    sites.forEach((s: any) => validSiteCache.add(s.id))
+    sites.forEach(s => validSiteCache.add(s.id))
     lastCacheUpdate = Date.now()
   } catch (e) {
     logger.error('Failed to refresh site cache', e)

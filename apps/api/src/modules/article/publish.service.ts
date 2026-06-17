@@ -22,7 +22,7 @@ export async function finalizeArticlePublish(
   const updated = await repo.updateArticle(id, siteId, {
     status: 'published',
     publishedAt: existingArticle?.publishedAt || new Date()
-  } as any)
+  } as unknown as Parameters<typeof repo.updateArticle>[2])
 
   await repo.createAuditLog({
     userId: actor.userId,

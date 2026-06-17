@@ -1,6 +1,6 @@
 'use client'
 
-import { Node, mergeAttributes } from '@tiptap/core'
+import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { useState, useCallback } from 'react'
 import { Trash2, Upload, Image as ImageIcon, X, AlignLeft, AlignRight, AlignCenter } from 'lucide-react'
@@ -11,7 +11,7 @@ import { cn } from '../../../lib/utils'
 
 type LayoutType = 'left' | 'right' | 'center'
 
-const MediaTextComponent = ({ node, updateAttributes, deleteNode }: any) => {
+const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps) => {
   const imageUrl: string = node.attrs.imageUrl || ''
   const layout: LayoutType = node.attrs.layout || 'left'
   const [showMediaLibrary, setShowMediaLibrary] = useState(false)

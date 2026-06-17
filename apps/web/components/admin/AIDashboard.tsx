@@ -77,7 +77,7 @@ export function AIDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [searchTerm, setSearchTerm] = useState('')
   
-  const [editingRole, setEditingRole] = useState<any | null>(null)
+  const [editingRole, setEditingRole] = useState<QuotaData['roleQuotas'][number] | null>(null)
   const [roleFormData, setRoleFormData] = useState({
     dailyRequests: 50,
     monthlyBudget: 10,
@@ -98,7 +98,7 @@ export function AIDashboard() {
     { id: 'image_gen', name: 'Pembuat Gambar AI (Image Gen)' }
   ]
 
-  function openEditRoleModal(quota: any) {
+  function openEditRoleModal(quota: QuotaData['roleQuotas'][number]) {
     let allowed: string[] = []
     if (Array.isArray(quota.allowedFeatures)) {
       allowed = quota.allowedFeatures

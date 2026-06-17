@@ -27,16 +27,16 @@ describe('accountLockout (Redis path)', () => {
 
   describe('checkAccountLockout', () => {
     it('mengembalikan false jika tidak ada attempt', async () => {
-      vi.mocked(redis.get).mockResolvedValue(null)
+      vi.mocked(redis!.get).mockResolvedValue(null)
 
       const locked = await checkAccountLockout(TEST_EMAIL)
 
       expect(locked).toBe(false)
-      expect(redis.get).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
+      expect(redis!.get).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
     })
 
     it('mengembalikan false jika attempt < MAX_ATTEMPTS', async () => {
-      vi.mocked(redis.get).mockResolvedValue('3')
+      vi.mocked(redis!.get).mockResolvedValue('3')
 
       const locked = await checkAccountLockout(TEST_EMAIL)
 
@@ -44,7 +44,7 @@ describe('accountLockout (Redis path)', () => {
     })
 
     it('mengembalikan true jika attempt >= MAX_ATTEMPTS', async () => {
-      vi.mocked(redis.get).mockResolvedValue('5')
+      vi.mocked(redis!.get).mockResolvedValue('5')
 
       const locked = await checkAccountLockout(TEST_EMAIL)
 
@@ -54,31 +54,31 @@ describe('accountLockout (Redis path)', () => {
 
   describe('recordFailedAttempt', () => {
     it('mengincrement counter di Redis', async () => {
-      vi.mocked(redis.incr).mockResolvedValue(1)
+      vi.mocked(redis!.incr).mockResolvedValue(1)
 
       await recordFailedAttempt(TEST_EMAIL)
 
-      expect(redis.incr).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
-      expect(redis.expire).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`, 900)
+      expect(redis!.incr).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
+      expect(redis!.expire).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`, 900)
     })
 
     it('tidak set TTL jika bukan insert pertama', async () => {
-      vi.mocked(redis.incr).mockResolvedValue(3)
+      vi.mocked(redis!.incr).mockResolvedValue(3)
 
       await recordFailedAttempt(TEST_EMAIL)
 
-      expect(redis.incr).toHaveBeenCalled()
-      expect(redis.expire).not.toHaveBeenCalled()
+      expect(redis!.incr).toHaveBeenCalled()
+      expect(redis!.expire).not.toHaveBeenCalled()
     })
   })
 
   describe('resetFailedAttempts', () => {
     it('menghapus key lockout di Redis', async () => {
-      vi.mocked(redis.del).mockResolvedValue(1)
+      vi.mocked(redis!.del).mockResolvedValue(1)
 
       await resetFailedAttempts(TEST_EMAIL)
 
-      expect(redis.del).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
+      expect(redis!.del).toHaveBeenCalledWith(`lockout:${TEST_EMAIL}`)
     })
   })
 })

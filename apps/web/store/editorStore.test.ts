@@ -43,10 +43,10 @@ describe('editorStore', () => {
     const store = useEditorStore.getState()
     const id = store.blocks[0].id
 
-    store.updateBlock(id, { content: 'Konten baru' } as any)
+    store.updateBlock(id, { content: 'Konten baru' })
 
     const updated = useEditorStore.getState().blocks.find(b => b.id === id)
-    expect((updated as any).content).toBe('Konten baru')
+    expect(updated && 'content' in updated ? updated.content : undefined).toBe('Konten baru')
   })
 
   it('moveBlock naik memindah blok ke posisi sebelumnya', () => {

@@ -31,12 +31,13 @@ export const useAuthStore = create<AuthState>()(
       // Tokens are now set in httpOnly cookies by the backend
       const { user } = data.data
       set({ user, isLoading: false })
-    } catch (err: any) {
+    } catch (err: unknown) {
       let msg = 'Login gagal'
-      if (err.response?.data?.error) {
-        const errorData = err.response.data.error
+      const axiosErr = err as { response?: { data?: { error?: { message?: string; details?: Array<{ message: string }> } } } }
+      if (axiosErr.response?.data?.error) {
+        const errorData = axiosErr.response.data.error
         if (errorData.details && errorData.details.length > 0) {
-          msg = errorData.details.map((d: any) => `${d.message}`).join(', ')
+          msg = errorData.details.map(d => `${d.message}`).join(', ')
         } else {
           msg = errorData.message || msg
         }
@@ -53,12 +54,13 @@ export const useAuthStore = create<AuthState>()(
       // Tokens are now set in httpOnly cookies by the backend
       const { user } = data.data
       set({ user, isLoading: false })
-    } catch (err: any) {
+    } catch (err: unknown) {
       let msg = 'Pendaftaran gagal'
-      if (err.response?.data?.error) {
-        const errorData = err.response.data.error
+      const axiosErr = err as { response?: { data?: { error?: { message?: string; details?: Array<{ message: string }> } } } }
+      if (axiosErr.response?.data?.error) {
+        const errorData = axiosErr.response.data.error
         if (errorData.details && errorData.details.length > 0) {
-          msg = errorData.details.map((d: any) => `${d.message}`).join(', ')
+          msg = errorData.details.map(d => `${d.message}`).join(', ')
         } else {
           msg = errorData.message || msg
         }

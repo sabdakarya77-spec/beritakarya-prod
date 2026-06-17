@@ -132,8 +132,8 @@ export function httpLogger(req: Request, res: Response, next: NextFunction) {
       status:    res.statusCode,
       duration:  `${duration}ms`,
       requestId: req.headers['x-request-id'],
-      userId:    (req as any).user?.userId,
-      site:      (req as any).site,
+      userId:    req.user?.userId,
+      site:      req.site,
       ip:        req.ip,
     })
   })

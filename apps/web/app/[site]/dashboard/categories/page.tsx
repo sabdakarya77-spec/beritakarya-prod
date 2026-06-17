@@ -6,6 +6,7 @@ import { api } from '../../../../lib/api';
 import type { Category } from '@beritakarya/types';
 import { getCategoryColor, CATEGORIES_CONFIG } from '../../../../lib/constants';
 import { useRequireRole } from '../../../../hooks/useRequireRole';
+import axios from 'axios';
 
 export default function CategoriesDashboard() {
   const { isAllowed } = useRequireRole(['superadmin']);
@@ -40,7 +41,7 @@ export default function CategoriesDashboard() {
       if (data.success) {
         setCategories(data.data);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Gagal mengambil kategori', error);
       showToast('Gagal memuat kategori', 'error');
     }
@@ -89,8 +90,8 @@ export default function CategoriesDashboard() {
       setOrder('0');
       setEditingCategory(null);
       fetchCategories();
-    } catch (error: any) {
-      showToast(error.response?.data?.error?.message || (editingCategory ? 'Gagal memperbarui kategori' : 'Gagal membuat kategori'), 'error');
+    } catch (error: unknown) {
+      showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || (editingCategory ? 'Gagal memperbarui kategori' : 'Gagal membuat kategori'), 'error');
     } finally {
       setLoading(false);
     }
@@ -126,8 +127,8 @@ export default function CategoriesDashboard() {
       await api.delete(`/categories/${deleteConfirm.id}`);
       showToast('Kategori berhasil dihapus');
       fetchCategories();
-    } catch (error: any) {
-      showToast(error.response?.data?.error?.message || 'Gagal menghapus kategori', 'error');
+    } catch (error: unknown) {
+      showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || 'Gagal menghapus kategori', 'error');
     } finally {
       setDeleteConfirm(null);
     }
@@ -177,7 +178,7 @@ export default function CategoriesDashboard() {
               existingSlugs.set(parentSlugNormalized, parentIdToUse!);
               createdParentCount++;
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
             console.error(`Gagal membuat parent ${cat.name}`, err);
           }
         }
@@ -200,7 +201,7 @@ export default function CategoriesDashboard() {
                 await api.post('/categories', subPayload);
                 existingSlugs.set(subSlugNormalized, 'created');
                 createdSubCount++;
-              } catch (err: any) {
+              } catch (err: unknown) {
                 console.error(`Gagal membuat subkategori ${sub.name}`, err);
               }
             }
@@ -215,7 +216,7 @@ export default function CategoriesDashboard() {
       }
       
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Gagal memuat kategori default', error);
       showToast('Gagal memuat kategori default', 'error');
     } finally {

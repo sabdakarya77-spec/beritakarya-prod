@@ -60,7 +60,7 @@ export class WatermarkService {
       // Tumpuk pola tile ke seluruh foto (tile: true) dan pita merah di bagian bawah (gravity: south)
       const allComposites: sharp.OverlayOptions[] = [
         {
-          input: tileInput as any,
+          input: tileInput as string | Buffer,
           tile: true,
           blend: 'over',
         },
@@ -90,9 +90,9 @@ export class WatermarkService {
       await fs.unlink(tmpPath).catch(() => {})
 
       logger.info(`[WatermarkService] Watermark applied: ${path.basename(imagePath)}`)
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(`[WatermarkService] Failed to watermark ${imagePath}:`, error)
-      throw error
+      throw error instanceof Error ? error : new Error(String(error))
     }
   }
 
@@ -107,9 +107,9 @@ export class WatermarkService {
         .toFile(thumbPath)
 
       logger.info(`[WatermarkService] Thumbnail generated: ${path.basename(thumbPath)}`)
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(`[WatermarkService] Failed to generate thumbnail ${thumbPath}:`, error)
-      throw error
+      throw error instanceof Error ? error : new Error(String(error))
     }
   }
 

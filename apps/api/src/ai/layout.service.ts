@@ -6,7 +6,7 @@ export interface LayoutSuggestion {
   type: 'split_paragraph' | 'insert_image_after' | 'add_heading' | 'reorder'
   targetBlockId: string
   reason: string
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 }
 
 export interface LayoutResult {
@@ -16,8 +16,8 @@ export interface LayoutResult {
 
 function summarizeBlocks(blocks: Block[]): string {
   return blocks.map((b, i) => {
-    if (b.type === 'paragraph') return `[${i}] paragraph: ${(b as any).content?.slice(0, 80)}...`
-    if (b.type === 'heading') return `[${i}] heading H${(b as any).level}: ${(b as any).content}`
+    if (b.type === 'paragraph') return `[${i}] paragraph: ${b.content.slice(0, 80)}...`
+    if (b.type === 'heading') return `[${i}] heading H${b.level}: ${b.content}`
     if (b.type === 'image') return `[${i}] image`
     return `[${i}] ${b.type}`
   }).join('\n')

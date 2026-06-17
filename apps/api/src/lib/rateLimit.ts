@@ -12,7 +12,9 @@ import { logger } from './logger'
  * pastikan REDIS_HOST atau UPSTASH_REDIS_REST_URL diset.
  */
 
-let createStore: ((prefix: string) => any) | undefined
+import type { Store } from 'express-rate-limit'
+
+let createStore: ((prefix: string) => Store | undefined) | undefined
 
 // Only attempt Redis store if REDIS_HOST is explicitly configured
 if (process.env.REDIS_HOST) {
