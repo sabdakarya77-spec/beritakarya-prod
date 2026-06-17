@@ -36,6 +36,7 @@ Dokumen ini menjelaskan arsitektur deployment BeritaKarya secara lengkap:
 │                            │         │  Caddy → Express API │    │
 │                            │         │  PostgreSQL + Redis  │    │
 │                            │         │  Meilisearch         │    │
+│                            │         │  Ollama + GPU (VM-4) │    │
 │                            │         └──────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -433,7 +434,19 @@ cloudflared tunnel info beritakarya-api
 - [ ] Test multi-tenant (buka subdomain berbeda)
 - [ ] Hapus DNS record lama ke IP VPS (`152.42.185.222`)
 
-### Phase H: Hardening (Terakhir, setelah semua stabil)
+### Phase H: AI Stack — VM-4 (Opsional, GPU Passthrough)
+- [ ] Buat VM di Proxmox dengan GPU passthrough (AMD RX 6700 XT)
+- [ ] Enable IOMMU di Proxmox host (`amd_iommu=on iommu=pt`)
+- [ ] Bind VFIO driver untuk GPU (`1002:73df`)
+- [ ] Install ROCm driver di VM
+- [ ] Install Ollama (`curl -fsSL https://ollama.com/install.sh | sh`)
+- [ ] Set `HSA_OVERRIDE_GFX_VERSION=10.3.0` untuk RX 6700 XT compatibility
+- [ ] Download model: `ollama pull llama3:8b`
+- [ ] Test: `curl http://10.0.0.14:11434/api/generate -d '{"model":"llama3","prompt":"test"}'`
+- [ ] (Opsional) Deploy Open WebUI untuk chat interface
+- [ ] Update Express API `.env`: `OLLAMA_URL=http://10.0.0.14:11434`
+
+### Phase I: Hardening (Terakhir, setelah semua stabil)
 - [ ] Enable **HSTS** di Cloudflare (Max Age 2 tahun, includeSubDomains)
 - [ ] Enable **HSTS Preload** (hanya setelah domain stabil ≥1 minggu)
 - [ ] Setup monitoring (Uptime Kuma)
