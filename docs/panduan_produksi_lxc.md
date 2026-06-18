@@ -272,7 +272,7 @@ REDIS_HOST=10.0.0.11
 REDIS_PORT=6379
 REDIS_PASSWORD=GantiDenganPasswordRedisKuatAnda!
 MEILISEARCH_HOST=http://10.0.0.11:7700
-MEILISEARCH_API_KEY=GantiDenganKeyMasterMeilisearchKuatMinimal32Karakter!
+MEILISEARCH_KEY=GantiDenganKeyMasterMeilisearchKuatMinimal32Karakter!
 
 # Security Secrets
 JWT_SECRET=BuatRandom64CharHexStringDisiniUntukKeamananJWT

@@ -73,7 +73,7 @@ REDIS_PASSWORD=<PASSWORD_REDIS>
 
 # === Meilisearch (di CT 101) ===
 MEILISEARCH_HOST=http://10.0.0.11:7700
-MEILISEARCH_API_KEY=<MASTER_KEY_MEILISEARCH>
+MEILISEARCH_KEY=<MASTER_KEY_MEILISEARCH>
 
 # === Security ===
 JWT_SECRET=<RANDOM_64_CHAR_HEX>
@@ -513,7 +513,7 @@ REDIS_PASSWORD=your_redis_password
 
 # Meilisearch — native install di CT 101
 MEILISEARCH_HOST=http://10.0.0.11:7700
-MEILISEARCH_API_KEY=your_meilisearch_master_key_min_32_chars
+MEILISEARCH_KEY=your_meilisearch_master_key_min_32_chars
 
 # Security
 JWT_SECRET=generate_random_64_char_hex_string
