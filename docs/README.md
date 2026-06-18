@@ -2,15 +2,27 @@
 
 Dokumentasi lengkap untuk BeritaKarya.
 
-## Available Documentation
+## Arsitektur & Analisis
 
 | Document | Description |
 |----------|-------------|
-| [Setup Guide](setup.md) | Panduan instalasi dan konfigurasi lokal |
-| [Architecture](architecture.md) | Arsitektur sistem dan design decisions |
-| **[Deployment Architecture](ssl_plan_vercel.md)** | **Panduan deploy utama** (Vercel + Cloudflare + Home Server) |
-| [Deployment](deployment.md) | Ringkasan deploy & CI/CD |
-| [Discussion Notes](discussion-notes.md) | Diskusi teknis: impor berita, Google Index, AI features |
+| [Architecture](architecture.md) | Arsitektur sistem, multi-tenant, design decisions |
+| [Analisa](Analisa.md) | Analisis mendalam infra + codebase, checklist gabungan |
+
+## Deployment Produksi (Self-Hosted LXC)
+
+| Document | Description |
+|----------|-------------|
+| **[Implementasi Infra](implementasi-infra.md)** | **Plan infrastruktur LXC** — MikroTik, Proxmox, CT 101-103 (referensi utama) |
+| **[Implementasi Codebase](implementasi-codebase.md)** | **Plan penyesuaian codebase** — env vars, PM2, build script |
+| [Panduan Produksi LXC](panduan_produksi_lxc.md) | Panduan teknis konfigurasi LXC container |
+| [MikroTik Tutorial](mikrotik-tutorial-expanded.md) | Panduan topologi jaringan MikroTik & Proxmox VE |
+
+## Lainnya
+
+| Document | Description |
+|----------|-------------|
+| [WordPress Import](wordpress-import.md) | Panduan impor berita lama dengan tanggal asli |
 | [Contributing](../CONTRIBUTING.md) | Cara berkontribusi ke project |
 
 ## Quick Links
@@ -19,9 +31,18 @@ Dokumentasi lengkap untuk BeritaKarya.
 - [UI/UX Audit](../audit_UI_UX.md) — Audit komprehensif dan rencana perbaikan UI/UX
 - API Docs — http://localhost:3001/api-docs (Swagger, saat API berjalan)
 
+## Prinsip Deployment
+
+- **Infra = kepastian**, codebase menyesuaikan
+- **Semua service native** (tanpa Docker) di LXC container
+- **Zero cloud dependency** selain Cloudflare (DNS/Tunnel/CDN) dan OpenAI (AI API)
+- **Multi-tenant** via wildcard subdomain (`*.beritakarya.co`)
+
 ## Planned Documentation
 
 - [x] UI/UX Audit & Improvement Plan (`audit_UI_UX.md`)
+- [x] Infrastructure Analysis (`Analisa.md`)
+- [x] Implementation Plans (`implementasi-infra.md`, `implementasi-codebase.md`)
 - [ ] Design System specs
 - [ ] API Reference (Swagger annotations)
 - [ ] Changelog

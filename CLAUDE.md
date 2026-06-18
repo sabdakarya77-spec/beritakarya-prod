@@ -13,9 +13,11 @@ BeritaKarya is a multi-site digital media CMS platform built as a monorepo with 
 - **Frontend**: Next.js 16 (App Router), React 18, Tailwind CSS, Zustand
 - **Cache**: Redis 7 (ioredis) for rate limiting
 - **Search**: Meilisearch v1.6
+- **Storage**: MinIO (S3-compatible, self-hosted) for media/KYC files
 - **AI**: OpenAI API (GPT-4o default)
 - **Auth**: JWT HttpOnly cookie
 - **Testing**: Vitest (unit), Playwright (E2E)
+- **Production**: Self-hosted LXC (Proxmox VE), PM2, Caddy, Cloudflare Tunnel
 
 ## Common Commands
 
@@ -136,13 +138,28 @@ cp apps/web/.env.example apps/web/.env.local
 # Edit: DATABASE_URL, JWT_SECRET (api) and NEXT_PUBLIC_API_URL (web)
 ```
 
-## Services
+## Services (Development)
 
 | Service | Local URL |
 |---------|-----------|
 | Web     | http://localhost:3000 |
 | API     | http://localhost:3001 |
 | Swagger | http://localhost:3001/api-docs |
+
+## Production Architecture
+
+Self-hosted di Proxmox VE dengan 3 LXC Container (native, tanpa Docker):
+
+| Container | IP | Services |
+|-----------|-----|----------|
+| CT 101 (lxc-1-db) | 10.0.0.11 | PostgreSQL 15, Redis 7, Meilisearch v1.6, MinIO |
+| CT 102 (lxc-2-app) | 10.0.0.12 | Node.js 20, PM2, Caddy, Cloudflare Tunnel |
+| CT 103 (lxc-3-monitor) | 10.0.0.13 | Prometheus, Grafana, Exporters |
+
+- **Infra = kepastian**, codebase menyesuaikan
+- Multi-site routing via wildcard subdomain (`*.beritakarya.co`)
+- Media storage: MinIO (S3-compatible) di CT 101, bukan Supabase
+- Dokumentasi: `docs/implementasi-infra.md`, `docs/implementasi-codebase.md`, `docs/Analisa.md`
 
 ## Design System
 

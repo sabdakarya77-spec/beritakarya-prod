@@ -21,9 +21,27 @@ Arsitektur sistem BeritaKarya — platform CMS media digital multi-situs.
 └──────────────────────────┬──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
-│                      Infrastructure                          │
-│              PostgreSQL 15 │ Redis 7 │ Meilisearch v1.6     │
-│              S3/R2 (storage) │ Sentry (monitoring)          │
+│              Infrastructure (Self-Hosted LXC)                │
+│                                                             │
+│  MikroTik Router (Gateway, Firewall, VLAN)                  │
+│       │                                                     │
+│       └── VLAN 20 (10.0.0.0/24) — Server                   │
+│           ├── CT 101 (10.0.0.11) — Database & Storage       │
+│           │   ├── PostgreSQL 15                              │
+│           │   ├── Redis 7                                    │
+│           │   ├── Meilisearch v1.6                           │
+│           │   └── MinIO (S3-compatible media storage)        │
+│           ├── CT 102 (10.0.0.12) — Application              │
+│           │   ├── Express API (PM2 cluster)                  │
+│           │   ├── Next.js (PM2 cluster, standalone)          │
+│           │   ├── Caddy (reverse proxy, wildcard subdomain)  │
+│           │   └── Cloudflare Tunnel                          │
+│           └── CT 103 (10.0.0.13) — Monitoring               │
+│               ├── Prometheus                                  │
+│               ├── Grafana                                     │
+│               └── Exporters (Node, PG, Redis)                │
+│                                                             │
+│  External: Cloudflare (DNS/Tunnel/CDN), OpenAI (AI API)     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -161,6 +179,35 @@ CSS custom properties di `globals.css` (light/dark):
 | `--bg-main` | #F8FAFC | #020617 | Page background |
 
 Tailwind config memetakan token ini ke `brand-*` classes dengan opacity modifier support.
+
+## Multi-Tenant Architecture
+
+BeritaKarya menggunakan model **shared-database multi-tenant** dengan `siteId` sebagai partition key.
+
+### Site Resolution Flow
+
+```
+User → Subdomain (bandung.beritakarya.co)
+     → Caddy wildcard handler
+     → Next.js middleware (proxy.ts)
+     ├── Parse Host header → siteId = "bandung"
+     ├── Set cookie: siteId=bandung
+     └── Rewrite: / → /bandung/
+          → API call with X-Site-ID header
+          → siteMiddleware validates siteId
+          → Prisma: WHERE siteId = 'bandung'
+```
+
+### Corporate Asset Inheritance
+
+Branch sites inherit legal/branding fields from `pusat` (central) site at read time:
+- `socialLinks`, `footerText`, `googleIndexingConfig`
+- `aboutUs`, `codeOfEthics`, `editorial`, `advertising`
+- `privacyPolicy`, `termsOfService`, `mediaSiber`
+
+### Site-Scoped Entities
+
+All major tables have `siteId` foreign key: `User`, `Article`, `Category`, `Media`, `Advertisement`, `Comment`, `PageView`, `AuditLog`, `Notification`.
 
 ## Database Schema
 

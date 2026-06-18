@@ -208,11 +208,37 @@ Workflow artikel: `draft` → `submitted` → `review` → `revision` → `appro
 
 ## Deployment
 
-Arsitektur: **Vercel** (frontend) + **Cloudflare** (DNS/SSL/Tunnel) + **Home Server** (API/DB).
+Arsitektur produksi: **Self-Hosted LXC** (Proxmox VE) + **Cloudflare** (DNS/Tunnel/CDN).
 
-Panduan lengkap: [`docs/ssl_plan_vercel.md`](docs/ssl_plan_vercel.md)
+```
+┌─────────────────────────────────────────────────────────┐
+│  MikroTik Router → Proxmox VE → 3 LXC Containers       │
+│                                                         │
+│  CT 101: PostgreSQL + Redis + Meilisearch + MinIO       │
+│  CT 102: Next.js + Express API + Caddy + Cloudflare     │
+│  CT 103: Prometheus + Grafana                           │
+└─────────────────────────────────────────────────────────┘
+```
 
-GitHub Actions:
+### Dokumentasi Deployment
+
+| Dokumen | Deskripsi |
+|---------|-----------|
+| [`docs/implementasi-infra.md`](docs/implementasi-infra.md) | Plan infrastruktur LXC (referensi utama) |
+| [`docs/implementasi-codebase.md`](docs/implementasi-codebase.md) | Plan penyesuaian codebase |
+| [`docs/Analisa.md`](docs/Analisa.md) | Analisis mendalam + checklist gabungan |
+| [`docs/panduan_produksi_lxc.md`](docs/panduan_produksi_lxc.md) | Panduan teknis LXC container |
+| [`docs/mikrotik-tutorial-expanded.md`](docs/mikrotik-tutorial-expanded.md) | Panduan topologi jaringan MikroTik |
+
+### Quick Deploy (Self-Hosted)
+
+```bash
+# Di CT 102 (10.0.0.12)
+cd /var/www/beritakarya-prod
+bash scripts/deploy.sh
+```
+
+### GitHub Actions
 
 - **`ci.yml`** — lint, type-check, build, test, `pnpm audit` (level high), E2E Playwright
 - **`deploy.yml`** — build & push Docker images ke GHCR (triggered on push to main)
@@ -234,9 +260,11 @@ pnpm --filter @beritakarya/web test    # Web (Vitest)
 
 ### Layout & halaman publik
 
-- [Setup Guide](docs/setup.md) — Instalasi dan konfigurasi lokal
 - [Architecture](docs/architecture.md) — Arsitektur sistem
-- [Deployment](docs/deployment.md) — Panduan deploy
+- [Implementasi Infra](docs/implementasi-infra.md) — Plan infrastruktur produksi
+- [Implementasi Codebase](docs/implementasi-codebase.md) — Plan penyesuaian codebase
+- [Analisa](docs/Analisa.md) — Analisis mendalam + checklist
+- [WordPress Import](docs/wordpress-import.md) — Panduan impor berita lama
 - [Contributing](CONTRIBUTING.md) — Cara berkontribusi
 - Layout System — `Container`, token, bleed _(Coming Soon)_
 
@@ -273,7 +301,17 @@ import { LegalStandardPage } from '@/components/legal'
 
 ## Backup Database
 
-<!-- TODO: Tambahkan instruksi backup database setelah infra/scripts dibuat -->
+Backup PostgreSQL otomatis dijalankan setiap malam pukul 02:00 via cron di CT 101:
+
+```bash
+# Lokasi backup
+/var/backups/postgresql/
+
+# Retensi: 3 hari (disk sharing dengan MinIO)
+# Off-site: rsync ke NAS atau MinIO bucket terpisah (rekomendasi)
+```
+
+Lihat `docs/implementasi-infra.md` BAB 4.6 untuk detail script backup.
 
 ---
 
