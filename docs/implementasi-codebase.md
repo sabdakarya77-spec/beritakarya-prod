@@ -676,7 +676,7 @@ openssl rand -base64 16
 
 | # | File | Lokasi | Tujuan | Status |
 |---|------|--------|--------|--------|
-| 1 | `ecosystem.config.js` | Root project | PM2 configuration | ☐ (Fase 2) |
+| 1 | `ecosystem.config.js` | Root project | PM2 configuration | ✅ |
 | 2 | `.env.example.selfhosted` | `apps/api/` | Referensi env untuk self-hosted | ✅ |
 | 3 | `scripts/deploy.sh` | Root project | Script deploy otomatis | ☐ (Fase 3) |
 | 4 | `scripts/setup-production.sh` | Root project | Script setup awal | ☐ (Fase 3) |

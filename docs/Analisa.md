@@ -858,7 +858,7 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 | 1.2 | INFRA | Verifikasi VLAN 10 & 20 bisa ping gateway | Infra | ☐ |
 | 1.3 | CODE | Buat `apps/api/.env` dengan kredensial production | Dev | ✅ |
 | 1.4 | CODE | Buat `apps/web/.env.production` | Dev | ✅ |
-| 1.5 | CODE | Buat `ecosystem.config.js` di root project | Dev | ☐ |
+| 1.5 | CODE | Buat `ecosystem.config.js` di root project | Dev | ✅ |
 | 1.6 | CODE | Generate secrets (JWT, Redis, Meilisearch, MinIO, Admin) | Dev | ☐ |
 | 1.7 | CODE | Ganti default Railway URL di `next.config.mjs` | Dev | ✅ |
 | 1.8 | CODE | Tambah MinIO domain ke `remotePatterns` di `next.config.mjs` | Dev | ✅ |
