@@ -689,10 +689,10 @@ jobs:
 ### 8.2 Langkah Selanjutnya
 
 1. **Immediate** (sebelum deploy):
-   - [ ] Perbaiki PM2 configuration (R1.1)
+   - [x] Perbaiki PM2 configuration (R1.1) — `ecosystem.config.js` dibuat
    - [x] Sesuaikan DATABASE_URL format (R1.2) — `.env.example` sudah direct PostgreSQL
-   - [ ] Perbaiki build sequence (R1.4)
-   - [ ] Terapkan Next.js standalone mode
+   - [x] Perbaiki build sequence (R1.4) — `scripts/setup-production.sh` urutan benar
+   - [x] Terapkan Next.js standalone mode — `ecosystem.config.js` pakai `server.js`
    - [x] Ganti default Railway URL di `next.config.mjs`
    - [x] Tambah MinIO domain ke `remotePatterns`
    - [ ] Setup DNS wildcard `*.beritakarya.co` di Cloudflare
@@ -904,16 +904,18 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 #### FASE 4: Deploy Aplikasi
 
+> **Catatan**: Item 4.1–4.8 sudah diotomasi oleh `scripts/setup-production.sh` (setup awal) dan `scripts/deploy.sh` (deploy rutin). Script tersedia di repository.
+
 | # | Tipe | Task | Container | Status |
 |---|------|------|-----------|--------|
-| 4.1 | CODE | `pnpm install --frozen-lockfile` | CT 102 | ☐ |
-| 4.2 | CODE | `pnpm --filter @beritakarya/api db:generate` | CT 102 | ☐ |
-| 4.3 | CODE | `pnpm --filter @beritakarya/api db:migrate:deploy` | CT 102 | ☐ |
-| 4.4 | CODE | `pnpm --filter @beritakarya/api db:seed` | CT 102 | ☐ |
-| 4.5 | CODE | `pnpm build` | CT 102 | ☐ |
-| 4.6 | CODE | Copy static assets (public + .next/static → standalone) | CT 102 | ☐ |
-| 4.7 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ☐ |
-| 4.8 | CODE | `pm2 save && pm2 startup` | CT 102 | ☐ |
+| 4.1 | CODE | `pnpm install --frozen-lockfile` | CT 102 | ☐ (via script) |
+| 4.2 | CODE | `pnpm --filter @beritakarya/api db:generate` | CT 102 | ☐ (via script) |
+| 4.3 | CODE | `pnpm --filter @beritakarya/api db:migrate:deploy` | CT 102 | ☐ (via script) |
+| 4.4 | CODE | `pnpm --filter @beritakarya/api db:seed` | CT 102 | ☐ (via script) |
+| 4.5 | CODE | `pnpm build` | CT 102 | ☐ (via script) |
+| 4.6 | CODE | Copy static assets (public + .next/static → standalone) | CT 102 | ☐ (via script) |
+| 4.7 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ☐ (via script) |
+| 4.8 | CODE | `pm2 save && pm2 startup` | CT 102 | ☐ (via script) |
 | 4.9 | INFRA | Konfigurasi Caddy wildcard (`/etc/caddy/Caddyfile`) | CT 102 | ☐ |
 | 4.10 | INFRA | `systemctl restart caddy` | CT 102 | ☐ |
 | 4.11 | INFRA | Setup Cloudflare Tunnel + wildcard routing | CT 102 | ☐ |
