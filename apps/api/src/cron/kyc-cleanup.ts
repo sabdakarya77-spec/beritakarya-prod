@@ -59,7 +59,8 @@ export async function runKYCCleanup() {
 
 async function purgeKYCData(user: { id: string; name: string; idCardPath: string | null; familyCardPath: string | null }, reason: string) {
   try {
-    const isCloudEnabled = process.env.STORAGE_TYPE === 's3' || process.env.STORAGE_TYPE === 'r2'
+    // S3/MinIO storage is available when S3_ENDPOINT is configured
+    const isCloudEnabled = !!process.env.S3_ENDPOINT
 
     // Delete files
     if (user.idCardPath) {
