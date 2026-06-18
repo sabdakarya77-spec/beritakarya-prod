@@ -233,10 +233,42 @@ Arsitektur produksi: **Self-Hosted LXC** (Proxmox VE) + **Cloudflare** (DNS/Tunn
 ### Quick Deploy (Self-Hosted)
 
 ```bash
-# Di CT 102 (10.0.0.12)
+# 1. Clone repository ke CT 102
+ssh root@10.0.0.12
+mkdir -p /var/www && cd /var/www
+git clone <URL_REPOSITORI> beritakarya-prod
+cd beritakarya-prod
+
+# 2. Setup environment
+cp apps/api/.env.example.selfhosted apps/api/.env
+cp apps/web/.env.example apps/web/.env.production
+# Edit apps/api/.env — isi kredensial production (DB, Redis, Meilisearch, MinIO, JWT, dll)
+# Edit apps/web/.env.production — isi NEXT_PUBLIC_API_URL dan NEXT_PUBLIC_URL
+
+# 3. Install, generate, migrate, build
+pnpm install --frozen-lockfile
+pnpm --filter @beritakarya/api db:generate
+pnpm --filter @beritakarya/api db:migrate:deploy
+pnpm --filter @beritakarya/api db:seed
+pnpm build
+
+# 4. Copy static assets untuk standalone Next.js
+cp -r apps/web/public apps/web/.next/standalone/public
+cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+
+# 5. Start PM2
+pm2 start ecosystem.config.js
+pm2 save && pm2 startup
+```
+
+Untuk deploy selanjutnya (update):
+```bash
 cd /var/www/beritakarya-prod
 bash scripts/deploy.sh
 ```
+
+> **Prinsip**: Infrastruktur adalah kepastian. Codebase menyesuaikan.
+> Lihat [`docs/implementasi-codebase.md`](docs/implementasi-codebase.md) untuk panduan lengkap.
 
 ### GitHub Actions
 

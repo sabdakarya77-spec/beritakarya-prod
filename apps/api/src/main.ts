@@ -82,7 +82,6 @@ app.use(helmet({
 const allowedOrigins: (string | RegExp)[] = [
   /^https?:\/\/(.+\.)?beritakarya\.co$/,
   /^https?:\/\/(.+\.)?beritakarya\.com$/,
-  /^https?:\/\/(.+\.)?vercel\.app$/,
   'http://localhost:3000',
   'http://localhost:3001',
 ]
@@ -156,7 +155,7 @@ app.use('/api/v1/invitations', invitationRouter)
 app.use('/api/v1/admin', adminRouter)
 app.use('/api/v1/market', publicLimiter, marketRouter)
 
-// Cron endpoints (called by Vercel Cron Jobs)
+// Cron endpoints (called by scheduler — self-hosted crontab atau Vercel Cron)
 app.use('/api/cron', cronRouter)
 
 // ─── Health & Metrics ─────────────────────────────────────────────────────────
@@ -223,9 +222,9 @@ if (env.SENTRY_DSN) {
   })
 }
 
-// ─── Server Start (local only) ────────────────────────────────────────────────
+// ─── Server Start ────────────────────────────────────────────────────────────
+// `app.listen()` dipanggil saat berjalan sebagai standalone server (self-hosted / lokal).
 // Di Vercel, file api/index.ts mengekspor `app` langsung sebagai serverless function.
-// `app.listen()` HANYA dipanggil saat berjalan secara lokal (bukan di lingkungan Vercel).
 
 if (!process.env.VERCEL) {
   const PORT = env.PORT

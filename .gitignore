@@ -6,8 +6,10 @@
 
 # Apps
 apps/api/.env
+apps/api/.env.production
 apps/web/.env
 apps/web/.env.local
+apps/web/.env.production
 
 # Logs
 logs/**

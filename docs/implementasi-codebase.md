@@ -674,31 +674,28 @@ openssl rand -base64 16
 
 ### 8.1 File Baru yang Perlu Dibuat
 
-| # | File | Lokasi | Tujuan |
-|---|------|--------|--------|
-| 1 | `ecosystem.config.js` | Root project | PM2 configuration |
-| 2 | `.env.example.selfhosted` | `apps/api/` | Referensi env untuk self-hosted |
-| 3 | `scripts/deploy.sh` | Root project | Script deploy otomatis |
-| 4 | `scripts/setup-production.sh` | Root project | Script setup awal |
+| # | File | Lokasi | Tujuan | Status |
+|---|------|--------|--------|--------|
+| 1 | `ecosystem.config.js` | Root project | PM2 configuration | ☐ (Fase 2) |
+| 2 | `.env.example.selfhosted` | `apps/api/` | Referensi env untuk self-hosted | ✅ |
+| 3 | `scripts/deploy.sh` | Root project | Script deploy otomatis | ☐ (Fase 3) |
+| 4 | `scripts/setup-production.sh` | Root project | Script setup awal | ☐ (Fase 3) |
 
 ### 8.2 File yang Perlu Diupdate
 
-| # | File | Perubahan |
-|---|------|-----------|
-| 1 | `.gitignore` | Tambahkan `.env.production` |
-| 2 | `README.md` | Tambahkan section deployment self-hosted |
+| # | File | Perubahan | Status |
+|---|------|-----------|--------|
+| 1 | `.gitignore` | Tambahkan `.env.production` | ✅ |
+| 2 | `README.md` | Tambahkan section deployment self-hosted | ✅ |
 
 ### 8.3 File yang TIDAK Perlu Diubah
 
 | File | Alasan |
 |------|--------|
 | `prisma/schema.prisma` | Schema tidak berubah |
-| `apps/api/src/main.ts` | Logic tidak berubah |
-| `apps/web/next.config.mjs` | Konfigurasi tidak berubah |
-| `docker-compose.yml` | Tetap untuk development |
 | `Dockerfile` (api & web) | Tetap untuk CI/CD |
 | `turbo.json` | Pipeline tidak berubah |
-| Semua source code di `src/` | Tidak ada logic change |
+| Semua source code di `src/` | Tidak ada logic change (kecuali CORS cleanup di `main.ts`) |
 
 ### 8.4 Urutan Eksekusi
 

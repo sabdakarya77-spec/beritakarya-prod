@@ -26,11 +26,11 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
-      // Supabase Storage CDN (produksi)
+      // MinIO via Cloudflare CDN (produksi self-hosted)
       {
         protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        hostname: 'media.beritakarya.co',
+        pathname: '/**',
       },
       // API lokal untuk development (gambar diakses via endpoint proxy jika perlu)
       {
@@ -61,7 +61,7 @@ const nextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://web-production-aa8a.up.railway.app'}/api/v1/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/:path*`,
       },
     ]
   },
