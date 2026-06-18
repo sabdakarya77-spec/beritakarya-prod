@@ -47,33 +47,35 @@ async function main() {
 
   console.log('Superadmin user upserted:', superadmin.name)
 
-  // 3. Seed Categories dari CATEGORY_TREE_CONFIG (Single Source of Truth)
+  // 3. Seed Global Categories dari CATEGORY_TREE_CONFIG (Single Source of Truth)
+  //    Menggunakan slug_siteId unique constraint untuk mencegah duplikasi.
+  //    Kategori global: siteId = null, isGlobal = true.
   const categoriesMap: Record<string, string> = {}
   let order = 1
 
   for (const cat of CATEGORY_TREE_CONFIG) {
     const parent = await prisma.category.upsert({
-      where: { id: cat.slug },
-      update: { name: cat.name, slug: cat.slug, order, parentId: null },
-      create: { id: cat.slug, name: cat.name, slug: cat.slug, isGlobal: true, order }
+      where: { slug_siteId: { slug: cat.slug, siteId: null } },
+      update: { name: cat.name, order, parentId: null },
+      create: { name: cat.name, slug: cat.slug, isGlobal: true, siteId: null, order }
     })
     categoriesMap[cat.slug] = parent.id
 
     let subOrder = 1
     for (const sub of cat.subCategories ?? []) {
       const child = await prisma.category.upsert({
-        where: { id: sub.slug },
-        update: { name: sub.name, slug: sub.slug, parentId: parent.id, order: subOrder },
-        create: { id: sub.slug, name: sub.name, slug: sub.slug, isGlobal: true, parentId: parent.id, order: subOrder }
+        where: { slug_siteId: { slug: sub.slug, siteId: null } },
+        update: { name: sub.name, parentId: parent.id, order: subOrder },
+        create: { name: sub.name, slug: sub.slug, isGlobal: true, siteId: null, parentId: parent.id, order: subOrder }
       })
       categoriesMap[sub.slug] = child.id
 
       let subSubOrder = 1
       for (const subsub of sub.subCategories ?? []) {
         const grandchild = await prisma.category.upsert({
-          where: { id: subsub.slug },
-          update: { name: subsub.name, slug: subsub.slug, parentId: child.id, order: subSubOrder },
-          create: { id: subsub.slug, name: subsub.name, slug: subsub.slug, isGlobal: true, parentId: child.id, order: subSubOrder }
+          where: { slug_siteId: { slug: subsub.slug, siteId: null } },
+          update: { name: subsub.name, parentId: child.id, order: subSubOrder },
+          create: { name: subsub.name, slug: subsub.slug, isGlobal: true, siteId: null, parentId: child.id, order: subSubOrder }
         })
         categoriesMap[subsub.slug] = grandchild.id
         subSubOrder++
@@ -83,16 +85,9 @@ async function main() {
     order++
   }
 
-  console.log('Categories seeded from @beritakarya/config:', Object.keys(categoriesMap))
+  console.log('Global categories seeded from @beritakarya/config:', Object.keys(categoriesMap).length, 'categories')
 
-  // 4. Clean existing mock articles (to avoid duplication on repeated seed runs)
-  await prisma.article.deleteMany({
-    where: {
-      siteId: 'pusat'
-    }
-  })
-
-  // 5. Seed Mock Articles
+  // 4. Seed Articles (upsert — aman dijalankan berulang tanpa duplikasi)
   const mockArticles = [
     {
       title: 'Sri Mulyani Umumkan Arah Kebijakan Fiskal 2027: Fokus Pertumbuhan Berkelanjutan',
@@ -191,8 +186,20 @@ async function main() {
       { type: 'image', url: article.featuredImage }
     ]
 
-    await prisma.article.create({
-      data: {
+    await prisma.article.upsert({
+      where: { siteId_slug: { siteId: 'pusat', slug: article.slug } },
+      update: {
+        title: article.title,
+        categoryId: article.categoryId,
+        blocks: blocksJson,
+        tags: article.tags,
+        featuredImage: article.featuredImage,
+        featuredImageColor: article.featuredImageColor,
+        isBreaking: article.isBreaking,
+        isExclusive: article.isExclusive,
+        isFeatured: article.isFeatured,
+      },
+      create: {
         title: article.title,
         slug: article.slug,
         siteId: 'pusat',
@@ -213,7 +220,7 @@ async function main() {
     })
   }
 
-  console.log('Successfully seeded 8 highly realistic mock articles!')
+  console.log('Successfully seeded/upserted 8 articles.')
   console.log('Seed selesai. Gunakan akun superadmin untuk membuat user lainnya.')
 }
 
