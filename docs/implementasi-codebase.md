@@ -727,8 +727,8 @@ openssl rand -base64 16
 |---|------|--------|--------|--------|
 | 1 | `ecosystem.config.js` | Root project | PM2 configuration | ✅ |
 | 2 | `.env.example.selfhosted` | `apps/api/` | Referensi env untuk self-hosted | ✅ |
-| 3 | `scripts/deploy.sh` | Root project | Script deploy otomatis | ☐ (Fase 3) |
-| 4 | `scripts/setup-production.sh` | Root project | Script setup awal | ☐ (Fase 3) |
+| 3 | `scripts/deploy.sh` | Root project | Script deploy otomatis | ✅ |
+| 4 | `scripts/setup-production.sh` | Root project | Script setup awal | ✅ |
 
 ### 8.2 File yang Perlu Diupdate
 
