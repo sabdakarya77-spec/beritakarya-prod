@@ -234,6 +234,55 @@ standalone/server.js:
 
 ---
 
+## 3.3 Pre-Deploy: Clean Build (WAJIB)
+
+> **Sebelum build pertama kali di production**, lakukan clean build untuk memastikan tidak ada artefak lama yang terbawa. Ini sekaligus jadi validasi akhir bahwa codebase benar-benar siap deploy.
+
+### Langkah
+
+```bash
+cd /var/www/beritakarya-prod
+
+# 1. Hapus semua artefak build & cache
+rm -rf node_modules
+rm -rf apps/api/dist
+rm -rf apps/api/node_modules
+rm -rf apps/web/.next
+rm -rf apps/web/node_modules
+rm -rf packages/*/node_modules
+rm -rf .turbo
+
+# 2. Install ulang dari clean state
+pnpm install --frozen-lockfile
+
+# 3. Generate Prisma client
+pnpm --filter @beritakarya/api db:generate
+
+# 4. Build semua packages dan apps
+pnpm build
+
+# 5. Verifikasi tidak ada error
+echo "Build status: $?"
+```
+
+### Mengapa Penting?
+
+| Masalah | Dampak | Clean Build Fix |
+|---------|--------|-----------------|
+| `dist/` berisi compiled file lama yang source-nya sudah dihapus | Runtime error tak terduga | ✅ |
+| `node_modules/` punya dependency versi lama | Bug atau vulnerability | ✅ |
+| `.turbo/` cache stale | Build gagal atau silent error | ✅ |
+| `.next/` build cache inconsistent | Halaman blank atau hydration error | ✅ |
+
+### Kapan Harus Clean Build?
+
+- ✅ **Pertama kali deploy** ke server baru
+- ✅ **Setelah pull** perubahan besar (schema change, dependency update)
+- ✅ **Sebelum go-live** production
+- ❌ Tidak perlu untuk deploy rutin (cukup `pnpm install && pnpm build`)
+
+---
+
 ## 4. Fase 3: Build & Deploy Script
 
 ### 4.1 Script Deploy (`scripts/deploy.sh`)
