@@ -52,8 +52,9 @@ test.describe('Ad Booking — Advertiser Dashboard', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Riwayat Booking', { exact: true }).click();
-    await expect(page.getByText('Riwayat Booking').first()).toBeVisible({ timeout: 10000 });
+    // Sidebar link "Riwayat Iklan" navigates to booking history
+    await page.getByText('Riwayat Iklan').click();
+    await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -74,8 +75,9 @@ test.describe('Ad Booking — Superadmin Management', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Antrean Validasi Booking', { exact: true }).click();
-    await expect(page.getByText(/Antrean Validasi/)).toBeVisible({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Antrean Validasi Booking' }).click();
+    // Heading appears after tab click
+    await expect(page.getByText('Antrean Validasi Pemesanan', { exact: false })).toBeVisible({ timeout: 10000 });
   });
 
   test('displays packages tab', async ({ page }) => {
@@ -84,8 +86,8 @@ test.describe('Ad Booking — Superadmin Management', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Katalog Paket Iklan', { exact: true }).click();
-    await expect(page.getByText(/Katalog Paket/)).toBeVisible({ timeout: 10000 });
+    await page.getByRole('button', { name: 'Katalog Paket Iklan' }).click();
+    await expect(page.getByText('Katalog Paket Iklan', { exact: true })).toBeVisible({ timeout: 10000 });
   });
 });
 

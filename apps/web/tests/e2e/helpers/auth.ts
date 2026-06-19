@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 
 type UserRole = 'superadmin' | 'wapimred' | 'reporter' | 'kontributor' | 'advertiser';
 
@@ -55,8 +55,20 @@ const MOCK_USERS: Record<UserRole, MockUser> = {
 };
 
 /**
+ * Helper to fulfill a route with JSON data.
+ */
+function fulfillJson(route: Route, data: unknown, status = 200) {
+  return route.fulfill({
+    status,
+    contentType: 'application/json',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
  * Simulate login by injecting auth state into cookies and localStorage.
- * Sets up mocks for common API endpoints.
+ * Uses a single catch-all route handler for all API mocks — more reliable
+ * than individual handlers which can have ordering/timing issues.
  *
  * Usage: call loginAs(), then page.goto() to the target URL.
  */
@@ -103,91 +115,61 @@ export async function loginAs(page: Page, role: UserRole, site: string = 'pusat'
     localStorage.setItem('auth-storage', JSON.stringify(authState));
   }, user);
 
-  // Mock common API endpoints
-  await page.route('**/api/v1/auth/me', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, data: { user } }),
-    });
-  });
+  // Single catch-all handler for ALL /api/v1/* requests.
+  // More reliable than individual handlers — no ordering/timing issues.
+  await page.route(/\/api\/v1\//, async (route) => {
+    const url = route.request().url();
+    const method = route.request().method();
 
-  await page.route('**/api/v1/auth/refresh', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true }),
-    });
-  });
-
-  await page.route(/\/api\/v1\/users\/heartbeat/, (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true }),
-    });
-  });
-
-  await page.route('**/api/v1/notifications**', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, data: [], unreadCount: 0 }),
-    });
-  });
-
-  await page.route('**/api/v1/sites**', (route) => {
-    if (route.request().method() === 'GET') {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: [{ id: site, name: `Site ${site}`, domain: `${site}.test.com` }],
-        }),
-      });
-    } else {
-      route.continue();
+    // Auth endpoints
+    if (url.includes('/auth/me')) {
+      return fulfillJson(route, { success: true, data: { user } });
     }
-  });
-
-  // Note: articles mock removed — data comes from seeded DB via SSR.
-  // Tests that need specific article list data should add their own mock.
-
-  await page.route('**/api/v1/analytics**', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, data: {} }),
-    });
-  });
-
-  await page.route('**/api/v1/categories**', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, data: [] }),
-    });
-  });
-
-  await page.route('**/api/v1/comments**', (route) => {
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, data: [] }),
-    });
-  });
-
-  await page.route('**/api/v1/users**', (route) => {
-    if (route.request().method() === 'GET') {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: [] }),
-      });
-    } else {
-      route.continue();
+    if (url.includes('/auth/refresh')) {
+      return fulfillJson(route, { success: true });
     }
+
+    // Heartbeat — critical for auth state stability
+    if (url.includes('/users/heartbeat')) {
+      return fulfillJson(route, { success: true });
+    }
+
+    // Notifications
+    if (url.includes('/notifications')) {
+      return fulfillJson(route, { success: true, data: [], unreadCount: 0 });
+    }
+
+    // Sites
+    if (url.includes('/sites') && method === 'GET') {
+      return fulfillJson(route, {
+        success: true,
+        data: [{ id: site, name: `Site ${site}`, domain: `${site}.test.com` }],
+      });
+    }
+
+    // Analytics
+    if (url.includes('/analytics')) {
+      return fulfillJson(route, { success: true, data: {} });
+    }
+
+    // Categories
+    if (url.includes('/categories')) {
+      return fulfillJson(route, { success: true, data: [] });
+    }
+
+    // Comments
+    if (url.includes('/comments')) {
+      return fulfillJson(route, { success: true, data: [] });
+    }
+
+    // Users list (GET only)
+    if (url.includes('/users') && method === 'GET') {
+      return fulfillJson(route, { success: true, data: [] });
+    }
+
+    // For all other API requests — fall through to real API.
+    // This allows SSR data (articles, ad packages) to come from the seeded DB.
+    return route.fallback();
   });
 }
 
