@@ -20,6 +20,7 @@ import { Container } from '../../../../components/layout/Container'
 import ArticleShareActions from '../../../../components/ui/ArticleShareActions'
 import ArticleBookmarkButton from '../../../../components/ui/ArticleBookmarkButton'
 import ArticleFloatingTools from '../../../../components/ui/ArticleFloatingTools'
+import MobileArticleTools from '../../../../components/ui/MobileArticleTools'
 import FadeInOnScroll from '../../../../components/ui/FadeInOnScroll'
 import { YouTubeEmbed } from '../../../../components/ui/YouTubeEmbed'
 
@@ -658,6 +659,14 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           </Container>
         </article>
+
+        {/* Mobile bottom bar — Share & Bookmark, only visible on < md */}
+        <MobileArticleTools
+          title={article.title}
+          url={articleUrl}
+          article={article}
+          site={siteParam}
+        />
       </ImageLightboxWrapper>
 
     </PublicSiteLayout>

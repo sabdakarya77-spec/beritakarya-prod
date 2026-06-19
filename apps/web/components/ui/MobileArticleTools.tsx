@@ -105,7 +105,7 @@ export default function MobileArticleTools({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
             aria-hidden="true"
           />
         )}
@@ -121,7 +121,7 @@ export default function MobileArticleTools({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-            className="fixed bottom-0 inset-x-0 z-50 rounded-t-[2rem] border-t border-white/10 bg-[rgba(7,15,33,0.97)] px-5 pb-8 pt-5 shadow-[0_-20px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl xl:hidden"
+            className="fixed bottom-0 inset-x-0 z-50 rounded-t-[2rem] border-t border-white/10 bg-[rgba(7,15,33,0.97)] px-5 pb-8 pt-5 shadow-[0_-20px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Bagikan artikel"
@@ -157,7 +157,7 @@ export default function MobileArticleTools({
 
       {/* Fixed bottom bar — hidden at xl and above (floating sidebar takes over) */}
       <div
-        className="fixed bottom-0 inset-x-0 z-30 xl:hidden"
+        className="fixed bottom-0 inset-x-0 z-30 md:hidden"
         role="toolbar"
         aria-label="Alat artikel"
       >
