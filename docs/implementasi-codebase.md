@@ -1,7 +1,7 @@
 # Implementasi Plan: Penyesuaian Codebase BeritaKarya untuk Produksi LXC
 
 > **Prinsip**: Infrastruktur adalah **kepastian**. Codebase **menyesuaikan** dengan infra.
-> **Semua service native** — tanpa Docker di production.
+> **Frontend di Vercel**, backend & database self-hosted native di LXC (tanpa Docker).
 > **Referensi**: `implementasi-infra.md` (sumber kebenaran infrastruktur)
 > **Tanggal**: 18 Juni 2026
 
@@ -24,10 +24,11 @@
 
 ### 1.1 Apa yang Berubah
 
-| Dari (Cloud) | Ke (Self-Hosted LXC) | Alasan |
-|--------------|----------------------|--------|
+| Dari (Cloud) | Ke (Hybrid) | Alasan |
+|--------------|-------------|--------|
 | Supabase PostgreSQL | PostgreSQL native di CT 101 | Self-hosted, lebih kontrol |
-| Railway/Vercel hosting | PM2 + Caddy di CT 102 | Self-hosted, lebih murah |
+| Railway backend | PM2 + Caddy di CT 102 | Self-hosted, lebih murah |
+| Vercel frontend | **Tetap di Vercel** | Hemat RAM server, dapat CDN + auto-scaling |
 | Supabase Storage (S3) | MinIO di CT 101 | S3-compatible, full self-hosted, zero Supabase dependency |
 | Redis managed | Redis native di CT 101 | Self-hosted |
 | Meilisearch cloud | Meilisearch native di CT 101 | Self-hosted |
@@ -81,9 +82,10 @@ RESET_SECRET=<RANDOM_SECRET_KEY>
 CORS_ORIGIN=https://beritakarya.co
 COOKIE_DOMAIN=.beritakarya.co
 
-# === S3 Storage (MinIO di CT 101 — S3-compatible) ===
-# MinIO menggantikan Supabase Storage sepenuhnya
-# Endpoint mengarah ke MinIO native di CT 101 (10.0.0.11:9000)
+# === MinIO Storage (S3-compatible, self-hosted di CT 101) ===
+# BUKAN AWS S3 — ini MinIO yang berjalan sendiri di server kita
+# Variabel pakai prefix S3_ karena MinIO menggunakan protokol S3 yang sama
+STORAGE_TYPE="s3"
 S3_ENDPOINT="http://10.0.0.11:9000"
 S3_REGION="us-east-1"
 S3_ACCESS_KEY="minioadmin"
@@ -115,20 +117,18 @@ SEED_ADMIN_EMAIL=admin@beritakarya.co
 SEED_ADMIN_PASSWORD=<PASSWORD_ADMIN>
 ```
 
-### 2.2 Web Frontend (`apps/web/.env.production`)
+### 2.2 Web Frontend (Vercel Environment Variables)
 
-```ini
-# ============================================================
-# BeritaKarya Web — Production Environment
-# Infra: CT 102 (10.0.0.12)
-# ============================================================
+Frontend di-deploy ke **Vercel**. Environment variables diatur di **Vercel Dashboard** → Project → Settings → Environment Variables, bukan di file `.env.production`.
 
-NODE_ENV=production
-NEXT_PUBLIC_API_URL="https://api.beritakarya.co"
-NEXT_PUBLIC_URL="https://beritakarya.co"
-NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
-NEXT_PUBLIC_SITE_ID="pusat"
-```
+| Variable | Nilai | Environment |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://api.beritakarya.co` | Production |
+| `NEXT_PUBLIC_URL` | `https://beritakarya.co` | Production |
+| `NEXT_PUBLIC_GA_ID` | `G-XXXXXXXXXX` | Production |
+| `NEXT_PUBLIC_SITE_ID` | `pusat` | Production |
+
+> **Catatan**: Tidak perlu buat `.env.production` di server. Cukup set di Vercel Dashboard.
 
 ### 2.3 Perbedaan dengan `.env.example` Saat Ini
 
@@ -149,6 +149,8 @@ NEXT_PUBLIC_SITE_ID="pusat"
 
 ### 3.1 File: `ecosystem.config.js` (di root project)
 
+> **Catatan**: Hanya API — frontend (Next.js) di-deploy ke Vercel.
+
 ```javascript
 module.exports = {
   apps: [
@@ -168,28 +170,6 @@ module.exports = {
       kill_timeout: 3000,
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss'
-    },
-    {
-      name: 'beritakarya-web',
-      // STANDALONE MODE — bukan `next start`
-      // Sesuai dengan `output: 'standalone'` di next.config.mjs
-      // dan Dockerfile yang menggunakan `node apps/web/server.js`
-      script: 'apps/web/.next/standalone/server.js',
-      cwd: '/var/www/beritakarya-prod',
-      instances: 2,
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-        HOSTNAME: '0.0.0.0',
-        NEXT_PUBLIC_API_URL: 'https://api.beritakarya.co',
-        NEXT_PUBLIC_URL: 'https://beritakarya.co'
-      },
-      max_memory_restart: '1G',
-      listen_timeout: 8000,
-      kill_timeout: 3000,
-      merge_logs: true,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss'
     }
   ]
 };
@@ -200,37 +180,22 @@ module.exports = {
 **Mengapa `instances: 2` bukan `'max'`?**
 
 ```
-CT 102 RAM: 6 GB
+CT 102 RAM: 4 GB (dikurangi dari 6 GB karena frontend di Vercel)
 
 Alokasi:
   - OS + system: ~1 GB
   - API (2 workers × 800MB max): ~1.6 GB
-  - Web (2 workers × 1GB max): ~2 GB
   - Caddy + Cloudflare: ~200 MB
   - Headroom: ~1.2 GB
   ─────────────────────────────
-  Total: ~6 GB ✓
+  Total: ~4 GB ✓
 
 Jika instances = 'max' (= 4):
   - API (4 × 800MB): ~3.2 GB
-  - Web (4 × 1GB): ~4 GB
-  - Total: ~8.2 GB → OOM KILL ✗
+  - Total: ~4.4 GB → OOM KILL ✗
 ```
 
-**Mengapa standalone mode untuk Next.js?**
-
-```
-next start:
-  - Memuat seluruh node_modules (~200-400MB)
-  - Startup lebih lambat
-  - Tidak cocok untuk resource-constrained environment
-
-standalone/server.js:
-  - Hanya memuat dependency yang dibutuhkan (~50-100MB)
-  - Startup lebih cepat
-  - Sesuai dengan output: 'standalone' di next.config.mjs
-  - Konsisten dengan Dockerfile codebase
-```
+**Frontend di Vercel** → tidak perlu PM2 process untuk Next.js. Hemat ~2 GB RAM.
 
 ---
 
@@ -247,8 +212,6 @@ cd /var/www/beritakarya-prod
 rm -rf node_modules
 rm -rf apps/api/dist
 rm -rf apps/api/node_modules
-rm -rf apps/web/.next
-rm -rf apps/web/node_modules
 rm -rf packages/*/node_modules
 rm -rf .turbo
 
@@ -258,12 +221,14 @@ pnpm install --frozen-lockfile
 # 3. Generate Prisma client
 pnpm --filter @beritakarya/api db:generate
 
-# 4. Build semua packages dan apps
-pnpm build
+# 4. Build API saja (frontend di Vercel, tidak perlu build di server)
+pnpm --filter @beritakarya/api build
 
 # 5. Verifikasi tidak ada error
 echo "Build status: $?"
 ```
+
+> **Catatan**: Tidak perlu build `apps/web` — frontend di-deploy ke Vercel via Git push.
 
 ### Mengapa Penting?
 
@@ -289,7 +254,8 @@ echo "Build status: $?"
 
 ```bash
 #!/bin/bash
-# deploy.sh — Deploy BeritaKarya ke production LXC
+# deploy.sh — Deploy BeritaKarya API ke production LXC
+# Frontend auto-deploy ke Vercel via Git push
 # Jalankan dari CT 102 (10.0.0.12)
 
 set -e  # Exit on error
@@ -297,43 +263,38 @@ set -e  # Exit on error
 PROJECT_DIR="/var/www/beritakarya-prod"
 LOG_FILE="/var/log/deploy-$(date +%Y%m%d-%H%M%S).log"
 
-echo "=== BeritaKarya Deploy Started: $(date) ===" | tee $LOG_FILE
+echo "=== BeritaKarya API Deploy Started: $(date) ===" | tee $LOG_FILE
 
 # 1. Backup database dulu
-echo "[1/7] Backing up database..." | tee -a $LOG_FILE
+echo "[1/6] Backing up database..." | tee -a $LOG_FILE
 ssh root@10.0.0.11 "bash /usr/local/bin/backup_db.sh" 2>&1 | tee -a $LOG_FILE
 
 # 2. Pull latest code
-echo "[2/7] Pulling latest code..." | tee -a $LOG_FILE
+echo "[2/6] Pulling latest code..." | tee -a $LOG_FILE
 cd $PROJECT_DIR
 git pull origin main 2>&1 | tee -a $LOG_FILE
 
 # 3. Install dependencies
-echo "[3/7] Installing dependencies..." | tee -a $LOG_FILE
+echo "[3/6] Installing dependencies..." | tee -a $LOG_FILE
 pnpm install --frozen-lockfile 2>&1 | tee -a $LOG_FILE
 
 # 4. Generate Prisma client (WAJIB sebelum migrate)
-echo "[4/7] Generating Prisma client..." | tee -a $LOG_FILE
+echo "[4/6] Generating Prisma client..." | tee -a $LOG_FILE
 pnpm --filter @beritakarya/api db:generate 2>&1 | tee -a $LOG_FILE
 
 # 5. Run migrations (jika ada schema change)
-echo "[5/7] Running database migrations..." | tee -a $LOG_FILE
+echo "[5/6] Running database migrations..." | tee -a $LOG_FILE
 pnpm --filter @beritakarya/api db:migrate:deploy 2>&1 | tee -a $LOG_FILE
 
-# 6. Build all apps
-echo "[6/7] Building applications..." | tee -a $LOG_FILE
-pnpm build 2>&1 | tee -a $LOG_FILE
+# 6. Build API only (frontend di Vercel)
+echo "[6/6] Building API..." | tee -a $LOG_FILE
+pnpm --filter @beritakarya/api build 2>&1 | tee -a $LOG_FILE
 
-# 7. Copy static assets untuk standalone Next.js
-echo "[7/7] Copying static assets..." | tee -a $LOG_FILE
-cp -r apps/web/public apps/web/.next/standalone/public 2>/dev/null || true
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static 2>/dev/null || true
-
-# 8. Restart PM2
-echo "[8/7] Restarting PM2 processes..." | tee -a $LOG_FILE
+# 7. Restart PM2
+echo "[7/6] Restarting PM2..." | tee -a $LOG_FILE
 pm2 reload ecosystem.config.js 2>&1 | tee -a $LOG_FILE
 
-# 9. Verify
+# 8. Verify
 echo "[VERIFY] Checking health..." | tee -a $LOG_FILE
 sleep 3
 HEALTH=$(curl -s http://localhost:3001/health)
@@ -343,20 +304,22 @@ PM2_STATUS=$(pm2 jlist | python3 -c "import sys,json; apps=json.load(sys.stdin);
 echo "PM2 All Online: $PM2_STATUS" | tee -a $LOG_FILE
 
 echo "=== Deploy Completed: $(date) ===" | tee -a $LOG_FILE
+echo "Frontend: auto-deployed ke Vercel via Git push ke main branch"
 ```
 
 ### 4.2 Script Setup Awal (`scripts/setup-production.sh`)
 
 ```bash
 #!/bin/bash
-# setup-production.sh — Setup awal BeritaKarya di CT 102
+# setup-production.sh — Setup awal BeritaKarya API di CT 102
+# Frontend di-deploy ke Vercel (tidak perlu setup di server)
 # Jalankan SEKALI setelah CT 102 siap
 
 set -e
 
 PROJECT_DIR="/var/www/beritakarya-prod"
 
-echo "=== BeritaKarya Production Setup ==="
+echo "=== BeritaKarya Production Setup (API Only) ==="
 
 # 1. Clone repository
 echo "[1/6] Cloning repository..."
@@ -372,7 +335,7 @@ git checkout main
 echo "[2/6] Setting up environment files..."
 # PENTING: Edit file .env dengan nilai yang benar SEBELUM melanjutkan
 echo ">>> EDIT apps/api/.env dengan kredensial production"
-echo ">>> EDIT apps/web/.env.production dengan URL production"
+echo ">>> Frontend env diatur di Vercel Dashboard (bukan di server)"
 read -p "Tekan Enter setelah selesai mengedit..."
 
 # 4. Install dependencies
@@ -388,15 +351,11 @@ echo "[5/6] Running migrations and seed..."
 pnpm --filter @beritakarya/api db:migrate:deploy
 pnpm --filter @beritakarya/api db:seed
 
-# 7. Build
-echo "[6/6] Building applications..."
-pnpm build
+# 7. Build API only
+echo "[6/6] Building API..."
+pnpm --filter @beritakarya/api build
 
-# 8. Copy static assets
-cp -r apps/web/public apps/web/.next/standalone/public
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
-
-# 9. Setup PM2
+# 8. Setup PM2
 echo "[PM2] Starting PM2..."
 pm2 start ecosystem.config.js
 pm2 save
@@ -407,7 +366,9 @@ echo "Next steps:"
 echo "  1. Verify: curl http://localhost:3001/health"
 echo "  2. Configure Caddy: /etc/caddy/Caddyfile"
 echo "  3. Setup Cloudflare Tunnel"
-echo "  4. Test: https://beritakarya.co"
+echo "  4. Setup Vercel: hubungkan repo ke Vercel, set env variables"
+echo "  5. Test API: https://api.beritakarya.co/api-docs"
+echo "  6. Test Frontend: https://beritakarya.co (Vercel)"
 ```
 
 ---
@@ -521,7 +482,8 @@ RESET_SECRET=generate_random_secret_key
 CORS_ORIGIN=https://beritakarya.co
 COOKIE_DOMAIN=.beritakarya.co
 
-# S3 Storage — MinIO di CT 101 (S3-compatible, menggantikan Supabase Storage)
+# MinIO Storage — BUKAN AWS S3, ini MinIO self-hosted di CT 101
+STORAGE_TYPE="s3"
 S3_ENDPOINT="http://10.0.0.11:9000"
 S3_REGION="us-east-1"
 S3_ACCESS_KEY="minioadmin"
@@ -622,33 +584,17 @@ caddy version
 ```bash
 # 1. PM2 status
 pm2 status
-# Expected: 2 beritakarya-api online, 2 beritakarya-web online
+# Expected: 2 beritakarya-api online
 
 # 2. API health
 curl -s http://localhost:3001/health | jq .
 # Expected: {"status":"healthy","database":"connected",...}
 
-# 3. Web response
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
-# Expected: 200
-
-# 4. Caddy proxy (domain utama)
-curl -s -o /dev/null -w "%{http_code}" https://beritakarya.co
-# Expected: 200
-
-# 4b. Caddy proxy (multi-site subdomain)
-curl -s -o /dev/null -w "%{http_code}" https://pusat.beritakarya.co
-# Expected: 200
-
-# 4c. Caddy proxy (site lain)
-curl -s -o /dev/null -w "%{http_code}" https://bandung.beritakarya.co
-# Expected: 200 (atau redirect ke login jika site belum ada)
-
-# 4d. API via subdomain
+# 3. API via subdomain
 curl -s -o /dev/null -w "%{http_code}" https://api.beritakarya.co/api-docs
 # Expected: 200
 
-# 4e. Media CDN
+# 4. Media CDN
 curl -s -o /dev/null -w "%{http_code}" https://media.beritakarya.co/minio/health/live
 # Expected: 200
 
@@ -660,9 +606,17 @@ curl -s -o /dev/null -w "%{http_code}" https://api.beritakarya.co/api-docs
 curl -s http://localhost:3001/api/v1/sites | jq '.data | length'
 # Expected: > 0 (ada data site dari seed)
 
-# 7. PM2 memory usage
+# 7. Frontend (Vercel)
+curl -s -o /dev/null -w "%{http_code}" https://beritakarya.co
+# Expected: 200
+
+# 8. Multi-site subdomain (Vercel)
+curl -s -o /dev/null -w "%{http_code}" https://bandung.beritakarya.co
+# Expected: 200 (atau redirect ke login jika site belum ada)
+
+# 9. PM2 memory usage
 pm2 monit
-# Expected: masing-masing worker < 800MB (API) / 1GB (Web)
+# Expected: masing-masing worker < 800MB (API)
 ```
 
 ### 6.3 Stress Test (Opsional)
@@ -758,22 +712,21 @@ openssl rand -base64 16
 │    ├── Redis siap ───────────┤                              │
 │    └── Meilisearch siap ─────┤                              │
 │                              ▼                              │
-│  Infra (CT 102)                                             │
+│  Infra (CT 102) — API Only                                  │
 │    │                                                        │
 │    ├── Node.js + pnpm install                               │
 │    ├── Clone repo ───────────┐                              │
 │    └── Buat .env ────────────┤                              │
 │                              ▼                              │
-│  Codebase                                                  │
+│  Codebase (API Only)                                        │
 │    │                                                        │
 │    ├── pnpm install                                         │
 │    ├── db:generate ───────────┐                             │
 │    ├── db:migrate:deploy ─────┤                             │
 │    ├── db:seed ───────────────┤                             │
-│    ├── pnpm build ────────────┤                             │
-│    └── Copy static assets ────┤                             │
+│    └── pnpm --filter api build┤                             │
 │                               ▼                             │
-│  PM2                                                        │
+│  PM2 (API Only)                                             │
 │    │                                                        │
 │    ├── pm2 start ecosystem.config.js                        │
 │    ├── pm2 save                                             │
@@ -782,17 +735,24 @@ openssl rand -base64 16
 │          ▼                                                  │
 │  Caddy + Cloudflare Tunnel                                  │
 │    │                                                        │
-│    ├── Konfigurasi Caddyfile                                │
+│    ├── Konfigurasi Caddyfile (API + Media)                  │
 │    ├── systemctl restart caddy                              │
 │    └── cloudflared setup                                    │
 │          │                                                  │
 │          ▼                                                  │
+│  Vercel (Frontend)                                          │
+│    │                                                        │
+│    ├── Hubungkan repo ke Vercel                             │
+│    ├── Set environment variables                            │
+│    └── Auto-deploy setiap push ke main                      │
+│          │                                                  │
+│          ▼                                                  │
 │  Verifikasi                                                 │
 │    │                                                        │
-│    ├── Health check API                                      │
-│    ├── Health check Web                                      │
-│    ├── Test koneksi DB                                       │
-│    └── Buka browser                                          │
+│    ├── Health check API (self-hosted)                       │
+│    ├── Buka https://beritakarya.co (Vercel)                 │
+│    ├── Test subdomain (Vercel wildcard)                     │
+│    └── Test koneksi DB                                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
