@@ -48,41 +48,47 @@ async function main() {
   console.log('Superadmin user upserted:', superadmin.name)
 
   // 3. Seed Global Categories dari CATEGORY_TREE_CONFIG (Single Source of Truth)
-  //    Menggunakan slug_siteId unique constraint untuk mencegah duplikasi.
   //    Kategori global: siteId = null, isGlobal = true.
+  //    Helper upsertGlobalCategory menghindari Prisma type issue dengan null di compound unique.
   const categoriesMap: Record<string, string> = {}
-  let order = 1
 
-  for (const cat of CATEGORY_TREE_CONFIG) {
-    const parent = await prisma.category.upsert({
-      where: { slug_siteId: { slug: cat.slug, siteId: null } },
-      update: { name: cat.name, order, parentId: null },
-      create: { name: cat.name, slug: cat.slug, isGlobal: true, siteId: null, order }
+  async function upsertGlobalCategory(data: {
+    slug: string; name: string; parentId: string | null; order: number
+  }) {
+    const existing = await prisma.category.findFirst({
+      where: { slug: data.slug, isGlobal: true, deletedAt: null }
     })
+    if (existing) {
+      const needsUpdate = existing.name !== data.name || existing.order !== data.order || existing.parentId !== data.parentId
+      if (needsUpdate) {
+        return prisma.category.update({
+          where: { id: existing.id },
+          data: { name: data.name, order: data.order, parentId: data.parentId }
+        })
+      }
+      return existing
+    }
+    return prisma.category.create({
+      data: { name: data.name, slug: data.slug, isGlobal: true, siteId: null, parentId: data.parentId, order: data.order }
+    })
+  }
+
+  let order = 1
+  for (const cat of CATEGORY_TREE_CONFIG) {
+    const parent = await upsertGlobalCategory({ slug: cat.slug, name: cat.name, parentId: null, order: order++ })
     categoriesMap[cat.slug] = parent.id
 
     let subOrder = 1
     for (const sub of cat.subCategories ?? []) {
-      const child = await prisma.category.upsert({
-        where: { slug_siteId: { slug: sub.slug, siteId: null } },
-        update: { name: sub.name, parentId: parent.id, order: subOrder },
-        create: { name: sub.name, slug: sub.slug, isGlobal: true, siteId: null, parentId: parent.id, order: subOrder }
-      })
+      const child = await upsertGlobalCategory({ slug: sub.slug, name: sub.name, parentId: parent.id, order: subOrder++ })
       categoriesMap[sub.slug] = child.id
 
       let subSubOrder = 1
       for (const subsub of sub.subCategories ?? []) {
-        const grandchild = await prisma.category.upsert({
-          where: { slug_siteId: { slug: subsub.slug, siteId: null } },
-          update: { name: subsub.name, parentId: child.id, order: subSubOrder },
-          create: { name: subsub.name, slug: subsub.slug, isGlobal: true, siteId: null, parentId: child.id, order: subSubOrder }
-        })
+        const grandchild = await upsertGlobalCategory({ slug: subsub.slug, name: subsub.name, parentId: child.id, order: subSubOrder++ })
         categoriesMap[subsub.slug] = grandchild.id
-        subSubOrder++
       }
-      subOrder++
     }
-    order++
   }
 
   console.log('Global categories seeded from @beritakarya/config:', Object.keys(categoriesMap).length, 'categories')
