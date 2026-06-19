@@ -22,7 +22,9 @@ const s3 = new S3Client({
 const KYC_BUCKET = process.env.S3_BUCKET || 'kyc'
 const MEDIA_BUCKET = process.env.S3_MEDIA_BUCKET || 'media'
 
-// Base URL for Supabase public CDN, e.g. https://<ref>.supabase.co/storage/v1/object/public
+// Base URL for public media access.
+// Self-hosted: https://media.beritakarya.co (MinIO via Caddy)
+// Supabase:   https://<ref>.supabase.co/storage/v1/object/public
 let resolvedPublicUrl = process.env.SUPABASE_STORAGE_PUBLIC_URL || ''
 if (!resolvedPublicUrl && process.env.S3_ENDPOINT) {
   const match = process.env.S3_ENDPOINT.match(/https:\/\/([^.]+)\.storage\.supabase\.co/)

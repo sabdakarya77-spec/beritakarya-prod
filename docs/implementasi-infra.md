@@ -1,7 +1,7 @@
 # Implementasi Plan: Infrastruktur Produksi LXC BeritaKarya
 
 > **Prinsip**: Infrastruktur adalah **kepastian**. Codebase menyesuaikan dengan infra.
-> **Keputusan Arsitektur**: Semua service berjalan **native** (tanpa Docker) di dalam LXC Container.
+> **Keputusan Arsitektur**: Backend & database **self-hosted** di LXC Container. Frontend (Next.js) di-deploy ke **Vercel**.
 > **Referensi**: `panduan_produksi_lxc.md`, `mikrotik-tutorial-expanded.md`
 > **Tanggal**: 18 Juni 2026
 
@@ -27,66 +27,78 @@
 ```
 Internet
     │
-    ▼
-┌──────────────┐
-│ MikroTik     │ Ether1 = WAN (ISP)
-│ Router       │ Ether2 = Trunk → Proxmox
-│              │ Ether3-5 = Access → VLAN 10 (Admin)
-└──────┬───────┘
-       │ Ether2 (Trunk, VLAN 10 + 20 tagged)
-       ▼
-┌──────────────┐
-│ Proxmox Host │ vmbr0 (VLAN-aware)
-│ 192.168.10.50│ vmbr0.10 = Management (VLAN 10)
-└──────┬───────┘
-       │
-       ├──────────────────────────────────────┐
-       │ VLAN 20 (10.0.0.0/24)               │
-       │                                      │
-       ▼                                      ▼
-┌──────────────────┐              ┌──────────────────┐
-│ CT 101           │              │ CT 102           │
-│ lxc-1-db         │◄────────────│ lxc-2-app        │
-│ 10.0.0.11        │  5432,6379, │ 10.0.0.12        │
-│                  │  7700,9000  │                  │
-│ PostgreSQL 15    │              │ Express API      │
-│ Redis 7          │              │ Next.js          │
-│ Meilisearch v1.6 │              │ Caddy            │
-│ MinIO (S3)       │              │ Cloudflare Tunnel│
-└──────────────────┘              └──────────────────┘
-                                  └──────────────────┘
-       │
-       ▼
-┌──────────────────┐
-│ CT 103           │
-│ lxc-3-monitor    │
-│ 10.0.0.13        │
-│                  │
-│ Prometheus       │
-│ Grafana          │
-│ Exporters        │
-└──────────────────┘
+    ├──────────────────────────────────────────┐
+    │                                          │
+    ▼                                          ▼
+┌──────────────┐                    ┌──────────────────┐
+│ Vercel       │                    │ Cloudflare Tunnel │
+│ (Frontend)   │                    │ (*.api subdomain)  │
+│ Next.js SSR  │                    └────────┬─────────┘
+│ Wildcard     │                             │
+│ subdomain    │                             ▼
+└──────────────┘                    ┌──────────────────┐
+                                    │ CT 102           │
+                                    │ lxc-2-app        │
+                                    │ 10.0.0.12        │
+                                    │                  │
+                                    │ Express API      │
+                                    │ Caddy            │
+                                    └────────┬─────────┘
+                                             │ 5432,6379,
+                                             │ 7700,9000
+                                             ▼
+                                    ┌──────────────────┐
+                                    │ CT 101           │
+                                    │ lxc-1-db         │
+                                    │ 10.0.0.11        │
+                                    │                  │
+                                    │ PostgreSQL 15    │
+                                    │ Redis 7          │
+                                    │ Meilisearch v1.6 │
+                                    │ MinIO (S3)       │
+                                    └──────────────────┘
+
+Proxmox Host: 192.168.10.50 (VLAN 10 Management)
+MikroTik Router: 192.168.10.1 (VLAN 10), 10.0.0.1 (VLAN 20)
+
+                                    ┌──────────────────┐
+                                    │ CT 103           │
+                                    │ lxc-3-monitor    │
+                                    │ 10.0.0.13        │
+                                    │                  │
+                                    │ Prometheus       │
+                                    │ Grafana          │
+                                    │ Exporters        │
+                                    └──────────────────┘
 ```
+
+**Catatan Arsitektur**:
+- **Frontend (Next.js)** di-deploy ke **Vercel** — hemat ~2 GB RAM di CT 102, dapat CDN + auto-scaling + wildcard subdomain unlimited
+- **Backend (Express API)** tetap self-hosted di CT 102
+- **Database & services** tetap di CT 101
+- Vercel memanggil API di `api.beritakarya.co` via Cloudflare Tunnel
 
 ### 1.2 Alokasi Resource (Final)
 
 | Container | Hostname | IP | CPU | RAM | Disk | Layanan |
 |-----------|----------|-----|-----|-----|------|---------|
 | CT 101 | `lxc-1-db` | `10.0.0.11` | 2 core | 4 GB | 64 GB | PostgreSQL 15, Redis 7, Meilisearch v1.6, MinIO |
-| CT 102 | `lxc-2-app` | `10.0.0.12` | 4 core | 6 GB | 20 GB | Node.js 20, PM2, Caddy, Cloudflare Tunnel |
+| CT 102 | `lxc-2-app` | `10.0.0.12` | 2 core | 4 GB | 20 GB | Node.js 20, PM2 (API only), Caddy, Cloudflare Tunnel |
 | CT 103 | `lxc-3-monitor` | `10.0.0.13` | 2 core | 2 GB | 10 GB | Prometheus, Grafana, Node Exporter |
 
 ### 1.3 Keputusan Arsitektur
 
 | Keputusan | Alasan |
 |-----------|--------|
+| **Frontend di Vercel** | Next.js SSR di Vercel — hemat ~2 GB RAM di CT 102, dapat CDN edge, auto-scaling, wildcard subdomain unlimited |
+| **Backend self-hosted** | Express API tetap di CT 102 — kontrol penuh atas database, cron, AI features |
 | **Tanpa Docker** | LXC sudah isolasi, Docker menambah overhead RAM ~300MB per host tanpa manfaat signifikan |
 | **Native install** | Service langsung dikelola systemd, lebih transparan untuk debugging dan monitoring |
 | **VLAN 20 static IP** | Server tidak boleh pakai DHCP, IP harus konsisten untuk koneksi antar-service |
 | **CT 101 tanpa internet** | Database tidak boleh akses internet (firewall rule #3 di MikroTik) |
 | **MinIO untuk media** | S3-compatible, drop-in replacement Supabase Storage, full self-hosted |
 | **Caddy bukan Nginx** | Auto-SSL, config lebih sederhana, cocok untuk single-server |
-| **Cloudflare Tunnel** | Zero-trust, tidak perlu port forwarding, SSL termination di edge |
+| **Cloudflare Tunnel** | Zero-trust, tidak perlu port forwarding, SSL termination di edge untuk API |
 | **Cloudflare CDN untuk media** | Cache static media dari MinIO, mengurangi beban CT 101 |
 
 ---
@@ -457,21 +469,19 @@ Simpan di password manager, **bukan di file**:
 - [ ] **4.6** Install PM2 global: `npm install -g pm2`
 - [ ] **4.7** Install Caddy (dari official repo)
 
-### 5.3 Checklist Deploy Aplikasi
+> **Catatan**: Frontend (Next.js) di-deploy ke **Vercel**, tidak perlu di CT 102. CT 102 hanya menjalankan Express API.
+
+### 5.3 Checklist Deploy Aplikasi (API Only)
 
 - [ ] **4.8** Clone repo ke `/var/www/beritakarya-prod`
 - [ ] **4.9** Buat `.env` untuk API (lihat `implementasi-codebase.md` untuk nilai yang benar)
-- [ ] **4.10** Buat `.env.production` untuk Web
-- [ ] **4.11** `pnpm install --frozen-lockfile`
-- [ ] **4.12** `pnpm --filter @beritakarya/api db:generate`
-- [ ] **4.13** `pnpm --filter @beritakarya/api db:migrate:deploy`
-- [ ] **4.14** `pnpm --filter @beritakarya/api db:seed`
-- [ ] **4.15** `pnpm build`
-- [ ] **4.16** Copy static assets untuk standalone Next.js:
-  ```bash
-  cp -r apps/web/public apps/web/.next/standalone/public
-  cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
-  ```
+- [ ] **4.10** `pnpm install --frozen-lockfile`
+- [ ] **4.11** `pnpm --filter @beritakarya/api db:generate`
+- [ ] **4.12** `pnpm --filter @beritakarya/api db:migrate:deploy`
+- [ ] **4.13** `pnpm --filter @beritakarya/api db:seed`
+- [ ] **4.14** Build API: `pnpm --filter @beritakarya/api build`
+
+> **Catatan**: Frontend di-deploy ke Vercel via Git push. Tidak perlu build web di CT 102.
 
 ### 5.4 Checklist PM2
 
@@ -501,34 +511,16 @@ module.exports = {
       kill_timeout: 3000,
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss'
-    },
-    {
-      name: 'beritakarya-web',
-      script: 'apps/web/.next/standalone/server.js',
-      cwd: '/var/www/beritakarya-prod',
-      instances: 2,
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-        HOSTNAME: '0.0.0.0',
-        NEXT_PUBLIC_API_URL: 'https://api.beritakarya.co',
-        NEXT_PUBLIC_URL: 'https://beritakarya.co'
-      },
-      max_memory_restart: '1G',
-      listen_timeout: 8000,
-      kill_timeout: 3000,
-      merge_logs: true,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss'
     }
   ]
 };
 ```
 
 **Catatan Penting:**
-- `instances: 2` (bukan `'max'`) — menghindari OOM dengan RAM 6 GB
-- `beritakarya-web` menggunakan **standalone server** (`apps/web/.next/standalone/server.js`), bukan `next start`
-- Total estimasi RAM: 2×800M + 2×1G = 3.6 GB + OS ~1.5 GB = ~5.1 GB (aman dari 6 GB)
+- Hanya **beritakarya-api** — frontend (Next.js) di-deploy ke Vercel
+- `instances: 2` dengan RAM 4 GB masih aman
+- Total estimasi RAM: 2×800M = 1.6 GB + OS ~1.5 GB = ~3.1 GB (dari 4 GB, sisa ~0.9 GB headroom)
+- Bisa naikkan ke 3-4 instances jika traffic tinggi (cukup RAM karena frontend sudah di Vercel)
 
 ### 5.6 Checklist Caddy
 
@@ -537,69 +529,9 @@ module.exports = {
 
 ### 5.7 Caddy Configuration (`/etc/caddy/Caddyfile`)
 
-**PENTING**: Konfigurasi ini mendukung **multi-site subdomain** (`bandung.beritakarya.co`, `surabaya.beritakarya.co`, dll). Caddy menggunakan wildcard matcher `{http.request.host.labels.2}` untuk menangkap subdomain dinamis.
+**PENTING**: Frontend (Next.js) di-deploy ke Vercel. Caddy di CT 102 hanya menangani **API** dan **media**.
 
 ```caddy
-# ============================================================
-# Wildcard domain — Multi-site routing
-# Semua subdomain *.beritakarya.co diarahkan ke Next.js
-# Next.js middleware (proxy.ts) yang menentukan site berdasarkan subdomain
-# ============================================================
-*.beritakarya.co {
-    # Extract subdomain dan forward ke Next.js
-    # Caddy otomatis forward Host header, jadi Next.js bisa baca subdomain
-    reverse_proxy localhost:3000 {
-        header_up Host {http.request.host}
-        header_up X-Forwarded-Host {http.request.host}
-        header_up X-Forwarded-Proto {http.request.scheme}
-    }
-
-    encode gzip zstd
-
-    # Header keamanan
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
-    }
-
-    log {
-        output file /var/log/caddy/access_multi.log {
-            roll_size 50mb
-            roll_keep 7
-        }
-    }
-}
-
-# ============================================================
-# Domain utama — Redirect www ke non-www
-# ============================================================
-www.beritakarya.co {
-    redir https://beritakarya.co{uri}
-}
-
-# ============================================================
-# Frontend utama
-# ============================================================
-beritakarya.co {
-    reverse_proxy localhost:3000
-
-    encode gzip zstd
-
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
-    }
-
-    log {
-        output file /var/log/caddy/access_web.log {
-            roll_size 50mb
-            roll_keep 7
-        }
-    }
-}
-
 # ============================================================
 # Backend REST API
 # ============================================================
@@ -625,11 +557,9 @@ api.beritakarya.co {
 
 # ============================================================
 # Media CDN (MinIO via Cloudflare)
-# Hanya jika menggunakan Cloudflare Tunnel langsung ke MinIO
-# Jika pakai Cloudflare Cache Rules, section ini tidak diperlukan
 # ============================================================
 media.beritakarya.co {
-    reverse_proxy localhost:9000
+    reverse_proxy 10.0.0.11:9000
 
     encode gzip zstd
 
@@ -647,28 +577,46 @@ media.beritakarya.co {
 }
 ```
 
+**Yang dihapus** (karena frontend di Vercel):
+- Block `*.beritakarya.co` (wildcard routing ke Next.js)
+- Block `www.beritakarya.co` (redirect)
+- Block `beritakarya.co` (frontend utama)
+
+**Wildcard subdomain** untuk multi-site (`bandung.beritakarya.co`, `surabaya.beritakarya.co`) sekarang di-handle oleh **Vercel**, bukan Caddy.
+
 ### 5.8 Checklist Cloudflare Tunnel & DNS
 
 - [ ] **4.23** Install `cloudflared`
 - [ ] **4.24** `cloudflared tunnel login`
-- [ ] **4.25** `cloudflared tunnel create beritakarya-tunnel`
+- [ ] **4.25** `cloudflared tunnel create beritakarya-api-tunnel`
 - [ ] **4.26** Konfigurasi tunnel → `http://localhost:80` (Caddy)
 - [ ] **4.27** `cloudflared service install <TUNNEL_TOKEN>`
 - [ ] **4.28** `systemctl enable --now cloudflared`
 
-#### DNS Wildcard Configuration (Cloudflare Dashboard)
+#### DNS Configuration (Cloudflare Dashboard)
 
-**WAJIB untuk multi-site subdomain routing.** Tanpa ini, `bandung.beritakarya.co` tidak akan mengarah ke server.
+| Type | Name | Content | Proxy | TTL | Keterangan |
+|------|------|---------|-------|-----|------------|
+| CNAME | `api` | `<TUNNEL_ID>.cfargotunnel.com` | ✅ Proxied | Auto | API backend (via Cloudflare Tunnel) |
+| CNAME | `media` | `<TUNNEL_ID>.cfargotunnel.com` | ✅ Proxied | Auto | Media MinIO (via Cloudflare Tunnel) |
+
+> **Catatan**: Domain utama (`beritakarya.co`) dan wildcard (`*.beritakarya.co`) diatur di **Vercel**, bukan di Cloudflare DNS untuk server ini. Hanya `api` dan `media` yang diarahkan ke self-hosted server.
+
+#### Vercel Domain Configuration
+
+Di Vercel Dashboard → Project → Settings → Domains:
+
+1. Tambahkan `beritakarya.co` → Vercel berikan CNAME target
+2. Tambahkan `*.beritakarya.co` (wildcard) → Vercel handle semua subdomain
+3. Di Cloudflare DNS, buat CNAME untuk `beritakarya.co` mengarah ke Vercel
 
 | Type | Name | Content | Proxy | TTL |
 |------|------|---------|-------|-----|
-| A | `beritakarya.co` | `<IP_SERVER_ANDA>` | ✅ Proxied | Auto |
-| CNAME | `www` | `beritakarya.co` | ✅ Proxied | Auto |
-| CNAME | `api` | `beritakarya.co` | ✅ Proxied | Auto |
-| CNAME | `media` | `beritakarya.co` | ✅ Proxied | Auto |
-| CNAME | `*` | `beritakarya.co` | ✅ Proxied | Auto |
+| CNAME | `beritakarya.co` | `cname.vercel-dns.com` | ✅ Proxied | Auto |
+| CNAME | `www` | `cname.vercel-dns.com` | ✅ Proxied | Auto |
+| CNAME | `*` | `cname.vercel-dns.com` | ✅ Proxied | Auto |
 
-> **Catatan**: CNAME `*` (wildcard) menangkap semua subdomain (`bandung`, `surabaya`, dll). Semua diarahkan ke server yang sama, dan Next.js middleware (`proxy.ts`) yang menentukan site berdasarkan subdomain.
+> Wildcard `*` diarahkan ke Vercel. Semua subdomain (`bandung`, `surabaya`, dll) di-handle oleh Next.js di Vercel.
 
 #### Cloudflare Tunnel Routing
 
@@ -676,24 +624,25 @@ Konfigurasi di Cloudflare Dashboard → Zero Trust → Networks → Tunnels:
 
 | Service | URL |
 |---------|-----|
-| `beritakarya.co` | `http://localhost:80` |
-| `*.beritakarya.co` | `http://localhost:80` |
 | `api.beritakarya.co` | `http://localhost:80` |
 | `media.beritakarya.co` | `http://localhost:80` |
 
-Atau gunakan config file `/root/.cloudflared/config.yml`:
+Config file `/root/.cloudflared/config.yml`:
 
 ```yaml
 tunnel: <TUNNEL_ID>
 credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
-  # Semua traffic masuk ke Caddy (port 80)
-  # Caddy yang handle routing berdasarkan domain
-  - service: http://localhost:80
+  # API dan Media saja — frontend di Vercel
+  - hostname: api.beritakarya.co
+    service: http://localhost:80
+  - hostname: media.beritakarya.co
+    service: http://localhost:80
+  - service: http_status:404
 ```
 
-> Caddy akan handle routing berdasarkan `Host` header. Tidak perlu split routing di Cloudflare Tunnel.
+> Hanya `api` dan `media` yang masuk ke server ini. Frontend tidak melewati Cloudflare Tunnel.
 
 ### 5.9 Port yang Harus Terbuka di CT 102
 
@@ -701,14 +650,14 @@ ingress:
 |------|---------|------|
 | 80 | Caddy (HTTP) | Cloudflare Tunnel |
 | 443 | Caddy (HTTPS) | Cloudflare Tunnel |
-| 3000 | Next.js | Caddy (localhost) |
 | 3001 | Express API | Caddy (localhost) |
-| 9000 | MinIO API (media) | Caddy (localhost) |
 | 9100 | Node Exporter | CT 103 (Monitor) |
+
+> **Dihapus**: Port 3000 (Next.js) dan 9000 (MinIO via Caddy) — frontend di Vercel, media diakses langsung dari CT 101.
 
 ### 5.10 Checklist Cron Scheduler
 
-Codebase BeritaKarya memiliki endpoint `/api/cron/*` yang dirancang untuk dipanggil secara periodik (cleanup expired tokens, KYC cleanup, pageview retention, dll). Di Vercel, ini dipanggil oleh Vercel Cron Jobs. Di self-hosted, perlu scheduler manual.
+Codebase BeritaKarya memiliki endpoint `/api/cron/*` yang dirancang untuk dipanggil secara periodik (cleanup expired tokens, KYC cleanup, pageview retention, dll). Di self-hosted, perlu scheduler manual via crontab.
 
 - [ ] **4.29** Buat cron script `/usr/local/bin/beritakarya-cron.sh`
 - [ ] **4.30** Tambahkan ke crontab
@@ -839,12 +788,12 @@ scrape_configs:
 
 ### 7.2 Checklist Verifikasi Aplikasi
 
-- [ ] **6.6** `pm2 status` → semua process online
+- [ ] **6.6** `pm2 status` → beritakarya-api online
 - [ ] **6.7** `curl http://localhost:3001/health` → `{"status":"healthy"}`
-- [ ] **6.8** `curl http://localhost:3000` → HTML response (Next.js)
-- [ ] **6.9** Buka `https://beritakarya.co` di browser → Site tampil
-- [ ] **6.10** Buka `https://api.beritakarya.co/api-docs` → Swagger tampil
-- [ ] **6.11** Login dengan admin seed credentials → Berhasil
+- [ ] **6.8** Buka `https://beritakarya.co` di browser → Site tampil (Vercel)
+- [ ] **6.9** Buka `https://api.beritakarya.co/api-docs` → Swagger tampil (self-hosted)
+- [ ] **6.10** Login dengan admin seed credentials → Berhasil
+- [ ] **6.11** Buka `https://bandung.beritakarya.co` → Subdomain berfungsi (Vercel wildcard)
 
 ### 7.3 Checklist Verifikasi Monitoring
 
@@ -867,10 +816,11 @@ scrape_configs:
 
 | Item | Command | Expected |
 |------|---------|----------|
-| PM2 status | `pm2 status` | Semua online, restart count = 0 |
+| PM2 status | `pm2 status` | beritakarya-api online, restart count = 0 |
 | Disk usage | `df -h` | < 80% used |
 | PostgreSQL connections | `psql -c "SELECT count(*) FROM pg_stat_activity;"` | < 80 |
 | Redis memory | `redis-cli info memory` | used_memory < maxmemory |
+| Vercel dashboard | https://vercel.com | No deployment errors, healthy status |
 
 ### 8.2 Backup Strategy
 
@@ -881,6 +831,8 @@ scrape_configs:
 | Code (git) | GitHub | Setiap push | Permanent |
 
 ### 8.3 Update Procedure
+
+**Backend (self-hosted di CT 102):**
 
 ```bash
 # 1. Backup database dulu
@@ -895,22 +847,27 @@ pnpm install --frozen-lockfile
 pnpm --filter @beritakarya/api db:generate
 pnpm --filter @beritakarya/api db:migrate:deploy
 
-# 4. Build
-pnpm build
+# 4. Build API
+pnpm --filter @beritakarya/api build
 
-# 5. Copy static assets (jika ada perubahan frontend)
-cp -r apps/web/public apps/web/.next/standalone/public
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
-
-# 6. Restart PM2
+# 5. Restart PM2
 pm2 reload ecosystem.config.js
+```
+
+**Frontend (Vercel):**
+
+```bash
+# Frontend auto-deploy dari Git push ke main branch
+# Cek status di Vercel Dashboard → Deployments
+# Tidak perlu aksi manual di server
 ```
 
 ### 8.4 Rollback Procedure
 
+**Backend (self-hosted):**
+
 ```bash
 # 1. Restore database
-pg_dump -U berita_user -h 10.0.0.11 -d beritakarya -F c -f /tmp/rollback.dump
 pg_restore -U berita_user -h 10.0.0.11 -d beritakarya -c /var/backups/postgresql/beritakarya_backup_<DATE>.dump
 
 # 2. Rollback code
@@ -918,12 +875,17 @@ cd /var/www/beritakarya-prod
 git log --oneline -5  # Cari commit sebelumnya
 git checkout <COMMIT_HASH>
 pnpm install --frozen-lockfile
-pnpm build
-cp -r apps/web/public apps/web/.next/standalone/public
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+pnpm --filter @beritakarya/api build
 
 # 3. Restart
 pm2 reload ecosystem.config.js
+```
+
+**Frontend (Vercel):**
+
+```bash
+# Di Vercel Dashboard → Deployments → cari deployment sebelumnya → "Promote to Production"
+# Atau revert commit di Git, Vercel auto-deploy versi sebelumnya
 ```
 
 ---
