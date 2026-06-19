@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
       // Token disimpan di httpOnly cookie — tidak bisa diakses via JS
       // Jika user null setelah AuthInit selesai checkAuth, 
-      // middleware.ts (Next.js) sudah handle redirect ke /login via cookie check
+      // proxy.ts (Next.js) sudah handle redirect ke /login via cookie check
       if (user) {
         // [MULTI-SITE] Cross-site guard: tolak akses dashboard situs lain
         // - Superadmin: bebas lintas situs
