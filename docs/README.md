@@ -34,9 +34,9 @@ Dokumentasi lengkap untuk BeritaKarya.
 ## Prinsip Deployment
 
 - **Infra = kepastian**, codebase menyesuaikan
-- **Semua service native** (tanpa Docker) di LXC container
-- **Zero cloud dependency** selain Cloudflare (DNS/Tunnel/CDN) dan OpenAI (AI API)
-- **Multi-tenant** via wildcard subdomain (`*.beritakarya.co`)
+- **Hybrid**: Frontend di **Vercel**, backend & database self-hosted di LXC
+- **Backend native** (tanpa Docker) di LXC container
+- **Multi-tenant** via wildcard subdomain (`*.beritakarya.co`) — di-handle Vercel
 
 ## Planned Documentation
 

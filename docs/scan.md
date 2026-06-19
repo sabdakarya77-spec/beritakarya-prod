@@ -68,7 +68,7 @@
 
 | # | File | Alasan Dead |
 |---|------|-------------|
-| 16 | `api/index.ts` | Vercel serverless entry point. Project sudah self-hosted, tidak pakai Vercel |
+| 16 | `api/index.ts` | Vercel serverless entry point untuk API. API self-hosted di CT 102, file ini tidak dipakai. Frontend tetap di Vercel tapi tidak butuh file ini. |
 
 ### 2.4 Dead Patch Files
 

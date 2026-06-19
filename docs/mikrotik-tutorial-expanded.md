@@ -573,9 +573,9 @@ pct create 101 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
 
 ---
 
-### 5.8 Membuat LXC Container (CT 102 — App Stack)
+### 5.8 Membuat LXC Container (CT 102 — API Server)
 
-Ulangi proses yang sama untuk **CT 102** (`lxc-2-app`) — container ini menjalankan NestJS API dan Cloudflare Tunnel.
+Ulangi proses yang sama untuk **CT 102** (`lxc-2-app`) — container ini menjalankan Express API dan Cloudflare Tunnel. Frontend (Next.js) di-deploy ke **Vercel**.
 
 #### Via CLI:
 
@@ -585,15 +585,15 @@ pct create 102 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
   --password "GantiDenganPasswordKuat!" \
   --storage local-lvm \
   --rootfs local-lvm:20 \
-  --cores 4 \
-  --memory 6144 \
-  --swap 3072 \
+  --cores 2 \
+  --memory 4096 \
+  --swap 2048 \
   --net0 name=eth0,bridge=vmbr0,tag=20,ip=10.0.0.12/24,gw=10.0.0.1 \
   --nameserver 1.1.1.1 \
   --start 1
 ```
 
-> CT 102 diberi **RAM lebih besar (6 GB)** karena menjalankan Node.js app stack.
+> CT 102 cukup **2 core, 4 GB RAM** karena hanya menjalankan API. Frontend di Vercel.
 
 ---
 

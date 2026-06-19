@@ -31,11 +31,12 @@ Arsitektur sistem BeritaKarya — platform CMS media digital multi-situs.
 │           │   ├── Redis 7                                    │
 │           │   ├── Meilisearch v1.6                           │
 │           │   └── MinIO (S3-compatible media storage)        │
-│           ├── CT 102 (10.0.0.12) — Application              │
+│           ├── CT 102 (10.0.0.12) — API Server                │
 │           │   ├── Express API (PM2 cluster)                  │
-│           │   ├── Next.js (PM2 cluster, standalone)          │
-│           │   ├── Caddy (reverse proxy, wildcard subdomain)  │
+│           │   ├── Caddy (reverse proxy, API + Media)         │
 │           │   └── Cloudflare Tunnel                          │
+│                                                             │
+│  External: Vercel (Frontend Next.js, wildcard subdomain)     │
 │           └── CT 103 (10.0.0.13) — Monitoring               │
 │               ├── Prometheus                                  │
 │               ├── Grafana                                     │
