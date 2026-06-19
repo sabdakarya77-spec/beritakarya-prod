@@ -83,22 +83,21 @@ rename `proxy.ts → middleware.ts` yang selama ini tidak aktif.
 - `components/ui/ArticleActions.tsx`
 - `components/ui/DateTimeWeather.tsx`
 - `components/ui/FontSizeControl.tsx`
-- `components/ui/MobileArticleTools.tsx` *(218 baris logika bookmark+share — tapi tidak ada yang menggunakannya)*
 - `components/ui/NewsletterForm.tsx`
 
 ---
 
-### Phase 4 — Hapus Build Artifacts
+### Phase 4 — Hapus Build Artifacts ✅ SELESAI
 
-#### [DELETE] Build artifacts yang tidak perlu di-commit:
+#### [DELETE] Build artifacts yang tidak perlu di-commit: ✅
 
 **`apps/web`:**
-- `tsconfig.tsbuildinfo` (338 KB) — TypeScript incremental cache
-- `.turbo/` — 4 log files Turborepo
-- `test-results/` — hanya berisi `.last-run.json`
+- ✅ `tsconfig.tsbuildinfo` (338 KB) — TypeScript incremental cache
+- ✅ `.turbo/` — 4 log files Turborepo
+- ✅ `test-results/` — hanya berisi `.last-run.json`
 
 **`apps/api`:**
-- `tsconfig.build.tsbuildinfo` (391 KB) — build cache, tercatat di scan.md section 2.5
+- ✅ `tsconfig.build.tsbuildinfo` (391 KB) — build cache, tercatat di scan.md section 2.5
 
 > [!NOTE]
 > Build artifacts ini akan di-regenerate otomatis saat `pnpm build`. Tidak ada informasi yang hilang.
