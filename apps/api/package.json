@@ -14,7 +14,9 @@
     "db:studio": "prisma studio",
     "db:seed": "ts-node --project tsconfig.scripts.json src/db/seed.ts",
     "db:seed:categories": "ts-node --project tsconfig.scripts.json scripts/seed-categories-from-config.ts",
-    "cleanup:trial": "ts-node --project tsconfig.scripts.json scripts/cleanup-trial-content.ts"
+    "cleanup:trial": "ts-node --project tsconfig.scripts.json scripts/cleanup-trial-content.ts",
+    "db:seed:e2e": "ts-node --project tsconfig.scripts.json src/scripts/e2e-seed.ts",
+    "db:teardown:e2e": "ts-node --project tsconfig.scripts.json src/scripts/e2e-teardown.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1053.0",

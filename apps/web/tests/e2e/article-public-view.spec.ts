@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { mockPublicArticle, mockPublicArticlesList, MOCK_ARTICLE } from './helpers/homepage-mock';
+import { MOCK_ARTICLE } from './helpers/homepage-mock';
 
 const SITE = 'pusat';
 
 test.describe('Article Public View', () => {
-  test.beforeEach(async ({ page }) => {
-    mockPublicArticle(page);
-    mockPublicArticlesList(page);
+  // Article data comes from the database (seeded by e2e-seed.ts).
+  // Only mock non-content endpoints that may not have test data.
 
+  test.beforeEach(async ({ page }) => {
     // Mock heartbeat (AuthInit runs on every page)
     await page.route('**/api/v1/users/heartbeat', (route) => {
       route.fulfill({
@@ -17,25 +17,7 @@ test.describe('Article Public View', () => {
       });
     });
 
-    // Mock comments
-    await page.route('**/api/v1/comments**', (route) => {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: [] }),
-      });
-    });
-
-    // Mock ads
-    await page.route('**/api/v1/ads/public**', (route) => {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: [] }),
-      });
-    });
-
-    // Mock analytics
+    // Mock analytics (not seeded)
     await page.route('**/api/v1/analytics**', (route) => {
       route.fulfill({
         status: 200,
@@ -43,40 +25,24 @@ test.describe('Article Public View', () => {
         body: JSON.stringify({ success: true, data: {} }),
       });
     });
-
-    // Mock sites (for multi-site context)
-    await page.route('**/api/v1/sites**', (route) => {
-      if (route.request().method() === 'GET') {
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: true,
-            data: [{ id: 'pusat', name: 'BeritaKarya Pusat', domain: 'beritakarya.co' }],
-          }),
-        });
-      } else {
-        route.continue();
-      }
-    });
   });
 
   test('menampilkan judul artikel', async ({ page }) => {
     await page.goto(`/${SITE}/artikel/${MOCK_ARTICLE.slug}`);
 
-    await expect(page.getByText(MOCK_ARTICLE.title)).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: MOCK_ARTICLE.title })).toBeVisible({ timeout: 20000 });
   });
 
   test('menampilkan nama penulis', async ({ page }) => {
     await page.goto(`/${SITE}/artikel/${MOCK_ARTICLE.slug}`);
 
-    await expect(page.getByText(MOCK_ARTICLE.author.name)).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText(MOCK_ARTICLE.author.name).first()).toBeVisible({ timeout: 20000 });
   });
 
   test('menampilkan kategori artikel', async ({ page }) => {
     await page.goto(`/${SITE}/artikel/${MOCK_ARTICLE.slug}`);
 
-    await expect(page.getByText(MOCK_ARTICLE.category.name)).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText(MOCK_ARTICLE.category.name).first()).toBeVisible({ timeout: 20000 });
   });
 
   test('menampilkan excerpt artikel', async ({ page }) => {

@@ -151,20 +151,8 @@ export async function loginAs(page: Page, role: UserRole, site: string = 'pusat'
     }
   });
 
-  await page.route('**/api/v1/articles**', (route) => {
-    if (route.request().method() === 'GET') {
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 },
-        }),
-      });
-    } else {
-      route.continue();
-    }
-  });
+  // Note: articles mock removed — data comes from seeded DB via SSR.
+  // Tests that need specific article list data should add their own mock.
 
   await page.route('**/api/v1/analytics**', (route) => {
     route.fulfill({
