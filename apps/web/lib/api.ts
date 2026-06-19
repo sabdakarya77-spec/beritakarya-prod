@@ -13,7 +13,7 @@ export const api = axios.create({
 
 api.interceptors.request.use(async (config) => {
   if (typeof window !== 'undefined') {
-    // [FIX-MULTISITE] Baca site dari cookie (dikelola proxy.ts)
+    // [FIX-MULTISITE] Baca site dari cookie (dikelola middleware.ts)
     let siteId = document.cookie
       .split('; ')
       .find(r => r.startsWith('siteId='))

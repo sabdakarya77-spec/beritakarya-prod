@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || ''
 
   // bandung.localhost:3000 -> bandung

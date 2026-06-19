@@ -17,23 +17,21 @@
 
 ## 1. Temuan Kritis
 
-### ⚠️ `apps/web/proxy.ts` — Middleware Tidak Aktif
+### ✅ `apps/web/proxy.ts` → `middleware.ts` — SUDAH DIAKTIFKAN
 
-**Masalah**: File `proxy.ts` berisi logic Next.js middleware (subdomain detection, auth guard, URL rewrite) tapi **tidak pernah dijalankan** karena Next.js hanya membaca file bernama `middleware.ts`.
+> **Status**: ✅ **SELESAI** — 19 Juni 2026
 
-**Bukti**:
-- Tidak ada `middleware.ts` di project
-- Tidak ada file yang import dari `proxy.ts`
-- Export `proxy` function + `config` object = signature Next.js middleware
+**Masalah (sebelumnya)**: File `proxy.ts` berisi logic Next.js middleware (subdomain detection, auth guard, URL rewrite) tapi **tidak pernah dijalankan** karena Next.js hanya membaca file bernama `middleware.ts`.
 
-**Dampak**:
-- Subdomain routing (`bandung.beritakarya.co` → siteId) **tidak aktif**
-- Auth guard `/dashboard` **tidak aktif** (user tanpa token bisa akses)
-- URL rewrite (`/` → `/pusat/`) **tidak aktif**
+**Yang sudah dilakukan**:
+- ✅ Rename `proxy.ts` → `middleware.ts`
+- ✅ Rename export function `proxy` → `middleware`
+- ✅ Update komentar referensi di `lib/api.ts` dan `dashboard/layout.tsx`
 
-**Opsi**:
-1. **Rename** `proxy.ts` → `middleware.ts` agar aktif (recommended)
-2. **Hapus** jika memang tidak dibutuhkan
+**Dampak (sekarang AKTIF)**:
+- Subdomain routing (`bandung.beritakarya.co` → siteId) **AKTIF**
+- Auth guard `/dashboard` **AKTIF** (user tanpa token di-redirect ke /login)
+- URL rewrite (`/` → `/pusat/`) **AKTIF**
 
 ---
 
@@ -90,6 +88,7 @@
 | 23 | `dist/modules/article/article.publish.js` | Source sudah direfaktor ke `publish.service.ts` |
 | 24 | `dist/middleware/aiQuota.js` | Source rename ke `aiQuota.middleware.ts` |
 | 25 | `dist/middleware/quotaNotifications.js` | Source pindah ke `services/quotaNotifications.service.ts` |
+| 26 | `tsconfig.build.tsbuildinfo` (391KB) | TypeScript incremental build cache di root `apps/api/`. Terlewat dari scan awal |
 
 ### 2.6 Config yang Masih Dipakai
 
@@ -99,6 +98,19 @@
 | `vitest.config.mts` | ✅ Aktif | Dipakai oleh test runner |
 | `.env.example` | ✅ Aktif | Template dokumentasi |
 | `.env.example.selfhosted` | ✅ Aktif | Template dokumentasi self-hosted |
+
+### 2.7 Scripts Root yang Perlu Dicek (Gap — Terlewat dari Scan Awal)
+
+> Direktori `apps/api/scripts/` tidak dicakup oleh scan awal. Berikut hasil pengecekan:
+
+| File | Status | Catatan |
+|------|--------|---------|
+| `scripts/copy-assets.js` | ✅ Aktif | Dipakai di `build` script package.json |
+| `scripts/cleanup-trial-content.ts` | ✅ Aktif | Ada di `cleanup:trial` script package.json |
+| `scripts/seed-categories-from-config.ts` | ✅ Aktif | Ada di `db:seed:categories` script package.json |
+| `scripts/backfill-blur.ts` | ✅ Aktif | Masih dipakai (konfirmasi user) |
+| `scripts/import-wordpress.ts` | ✅ Aktif | Masih dipakai (konfirmasi user) |
+| `scripts/query-media.ts` | ✅ Aktif | Masih dipakai (konfirmasi user) |
 
 ---
 
@@ -114,7 +126,7 @@
 | 4 | `components/ui/ArticleActions.tsx` | Tidak ada yang import |
 | 5 | `components/ui/DateTimeWeather.tsx` | Tidak ada yang import |
 | 6 | `components/ui/FontSizeControl.tsx` | Tidak ada yang import |
-| 7 | `components/ui/MobileArticleTools.tsx` | Tidak ada yang import (wrapper) |
+| 7 | `components/ui/MobileArticleTools.tsx` | Tidak ada yang import (218 baris — bookmark + share sheet + bottom bar, tapi tidak dipanggil siapapun) |
 | 8 | `components/ui/NewsletterForm.tsx` | Tidak ada yang import |
 
 ### 3.2 Build Artifacts (seharusnya di .gitignore)
@@ -123,9 +135,9 @@
 |---|------|--------|
 | 9 | `tsconfig.tsbuildinfo` | TypeScript incremental build cache (330KB). Regenerated setiap `tsc` |
 | 10 | `.turbo/` (4 log files) | Turborepo local cache/logs |
-| 11 | `test-results/` (5 dirs) | Playwright test failure screenshots dari run sebelumnya |
+| 11 | `test-results/` (1 file) | Hanya berisi `.last-run.json` (metadata Playwright). Tidak ada screenshot |
 
-### 3.3 File Aktif yang Terdeteksi (BUAN dead)
+### 3.3 File Aktif yang Terdeteksi (BUKAN dead)
 
 | File | Status | Catatan |
 |------|--------|---------|
@@ -136,6 +148,13 @@
 | `public/placeholder.jpg` | ✅ Aktif | Fallback image untuk SmartImage, NewsCard |
 | `public/sw.js` | ✅ Aktif | Service Worker |
 | `postcss.config.js` | ✅ Aktif | Tailwind/PostCSS config |
+
+### 3.4 File Aktif yang Tidak Tercakup Scan (Gap — Terlewat dari Scan Awal)
+
+| File | Status | Catatan |
+|------|--------|---------|
+| `components/berita/MagazineBentoHero.tsx` | ✅ Aktif | Diimport dan dirender di `SiteHomePage.tsx` |
+| `components/ui/ArticleFloatingTools.tsx` | ✅ Aktif | Diimport di `app/[site]/artikel/[slug]/page.tsx` — floating toolbar desktop |
 
 ---
 
@@ -181,10 +200,9 @@ test-results/
 
 ### Perlu Keputusan
 
-| Item | Opsi | Dampak |
-|------|------|--------|
-| `proxy.ts` | Rename → `middleware.ts` | Aktifkan multisite routing + auth guard |
-| `proxy.ts` | Hapus | Multisite routing tidak jalan (perlu tulis ulang) |
+| Item | Opsi | Dampak | Status |
+|------|------|--------|--------|
+| `proxy.ts` | Rename → `middleware.ts` | Aktifkan multisite routing + auth guard | ✅ **SELESAI** |
 
 ### Clean Build (Setelah Hapus File)
 
@@ -197,4 +215,6 @@ pnpm type-check
 
 ---
 
-> **Total**: 27 file dead + 11 build artifacts = **38 file** bisa dihapus
+> **Total**: 28 file dead + 12 build artifacts = **40 file** bisa dihapus
+>
+> **Koreksi dari verifikasi**: `test-results/` bukan 5 dirs (hanya 1 file), `MobileArticleTools.tsx` bukan wrapper (218 baris full component). Gap: `MagazineBentoHero.tsx` & `ArticleFloatingTools.tsx` (aktif, aman), 3 scripts perlu dicek, 1 build artifact tambahan (`tsconfig.build.tsbuildinfo`).
