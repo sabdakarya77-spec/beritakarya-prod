@@ -4,7 +4,7 @@ Dokumen ini menyediakan panduan langkah-demi-langkah yang terperinci untuk mengo
 
 Berdasarkan dokumen arsitektur dan topologi jaringan, berikut adalah alokasi container kita:
 - **CT 101 (`lxc-1-db`)**: `10.0.0.11` — Menjalankan PostgreSQL 15, Redis 7, dan Meilisearch v1.6.
-- **CT 102 (`lxc-2-app`)**: `10.0.0.12` — Menjalankan Node.js App Stack (Next.js & Express API), PM2, Nginx/Caddy, dan Cloudflare Tunnel.
+- **CT 102 (`lxc-2-app`)**: `10.0.0.12` — Menjalankan Express API (PM2), Caddy, dan Cloudflare Tunnel. Frontend (Next.js) di-deploy ke **Vercel**.
 - **CT 103 (`lxc-3-monitor`)**: `10.0.0.13` — Menjalankan Prometheus, Grafana, dan Exporters.
 
 ---
@@ -213,9 +213,9 @@ echo "0 2 * * * root /usr/local/bin/backup_db.sh" >> /etc/crontab
 
 ---
 
-## BAB 3: Konfigurasi `lxc-2-app` (Application Stack)
+## BAB 3: Konfigurasi `lxc-2-app` (API Server)
 
-Container ini dialokasikan 4 Core CPU dan 6 GB RAM untuk menjalankan frontend (Next.js) dan backend (Express/NestJS API).
+Container ini dialokasikan 2 Core CPU dan 4 GB RAM untuk menjalankan backend Express API. Frontend (Next.js) di-deploy ke **Vercel**, tidak di container ini.
 
 ### 3.1 Install Node.js LTS, PNPM, PM2, dan Caddy
 Jalankan langkah-langkah berikut di `lxc-2-app` (`10.0.0.12`):
@@ -280,15 +280,18 @@ RESET_SECRET=BuatRandomSecretKeyLainDisiniUntukResetPassword
 CORS_ORIGIN=https://beritakarya.co          # Domain utama frontend Anda
 COOKIE_DOMAIN=.beritakarya.co
 
-# S3/R2 Storage & CDN untuk unggahan file gambar/media
-S3_ENDPOINT="https://[PROJECT_REF].supabase.co/storage/v1/s3"
-S3_REGION="ap-southeast-1"
-S3_ACCESS_KEY="ACCESS_KEY_S3_PROD"
-S3_SECRET_KEY="SECRET_KEY_S3_PROD"
+# MinIO Storage (BUKAN AWS S3 — ini MinIO self-hosted di CT 101)
+# Variabel pakai prefix S3_ karena MinIO menggunakan protokol S3 yang sama
+STORAGE_TYPE="s3"
+S3_ENDPOINT="http://10.0.0.11:9000"
+S3_REGION="us-east-1"
+S3_ACCESS_KEY="minioadmin"
+S3_SECRET_KEY="GantiDenganPasswordMinIOKuat!"
 S3_FORCE_PATH_STYLE=true
 S3_BUCKET="kyc"
 S3_MEDIA_BUCKET="media"
-SUPABASE_STORAGE_PUBLIC_URL="https://[PROJECT_REF].supabase.co/storage/v1/object/public"
+# URL publik media melalui Caddy → MinIO
+SUPABASE_STORAGE_PUBLIC_URL="https://media.beritakarya.co"
 
 # Integrasi AI
 OPENAI_API_KEY=sk-proj-YourProductionOpenAIApiKey
@@ -310,31 +313,41 @@ SEED_ADMIN_EMAIL=admin@beritakarya.co
 SEED_ADMIN_PASSWORD=PasswordAdminAwal123!
 ```
 
-#### 3.3.2 frontend Web: `/var/www/beritakarya-prod/apps/web/.env.production`
-```ini
-NODE_ENV=production
-NEXT_PUBLIC_API_URL="https://api.beritakarya.co"
-NEXT_PUBLIC_URL="https://beritakarya.co"
-NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"            # ID Google Analytics
-NEXT_PUBLIC_SITE_ID="pusat"
-```
+#### 3.3.2 Frontend (Vercel — Tidak Perlu di Server)
 
-### 3.4 Build Aplikasi & Inisialisasi Database
+Frontend di-deploy ke **Vercel**. Environment variables diatur di **Vercel Dashboard** → Project → Settings → Environment Variables:
+
+| Variable | Nilai |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://api.beritakarya.co` |
+| `NEXT_PUBLIC_URL` | `https://beritakarya.co` |
+| `NEXT_PUBLIC_GA_ID` | `G-XXXXXXXXXX` |
+
+> Tidak perlu buat `.env.production` di server. Cukup set di Vercel Dashboard.
+
+### 3.4 Build API & Inisialisasi Database
 Jalankan proses build di direktori root project:
 
 ```bash
+# Generate Prisma client
+pnpm --filter @beritakarya/api db:generate
+
 # Jalankan migrasi schema database ke PostgreSQL target
 pnpm --filter @beritakarya/api db:migrate:deploy
 
 # Jalankan seeder database untuk data role quota awal dan superadmin
 pnpm --filter @beritakarya/api db:seed
 
-# Build semua aplikasi di monorepo (API & NextJS Frontend)
-pnpm build
+# Build API saja (frontend di Vercel, tidak perlu build di server)
+pnpm --filter @beritakarya/api build
 ```
 
+> **Catatan**: Tidak perlu build `apps/web` — frontend di-deploy ke Vercel via Git push.
+
 ### 3.5 Konfigurasi PM2 Process Manager
-Buat file konfigurasi `/var/www/beritakarya-prod/ecosystem.config.js` untuk mengelola proses aplikasi dengan PM2:
+Buat file konfigurasi `/var/www/beritakarya-prod/ecosystem.config.js` untuk mengelola proses API dengan PM2:
+
+> **Catatan**: Hanya API — frontend (Next.js) di-deploy ke Vercel.
 
 ```javascript
 module.exports = {
@@ -344,30 +357,13 @@ module.exports = {
       script: 'node',
       args: 'apps/api/dist/main.js',
       cwd: '/var/www/beritakarya-prod',
-      instances: 'max',                 // Jalankan di 4 core (Cluster mode)
+      instances: 2,                     // 2 workers (hemat RAM, cukup untuk 2 core)
       exec_mode: 'cluster',
       env: {
         NODE_ENV: 'production',
         PORT: 3001
       },
-      max_memory_restart: '1G',
-      listen_timeout: 8000,
-      kill_timeout: 3000,
-      merge_logs: true,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss'
-    },
-    {
-      name: 'beritakarya-web',
-      script: 'node_modules/next/dist/bin/next',
-      args: 'start apps/web -p 3000',
-      cwd: '/var/www/beritakarya-prod',
-      instances: 'max',                 // Jalankan di 4 core (Cluster mode)
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000
-      },
-      max_memory_restart: '1.5G',
+      max_memory_restart: '800M',
       listen_timeout: 8000,
       kill_timeout: 3000,
       merge_logs: true,
@@ -376,6 +372,8 @@ module.exports = {
   ]
 };
 ```
+
+**Estimasi RAM**: 2 × 800M = 1.6 GB + OS ~1 GB = ~2.6 GB dari 4 GB (aman).
 
 Jalankan PM2 dan konfigurasikan autostart saat VM/LXC booting:
 ```bash
@@ -391,31 +389,16 @@ pm2 startup
 ```
 
 ### 3.6 Konfigurasi Caddy Reverse Proxy
-Caddy akan melayani port HTTP (`80`) dan HTTPS (`443`) secara aman, dan mengarahkan lalu lintas ke port internal Next.js (`3000`) dan API (`3001`).
+Caddy hanya menangani **API** dan **media**. Frontend di-deploy ke Vercel.
 
 Edit `/etc/caddy/Caddyfile`:
 ```caddy
-# Frontend Web Utama
-beritakarya.co, www.beritakarya.co {
-    reverse_proxy localhost:3000
-    
-    encode gzip zstd
-    
-    log {
-        output file /var/log/caddy/access_web.log {
-            roll_size 50mb
-            roll_keep 7
-        }
-    }
-}
-
 # Backend REST API
 api.beritakarya.co {
     reverse_proxy localhost:3001
-    
+
     encode gzip zstd
-    
-    # Header keamanan tambahan
+
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-XSS-Protection "1; mode=block"
@@ -430,14 +413,33 @@ api.beritakarya.co {
         }
     }
 }
+
+# Media (MinIO di CT 101)
+media.beritakarya.co {
+    reverse_proxy 10.0.0.11:9000
+
+    encode gzip zstd
+
+    header {
+        Cache-Control "public, max-age=31536000, immutable"
+    }
+
+    log {
+        output file /var/log/caddy/access_media.log {
+            roll_size 50mb
+            roll_keep 7
+        }
+    }
+}
 ```
 Mulai ulang Caddy:
 ```bash
 systemctl restart caddy
 ```
 
-### 3.7 Integrasi Cloudflare Tunnel (Opsional / Direkomendasikan)
-Untuk mengekspos Caddy ke internet secara aman tanpa perlu melakukan port forwarding di MikroTik:
+### 3.7 Integrasi Cloudflare Tunnel
+Cloudflare Tunnel mengekspos **API** dan **media** ke internet. Frontend di Vercel, tidak melewati tunnel.
+
 ```bash
 # Unduh dan pasang cloudflared
 curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
@@ -447,16 +449,40 @@ dpkg -i cloudflared.deb
 cloudflared tunnel login
 
 # Buat tunnel baru
-cloudflared tunnel create beritakarya-tunnel
+cloudflared tunnel create beritakarya-api-tunnel
 
-# Konfigurasi tunnel di /root/.cloudflare/config.yml:
-# url: http://localhost:80 (mengarah ke Caddy)
+# Konfigurasi tunnel di /root/.cloudflared/config.yml:
+# Hanya api dan media — frontend di Vercel
+```
 
+Config file `/root/.cloudflared/config.yml`:
+```yaml
+tunnel: <TUNNEL_ID>
+credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  - hostname: api.beritakarya.co
+    service: http://localhost:80
+  - hostname: media.beritakarya.co
+    service: http://localhost:80
+  - service: http_status:404
+```
+
+```bash
 # Jalankan tunnel sebagai systemd service
 cloudflared service install <TUNNEL_TOKEN>
 systemctl start cloudflared
 systemctl enable cloudflared
 ```
+
+**DNS di Cloudflare Dashboard:**
+
+| Type | Name | Content | Keterangan |
+|---|---|---|---|
+| CNAME | `api` | `<TUNNEL_ID>.cfargotunnel.com` | API backend |
+| CNAME | `media` | `<TUNNEL_ID>.cfargotunnel.com` | Media MinIO |
+| CNAME | `beritakarya.co` | `cname.vercel-dns.com` | Frontend Vercel |
+| CNAME | `*` | `cname.vercel-dns.com` | Wildcard Vercel |
 
 ---
 
