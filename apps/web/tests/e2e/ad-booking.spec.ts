@@ -19,7 +19,8 @@ test.describe('Ad Booking — Advertiser Order Page', () => {
 
     await page.goto(`/${SITE}/dashboard/ads/order`);
     await expect(page.getByText('Pilih Paket & Format Iklan')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Billboard Banner Pusat')).toBeVisible({ timeout: 20000 });
+    // Package name appears twice (list + summary) — use first()
+    await expect(page.getByText('Billboard Banner Pusat').first()).toBeVisible({ timeout: 20000 });
   });
 
   test('shows empty state when no packages available', async ({ page }) => {
@@ -51,7 +52,7 @@ test.describe('Ad Booking — Advertiser Dashboard', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Riwayat Booking').click();
+    await page.getByText('Riwayat Booking', { exact: true }).click();
     await expect(page.getByText('Riwayat Booking').first()).toBeVisible({ timeout: 10000 });
   });
 });
@@ -73,7 +74,7 @@ test.describe('Ad Booking — Superadmin Management', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Antrean Validasi Booking').click();
+    await page.getByText('Antrean Validasi Booking', { exact: true }).click();
     await expect(page.getByText(/Antrean Validasi/)).toBeVisible({ timeout: 10000 });
   });
 
@@ -83,7 +84,7 @@ test.describe('Ad Booking — Superadmin Management', () => {
 
     await page.goto(`/${SITE}/dashboard/ads`);
     await expect(page.getByText('Portal Iklan & Monetisasi')).toBeVisible({ timeout: 15000 });
-    await page.getByText('Katalog Paket Iklan').click();
+    await page.getByText('Katalog Paket Iklan', { exact: true }).click();
     await expect(page.getByText(/Katalog Paket/)).toBeVisible({ timeout: 10000 });
   });
 });
@@ -94,9 +95,8 @@ test.describe('Ad Booking — Access Control', () => {
   test('advertiser cannot access editorial review page', async ({ page }) => {
     await loginAs(page, 'advertiser', SITE);
     await page.goto(`/${SITE}/dashboard/review`);
-    // Should redirect away from review page (layout guard redirects to dashboard)
-    await page.waitForURL((url) => !url.pathname.includes('/review'), { timeout: 10000 });
-    expect(page.url()).not.toContain('/review');
+    // Review page shows "Akses Terbatas" for non-editorial roles (no redirect)
+    await expect(page.getByText('Akses Terbatas')).toBeVisible({ timeout: 15000 });
   });
 
   test('superadmin sees full sidebar', async ({ page }) => {

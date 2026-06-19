@@ -120,7 +120,7 @@ export async function loginAs(page: Page, role: UserRole, site: string = 'pusat'
     });
   });
 
-  await page.route('**/api/v1/users/heartbeat', (route) => {
+  await page.route(/\/api\/v1\/users\/heartbeat/, (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',

@@ -42,7 +42,7 @@ export const MOCK_PACKAGES: MockAdPackage[] = [
 ];
 
 export function mockAdPackages(page: Page, packages: MockAdPackage[] = MOCK_PACKAGES) {
-  page.route('**/api/v1/ads/packages', (route) => {
+  page.route(/\/api\/v1\/ads\/packages/, (route) => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
