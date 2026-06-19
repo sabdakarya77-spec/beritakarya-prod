@@ -32,8 +32,9 @@ Dua dokumen panduan (`panduan_produksi_lxc.md` dan `mikrotik-tutorial-expanded.m
 | Aspek | Status | Catatan |
 |-------|--------|---------|
 | Topologi Jaringan | ✅ Solid | VLAN isolation antara Admin (VLAN 10) dan Server (VLAN 20) sudah benar |
-| Alokasi Resource | ⚠️ Perlu Review | RAM CT 102 (6 GB) mungkin kurang untuk PM2 cluster mode 4 core |
-| Kesesuaian Codebase | ⚠️ Ada Gap | Beberapa konfigurasi .env tidak sinkron dengan schema Prisma aktual |
+| Alokasi Resource | ✅ Aman | RAM CT 102 dikurangi ke 4 GB karena frontend di Vercel |
+| Arsitektur | ✅ Hybrid | Frontend di Vercel, backend self-hosted — hemat RAM, dapat CDN |
+| Kesesuaian Codebase | ✅ Sesuai | Konfigurasi .env sudah sinkron, STORAGE_TYPE ditambahkan |
 | Keamanan | ✅ Baik | Firewall rules, DB isolation, Redis auth sudah dipertimbangkan |
 | Monitoring | ✅ Lengkap | Prometheus + Grafana + Exporters sudah terencana |
 | Backup | ⚠️ Dasar | Hanya pg_dump cron, belum ada strategi off-site backup |
@@ -66,13 +67,18 @@ Berdasarkan analisis codebase, deployment saat ini menggunakan:
 - `apps/api/api/index.ts` → Vercel serverless entry point
 - `docker-compose.yml` → 5 services (postgres, redis, meilisearch, api, web) untuk development
 
-### 2.2 Arsitektur Target (Panduan LXC)
+### 2.2 Arsitektur Target (Hybrid Vercel + Self-Hosted)
 
-Panduan merancang migrasi ke self-hosted:
+Arsitektur hybrid — frontend di Vercel, backend & database self-hosted:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                 SELF-HOSTED STACK                    │
+│                 HYBRID STACK                         │
+│                                                     │
+│  Vercel (Frontend)                                   │
+│  ├── Next.js SSR + CDN edge                         │
+│  ├── Wildcard subdomain (*.beritakarya.co)           │
+│  └── Auto-deploy dari Git push                       │
 │                                                     │
 │  MikroTik Router (Gateway, DHCP, Firewall, VLAN)    │
 │       │                                             │
@@ -85,9 +91,8 @@ Panduan merancang migrasi ke self-hosted:
 │           │   ├── Redis 7                            │
 │           │   ├── Meilisearch v1.6                   │
 │           │   └── MinIO (S3-compatible)               │
-│           ├── CT 102 (10.0.0.12) — App              │
+│           ├── CT 102 (10.0.0.12) — API Only          │
 │           │   ├── Express API (PM2 cluster)          │
-│           │   ├── Next.js (PM2 cluster)              │
 │           │   ├── Caddy (reverse proxy)              │
 │           │   └── Cloudflare Tunnel                  │
 │           └── CT 103 (10.0.0.13) — Monitor          │
@@ -99,15 +104,16 @@ Panduan merancang migrasi ke self-hosted:
 
 ### 2.3 Perbandingan Resource
 
-| Komponen | Cloud (Saat Ini) | LXC (Target) | Catatan |
-|----------|------------------|--------------|---------|
-| **CPU** | Shared (Vercel/Railway) | 2+4+2 = 8 cores total | Dedicated, lebih konsisten |
-| **RAM** | Shared | 4+6+2 = 12 GB total | Terbatas, perlu monitoring ketat |
+| Komponen | Cloud (Saat Ini) | Hybrid (Target) | Catatan |
+|----------|------------------|-----------------|---------|
+| **Frontend** | Vercel | **Tetap Vercel** | Hemat RAM server, dapat CDN + auto-scaling |
+| **Backend CPU** | Shared (Railway) | 2+2 = 4 cores (CT 101+102) | Dedicated, lebih konsisten |
+| **Backend RAM** | Shared | 4+4 = 8 GB (CT 101+102) | Cukup lega karena frontend di Vercel |
 | **Storage** | Managed (Supabase) | MinIO di CT 101 (64 GB) | S3-compatible, full self-hosted |
 | **Bandwidth** | Unlimited (cloud) | Tergantung ISP | Cloudflare Tunnel bantu cache |
 | **Backup** | Automated (Supabase) | Cron pg_dump lokal | Perlu strategi off-site |
 | **SSL** | Managed (Vercel/Cloud) | Caddy auto + Cloudflare | Caddy handle Let's Encrypt otomatis |
-| **Scaling** | Auto-scaling | Manual (resize CT) | Tidak ada horizontal scaling mudah |
+| **Scaling** | Auto-scaling | Manual (resize CT) | Frontend auto-scale di Vercel |
 
 ---
 
@@ -181,42 +187,42 @@ Panduan merancang migrasi ke self-hosted:
 - ⚠️ **Redis password di plaintext**: Password Redis disimpan di `.env` tanpa enkripsi. Seharusnya menggunakan secret manager atau minimal file permission yang ketat
 - ⚠️ **Backup hanya lokal**: `backup_db.sh` menyimpan di `/var/backups/postgresql` — jika disk gagal, backup hilang juga. Perlu off-site backup (S3, R2, atau rsync ke NAS)
 
-### 4.2 CT 102 — Application Stack (`lxc-2-app`)
+### 4.2 CT 102 — API Server (`lxc-2-app`)
 
-**Resource**: 4 CPU, 6 GB RAM, 20 GB Disk
+**Resource**: 2 CPU, 4 GB RAM, 20 GB Disk (dikurangi karena frontend di Vercel)
 
 | Layanan | Konfigurasi | Analisa |
 |---------|-------------|---------|
 | **Node.js 20 LTS** | Via NodeSource | ✅ Sesuai dengan Dockerfile codebase |
 | **pnpm 10** | Global install | ✅ Sesuai `package.json` (pnpm 10.33.2) |
-| **PM2** | Cluster mode, `instances: 'max'` | ⚠️ Perlu review (lihat di bawah) |
-| **Caddy** | Reverse proxy, auto-SSL | ✅ Lebih baik dari Nginx untuk kasus ini |
-| **Cloudflare Tunnel** | Systemd service | ✅ Best practice |
+| **PM2** | Cluster mode, `instances: 2` (API only) | ✅ Aman — hemat RAM karena frontend di Vercel |
+| **Caddy** | Reverse proxy (API + Media) | ✅ Lebih sederhana tanpa frontend routing |
+| **Cloudflare Tunnel** | Systemd service (api + media saja) | ✅ Best practice |
 
-**Temuan Kritis:**
+**Temuan:**
 
-1. **PM2 Cluster Mode — Potensi Masalah**:
+1. **PM2 Cluster Mode — Sudah Dioptimasi**:
    ```
-   instances: 'max'  → 4 workers (sama dengan core count)
-   max_memory_restart: '1G' (API) + '1.5G' (Web)
+   instances: 2 (API only)
+   max_memory_restart: '800M'
    ```
-   - Total potensi RAM: `4 × 1G + 4 × 1.5G = 10 GB` — **melebihi alokasi 6 GB**
-   - PM2 akan melakukan restart循环 jika memory melebihi limit
-   - **Rekomendasi**: Kurangi instances menjadi 2 untuk API dan 2 untuk Web, atau tambah RAM CT 102 menjadi 8 GB
+   - Total potensi RAM: `2 × 800M = 1.6 GB` — **aman dari 4 GB alokasi**
+   - Sisa headroom: ~2.4 GB untuk OS, Caddy, dan traffic spike
+   - ✅ **Fixed**: Frontend di Vercel, PM2 hanya handle API
 
-2. **Next.js Standalone Output**:
-   - Codebase menggunakan `output: 'standalone'` di `next.config.mjs`
-   - Panduan menggunakan `node_modules/next/dist/bin/next start` — ini **bukan standalone mode**
-   - **Seharusnya**: `node apps/web/.next/standalone/server.js` (seperti di Dockerfile)
-   - Standalone output lebih ringan dan tidak memerlukan `node_modules` lengkap
+2. **Frontend di Vercel**:
+   - Next.js tidak perlu di-build atau di-deploy di CT 102
+   - Wildcard subdomain di-handle Vercel, bukan Caddy
+   - Caddy hanya proxy `api.beritakarya.co` dan `media.beritakarya.co`
+   - ✅ **Hemat ~2 GB RAM** dibanding arsitektur sebelumnya
 
 3. **Environment Variables**:
-   - Panduan menulis `DATABASE_URL` dengan `connection_limit=20`
-   - Codebase `.env.example` sudah diupdate: direct PostgreSQL, Redis, Meilisearch, MinIO
-   - ✅ **Fixed**: Parameter koneksi sudah disesuaikan untuk self-hosted
+   - `STORAGE_TYPE="s3"` ditambahkan agar KYC upload ke MinIO
+   - Komentar MinIO ditambahkan (BUKAN AWS S3)
+   - ✅ **Fixed**: Semua env sudah sinkron
 
 4. **Caddy Configuration**:
-   - ✅ Sudah benar: reverse proxy ke `localhost:3000` (Web) dan `localhost:3001` (API)
+   - ✅ Hanya 2 block: `api.beritakarya.co` dan `media.beritakarya.co`
    - ✅ Security headers sudah ditambahkan
    - ⚠️ **Tidak ada rate limiting di Caddy**: Seharusnya ditambahkan untuk API endpoints
 
@@ -362,16 +368,13 @@ CMD ["node", "apps/web/server.js"]
 
 **PM2** (`ecosystem.config.js` — sudah dibuat):
 ```javascript
-// API
+// API only (frontend di Vercel)
 { script: 'node', args: 'apps/api/dist/main.js' }
-
-// Web
-{ script: 'apps/web/.next/standalone/server.js' }
 ```
 
 **Gap:**
 - API: ✅ Konsisten (`node dist/main.js`)
-- Web: ✅ **Fixed** — `ecosystem.config.js` sudah menggunakan standalone server (`apps/web/.next/standalone/server.js`), konsisten dengan Dockerfile
+- Web: ✅ **Tidak perlu** — frontend di-deploy ke Vercel, bukan PM2
 
 ---
 
@@ -381,11 +384,12 @@ CMD ["node", "apps/web/server.js"]
 
 | # | Gap | Dampak | Solusi | Status |
 |---|-----|--------|--------|--------|
-| 1 | **Next.js tidak menggunakan standalone mode** | RAM usage lebih tinggi, startup lebih lambat | Gunakan `node apps/web/.next/standalone/server.js` di PM2 | ✅ `ecosystem.config.js` |
-| 2 | **PM2 instances 'max' dengan RAM terbatas** | OOM kill, restart循环 | Kurangi instances ke 2 atau tambah RAM ke 8 GB | ✅ `ecosystem.config.js` |
+| 1 | ~~Next.js tidak standalone~~ | — | Frontend di Vercel, tidak relevan lagi | ✅ Vercel |
+| 2 | ~~PM2 instances 'max'~~ | — | Hanya API, instances: 2, aman | ✅ `ecosystem.config.js` |
 | 3 | **DATABASE_URL format Supabase vs direct** | Koneksi gagal | Sesuaikan parameter koneksi Prisma | ✅ `.env.example` |
 | 4 | **Tidak ada `db:generate` sebelum build** | Prisma client tidak ter-generate | Tambahkan langkah `db:generate` | ✅ `setup-production.sh` |
 | 5 | **Backup hanya lokal** | Data loss jika disk gagal | Tambahkan off-site backup (rsync/S3) | ☐ Infra |
+| 6 | **STORAGE_TYPE belum diset** | KYC upload ke lokal, bukan MinIO | Tambah `STORAGE_TYPE="s3"` ke .env | ✅ `.env.example` |
 
 ### 6.2 Gap Medium (Direkomendasikan)
 
@@ -412,10 +416,10 @@ CMD ["node", "apps/web/server.js"]
 
 ### 7.1 Rekomendasi Prioritas 1 (Wajib Sebelum Go-Live)
 
-#### R1.1 — Perbaiki PM2 Configuration
+#### R1.1 — PM2 Configuration (Sudah Dioptimasi)
 
 ```javascript
-// ecosystem.config.js — Revisi
+// ecosystem.config.js — API only (frontend di Vercel)
 module.exports = {
   apps: [
     {
@@ -423,29 +427,13 @@ module.exports = {
       script: 'node',
       args: 'apps/api/dist/main.js',
       cwd: '/var/www/beritakarya-prod',
-      instances: 2,              // Kurangi dari 'max' (4) ke 2
+      instances: 2,
       exec_mode: 'cluster',
       env: {
         NODE_ENV: 'production',
         PORT: 3001
       },
-      max_memory_restart: '800M', // Kurangi dari 1G
-      // ...
-    },
-    {
-      name: 'beritakarya-web',
-      script: 'apps/web/.next/standalone/server.js',  // ← Standalone mode
-      cwd: '/var/www/beritakarya-prod',
-      instances: 2,              // Kurangi dari 'max' (4) ke 2
-      exec_mode: 'cluster',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3000,
-        HOSTNAME: '0.0.0.0',
-        NEXT_PUBLIC_API_URL: 'https://api.beritakarya.co',
-        NEXT_PUBLIC_URL: 'https://beritakarya.co'
-      },
-      max_memory_restart: '1G',  // Kurangi dari 1.5G
+      max_memory_restart: '800M',
       // ...
     }
   ]
@@ -454,9 +442,9 @@ module.exports = {
 
 **Estimasi RAM usage:**
 - API: 2 workers × 800MB = 1.6 GB
-- Web: 2 workers × 1GB = 2 GB
+- Caddy + Cloudflare: ~100 MB
 - OS + overhead: ~1 GB
-- **Total: ~4.6 GB dari 6 GB tersedia** — aman dengan headroom
+- **Total: ~2.8 GB dari 4 GB tersedia** — aman dengan headroom 1.2 GB
 
 #### R1.2 — Sesuaikan Database URL
 
@@ -500,13 +488,11 @@ pnpm --filter @beritakarya/api db:migrate:deploy
 # 4. Seed database (role quotas, admin user)
 pnpm --filter @beritakarya/api db:seed
 
-# 5. Build all packages and apps
-pnpm build
-
-# 6. Copy static assets for standalone Next.js
-cp -r apps/web/public apps/web/.next/standalone/public
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+# 5. Build API only (frontend di Vercel)
+pnpm --filter @beritakarya/api build
 ```
+
+> **Catatan**: Tidak perlu build `apps/web` atau copy static assets — frontend di-deploy ke Vercel.
 
 ### 7.2 Rekomendasi Prioritas 2 (Direkomendasikan)
 
@@ -695,8 +681,9 @@ jobs:
    - [x] Terapkan Next.js standalone mode — `ecosystem.config.js` pakai `server.js`
    - [x] Ganti default Railway URL di `next.config.mjs`
    - [x] Tambah MinIO domain ke `remotePatterns`
-   - [ ] Setup DNS wildcard `*.beritakarya.co` di Cloudflare
-   - [ ] Konfigurasi Caddy wildcard subdomain
+   - [ ] Setup DNS wildcard `*.beritakarya.co` → Vercel di Cloudflare
+   - [ ] Setup DNS `api` dan `media` → Cloudflare Tunnel
+   - [ ] Hubungkan repo ke Vercel, set environment variables
 
 2. **Short-term** (minggu pertama):
    - [ ] Tambahkan off-site backup (R1.3)
@@ -717,11 +704,13 @@ jobs:
 | Container | CPU | RAM (Estimasi) | Disk | Status |
 |-----------|-----|----------------|------|--------|
 | CT 101 (DB + Storage) | 2 cores | ~2.8 GB / 4 GB | ~20 GB / 64 GB | ✅ Aman |
-| CT 102 (App) | 4 cores | ~4.6 GB / 6 GB | ~12 GB / 20 GB | ⚠️ Perlu monitoring |
+| CT 102 (API Only) | 2 cores | ~2.8 GB / 4 GB | ~8 GB / 20 GB | ✅ Aman |
 | CT 103 (Monitor) | 2 cores | ~1.2 GB / 2 GB | ~5 GB / 10 GB | ✅ Aman |
-| **Total** | **8 cores** | **~8.6 GB / 12 GB** | **~37 GB / 94 GB** | ✅ Feasible |
+| **Vercel (Frontend)** | **Auto-scale** | **Managed** | **Managed** | ✅ Aman |
+| **Total Self-Hosted** | **6 cores** | **~6.8 GB / 10 GB** | **~33 GB / 94 GB** | ✅ Feasible |
 
 > **Catatan CT 101**: Disk 64 GB dibagi untuk DB (~20 GB) dan MinIO media storage (~41-49 GB). Retensi backup dikurangi dari 7 hari ke 3 hari untuk menghemat tempat.
+> **Catatan CT 102**: RAM 4 GB cukup karena frontend di Vercel. Jika traffic API tinggi, bisa naikkan instances ke 3.
 
 ---
 
@@ -749,12 +738,15 @@ BeritaKarya menggunakan model **multi-tenant shared-database** dengan `siteId` s
 
 | # | Komponen | Lokasi | Fungsi | Prioritas | Status |
 |---|----------|--------|--------|-----------|--------|
-| 1 | DNS wildcard `*.beritakarya.co` | Cloudflare | Semua subdomain mengarah ke server | **Wajib** | ☐ |
-| 2 | Caddy wildcard config | CT 102 | Handle subdomain, forward ke Next.js | **Wajib** | ☐ |
-| 3 | Cloudflare Tunnel wildcard | Cloudflare | Forward `*.beritakarya.co` ke Caddy | **Wajib** | ☐ |
+| 1 | DNS wildcard `*.beritakarya.co` | Cloudflare → Vercel | Semua subdomain ke Vercel | **Wajib** | ☐ |
+| 2 | DNS `api.beritakarya.co` | Cloudflare → Tunnel | API backend ke CT 102 | **Wajib** | ☐ |
+| 3 | DNS `media.beritakarya.co` | Cloudflare → Tunnel | Media MinIO ke CT 102 | **Wajib** | ☐ |
 | 4 | Hapus Railway URL default | `next.config.mjs` | Prevent redirect ke Railway | **Wajib** | ✅ |
 | 5 | Tambah MinIO domain | `next.config.mjs` | Image optimization untuk media baru | **Wajib** | ✅ |
 | 6 | Cron scheduler | CT 102 crontab | Cleanup jobs tetap jalan | **Wajib** | ☐ |
+| 7 | Vercel project setup | Vercel Dashboard | Hubungkan repo, set env variables | **Wajib** | ☐ |
+
+> **Catatan**: Wildcard subdomain di-handle oleh **Vercel**, bukan Caddy. CT 102 hanya melayani `api` dan `media`.
 
 ### 9.0.4 Multi-Tenant Flow di Self-Hosted
 
@@ -762,37 +754,23 @@ BeritaKarya menggunakan model **multi-tenant shared-database** dengan `siteId` s
 User buka bandung.beritakarya.co
          │
          ▼
-    Cloudflare DNS (wildcard *.beritakarya.co → server IP)
+    Cloudflare DNS (wildcard *.beritakarya.co → Vercel)
          │
          ▼
-    Cloudflare Tunnel → CT 102 Caddy (port 80)
-         │
-         ▼
-    Caddy wildcard handler (*.beritakarya.co)
-    ├── Terima request dengan Host: bandung.beritakarya.co
-    └── reverse_proxy localhost:3000 (dengan Host header asli)
+    Vercel Edge Network
+    ├── Next.js SSR di edge
+    ├── proxy.ts: extract siteId = "bandung"
+    ├── Set cookie: siteId=bandung
+    └── Render halaman /bandung/
               │
               ▼
-         Next.js (port 3000)
-         │
-         ▼
-         proxy.ts middleware
-         ├── Parse Host: bandung.beritakarya.co
-         ├── Extract siteId: "bandung"
-         ├── Set cookie: siteId=bandung
-         └── Rewrite: / → /bandung/
+    API call: https://api.beritakarya.co/api/v1/articles?site=bandung
               │
               ▼
-         Browser render halaman /bandung/
+    Cloudflare DNS (api.beritakarya.co → Cloudflare Tunnel)
               │
               ▼
-         API call: /api/v1/articles?site=bandung
-              │
-              ▼
-         Next.js rewrite → http://localhost:3001/api/v1/articles?site=bandung
-              │
-              ▼
-         Express API (port 3001)
+    Cloudflare Tunnel → CT 102 Caddy → Express API (port 3001)
          ├── siteMiddleware baca X-Site-ID: bandung
          ├── Validate siteId exists in DB
          └── Prisma: WHERE siteId = 'bandung'
@@ -801,12 +779,18 @@ User buka bandung.beritakarya.co
          Return data (hanya artikel milik site "bandung")
 ```
 
+**Perbedaan dengan arsitektur sebelumnya:**
+- Frontend di Vercel, bukan di CT 102
+- Request frontend tidak melewati Cloudflare Tunnel
+- API call dari Vercel ke `api.beritakarya.co` (eksternal, bukan localhost)
+- Wildcard subdomain di-handle Vercel, bukan Caddy
+
 ### 9.0.5 External Dependencies Summary
 
-| Service | Status di Self-Hosted | Keterangan |
-|---------|----------------------|------------|
-| Vercel | ❌ **Dihapus** | Diganti PM2 + Caddy |
-| Railway | ❌ **Dihapus** | Diganti PM2 + Caddy |
+| Service | Status di Hybrid | Keterangan |
+|---------|-----------------|------------|
+| **Vercel** | ✅ **Dipertahankan** | Frontend Next.js, wildcard subdomain, CDN edge |
+| Railway | ❌ **Dihapus** | Diganti PM2 + Caddy untuk backend |
 | Supabase PostgreSQL | ❌ **Dihapus** | Diganti PostgreSQL native di CT 101 |
 | Supabase Storage | ❌ **Dihapus** | Diganti MinIO di CT 101 |
 | OpenAI API | ✅ **Dipertahankan** | External API, tidak bisa self-host |
@@ -841,11 +825,12 @@ FASE 3 (Setelah Fase 2, Paralel per container)        ││││
                                                        │││││││
 FASE 4 (Setelah Fase 3 selesai semua)                 │││││││
 ├── [CODE] db:generate + db:migrate + db:seed ────────┐│││││││
-├── [CODE] pnpm build + copy static ──────────────────┐││││││││
-└── [CODE] PM2 start + Caddy + Cloudflare ────────────┐│││││││││
-                                                       ││││││││││
-FASE 5 (Setelah Fase 4)                               ││││││││││
-└── [VERIFY] Health check + Browser test ─────────────┘││││││││││
+├── [CODE] pnpm --filter api build ───────────────────┐││││││││
+├── [CODE] PM2 start + Caddy + Cloudflare ────────────┐│││││││││
+└── [VERCEL] Hubungkan repo + set env vars ───────────┐││││││││││
+                                                       │││││││││││
+FASE 5 (Setelah Fase 4)                               │││││││││││
+└── [VERIFY] Health check API + Browser test ─────────┘│││││││││││
 ```
 
 ### 9.2 Checklist Per Fase
@@ -857,7 +842,7 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 | 1.1 | INFRA | Konfigurasi MikroTik (bridge, VLAN, DHCP, firewall) | Infra | ☐ |
 | 1.2 | INFRA | Verifikasi VLAN 10 & 20 bisa ping gateway | Infra | ☐ |
 | 1.3 | CODE | Buat `apps/api/.env` dengan kredensial production | Dev | ✅ |
-| 1.4 | CODE | Buat `apps/web/.env.production` | Dev | ✅ |
+| 1.4 | CODE | Setup Vercel project + environment variables | Dev | ☐ |
 | 1.5 | CODE | Buat `ecosystem.config.js` di root project | Dev | ✅ |
 | 1.6 | CODE | Generate secrets (JWT, Redis, Meilisearch, MinIO, Admin) | Dev | ☐ |
 | 1.7 | CODE | Ganti default Railway URL di `next.config.mjs` | Dev | ✅ |
@@ -912,17 +897,18 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 | 4.2 | CODE | `pnpm --filter @beritakarya/api db:generate` | CT 102 | ☐ (via script) |
 | 4.3 | CODE | `pnpm --filter @beritakarya/api db:migrate:deploy` | CT 102 | ☐ (via script) |
 | 4.4 | CODE | `pnpm --filter @beritakarya/api db:seed` | CT 102 | ☐ (via script) |
-| 4.5 | CODE | `pnpm build` | CT 102 | ☐ (via script) |
-| 4.6 | CODE | Copy static assets (public + .next/static → standalone) | CT 102 | ☐ (via script) |
-| 4.7 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ☐ (via script) |
-| 4.8 | CODE | `pm2 save && pm2 startup` | CT 102 | ☐ (via script) |
-| 4.9 | INFRA | Konfigurasi Caddy wildcard (`/etc/caddy/Caddyfile`) | CT 102 | ☐ |
-| 4.10 | INFRA | `systemctl restart caddy` | CT 102 | ☐ |
-| 4.11 | INFRA | Setup Cloudflare Tunnel + wildcard routing | CT 102 | ☐ |
-| 4.12 | INFRA | Setup cron scheduler (`/usr/local/bin/beritakarya-cron.sh`) | CT 102 | ☐ |
-| 4.13 | VERIFY | Test multi-site subdomain (`pusat.beritakarya.co`) | Browser | ☐ |
+| 4.5 | CODE | `pnpm --filter @beritakarya/api build` | CT 102 | ☐ (via script) |
+| 4.6 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ☐ (via script) |
+| 4.7 | CODE | `pm2 save && pm2 startup` | CT 102 | ☐ (via script) |
+| 4.8 | INFRA | Konfigurasi Caddy (API + Media) | CT 102 | ☐ |
+| 4.9 | INFRA | `systemctl restart caddy` | CT 102 | ☐ |
+| 4.10 | INFRA | Setup Cloudflare Tunnel (api + media) | CT 102 | ☐ |
+| 4.11 | INFRA | Setup cron scheduler (`/usr/local/bin/beritakarya-cron.sh`) | CT 102 | ☐ |
+| 4.12 | VERIFY | Test API (`https://api.beritakarya.co/api-docs`) | Browser | ☐ |
+| 4.13 | VERIFY | Test frontend Vercel (`https://beritakarya.co`) | Browser | ☐ |
+| 4.14 | VERIFY | Test subdomain Vercel (`https://bandung.beritakarya.co`) | Browser | ☐ |
 
-**Dependensi**: 4.1-4.8 butuh Fase 3 selesai (DB, Redis, Meilisearch harus running). 4.9-4.11 butuh 4.7 selesai (PM2 harus jalan dulu).
+**Dependensi**: 4.1-4.7 butuh Fase 3 selesai (DB, Redis, Meilisearch harus running). 4.8-4.10 butuh 4.6 selesai (PM2 harus jalan dulu).
 
 #### FASE 5: Verifikasi & Go-Live
 
@@ -934,12 +920,11 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 | 5.3b | VERIFY | `nc -zv 10.0.0.11 9000` → MinIO OK | CT 102 | ☐ |
 | 5.3c | VERIFY | Upload test foto ke MinIO → URL bisa diakses | CT 102 | ☐ |
 | 5.4 | VERIFY | Dari CT 101: `ping google.com` → GAGAL (firewall block) | CT 101 | ☐ |
-| 5.5 | VERIFY | `pm2 status` → semua online | CT 102 | ☐ |
+| 5.5 | VERIFY | `pm2 status` → beritakarya-api online | CT 102 | ☐ |
 | 5.6 | VERIFY | `curl http://localhost:3001/health` → healthy | CT 102 | ☐ |
-| 5.7 | VERIFY | `curl http://localhost:3000` → 200 OK | CT 102 | ☐ |
-| 5.8 | VERIFY | Buka `https://beritakarya.co` → Site tampil | Browser | ☐ |
-| 5.8b | VERIFY | Buka `https://pusat.beritakarya.co` → Site tampil | Browser | ☐ |
-| 5.8c | VERIFY | Buka `https://media.beritakarya.co/minio/health/live` → 200 | Browser | ☐ |
+| 5.7 | VERIFY | Buka `https://beritakarya.co` → Site tampil (Vercel) | Browser | ☐ |
+| 5.7b | VERIFY | Buka `https://bandung.beritakarya.co` → Subdomain (Vercel) | Browser | ☐ |
+| 5.7c | VERIFY | Buka `https://media.beritakarya.co/minio/health/live` → 200 | Browser | ☐ |
 | 5.9 | VERIFY | Buka `https://api.beritakarya.co/api-docs` → Swagger | Browser | ☐ |
 | 5.10 | VERIFY | Login admin → Berhasil | Browser | ☐ |
 | 5.11 | VERIFY | Grafana dashboard tampil data | Browser | ☐ |
