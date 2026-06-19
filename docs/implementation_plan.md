@@ -47,29 +47,29 @@ rename `proxy.ts → middleware.ts` yang selama ini tidak aktif.
 #### [DELETE] 16 file berikut: ✅
 
 **Dead source files (`src/`):**
-- `src/db/fix_id.ts` — one-off migration rename siteId
-- `src/modules/user/user.repository.ts` — export `getTeamStats()` tidak diimport siapapun
-- `src/scripts/backfill-kyc-fields.ts` — one-off backfill
-- `src/scripts/migrate-kyc-status.ts` — one-off migration
-- `src/scripts/migrate-kyc-to-r2.ts` — one-off migration
+- ✅ `src/db/fix_id.ts` — one-off migration rename siteId
+- ✅ `src/modules/user/user.repository.ts` — export `getTeamStats()` tidak diimport siapapun
+- ✅ `src/scripts/backfill-kyc-fields.ts` — one-off backfill
+- ✅ `src/scripts/migrate-kyc-status.ts` — one-off migration
+- ✅ `src/scripts/migrate-kyc-to-r2.ts` — one-off migration
 
 **Dead standalone scripts (root `apps/api/`):**
-- `apply-email-notifications.js`
-- `apply-kyc-retry-limit.js`
-- `apply-role-change-email.js`
-- `update-schema.js`
-- `generate-migration.js` — tidak direferensikan di package.json
-- `test-upload.js`
-- `test-database-readiness.ts`
-- `verify-database.ts`
-- `verify-smtp.js`
-- `temp_homepage.html` — file kosong 0 bytes
+- ✅ `apply-email-notifications.js`
+- ✅ `apply-kyc-retry-limit.js`
+- ✅ `apply-role-change-email.js`
+- ✅ `update-schema.js`
+- ✅ `generate-migration.js` — tidak direferensikan di package.json
+- ✅ `test-upload.js`
+- ✅ `test-database-readiness.ts`
+- ✅ `verify-database.ts`
+- ✅ `verify-smtp.js`
+- ✅ `temp_homepage.html` — file kosong 0 bytes
 
 **Dead Vercel entry point:**
-- `api/index.ts` → seluruh folder `api/` — Vercel serverless entry point, API self-hosted di CT 102
+- ✅ `api/index.ts` → seluruh folder `api/` — Vercel serverless entry point, API self-hosted di CT 102
 
 **Dead patch:**
-- `patches/kyc-retry-limit.patch` → seluruh folder `patches/`
+- ✅ `patches/kyc-retry-limit.patch` → seluruh folder `patches/`
 
 ---
 
@@ -105,18 +105,16 @@ rename `proxy.ts → middleware.ts` yang selama ini tidak aktif.
 
 ---
 
-### Phase 5 — Update `docs/scan.md`
+### Phase 5 — Update `docs/scan.md` ✅ SELESAI
 
-#### [MODIFY] [scan.md](file:///d:/beritakarya-v.0.1/docs/scan.md)
+#### [MODIFY] `scan.md` ✅
 
-Tambahkan section baru untuk mendokumentasikan gap yang ditemukan saat verifikasi:
-
-- Tambah **Section 3.4** — File Aktif yang Tidak Tercakup Scan:
+- ✅ Tambah **Section 3.4** — File Aktif yang Tidak Tercakup Scan:
   - `components/berita/MagazineBentoHero.tsx` → aktif, diimport di `SiteHomePage.tsx`
   - `components/ui/ArticleFloatingTools.tsx` → aktif, diimport di halaman artikel
-- Tambah **Section 2.7** — Scripts Root yang Perlu Dicek:
-  - `scripts/backfill-blur.ts`, `scripts/import-wordpress.ts`, `scripts/query-media.ts`
-- Update total hitungan dead files
+- ✅ Tambah **Section 2.7** — Scripts Root yang Perlu Dicek:
+  - `scripts/backfill-blur.ts`, `scripts/import-wordpress.ts`, `scripts/query-media.ts` → dikonfirmasi aktif
+- ✅ Update total hitungan dead files (28 dead + 12 artifacts = 40 file)
 
 ---
 
