@@ -19,12 +19,12 @@ test.describe('Ad Booking — Advertiser Order Page', () => {
 
     await page.goto(`/${SITE}/dashboard/ads/order`);
     await expect(page.getByText('Pilih Paket & Format Iklan')).toBeVisible({ timeout: 15000 });
-    // Wait for packages to load — use a generous timeout
     await expect(page.getByText('Billboard Banner Pusat')).toBeVisible({ timeout: 20000 });
   });
 
   test('shows empty state when no packages available', async ({ page }) => {
     await loginAs(page, 'advertiser', SITE);
+    // This test needs empty packages — mock overrides DB data
     mockAdPackages(page, []);
 
     await page.goto(`/${SITE}/dashboard/ads/order`);

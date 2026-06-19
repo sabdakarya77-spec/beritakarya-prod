@@ -30,8 +30,10 @@ export default defineConfig({
     {
       command: 'pnpm --filter @beritakarya/web dev',
       url: process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
+      // Must NOT reuse — globalSetup patches .env.local with local API URL.
+      // Reusing would keep the old (production) API URL.
+      reuseExistingServer: false,
+      timeout: 180 * 1000,
     },
   ],
 })
