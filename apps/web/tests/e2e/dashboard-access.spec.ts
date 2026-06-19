@@ -81,7 +81,7 @@ test.describe('Dashboard Access Control', () => {
       // Sidebar advertiser
       await expect(page.getByText('Statistik Iklan')).toBeVisible({ timeout: 15000 });
       await expect(page.getByText('Riwayat Iklan')).toBeVisible();
-      await expect(page.getByText('Pasang Iklan Baru')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Pasang Iklan Baru', exact: true })).toBeVisible();
 
       // Sidebar reguler TIDAK terlihat
       await expect(page.getByText('Ringkasan')).not.toBeVisible();

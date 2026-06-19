@@ -113,6 +113,12 @@ export function mockPublicArticle(page: Page, article = MOCK_ARTICLE) {
  */
 export function mockPublicArticlesList(page: Page, data = MOCK_HOMEPAGE_ARTICLES) {
   page.route('**/api/v1/articles**', (route) => {
+    const url = route.request().url();
+    // Skip slug requests — they are handled by mockPublicArticle
+    if (url.includes('/articles/slug/')) {
+      route.fallback();
+      return;
+    }
     if (route.request().method() === 'GET') {
       route.fulfill({
         status: 200,

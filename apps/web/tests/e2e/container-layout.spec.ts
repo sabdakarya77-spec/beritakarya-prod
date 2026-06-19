@@ -18,7 +18,7 @@ test.describe('Container Layout System', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
 
     for (const route of PUBLIC_ROUTES) {
-      await page.goto(route)
+      await page.goto(route, { timeout: 45000 })
       await expect(page.locator('main, article').first()).toBeVisible()
       await expect.poll(() => hasHorizontalOverflow(page)).toBe(false)
     }

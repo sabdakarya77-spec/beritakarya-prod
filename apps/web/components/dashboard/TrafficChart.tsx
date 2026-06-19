@@ -25,7 +25,7 @@ export default function TrafficChart({ data }: { data: TrafficData[] }) {
     setMounted(true);
   }, []);
 
-  if (!mounted || !data || data.length === 0) {
+  if (!mounted || !Array.isArray(data) || data.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest font-bold">
         Data tidak tersedia

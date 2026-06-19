@@ -8,6 +8,15 @@ test.describe('Article Public View', () => {
     mockPublicArticle(page);
     mockPublicArticlesList(page);
 
+    // Mock heartbeat (AuthInit runs on every page)
+    await page.route('**/api/v1/users/heartbeat', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+
     // Mock comments
     await page.route('**/api/v1/comments**', (route) => {
       route.fulfill({
@@ -33,6 +42,22 @@ test.describe('Article Public View', () => {
         contentType: 'application/json',
         body: JSON.stringify({ success: true, data: {} }),
       });
+    });
+
+    // Mock sites (for multi-site context)
+    await page.route('**/api/v1/sites**', (route) => {
+      if (route.request().method() === 'GET') {
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            data: [{ id: 'pusat', name: 'BeritaKarya Pusat', domain: 'beritakarya.co' }],
+          }),
+        });
+      } else {
+        route.continue();
+      }
     });
   });
 

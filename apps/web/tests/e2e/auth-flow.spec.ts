@@ -21,8 +21,7 @@ test.describe('Auth Flow', () => {
     test('menampilkan logo BERITAKARYA', async ({ page }) => {
       await page.goto('/login');
 
-      await expect(page.getByText('BERITA')).toBeVisible();
-      await expect(page.getByText('KARYA')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'BERITAKARYA' })).toBeVisible();
     });
   });
 

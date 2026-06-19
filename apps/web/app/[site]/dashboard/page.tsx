@@ -132,7 +132,7 @@ export default function DashboardOverview() {
 
         if (controller.signal.aborted) return;
         setArticles(artRes.data.data.articles || artRes.data.data.items || []);
-        setTrafficData(trafficRes.data.data);
+        setTrafficData(Array.isArray(trafficRes.data.data) ? trafficRes.data.data : []);
         setTopContent(topRes.data.data);
         setEngagementStats(engRes.data.data);
 
@@ -211,8 +211,8 @@ export default function DashboardOverview() {
   const catMax = catEntries[0]?.[1] || 1;
 
   // Sparkline data from real traffic
-  const trafficSpark = trafficData.length > 0 ? trafficData.map(d => d.views) : [0,0,0,0,0,0,0];
-  const publishedSpark = trafficData.length > 0 ? trafficData.map(d => Math.floor(d.views / 20)) : [0,0,0,0,0,0,0];
+  const trafficSpark = Array.isArray(trafficData) && trafficData.length > 0 ? trafficData.map(d => d.views) : [0,0,0,0,0,0,0];
+  const publishedSpark = Array.isArray(trafficData) && trafficData.length > 0 ? trafficData.map(d => Math.floor(d.views / 20)) : [0,0,0,0,0,0,0];
 
   const supportEmail = 'support.beritakarya@gmail.com';
   const supportSubject = encodeURIComponent(`Bantuan Dashboard ${site}`);
@@ -506,7 +506,7 @@ export default function DashboardOverview() {
             <div>
               <p className="dash-label mb-1">Total Views (7 Hari)</p>
               <p className="text-4xl font-black text-brand-black dark:text-white tabular-nums">
-                {trafficData.reduce((acc, curr) => acc + curr.views, 0).toLocaleString('id-ID')}
+                {(Array.isArray(trafficData) ? trafficData.reduce((acc, curr) => acc + curr.views, 0) : 0).toLocaleString('id-ID')}
               </p>
             </div>
             <div>
