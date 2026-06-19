@@ -254,3 +254,29 @@ draft → submitted → review → revision → approved → scheduled → publi
 - KYC lock after failed attempts
 - Soft delete with `deletedAt`
 - AI quota limits per user/role
+
+---
+
+## Catatan Perubahan
+
+### Next.js Proxy Convention (19 Juni 2026)
+
+Next.js 16 mengubah naming convention untuk edge middleware:
+
+| Versi | File | Export | Status |
+|-------|------|--------|--------|
+| ≤ 15 | `middleware.ts` | `export function middleware()` | Deprecated di v16 |
+| **16+** | **`proxy.ts`** | **`export function proxy()`** | **Current convention** |
+
+**Riwayat perubahan di repo ini:**
+1. Awalnya file bernama `proxy.ts` → di-rename ke `middleware.ts` (Phase 1 cleanup, mengikuti dokumentasi Next.js lama)
+2. Build menghasilkan warning: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
+3. Di-rename balik ke `proxy.ts` dengan export `proxy()` — warning hilang, build bersih
+
+**Fungsi `proxy.ts`:**
+- Subdomain routing: `bandung.beritakarya.co` → `siteId = "bandung"`
+- Auth guard: `/dashboard` tanpa token → redirect ke `/login`
+- URL rewrite: `/` → `/{siteId}/` secara internal
+- Cookie `siteId` untuk client-side multi-site context
+
+**Referensi**: `apps/web/proxy.ts`
