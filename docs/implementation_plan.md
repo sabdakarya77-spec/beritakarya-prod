@@ -42,9 +42,9 @@ rename `proxy.ts → middleware.ts` yang selama ini tidak aktif.
 
 ---
 
-### Phase 2 — Hapus Dead Files di `apps/api`
+### Phase 2 — Hapus Dead Files di `apps/api` ✅ SELESAI
 
-#### [DELETE] 16 file berikut:
+#### [DELETE] 16 file berikut: ✅
 
 **Dead source files (`src/`):**
 - `src/db/fix_id.ts` — one-off migration rename siteId
