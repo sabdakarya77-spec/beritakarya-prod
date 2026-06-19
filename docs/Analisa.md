@@ -212,8 +212,8 @@ Panduan merancang migrasi ke self-hosted:
 
 3. **Environment Variables**:
    - Panduan menulis `DATABASE_URL` dengan `connection_limit=20`
-   - Codebase `.env.example` menggunakan format Supabase (`pgbouncer=true`, `statement_cache_size=0`)
-   - **Gap**: Parameter koneksi PostgreSQL perlu disesuaikan untuk self-hosted (tanpa PgBouncer)
+   - Codebase `.env.example` sudah diupdate: direct PostgreSQL, Redis, Meilisearch, MinIO
+   - ✅ **Fixed**: Parameter koneksi sudah disesuaikan untuk self-hosted
 
 4. **Caddy Configuration**:
    - ✅ Sudah benar: reverse proxy ke `localhost:3000` (Web) dan `localhost:3001` (API)
@@ -221,9 +221,9 @@ Panduan merancang migrasi ke self-hosted:
    - ⚠️ **Tidak ada rate limiting di Caddy**: Seharusnya ditambahkan untuk API endpoints
 
 5. **CORS Configuration**:
-   - Codebase `main.ts` whitelist: `beritakarya.co`, `beritakarya.com`, `vercel.app`, localhost
+   - Codebase `main.ts` whitelist: `beritakarya.co`, `beritakarya.com`, localhost
    - Panduan `.env`: `CORS_ORIGIN=https://beritakarya.co`
-   - ✅ Sudah sinkron, tapi perlu ditambahkan `api.beritakarya.co` jika ada kebutuhan cross-origin API calls
+   - ✅ **Fixed**: `vercel.app` sudah dihapus dari CORS whitelist
 
 ### 4.3 CT 103 — Monitoring (`lxc-3-monitor`)
 
@@ -272,19 +272,19 @@ Panduan membuat database `beritakarya` dengan user `berita_user`. Mari kita coco
 
 #### API Backend (`apps/api/.env.example` vs Panduan)
 
-| Variable | `.env.example` | Panduan | Status |
-|----------|----------------|---------|--------|
-| `NODE_ENV` | `development` | `production` | ✅ Sesuai |
-| `PORT` | `3001` | `3001` | ✅ Cocok |
-| `API_URL` | `http://localhost:3001` | `https://api.beritakarya.co` | ✅ Sesuai production |
-| `DATABASE_URL` | Supabase format | Direct PostgreSQL | ⚠️ **Perlu penyesuaian** |
-| `DIRECT_URL` | Supabase format | Direct PostgreSQL | ⚠️ **Perlu penyesuaian** |
-| `REDIS_HOST` | Tidak ada (URL-based) | `10.0.0.11` | ⚠️ **Gap** |
-| `MEILISEARCH_HOST` | `http://localhost:7700` | `http://10.0.0.11:7700` | ✅ Sesuai |
+| Variable | `.env.example` (dulu) | `.env.example` (sekarang) | Status |
+|----------|----------------------|--------------------------|--------|
+| `NODE_ENV` | `development` | `development` | ✅ |
+| `PORT` | `3001` | `3001` | ✅ |
+| `API_URL` | `http://localhost:3001` | `http://localhost:3001` | ✅ |
+| `DATABASE_URL` | Supabase format | Direct PostgreSQL localhost | ✅ Fixed |
+| `DIRECT_URL` | Supabase format | Direct PostgreSQL localhost | ✅ Fixed |
+| `REDIS_HOST` | Tidak ada | `localhost` | ✅ Fixed |
+| `MEILISEARCH_HOST` | `http://localhost:7700` | `http://localhost:7700` | ✅ |
 | `JWT_SECRET` | Placeholder | Placeholder | ✅ |
-| `CORS_ORIGIN` | `http://localhost:3000` | `https://beritakarya.co` | ✅ Sesuai |
-| `COOKIE_DOMAIN` | Tidak ada | `.beritakarya.co` | ⚠️ **Tidak ada di .env.example** |
-| `S3_ENDPOINT` | Supabase S3 | `http://10.0.0.11:9000` (MinIO) | ⚠️ **Perlu penyesuaian** |
+| `CORS_ORIGIN` | `http://localhost:3000` | `http://localhost:3000` | ✅ |
+| `COOKIE_DOMAIN` | Tidak ada | `localhost` | ✅ Fixed |
+| `S3_ENDPOINT` | Supabase S3 | MinIO localhost:9000 | ✅ Fixed |
 | `EMAIL_ENABLED` | `false` | `true` | ✅ Production enabled |
 | `SENTRY_DSN` | Placeholder | Placeholder | ✅ |
 
@@ -311,12 +311,12 @@ Panduan membuat database `beritakarya` dengan user `berita_user`. Mari kita coco
 
 #### Web Frontend (`apps/web/.env.example` vs Panduan)
 
-| Variable | `.env.example` | Panduan | Status |
-|----------|----------------|---------|--------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3001` | `https://api.beritakarya.co` | ✅ |
-| `NEXT_PUBLIC_URL` | `http://localhost:3000` | `https://beritakarya.co` | ✅ |
-| `NEXT_PUBLIC_GA_ID` | Tidak ada | `G-XXXXXXXXXX` | ⚠️ Opsional |
-| `NEXT_PUBLIC_SITE_ID` | Commented out | `pusat` | ✅ |
+| Variable | `.env.example` (dulu) | `.env.example` (sekarang) | Status |
+|----------|----------------------|--------------------------|--------|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001` | `http://localhost:3001` | ✅ |
+| `NEXT_PUBLIC_URL` | Tidak ada | `http://localhost:3000` | ✅ Fixed |
+| `NEXT_PUBLIC_GA_ID` | Tidak ada | `""` (opsional) | ✅ |
+| `NEXT_PUBLIC_SITE_ID` | Commented out | Commented out | ✅ |
 
 ### 5.3 Build & Deploy Pipeline
 
@@ -336,8 +336,8 @@ pnpm build
 **Analisa:**
 - ✅ Perintah build sudah sesuai dengan Turbo pipeline
 - ✅ `db:migrate:deploy` digunakan (production), bukan `db:migrate` (development)
-- ⚠️ **Tidak ada langkah `db:generate`**: Sebelum `db:migrate:deploy`, seharusnya menjalankan `db:generate` untuk memastikan Prisma client ter-generate
-- ⚠️ **Tidak ada langkah build packages**: Turbo `build` seharusnya mem-build packages terlebih dahulu (`@beritakarya/types`, `@beritakarya/config`, `@beritakarya/utils`)
+- ✅ **Fixed**: `db:generate` sudah ditambahkan di `scripts/setup-production.sh` dan `scripts/deploy.sh`
+- ✅ Turbo `build` otomatis mem-build packages terlebih dahulu via `dependsOn: ["^build"]`
 
 **Urutan yang benar:**
 ```bash
@@ -360,18 +360,18 @@ CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
 CMD ["node", "apps/web/server.js"]
 ```
 
-**Panduan** (PM2):
+**PM2** (`ecosystem.config.js` — sudah dibuat):
 ```javascript
 // API
 { script: 'node', args: 'apps/api/dist/main.js' }
 
 // Web
-{ script: 'node_modules/next/dist/bin/next', args: 'start apps/web -p 3000' }
+{ script: 'apps/web/.next/standalone/server.js' }
 ```
 
 **Gap:**
 - API: ✅ Konsisten (`node dist/main.js`)
-- Web: ⚠️ **Tidak konsisten** — Dockerfile menggunakan standalone server (`apps/web/server.js`), PM2 menggunakan `next start`. Standalone mode lebih ringan dan cocok untuk container dengan resource terbatas
+- Web: ✅ **Fixed** — `ecosystem.config.js` sudah menggunakan standalone server (`apps/web/.next/standalone/server.js`), konsisten dengan Dockerfile
 
 ---
 
@@ -379,13 +379,13 @@ CMD ["node", "apps/web/server.js"]
 
 ### 6.1 Gap Kritis (Harus Diperbaiki Sebelum Deploy)
 
-| # | Gap | Dampak | Solusi |
-|---|-----|--------|--------|
-| 1 | **Next.js tidak menggunakan standalone mode** | RAM usage lebih tinggi, startup lebih lambat | Gunakan `node apps/web/.next/standalone/server.js` di PM2 |
-| 2 | **PM2 instances 'max' dengan RAM terbatas** | OOM kill, restart循环 | Kurangi instances ke 2 atau tambah RAM ke 8 GB |
-| 3 | **DATABASE_URL format Supabase vs direct** | Koneksi gagal | Sesuaikan parameter koneksi Prisma |
-| 4 | **Tidak ada `db:generate` sebelum build** | Prisma client tidak ter-generate | Tambahkan langkah `db:generate` |
-| 5 | **Backup hanya lokal** | Data loss jika disk gagal | Tambahkan off-site backup (rsync/S3) |
+| # | Gap | Dampak | Solusi | Status |
+|---|-----|--------|--------|--------|
+| 1 | **Next.js tidak menggunakan standalone mode** | RAM usage lebih tinggi, startup lebih lambat | Gunakan `node apps/web/.next/standalone/server.js` di PM2 | ✅ `ecosystem.config.js` |
+| 2 | **PM2 instances 'max' dengan RAM terbatas** | OOM kill, restart循环 | Kurangi instances ke 2 atau tambah RAM ke 8 GB | ✅ `ecosystem.config.js` |
+| 3 | **DATABASE_URL format Supabase vs direct** | Koneksi gagal | Sesuaikan parameter koneksi Prisma | ✅ `.env.example` |
+| 4 | **Tidak ada `db:generate` sebelum build** | Prisma client tidak ter-generate | Tambahkan langkah `db:generate` | ✅ `setup-production.sh` |
+| 5 | **Backup hanya lokal** | Data loss jika disk gagal | Tambahkan off-site backup (rsync/S3) | ☐ Infra |
 
 ### 6.2 Gap Medium (Direkomendasikan)
 
