@@ -19,6 +19,21 @@ const s3 = new S3Client({
   forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
 })
 
+/**
+ * Replace internal MinIO hostname with a public-accessible URL.
+ * Needed when S3_ENDPOINT is an internal IP (e.g. http://10.0.0.11:9000)
+ * but browsers need to access via a public domain (e.g. https://minio.beritakarya.co).
+ * Set S3_PUBLIC_ENDPOINT in .env to enable this rewrite.
+ */
+function rewritePresignedUrl(url: string): string {
+  const publicEndpoint = process.env.S3_PUBLIC_ENDPOINT
+  const internalEndpoint = process.env.S3_ENDPOINT
+  if (publicEndpoint && internalEndpoint && url.startsWith(internalEndpoint)) {
+    return url.replace(internalEndpoint, publicEndpoint.replace(/\/$/, ''))
+  }
+  return url
+}
+
 const KYC_BUCKET = process.env.S3_BUCKET || 'kyc'
 const MEDIA_BUCKET = process.env.S3_MEDIA_BUCKET || 'media'
 
@@ -99,11 +114,12 @@ export class StorageService {
     bucket: string = KYC_BUCKET
   ): Promise<string> {
     try {
-      return await getS3SignedUrl(
+      const url = await getS3SignedUrl(
         s3,
         new GetObjectCommand({ Bucket: bucket, Key: key }),
         { expiresIn: expiresSeconds }
       )
+      return rewritePresignedUrl(url)
     } catch (error) {
       logger.error(`[Storage] getSignedUrl failed for ${bucket}/${key}:`, error)
       throw error
