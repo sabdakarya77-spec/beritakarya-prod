@@ -161,7 +161,7 @@ export default function MobileMenu({
                             isActive && !hasSubCats
                               ? 'bg-brand-red/10 text-brand-red'
                               : isExpanded
-                              ? 'bg-gray-100 text-brand-black dark:bg-white/8 dark:text-white'
+                              ? 'bg-gray-100 text-brand-black dark:bg-slate-800 dark:text-white'
                               : 'text-gray-600 hover:bg-gray-50 dark:text-brand-text-muted dark:hover:bg-white/5',
                           )}
                         >
@@ -170,9 +170,9 @@ export default function MobileMenu({
                               <Bookmark size={14} />
                             ) : (
                               <div
-                                className={cn(
+                                  className={cn(
                                   'h-1 w-1 rounded-full',
-                                  isActive && !hasSubCats ? 'bg-brand-red' : isExpanded ? 'bg-brand-black dark:bg-white' : 'bg-gray-300',
+                                  isActive && !hasSubCats ? 'bg-brand-red' : isExpanded ? 'bg-gray-800 dark:bg-white' : 'bg-gray-300 dark:bg-gray-600',
                                 )}
                               />
                             )}
@@ -222,7 +222,7 @@ export default function MobileMenu({
                                         'flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left transition-colors',
                                         isSubActive
                                           ? 'bg-brand-red/10 text-brand-red'
-                                          : 'text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/5',
+                                          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10',
                                       )}
                                     >
                                       <span className="text-[10.5px] font-medium">{sub.name}</span>
