@@ -133,7 +133,7 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
 const sectionEyebrowClass = 'text-[10px] font-black uppercase tracking-[0.16em]'
 const sectionEyebrowMutedClass = `${sectionEyebrowClass} text-brand-text-muted`
 const sectionMetaClass = 'text-[10px] font-semibold text-brand-text-muted'
-const sectionTitleClass = 'text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white'
+const sectionTitleClass = 'text-base md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white'
 
 function formatSidebarDate(dateValue?: string | Date) {
   if (!dateValue) return ''
@@ -561,16 +561,16 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               ) : (
                 /* Empty state */
                 <div className="mb-12 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-center dark:border-white/10 dark:bg-white/[0.02]">
-                  <p className="text-base font-sans font-bold text-brand-black dark:text-white">
+                  <p className="text-sm md:text-base font-sans font-bold text-brand-black dark:text-white">
                     Belum ada berita untuk konteks ini.
                   </p>
-                  <p className="mt-3 text-sm text-brand-text-muted">
+                  <p className="mt-2 text-xs md:text-sm text-brand-text-muted">
                     Coba kembali ke topik terbaru atau gunakan kata kunci yang lebih umum.
                   </p>
-                  <div className="mt-6">
+                  <div className="mt-5">
                     <Link
                       href={`/${siteParam}`}
-                      className="inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-90"
+                      className="inline-flex items-center justify-center rounded-full bg-brand-red px-4 py-2 md:px-5 md:py-2.5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.12em] text-white transition-opacity hover:opacity-90"
                     >
                       Kembali Ke Berita Terbaru
                     </Link>
