@@ -101,7 +101,7 @@ describe('registerUser', () => {
 
     const result = await registerUser('baru@bandung.com', 'Pass123!', 'Baru', Role.reporter, 'bandung')
     expect(result.success).toBe(true)
-    expect(result.message).toContain('verifikasi')
+    expect(result.message).toContain('login')
   })
 })
 
