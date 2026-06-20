@@ -81,14 +81,14 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
   };
 
   return (
-    <section className="relative mb-8 w-full md:mb-12 overflow-hidden">
+    <section className="relative mb-6 w-full md:mb-8 overflow-hidden">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] bg-brand-red/5 dark:bg-brand-red/10 blur-[80px] -z-10 rounded-full" />
       
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 h-auto lg:h-[400px] xl:h-[430px]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 h-auto lg:h-[350px] xl:h-[380px]">
         
         {/* Kiri: Slider Gambar Utama */}
-        <div className="relative overflow-hidden rounded-2xl lg:col-span-8 h-[280px] sm:h-[350px] md:h-[380px] lg:h-full w-full bg-slate-900 border border-white/5">
+        <div className="relative overflow-hidden rounded-2xl lg:col-span-8 h-[220px] sm:h-[280px] md:h-[320px] lg:h-full w-full bg-slate-900 border border-white/5">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeIndex}
@@ -122,7 +122,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                     </span>
                   </div>
                   
-                  <h1 className="max-w-[22ch] text-balance font-sans text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
+                  <h1 className="max-w-[22ch] text-balance font-sans text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
                     {currentArticle.title}
                   </h1>
                 </div>
@@ -163,7 +163,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
 
                 {/* Judul Berita Pendek */}
                 <h3 className={cn(
-                  "line-clamp-2 font-sans text-[0.82rem] xl:text-[0.88rem] leading-[1.25] tracking-tight font-bold transition-colors",
+                  "line-clamp-2 font-sans text-[0.78rem] xl:text-[0.82rem] leading-[1.25] tracking-tight font-bold transition-colors",
                   isActive ? "text-white" : "text-white/60 hover:text-white/80"
                 )}>
                   {article.title}

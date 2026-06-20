@@ -91,7 +91,7 @@ function MarketRow({
 
   return (
     <div
-      className={`flex items-center justify-between transition-colors ${!isLast ? 'border-b border-black/5 pb-2.5 dark:border-white/5' : ''} ${isNew ? 'animate-[fadeIn_0.4s_ease]' : ''}`}
+      className={`flex items-center justify-between transition-colors ${!isLast ? 'border-b border-black/5 pb-2 dark:border-white/5' : ''} ${isNew ? 'animate-[fadeIn_0.4s_ease]' : ''}`}
     >
       {/* Left: label + value */}
       <div>
@@ -177,7 +177,7 @@ export default function MarketWidget({
   ]
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+    <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ export default function MarketWidget({
       )}
 
       {/* Rows */}
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {rows.map(({ label, key, formatter }, idx) => (
           <MarketRow
             key={label}

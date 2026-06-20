@@ -121,7 +121,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <article
-            className="group relative h-[420px] min-h-[380px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5 lg:h-[480px]"
+            className="group relative h-[340px] min-h-[300px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5 lg:h-[400px]"
           >
             <SmartImage 
               src={imageUrl} 
@@ -135,14 +135,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-transparent" />
             
-            <div className="absolute bottom-0 left-0 w-full max-w-3xl p-6 pb-20 md:p-8 md:pb-12">
+            <div className="absolute bottom-0 left-0 w-full max-w-3xl p-5 pb-12 md:p-6 md:pb-8">
               <div className="mb-3.5 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
                 <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h2 className="mb-3.5 max-w-[20ch] text-balance font-sans text-xl font-extrabold leading-[1.15] tracking-tight text-white md:text-2xl lg:text-[2rem]">
+              <h2 className="mb-3.5 max-w-[20ch] text-balance font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
                 {article.title}
               </h2>
               <p className="mb-5 max-w-2xl line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
@@ -177,7 +177,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           iconSize={15}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
-          <div className="py-3 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
+          <div className="py-2 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
             <div className="flex-1">
               <div className="mb-2 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
@@ -185,7 +185,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h3 className="line-clamp-3 font-sans text-sm font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
+              <h3 className="line-clamp-3 font-sans text-xs font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-sm">
                 {article.title}
               </h3>
               <div className={cn(calmMetaClass, "mt-2.5")}>
@@ -213,9 +213,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <article
-            className="group flex cursor-pointer gap-4 border-b border-gray-100 pb-4 pr-12 transition-transform duration-300 ease-out hover:translate-x-0.5 dark:border-white/5 md:gap-5 last:border-0"
+            className="group flex cursor-pointer gap-3 border-b border-gray-100 pb-3 pr-12 transition-transform duration-300 ease-out hover:translate-x-0.5 dark:border-white/5 md:gap-4 last:border-0"
           >
-            <div className="relative aspect-[16/10] w-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-28">
+            <div className="relative aspect-[16/10] w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-24">
               <SmartImage 
                 src={imageUrl} 
                 blur={article.featuredImageBlur}
@@ -234,7 +234,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
+              <h3 className="line-clamp-2 font-sans text-xs font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-sm">
                 {article.title}
               </h3>
               <p className="hidden line-clamp-2 text-xs leading-relaxed text-brand-text-muted/90 dark:text-brand-text-muted md:block">
@@ -263,7 +263,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
       />
       <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
         <article
-          className="group relative flex cursor-pointer flex-col gap-3 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] md:gap-4"
+          className="group relative flex cursor-pointer flex-col gap-2 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] md:gap-3"
         >
           <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
             <SmartImage 
@@ -286,7 +286,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 {article.category?.name || 'UMUM'}
               </span>
             </div>
-              <h3 className="line-clamp-2 font-sans text-base font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-lg">
+              <h3 className="line-clamp-2 font-sans text-sm font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
                 {article.title}
               </h3>
               <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] text-brand-text-muted">

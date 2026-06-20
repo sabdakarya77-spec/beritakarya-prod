@@ -390,7 +390,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             Sidebar: TIDAK ADA — butuh ruang penuh untuk dampak visual
         ════════════════════════════════════════════════════════ */}
         {showFokusRedaksi && (
-          <Container className="py-6 md:py-8">
+          <Container className="py-4 md:py-6">
             <ScrollAnimate>
               {/* Section header */}
               <div className="mb-5 flex items-center gap-2">
@@ -436,7 +436,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             Sidebar: TIDAK ADA — strip horizontal sederhana
         ════════════════════════════════════════════════════════ */}
         {showTrending && tags.length > 0 && (
-          <Container className="pb-6 md:pb-8">
+          <Container className="pb-4 md:pb-6">
             <section className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
               <div className="flex shrink-0 items-center gap-2">
                 <TrendingUp size={14} className="text-brand-red" />
@@ -472,8 +472,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               • Info Pasar
               • Video / Partner Placement
         ════════════════════════════════════════════════════════ */}
-        <Container className="py-6 md:py-8">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-8">
+        <Container className="py-4 md:py-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6">
 
             {/* ── Kolom Utama (8 kolom) ── */}
             <div className="lg:col-span-8">
@@ -592,10 +592,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             </div>
 
             {/* ── SIDEBAR (4 kolom) — hanya aktif di Zona 4 ── */}
-            <aside className="space-y-6 lg:col-span-4">
+            <aside className="space-y-4 lg:col-span-4">
 
               {/* Akses Redaksi */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+              <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
                 <div className="pb-2">
                   <span className={`${sectionEyebrowClass} text-brand-red`}>Akses Redaksi</span>
                   <h4 className="mt-2 text-lg md:text-xl font-sans font-bold leading-snug text-brand-black dark:text-white">
@@ -608,7 +608,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3.5 py-3 transition-colors hover:bg-emerald-500/10 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15"
+                      className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5 transition-colors hover:bg-emerald-500/10 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15"
                     >
                       <span className="flex items-center gap-3">
                         <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300">
@@ -629,7 +629,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       href={telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-between rounded-xl border border-sky-400/20 bg-sky-400/5 px-3.5 py-3 transition-colors hover:bg-sky-400/10 dark:border-sky-400/20 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"
+                      className="group flex items-center justify-between rounded-xl border border-sky-400/20 bg-sky-400/5 px-3 py-2.5 transition-colors hover:bg-sky-400/10 dark:border-sky-400/20 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"
                     >
                       <span className="flex items-center gap-3">
                         <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/20 bg-sky-400/10 text-sky-600 dark:bg-sky-300/10 dark:text-sky-200">
@@ -647,7 +647,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   )}
                   <a
                     href={reportUrl}
-                    className="group flex items-center justify-between rounded-xl border border-black/5 bg-black/5 px-3.5 py-3 transition-colors hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                    className="group flex items-center justify-between rounded-xl border border-black/5 bg-black/5 px-3 py-2.5 transition-colors hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                   >
                     <span className="flex items-center gap-3">
                       <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-black/10 text-brand-black dark:border-white/10 dark:bg-white/10 dark:text-white">
@@ -667,7 +667,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
               {/* Paling Populer */}
               {popular.length > 0 && (
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+                <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
                   <div className="mb-4 flex items-center gap-3">
                     <Star size={15} className="fill-brand-red text-brand-red" />
                     <h4 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
@@ -679,9 +679,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       <Link
                         key={article.id}
                         href={`/${siteParam}/artikel/${article.slug}`}
-                        className="group flex items-start gap-3.5 border-b border-black/5 py-3 first:pt-0 last:border-b-0 last:pb-0 dark:border-white/5"
+                        className="group flex items-start gap-2.5 border-b border-black/5 py-2 first:pt-0 last:border-b-0 last:pb-0 dark:border-white/5"
                       >
-                        <span className="tabular-nums font-sans text-2xl font-bold leading-none tracking-tight text-gray-100 transition-colors group-hover:text-brand-red dark:text-white/5">
+                        <span className="tabular-nums font-sans text-xl font-bold leading-none tracking-tight text-gray-100 transition-colors group-hover:text-brand-red dark:text-white/5">
                           {(index + 1).toString().padStart(2, '0')}
                         </span>
                         <div className="min-w-0 flex-1">
@@ -693,7 +693,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                               {formatSidebarDate(article.publishedAt || article.createdAt)}
                             </span>
                           </div>
-                          <h5 className="line-clamp-2 font-sans text-sm font-semibold leading-snug tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white">
+                          <h5 className="line-clamp-2 font-sans text-xs font-semibold leading-snug tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white">
                             {article.title}
                           </h5>
                           <div className="mt-2 flex items-center justify-between gap-3 text-[10px] text-brand-text-muted">
@@ -713,7 +713,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               <MarketWidget initialData={marketData} />
 
               {/* Video / Partner Placement */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+              <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
                 {siteSettings?.featuredVideo ? (
                   <div>
                     <div className="mb-4">
@@ -750,7 +750,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
         ════════════════════════════════════════════════════════ */}
         {showEditorialExtras && (
           <div className="border-t border-black/5 dark:border-white/5">
-            <Container className="py-10 space-y-14 md:space-y-16">
+            <Container className="py-6 space-y-8 md:space-y-10">
 
               {/* Pilihan Editor — portrait cards (3:4) */}
               {showEditorChoice && (
