@@ -19,6 +19,21 @@ const s3 = new S3Client({
   forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
 })
 
+// Client khusus untuk generate presigned URL.
+// Menggunakan S3_PUBLIC_ENDPOINT sebagai endpoint agar tanda tangan (Signature)
+// dihitung berdasarkan Host header yang akan dikirimkan browser (mencegah SignatureDoesNotMatch).
+const s3Sign = process.env.S3_PUBLIC_ENDPOINT
+  ? new S3Client({
+      endpoint: process.env.S3_PUBLIC_ENDPOINT,
+      region: process.env.S3_REGION || 'ap-southeast-1',
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY || '',
+        secretAccessKey: process.env.S3_SECRET_KEY || '',
+      },
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    })
+  : s3
+
 /**
  * Replace internal MinIO hostname with a public-accessible URL.
  * Needed when S3_ENDPOINT is an internal IP (e.g. http://10.0.0.11:9000)
@@ -115,11 +130,11 @@ export class StorageService {
   ): Promise<string> {
     try {
       const url = await getS3SignedUrl(
-        s3,
+        s3Sign,
         new GetObjectCommand({ Bucket: bucket, Key: key }),
         { expiresIn: expiresSeconds }
       )
-      return rewritePresignedUrl(url)
+      return process.env.S3_PUBLIC_ENDPOINT ? url : rewritePresignedUrl(url)
     } catch (error) {
       logger.error(`[Storage] getSignedUrl failed for ${bucket}/${key}:`, error)
       throw error

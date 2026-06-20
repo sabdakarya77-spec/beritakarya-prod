@@ -583,7 +583,7 @@ kycRouter.get('/view/:userId/:type',
       data: {
         userId,
         viewerId: req.user!.userId,
-        siteId: targetUser.siteId!,
+        siteId: targetUser.siteId || (req.site !== 'all' ? req.site : 'pusat') || 'pusat',
         fileType: type === 'idCard' ? 'ktp' : 'kk',
         ipAddress: anonymizeIP(req.ip),
         userAgent: req.headers['user-agent']
