@@ -41,10 +41,16 @@ interface ParsedArticle {
   author: string
 }
 
+interface TipTapMark {
+  type: string
+  attrs?: Record<string, any>
+}
+
 interface TipTapBlock {
   type: string
   attrs?: Record<string, any>
   text?: string
+  marks?: TipTapMark[]
   content?: TipTapBlock[]
 }
 
@@ -151,139 +157,323 @@ function parseWXR(xmlContent: string): ParsedArticle[] {
 
 // ── HTML → TipTap Blocks ─────────────────────────────────────────────────────
 
-function htmlToBlocks(html: string): { blocks: TipTapBlock[]; imageUrls: string[] } {
-  const blocks: TipTapBlock[] = []
-  const imageUrls: string[] = []
+/**
+ * Decode common HTML entities to their character equivalents.
+ */
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&#8216;/g, '‘')
+    .replace(/&#8217;/g, '’')
+    .replace(/&#8220;/g, '“')
+    .replace(/&#8221;/g, '”')
+    .replace(/&#8230;/g, '…')
+}
 
-  // Simple HTML parser using regex (sufficient for WordPress export)
-  // Split by block-level elements
-  const tagPattern = /<(p|h[1-6]|img|ul|ol|blockquote|div|figure)[^>]*>[\s\S]*?<\/\1>|<(img|hr)\s[^>]*\/?>/gi
-  const singleTagPattern = /<(img|hr)\s[^>]*\/?>/gi
+/**
+ * Strip Gutenberg block comments from WordPress content.
+ * Removes <!-- wp:... -->, <!-- /wp:... -->, and <!-- wp:... /--> patterns.
+ */
+function stripGutenbergComments(html: string): string {
+  return html
+    .replace(/<!--\s*\/?wp:[^>]*-->/g, '')
+    .replace(/<!--\s*nextpage\s*-->/g, '')
+    .replace(/<!--\s*more\s*[^>]*-->/g, '')
+    .trim()
+}
 
-  // Extract segments: text before first tag, then each tag block
-  const segments: string[] = []
-  let lastIndex = 0
-  let match: RegExpExecArray | null
+/**
+ * Parse inline HTML content into TipTap inline nodes with marks.
+ * Handles: <strong>, <b>, <em>, <i>, <a>, <code>, <br>
+ * Returns an array of { text, marks? } nodes.
+ */
+function parseInlineHtml(html: string): TipTapBlock[] {
+  const nodes: TipTapBlock[] = []
 
-  // First, try to split by common block tags
-  const blockSplit = /(<(?:p|h[1-6]|img|ul|ol|blockquote|figure)[\s\S]*?(?:<\/(?:p|h[1-6]|ul|ol|blockquote|figure)>|\/>))/gi
-  const parts: string[] = []
+  // Tokenize inline HTML into segments: tags + text
+  const tokens = html.split(/(<[^>]+>)/)
 
-  // Reset and collect all block-level segments
-  const fullHtml = html.trim()
+  let currentMarks: TipTapMark[] = []
+  let pendingLink: TipTapMark | null = null
 
-  // Simple approach: split by newlines and common block boundaries
-  // Then process each chunk
-  const chunks = fullHtml
-    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
-    .replace(/<\/h[1-6]>\s*/gi, '\n\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .split(/\n{2,}/)
-    .map((s) => s.trim())
-    .filter(Boolean)
+  for (const token of tokens) {
+    if (!token) continue
 
-  for (const chunk of chunks) {
-    // Check if chunk is an image
-    const imgMatch = chunk.match(/^<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>$/i)
-    if (imgMatch) {
-      const src = imgMatch[1]
-      imageUrls.push(src)
-      blocks.push({ type: 'image', attrs: { src } })
+    // Opening tags
+    if (token.match(/^<(strong|b)(\s[^>]*)?>/i)) {
+      currentMarks.push({ type: 'bold' })
+      continue
+    }
+    if (token.match(/^<(em|i)(\s[^>]*)?>/i)) {
+      currentMarks.push({ type: 'italic' })
+      continue
+    }
+    if (token.match(/^<code(\s[^>]*)?>/i)) {
+      currentMarks.push({ type: 'code' })
+      continue
+    }
+    const linkOpen = token.match(/^<a\s[^>]*href=["']([^"']+)["'][^>]*>/i)
+    if (linkOpen) {
+      pendingLink = { type: 'link', attrs: { href: linkOpen[1] } }
       continue
     }
 
-    // Check if chunk is a heading
-    const headingMatch = chunk.match(/^<h([1-6])[^>]*>([\s\S]*?)<\/h\1>$/i)
-    if (headingMatch) {
-      const level = parseInt(headingMatch[1])
-      const text = stripHtml(headingMatch[2])
-      if (text) {
-        blocks.push({
-          type: 'heading',
-          attrs: { level },
-          content: [{ type: 'text', text }],
-        })
-      }
+    // Closing tags
+    if (token.match(/^<\/(strong|b)>/i)) {
+      currentMarks = currentMarks.filter(m => m.type !== 'bold')
+      continue
+    }
+    if (token.match(/^<\/(em|i)>/i)) {
+      currentMarks = currentMarks.filter(m => m.type !== 'italic')
+      continue
+    }
+    if (token.match(/^<\/code>/i)) {
+      currentMarks = currentMarks.filter(m => m.type !== 'code')
+      continue
+    }
+    if (token.match(/^<\/a>/i)) {
+      pendingLink = null
       continue
     }
 
-    // Check if chunk is a list
-    const ulMatch = chunk.match(/^<ul[^>]*>([\s\S]*?)<\/ul>$/i)
-    if (ulMatch) {
-      const items = ulMatch[1].match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || []
-      const listItems = items.map((li) => {
-        const text = stripHtml(li)
-        return {
-          type: 'listItem',
-          content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-        }
-      })
-      if (listItems.length > 0) {
-        blocks.push({ type: 'bulletList', content: listItems })
-      }
+    // Self-closing tags
+    if (token.match(/^<br\s*\/?>/i)) {
+      nodes.push({ type: 'hardBreak' })
       continue
     }
 
-    const olMatch = chunk.match(/^<ol[^>]*>([\s\S]*?)<\/ol>$/i)
-    if (olMatch) {
-      const items = olMatch[1].match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || []
-      const listItems = items.map((li) => {
-        const text = stripHtml(li)
-        return {
-          type: 'listItem',
-          content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-        }
-      })
-      if (listItems.length > 0) {
-        blocks.push({ type: 'orderedList', content: listItems })
-      }
-      continue
-    }
+    // Skip other tags (img handled at block level, etc.)
+    if (token.match(/^<[^>]+>$/)) continue
 
-    // Check if chunk is a blockquote
-    const bqMatch = chunk.match(/^<blockquote[^>]*>([\s\S]*?)<\/blockquote>$/i)
-    if (bqMatch) {
-      const text = stripHtml(bqMatch[1])
-      if (text) {
-        blocks.push({
-          type: 'blockquote',
-          content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
-        })
-      }
-      continue
-    }
+    // Plain text
+    const text = decodeEntities(token)
+    if (!text) continue
 
-    // Check for images embedded in figure/div
-    const figureImgMatch = chunk.match(/<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>/i)
-    if (figureImgMatch) {
-      imageUrls.push(figureImgMatch[1])
-      blocks.push({ type: 'image', attrs: { src: figureImgMatch[1] } })
-      // Also extract any caption text
-      const captionMatch = chunk.match(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i)
-      if (captionMatch) {
-        const text = stripHtml(captionMatch[1])
-        if (text) {
-          blocks.push({ type: 'paragraph', content: [{ type: 'text', text }] })
-        }
-      }
-      continue
-    }
+    const allMarks = pendingLink
+      ? [...currentMarks, pendingLink]
+      : [...currentMarks]
 
-    // Default: treat as paragraph
-    const text = stripHtml(chunk)
-    if (text) {
-      blocks.push({
-        type: 'paragraph',
-        content: [{ type: 'text', text }],
-      })
+    if (allMarks.length > 0) {
+      nodes.push({ type: 'text', text, marks: allMarks })
+    } else {
+      nodes.push({ type: 'text', text })
     }
   }
 
-  // If no blocks were created, try a simpler approach
-  if (blocks.length === 0 && html.trim()) {
-    const text = stripHtml(html).trim()
+  return nodes
+}
+
+/**
+ * Strip all HTML tags, returning plain text only.
+ */
+function stripHtml(html: string): string {
+  return decodeEntities(
+    html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+  )
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
+/**
+ * Convert a single block-level HTML element into a TipTap block.
+ * Returns null if the chunk is empty or unrecognizable.
+ */
+function parseBlockElement(chunk: string, imageUrls: string[]): TipTapBlock | null {
+  const trimmed = chunk.trim()
+  if (!trimmed) return null
+
+  // ── Image (standalone <img> or inside <figure>) ──
+  const imgInFigure = trimmed.match(/<figure[^>]*>[\s\S]*?<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>[\s\S]*?(?:<figcaption[^>]*>([\s\S]*?)<\/figcaption>)?[\s\S]*?<\/figure>/i)
+  if (imgInFigure) {
+    const src = imgInFigure[1]
+    imageUrls.push(src)
+    const block: TipTapBlock = { type: 'image', attrs: { src } }
+    // If there's a caption, return image + caption paragraph
+    if (imgInFigure[2]?.trim()) {
+      const caption = stripHtml(imgInFigure[2])
+      if (caption) {
+        return { type: 'figure', content: [block, { type: 'paragraph', content: [{ type: 'text', text: caption }] }] }
+      }
+    }
+    return block
+  }
+
+  const standaloneImg = trimmed.match(/^<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>$/i)
+  if (standaloneImg) {
+    const src = standaloneImg[1]
+    imageUrls.push(src)
+    return { type: 'image', attrs: { src } }
+  }
+
+  // ── Heading ──
+  const headingMatch = trimmed.match(/^<h([1-6])[^>]*>([\s\S]*?)<\/h\1>$/i)
+  if (headingMatch) {
+    const level = parseInt(headingMatch[1])
+    const inlineNodes = parseInlineHtml(headingMatch[2])
+    if (inlineNodes.length > 0) {
+      return { type: 'heading', attrs: { level }, content: inlineNodes }
+    }
+  }
+
+  // ── Unordered List ──
+  const ulMatch = trimmed.match(/^<ul[^>]*>([\s\S]*?)<\/ul>$/i)
+  if (ulMatch) {
+    const items = ulMatch[1].match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || []
+    const listItems = items.map((li) => {
+      const liContent = li.replace(/^<li[^>]*>/i, '').replace(/<\/li>$/i, '')
+      const inlineNodes = parseInlineHtml(liContent)
+      return {
+        type: 'listItem',
+        content: [{ type: 'paragraph', content: inlineNodes.length > 0 ? inlineNodes : [{ type: 'text', text: '' }] }],
+      }
+    })
+    if (listItems.length > 0) {
+      return { type: 'bulletList', content: listItems }
+    }
+  }
+
+  // ── Ordered List ──
+  const olMatch = trimmed.match(/^<ol[^>]*>([\s\S]*?)<\/ol>$/i)
+  if (olMatch) {
+    const items = olMatch[1].match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || []
+    const listItems = items.map((li) => {
+      const liContent = li.replace(/^<li[^>]*>/i, '').replace(/<\/li>$/i, '')
+      const inlineNodes = parseInlineHtml(liContent)
+      return {
+        type: 'listItem',
+        content: [{ type: 'paragraph', content: inlineNodes.length > 0 ? inlineNodes : [{ type: 'text', text: '' }] }],
+      }
+    })
+    if (listItems.length > 0) {
+      return { type: 'orderedList', content: listItems }
+    }
+  }
+
+  // ── Blockquote ──
+  const bqMatch = trimmed.match(/^<blockquote[^>]*>([\s\S]*?)<\/blockquote>$/i)
+  if (bqMatch) {
+    // Blockquote may contain multiple paragraphs
+    const innerHtml = bqMatch[1]
+    const innerChunks = innerHtml
+      .split(/<\/p>\s*<p[^>]*>/i)
+      .map(s => s.replace(/^<p[^>]*>/i, '').replace(/<\/p>$/i, '').trim())
+      .filter(Boolean)
+    const bqParagraphs = innerChunks.map(chunk => {
+      const inlineNodes = parseInlineHtml(chunk)
+      return { type: 'paragraph', content: inlineNodes.length > 0 ? inlineNodes : [{ type: 'text', text: stripHtml(chunk) }] }
+    }).filter(p => (p.content as TipTapBlock[]).some(n => n.text?.trim()))
+    if (bqParagraphs.length > 0) {
+      return { type: 'blockquote', content: bqParagraphs }
+    }
+  }
+
+  // ── Paragraph ──
+  const pMatch = trimmed.match(/^<p[^>]*>([\s\S]*?)<\/p>$/i)
+  if (pMatch) {
+    const inlineNodes = parseInlineHtml(pMatch[1])
+    if (inlineNodes.length > 0) {
+      return { type: 'paragraph', content: inlineNodes }
+    }
+  }
+
+  // ── WordPress image block (wp-block-image class) ──
+  const wpImgMatch = trimmed.match(/<div\s+class=["'][^"']*wp-block-image[^"']*["'][^>]*>[\s\S]*?<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>[\s\S]*?<\/div>/i)
+  if (wpImgMatch) {
+    const src = wpImgMatch[1]
+    imageUrls.push(src)
+    return { type: 'image', attrs: { src } }
+  }
+
+  // ── Fallback: strip HTML and treat as paragraph ──
+  const text = stripHtml(trimmed)
+  if (text) {
+    return { type: 'paragraph', content: [{ type: 'text', text }] }
+  }
+
+  return null
+}
+
+/**
+ * Convert WordPress HTML content to TipTap JSON blocks.
+ * Handles Gutenberg block comments, inline formatting, and standard HTML elements.
+ */
+function htmlToBlocks(html: string): { blocks: TipTapBlock[]; imageUrls: string[] } {
+  const imageUrls: string[] = []
+
+  // 1. Strip Gutenberg block comments
+  let cleaned = stripGutenbergComments(html)
+
+  // 2. Normalize whitespace between block elements
+  cleaned = cleaned
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+
+  if (!cleaned) {
+    return { blocks: [], imageUrls }
+  }
+
+  // 3. Split into block-level chunks
+  //    Match each block-level element individually
+  const blockPattern = /(<(?:p|h[1-6]|ul|ol|blockquote|figure|div)[\s\S]*?(?:<\/(?:p|h[1-6]|ul|ol|blockquote|figure|div)>|\/>))/gi
+  const chunks: string[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  // Reset lastIndex
+  blockPattern.lastIndex = 0
+
+  while ((match = blockPattern.exec(cleaned)) !== null) {
+    // Any text before this match that isn't just whitespace
+    const before = cleaned.slice(lastIndex, match.index).trim()
+    if (before) {
+      // Check if it's a standalone image
+      const imgOnly = before.match(/^<img\s[^>]*src=["']([^"']+)["'][^>]*\/?>$/i)
+      if (imgOnly) {
+        chunks.push(before)
+      } else if (!before.match(/^<br\s*\/?>$/i)) {
+        chunks.push(before)
+      }
+    }
+    chunks.push(match[0])
+    lastIndex = blockPattern.lastIndex
+  }
+
+  // Remaining text after last block
+  const remaining = cleaned.slice(lastIndex).trim()
+  if (remaining && !remaining.match(/^(<br\s*\/?>\s*)+$/i)) {
+    chunks.push(remaining)
+  }
+
+  // If no chunks found (content has no block tags), treat entire content as one chunk
+  if (chunks.length === 0) {
+    chunks.push(cleaned)
+  }
+
+  // 4. Parse each chunk into TipTap blocks
+  const blocks: TipTapBlock[] = []
+
+  for (const chunk of chunks) {
+    const block = parseBlockElement(chunk, imageUrls)
+    if (block) {
+      blocks.push(block)
+    }
+  }
+
+  // 5. Fallback: if no blocks created, try plain text split
+  if (blocks.length === 0) {
+    const text = stripHtml(cleaned)
     if (text) {
-      // Split by double newline into paragraphs
       const paragraphs = text.split(/\n{2,}/).filter(Boolean)
       for (const p of paragraphs) {
         blocks.push({
@@ -295,21 +485,6 @@ function htmlToBlocks(html: string): { blocks: TipTapBlock[]; imageUrls: string[
   }
 
   return { blocks, imageUrls }
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
 }
 
 // ── Image Processing ─────────────────────────────────────────────────────────
