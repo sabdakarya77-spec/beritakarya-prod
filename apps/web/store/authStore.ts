@@ -78,9 +78,9 @@ export const useAuthStore = create<AuthState>()(
       // Ignore - cookies may already be expired/invalid
     } finally {
       set({ user: null })
-      // Redirect ke login setelah clear state
+      // Redirect ke homepage setelah clear state
       if (typeof window !== 'undefined') {
-        window.location.href = '/login'
+        window.location.href = '/'
       }
     }
   },
