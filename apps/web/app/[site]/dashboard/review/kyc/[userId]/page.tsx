@@ -262,16 +262,16 @@ export default function KYCDetailReviewPage() {
             </div>
           </div>
 
-          <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-xl">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-red mb-4">Informasi Keamanan</h3>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <Lock className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <p className="text-[11px] text-slate-300 leading-relaxed">Setiap tampilan dokumen identitas dicatat dalam audit trail untuk keamanan data pengguna.</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Setiap tampilan dokumen identitas dicatat dalam audit trail untuk keamanan data pengguna.</p>
               </div>
               <div className="flex items-start gap-3">
                 <ShieldCheck className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <p className="text-[11px] text-slate-300 leading-relaxed">Persetujuan akan secara otomatis mempromosikan peran pengguna menjadi Reporter.</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">Persetujuan akan secara otomatis mempromosikan peran pengguna menjadi Reporter.</p>
               </div>
             </div>
           </div>
