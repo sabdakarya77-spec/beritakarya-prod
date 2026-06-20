@@ -10,7 +10,9 @@ vi.mock('./auth.service', () => ({
   generateTokenPair:       vi.fn(),
   registerUser:            vi.fn(),
   refreshAccessToken:      vi.fn(),
-  logoutUser:              vi.fn()
+  logoutUser:              vi.fn(),
+  verifyEmail:             vi.fn(),
+  resendVerification:      vi.fn()
 }))
 
 vi.mock('../../lib/accountLockout', () => ({
@@ -42,14 +44,15 @@ interface MockUserShape {
   kycStatus: string
 }
 
-const mockUser: MockUserShape = {
+const mockUser: MockUserShape & { emailVerifiedAt: Date } = {
   id: 'u-1',
   email: 'test@test.com',
   name: 'Test',
   role: 'reporter',
   siteId: 'bandung',
   isVerified: true,
-  kycStatus: 'APPROVED'
+  kycStatus: 'APPROVED',
+  emailVerifiedAt: new Date()
 }
 
 interface MockTokensShape {
@@ -196,7 +199,7 @@ describe('POST /api/v1/auth/register', () => {
   })
 
   it('menerima role reader dan advertiser, menolak sisanya', async () => {
-    vi.mocked(authService.registerUser).mockResolvedValue(mockTokens as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
+    vi.mocked(authService.registerUser).mockResolvedValue({ success: true, message: 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.' } as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
 
     const readerRes = await request(app)
       .post('/api/v1/auth/register')

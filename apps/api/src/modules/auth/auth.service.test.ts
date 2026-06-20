@@ -6,7 +6,8 @@ vi.mock('../../db/client', () => ({
     user: {
       findUnique: vi.fn(),
       findFirst:  vi.fn(),
-      create:     vi.fn()
+      create:     vi.fn(),
+      update:     vi.fn()
     },
     refreshToken: {
       create:     vi.fn(),
@@ -18,6 +19,17 @@ vi.mock('../../db/client', () => ({
       findUnique: vi.fn(),
       create:     vi.fn()
     }
+  }
+}))
+
+vi.mock('../../services/email.service', () => ({
+  emailService: {
+    sendVerificationEmail: vi.fn().mockResolvedValue(true),
+    sendPasswordResetEmail: vi.fn().mockResolvedValue(true),
+    sendKYCNotification: vi.fn().mockResolvedValue(true),
+    sendRoleChangeNotification: vi.fn().mockResolvedValue(true),
+    sendAccountLockedNotification: vi.fn().mockResolvedValue(true),
+    sendEmail: vi.fn().mockResolvedValue(true)
   }
 }))
 
@@ -86,10 +98,10 @@ describe('registerUser', () => {
   it('berhasil register user baru', async () => {
     vi.mocked(prisma.user.findFirst).mockResolvedValue(null)
     vi.mocked(prisma.user.create).mockResolvedValue(await mockUser() as unknown as User)
-    vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: 'rt' } as unknown as RefreshToken)
 
     const result = await registerUser('baru@bandung.com', 'Pass123!', 'Baru', Role.reporter, 'bandung')
-    expect(result.accessToken).toBeDefined()
+    expect(result.success).toBe(true)
+    expect(result.message).toContain('verifikasi')
   })
 })
 
