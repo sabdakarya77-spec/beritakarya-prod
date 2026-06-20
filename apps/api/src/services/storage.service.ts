@@ -142,6 +142,24 @@ export class StorageService {
   }
 
   /**
+   * Fetch a file from S3/MinIO and return it as a Readable stream.
+   * Used to proxy private files (e.g. KYC docs) through the API server
+   * so that browsers never receive an internal/HTTP MinIO URL.
+   */
+  static async getFileStream(
+    key: string,
+    bucket: string = KYC_BUCKET
+  ): Promise<Readable> {
+    const { Readable } = await import('stream')
+    const result = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+    if (!result.Body) {
+      throw new AppError('File tidak ditemukan di storage', 404, 'STORAGE_NOT_FOUND')
+    }
+    // AWS SDK v3 Body is a SdkStream which implements Readable
+    return result.Body as unknown as Readable
+  }
+
+  /**
    * Delete a file from a bucket.
    */
   static async deleteFile(key: string, bucket: string = KYC_BUCKET): Promise<void> {

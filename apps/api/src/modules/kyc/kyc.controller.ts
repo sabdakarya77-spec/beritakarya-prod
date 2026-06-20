@@ -594,11 +594,17 @@ kycRouter.get('/view/:userId/:type',
 
     if (isCloudEnabled) {
       try {
-        const signedUrl = await StorageService.getSignedUrl(filePath, 300) // 5 minutes expiry
-        return res.redirect(signedUrl)
+        // Proxy the image through the API server instead of redirecting to a
+        // presigned MinIO URL. This avoids ERR_SSL_PROTOCOL_ERROR caused by the
+        // browser trying to access the internal HTTP endpoint (10.0.0.11:9000)
+        // from an HTTPS page (mixed-content blocked).
+        const stream = await StorageService.getFileStream(filePath)
+        res.setHeader('Content-Type', 'image/jpeg')
+        res.setHeader('Cache-Control', 'private, max-age=300')
+        return stream.pipe(res)
       } catch (err) {
-        logger.error(`Failed to get signed URL: ${err}`)
-        return res.status(500).json({ success: false, error: { message: 'Gagal mengambil file dari penyimpanan awan (R2)' } })
+        logger.error(`Failed to stream KYC file: ${err}`)
+        return res.status(500).json({ success: false, error: { message: 'Gagal mengambil file dari penyimpanan awan' } })
       }
     }
 
