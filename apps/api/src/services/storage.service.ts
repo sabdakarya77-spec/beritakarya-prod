@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl as getS3SignedUrl } from '@aws-sdk/s3-request-presigner'
 import fs from 'fs/promises'
+import { Readable } from 'stream'
 import { logger } from '../lib/logger'
 import { AppError } from '../utils/AppError'
 
@@ -150,7 +151,6 @@ export class StorageService {
     key: string,
     bucket: string = KYC_BUCKET
   ): Promise<Readable> {
-    const { Readable } = await import('stream')
     const result = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
     if (!result.Body) {
       throw new AppError('File tidak ditemukan di storage', 404, 'STORAGE_NOT_FOUND')
