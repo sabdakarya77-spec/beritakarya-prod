@@ -199,7 +199,7 @@ describe('POST /api/v1/auth/register', () => {
   })
 
   it('menerima role reader dan advertiser, menolak sisanya', async () => {
-    vi.mocked(authService.registerUser).mockResolvedValue({ success: true, message: 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.' } as unknown as Awaited<ReturnType<typeof authService.generateTokenPair>>)
+    vi.mocked(authService.registerUser).mockResolvedValue({ success: true, message: 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.' } as unknown as Awaited<ReturnType<typeof authService.registerUser>>)
 
     const readerRes = await request(app)
       .post('/api/v1/auth/register')
