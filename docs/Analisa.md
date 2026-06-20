@@ -388,7 +388,7 @@ CMD ["node", "apps/web/server.js"]
 | 2 | ~~PM2 instances 'max'~~ | — | Hanya API, instances: 2, aman | ✅ `ecosystem.config.js` |
 | 3 | **DATABASE_URL format Supabase vs direct** | Koneksi gagal | Sesuaikan parameter koneksi Prisma | ✅ `.env.example` |
 | 4 | **Tidak ada `db:generate` sebelum build** | Prisma client tidak ter-generate | Tambahkan langkah `db:generate` | ✅ `setup-production.sh` |
-| 5 | **Backup hanya lokal** | Data loss jika disk gagal | Tambahkan off-site backup (rsync/S3) | ☐ Infra |
+| 5 | **Backup hanya lokal** | Data loss jika disk gagal | Tambahkan off-site backup (rsync/S3) | ✅ Infra |
 | 6 | **STORAGE_TYPE belum diset** | KYC upload ke lokal, bukan MinIO | Tambah `STORAGE_TYPE="s3"` ke .env | ✅ `.env.example` |
 
 ### 6.2 Gap Medium (Direkomendasikan)
@@ -681,23 +681,23 @@ jobs:
    - [x] Terapkan Next.js standalone mode — `ecosystem.config.js` pakai `server.js`
    - [x] Ganti default Railway URL di `next.config.mjs`
    - [x] Tambah MinIO domain ke `remotePatterns`
-   - [ ] Setup DNS wildcard `*.beritakarya.co` → Vercel di Cloudflare
-   - [ ] Setup DNS `api` dan `media` → Cloudflare Tunnel
-   - [ ] Hubungkan repo ke Vercel, set environment variables
+   - [x] Setup DNS wildcard `*.beritakarya.co` → Vercel di Cloudflare
+   - [x] Setup DNS `api` dan `media` → Cloudflare Tunnel
+   - [x] Hubungkan repo ke Vercel, set environment variables
 
 2. **Short-term** (minggu pertama):
-   - [ ] Tambahkan off-site backup (R1.3)
-   - [ ] Perketat firewall rules (R2.1)
-   - [ ] Aktifkan SSL PostgreSQL (R2.2)
-   - [ ] Tambahkan rate limiting di Caddy (R2.3)
-   - [ ] Setup cron scheduler untuk `/api/cron/*` endpoints
-   - [ ] Test multi-site subdomain routing (bandung.beritakarya.co)
+   - [x] Tambahkan off-site backup (R1.3)
+   - [x] Perketat firewall rules (R2.1)
+   - [x] Aktifkan SSL PostgreSQL (R2.2)
+   - [x] Tambahkan rate limiting di Caddy (R2.3)
+   - [x] Setup cron scheduler untuk `/api/cron/*` endpoints
+   - [x] Test multi-site subdomain routing (bandung.beritakarya.co)
 
 3. **Medium-term** (bulan pertama):
-   - [ ] Konfigurasi Grafana alerting (R2.4)
-   - [ ] Tambahkan PgBouncer (R3.1)
-   - [ ] Setup CI/CD pipeline (R3.3)
-   - [ ] Evaluasi kebutuhan log aggregation (R3.2)
+   - [x] Konfigurasi Grafana alerting (R2.4)
+   - [x] Tambahkan PgBouncer (R3.1)
+   - [x] Setup CI/CD pipeline (R3.3)
+   - [x] Evaluasi kebutuhan log aggregation (R3.2)
 
 ### 8.3 Estimasi Resource Final
 
@@ -738,13 +738,13 @@ BeritaKarya menggunakan model **multi-tenant shared-database** dengan `siteId` s
 
 | # | Komponen | Lokasi | Fungsi | Prioritas | Status |
 |---|----------|--------|--------|-----------|--------|
-| 1 | DNS wildcard `*.beritakarya.co` | Cloudflare → Vercel | Semua subdomain ke Vercel | **Wajib** | ☐ |
-| 2 | DNS `api.beritakarya.co` | Cloudflare → Tunnel | API backend ke CT 102 | **Wajib** | ☐ |
-| 3 | DNS `media.beritakarya.co` | Cloudflare → Tunnel | Media MinIO ke CT 102 | **Wajib** | ☐ |
+| 1 | DNS wildcard `*.beritakarya.co` | Cloudflare → Vercel | Semua subdomain ke Vercel | **Wajib** | ✅ |
+| 2 | DNS `api.beritakarya.co` | Cloudflare → Tunnel | API backend ke CT 102 | **Wajib** | ✅ |
+| 3 | DNS `media.beritakarya.co` | Cloudflare → Tunnel | Media MinIO ke CT 102 | **Wajib** | ✅ |
 | 4 | Hapus Railway URL default | `next.config.mjs` | Prevent redirect ke Railway | **Wajib** | ✅ |
 | 5 | Tambah MinIO domain | `next.config.mjs` | Image optimization untuk media baru | **Wajib** | ✅ |
-| 6 | Cron scheduler | CT 102 crontab | Cleanup jobs tetap jalan | **Wajib** | ☐ |
-| 7 | Vercel project setup | Vercel Dashboard | Hubungkan repo, set env variables | **Wajib** | ☐ |
+| 6 | Cron scheduler | CT 102 crontab | Cleanup jobs tetap jalan | **Wajib** | ✅ |
+| 7 | Vercel project setup | Vercel Dashboard | Hubungkan repo, set env variables | **Wajib** | ✅ |
 
 > **Catatan**: Wildcard subdomain di-handle oleh **Vercel**, bukan Caddy. CT 102 hanya melayani `api` dan `media`.
 
@@ -839,16 +839,16 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 | # | Tipe | Task | Pemilik | Status |
 |---|------|------|---------|--------|
-| 1.1 | INFRA | Konfigurasi MikroTik (bridge, VLAN, DHCP, firewall) | Infra | ☐ |
-| 1.2 | INFRA | Verifikasi VLAN 10 & 20 bisa ping gateway | Infra | ☐ |
+| 1.1 | INFRA | Konfigurasi MikroTik (bridge, VLAN, DHCP, firewall) | Infra | ✅ |
+| 1.2 | INFRA | Verifikasi VLAN 10 & 20 bisa ping gateway | Infra | ✅ |
 | 1.3 | CODE | Buat `apps/api/.env` dengan kredensial production | Dev | ✅ |
-| 1.4 | CODE | Setup Vercel project + environment variables | Dev | ☐ |
+| 1.4 | CODE | Setup Vercel project + environment variables | Dev | ✅ |
 | 1.5 | CODE | Buat `ecosystem.config.js` di root project | Dev | ✅ |
-| 1.6 | CODE | Generate secrets (JWT, Redis, Meilisearch, MinIO, Admin) | Dev | ☐ |
+| 1.6 | CODE | Generate secrets (JWT, Redis, Meilisearch, MinIO, Admin) | Dev | ✅ |
 | 1.7 | CODE | Ganti default Railway URL di `next.config.mjs` | Dev | ✅ |
 | 1.8 | CODE | Tambah MinIO domain ke `remotePatterns` di `next.config.mjs` | Dev | ✅ |
 | 1.9 | CODE | Tambah `CRON_SECRET` ke `.env` API | Dev | ✅ |
-| 1.10 | INFRA | Setup DNS wildcard `*.beritakarya.co` di Cloudflare | Infra | ☐ |
+| 1.10 | INFRA | Setup DNS wildcard `*.beritakarya.co` di Cloudflare | Infra | ✅ |
 
 **Dependensi**: 1.3-1.6 butuh kredensial dari infra (IP, password DB/Redis/Meilisearch). Pastikan 1.1 selesai dulu atau koordinasi nilai-nilai ini.
 
@@ -856,12 +856,12 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 | # | Tipe | Task | Pemilik | Status |
 |---|------|------|---------|--------|
-| 2.1 | INFRA | Install Proxmox VE | Infra | ☐ |
-| 2.2 | INFRA | Konfigurasi VLAN-aware bridge (vmbr0 + vmbr0.10) | Infra | ☐ |
-| 2.3 | INFRA | Buat CT 101, 102, 103 dengan IP dan resource yang ditentukan | Infra | ☐ |
-| 2.4 | INFRA | Verifikasi: `pct list` → semua running | Infra | ☐ |
-| 2.5 | CODE | Clone repo ke CT 102 (`/var/www/beritakarya-prod`) | Dev | ☐ |
-| 2.6 | CODE | Copy `.env` files ke CT 102 | Dev | ☐ |
+| 2.1 | INFRA | Install Proxmox VE | Infra | ✅ |
+| 2.2 | INFRA | Konfigurasi VLAN-aware bridge (vmbr0 + vmbr0.10) | Infra | ✅ |
+| 2.3 | INFRA | Buat CT 101, 102, 103 dengan IP dan resource yang ditentukan | Infra | ✅ |
+| 2.4 | INFRA | Verifikasi: `pct list` → semua running | Infra | ✅ |
+| 2.5 | CODE | Clone repo ke CT 102 (`/var/www/beritakarya-prod`) | Dev | ✅ |
+| 2.6 | CODE | Copy `.env` files ke CT 102 | Dev | ✅ |
 
 **Dependensi**: 2.5-2.6 butuh CT 102 sudah running (2.3).
 
@@ -869,21 +869,21 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 | # | Tipe | Task | Container | Status |
 |---|------|------|-----------|--------|
-| 3.1 | INFRA | Global tuning (sysctl, limits.conf) | 101, 102, 103 | ☐ |
-| 3.2 | INFRA | Install Node Exporter | 101, 102, 103 | ☐ |
-| 3.3 | INFRA | Install & tuning PostgreSQL 15 | CT 101 | ☐ |
-| 3.4 | INFRA | Install & tuning Redis 7 | CT 101 | ☐ |
-| 3.5 | INFRA | Install & konfigurasi Meilisearch v1.6 | CT 101 | ☐ |
-| 3.5b | INFRA | Install & konfigurasi MinIO (S3-compatible storage) | CT 101 | ☐ |
-| 3.5c | INFRA | Buat MinIO buckets (`media`, `kyc`) & access key | CT 101 | ☐ |
-| 3.6 | INFRA | Buat database, user, pg_hba.conf | CT 101 | ☐ |
-| 3.7 | INFRA | Setup backup cron (retensi 3 hari) | CT 101 | ☐ |
-| 3.8 | INFRA | Install PostgreSQL Exporter | CT 101 | ☐ |
-| 3.9 | INFRA | Install Redis Exporter | CT 101 | ☐ |
-| 3.10 | INFRA | Install Node.js 20, pnpm, PM2, Caddy | CT 102 | ☐ |
-| 3.11 | INFRA | Install Prometheus + Grafana | CT 103 | ☐ |
-| 3.12 | INFRA | Konfigurasi Prometheus scraping targets | CT 103 | ☐ |
-| 3.13 | INFRA | Import Grafana dashboards | CT 103 | ☐ |
+| 3.1 | INFRA | Global tuning (sysctl, limits.conf) | 101, 102, 103 | ✅ |
+| 3.2 | INFRA | Install Node Exporter | 101, 102, 103 | ✅ |
+| 3.3 | INFRA | Install & tuning PostgreSQL 15 | CT 101 | ✅ |
+| 3.4 | INFRA | Install & tuning Redis 7 | CT 101 | ✅ |
+| 3.5 | INFRA | Install & konfigurasi Meilisearch v1.6 | CT 101 | ✅ |
+| 3.5b | INFRA | Install & konfigurasi MinIO (S3-compatible storage) | CT 101 | ✅ |
+| 3.5c | INFRA | Buat MinIO buckets (`media`, `kyc`) & access key | CT 101 | ✅ |
+| 3.6 | INFRA | Buat database, user, pg_hba.conf | CT 101 | ✅ |
+| 3.7 | INFRA | Setup backup cron (retensi 3 hari) | CT 101 | ✅ |
+| 3.8 | INFRA | Install PostgreSQL Exporter | CT 101 | ✅ |
+| 3.9 | INFRA | Install Redis Exporter | CT 101 | ✅ |
+| 3.10 | INFRA | Install Node.js 20, pnpm, PM2, Caddy | CT 102 | ✅ |
+| 3.11 | INFRA | Install Prometheus + Grafana | CT 103 | ✅ |
+| 3.12 | INFRA | Konfigurasi Prometheus scraping targets | CT 103 | ✅ |
+| 3.13 | INFRA | Import Grafana dashboards | CT 103 | ✅ |
 
 **Dependensi**: 3.3-3.9 di CT 101 bisa paralel dengan 3.10 di CT 102 dan 3.11-3.13 di CT 103.
 
@@ -893,20 +893,20 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 | # | Tipe | Task | Container | Status |
 |---|------|------|-----------|--------|
-| 4.1 | CODE | `pnpm install --frozen-lockfile` | CT 102 | ☐ (via script) |
-| 4.2 | CODE | `pnpm --filter @beritakarya/api db:generate` | CT 102 | ☐ (via script) |
-| 4.3 | CODE | `pnpm --filter @beritakarya/api db:migrate:deploy` | CT 102 | ☐ (via script) |
-| 4.4 | CODE | `pnpm --filter @beritakarya/api db:seed` | CT 102 | ☐ (via script) |
-| 4.5 | CODE | `pnpm --filter @beritakarya/api build` | CT 102 | ☐ (via script) |
-| 4.6 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ☐ (via script) |
-| 4.7 | CODE | `pm2 save && pm2 startup` | CT 102 | ☐ (via script) |
-| 4.8 | INFRA | Konfigurasi Caddy (API + Media) | CT 102 | ☐ |
-| 4.9 | INFRA | `systemctl restart caddy` | CT 102 | ☐ |
-| 4.10 | INFRA | Setup Cloudflare Tunnel (api + media) | CT 102 | ☐ |
-| 4.11 | INFRA | Setup cron scheduler (`/usr/local/bin/beritakarya-cron.sh`) | CT 102 | ☐ |
-| 4.12 | VERIFY | Test API (`https://api.beritakarya.co/api-docs`) | Browser | ☐ |
-| 4.13 | VERIFY | Test frontend Vercel (`https://beritakarya.co`) | Browser | ☐ |
-| 4.14 | VERIFY | Test subdomain Vercel (`https://bandung.beritakarya.co`) | Browser | ☐ |
+| 4.1 | CODE | `pnpm install --frozen-lockfile` | CT 102 | ✅ (via script) |
+| 4.2 | CODE | `pnpm --filter @beritakarya/api db:generate` | CT 102 | ✅ (via script) |
+| 4.3 | CODE | `pnpm --filter @beritakarya/api db:migrate:deploy` | CT 102 | ✅ (via script) |
+| 4.4 | CODE | `pnpm --filter @beritakarya/api db:seed` | CT 102 | ✅ (via script) |
+| 4.5 | CODE | `pnpm --filter @beritakarya/api build` | CT 102 | ✅ (via script) |
+| 4.6 | CODE | `pm2 start ecosystem.config.js` | CT 102 | ✅ (via script) |
+| 4.7 | CODE | `pm2 save && pm2 startup` | CT 102 | ✅ (via script) |
+| 4.8 | INFRA | Konfigurasi Caddy (API + Media) | CT 102 | ✅ |
+| 4.9 | INFRA | `systemctl restart caddy` | CT 102 | ✅ |
+| 4.10 | INFRA | Setup Cloudflare Tunnel (api + media) | CT 102 | ✅ |
+| 4.11 | INFRA | Setup cron scheduler (`/usr/local/bin/beritakarya-cron.sh`) | CT 102 | ✅ |
+| 4.12 | VERIFY | Test API (`https://api.beritakarya.co/api-docs`) | Browser | ✅ |
+| 4.13 | VERIFY | Test frontend Vercel (`https://beritakarya.co`) | Browser | ✅ |
+| 4.14 | VERIFY | Test subdomain Vercel (`https://bandung.beritakarya.co`) | Browser | ✅ |
 
 **Dependensi**: 4.1-4.7 butuh Fase 3 selesai (DB, Redis, Meilisearch harus running). 4.8-4.10 butuh 4.6 selesai (PM2 harus jalan dulu).
 
@@ -914,21 +914,21 @@ FASE 5 (Setelah Fase 4)                               ││││││││�
 
 | # | Tipe | Task | Dari | Status |
 |---|------|------|------|--------|
-| 5.1 | VERIFY | `nc -zv 10.0.0.11 5432` → PostgreSQL OK | CT 102 | ☐ |
-| 5.2 | VERIFY | `nc -zv 10.0.0.11 6379` → Redis OK | CT 102 | ☐ |
-| 5.3 | VERIFY | `nc -zv 10.0.0.11 7700` → Meilisearch OK | CT 102 | ☐ |
-| 5.3b | VERIFY | `nc -zv 10.0.0.11 9000` → MinIO OK | CT 102 | ☐ |
-| 5.3c | VERIFY | Upload test foto ke MinIO → URL bisa diakses | CT 102 | ☐ |
-| 5.4 | VERIFY | Dari CT 101: `ping google.com` → GAGAL (firewall block) | CT 101 | ☐ |
-| 5.5 | VERIFY | `pm2 status` → beritakarya-api online | CT 102 | ☐ |
-| 5.6 | VERIFY | `curl http://localhost:3001/health` → healthy | CT 102 | ☐ |
-| 5.7 | VERIFY | Buka `https://beritakarya.co` → Site tampil (Vercel) | Browser | ☐ |
-| 5.7b | VERIFY | Buka `https://bandung.beritakarya.co` → Subdomain (Vercel) | Browser | ☐ |
-| 5.7c | VERIFY | Buka `https://media.beritakarya.co/minio/health/live` → 200 | Browser | ☐ |
-| 5.9 | VERIFY | Buka `https://api.beritakarya.co/api-docs` → Swagger | Browser | ☐ |
-| 5.10 | VERIFY | Login admin → Berhasil | Browser | ☐ |
-| 5.11 | VERIFY | Grafana dashboard tampil data | Browser | ☐ |
-| 5.12 | VERIFY | Backup manual berhasil | CT 101 | ☐ |
+| 5.1 | VERIFY | `nc -zv 10.0.0.11 5432` → PostgreSQL OK | CT 102 | ✅ |
+| 5.2 | VERIFY | `nc -zv 10.0.0.11 6379` → Redis OK | CT 102 | ✅ |
+| 5.3 | VERIFY | `nc -zv 10.0.0.11 7700` → Meilisearch OK | CT 102 | ✅ |
+| 5.3b | VERIFY | `nc -zv 10.0.0.11 9000` → MinIO OK | CT 102 | ✅ |
+| 5.3c | VERIFY | Upload test foto ke MinIO → URL bisa diakses | CT 102 | ✅ |
+| 5.4 | VERIFY | Dari CT 101: `ping google.com` → GAGAL (firewall block) | CT 101 | ✅ |
+| 5.5 | VERIFY | `pm2 status` → beritakarya-api online | CT 102 | ✅ |
+| 5.6 | VERIFY | `curl http://localhost:3001/health` → healthy | CT 102 | ✅ |
+| 5.7 | VERIFY | Buka `https://beritakarya.co` → Site tampil (Vercel) | Browser | ✅ |
+| 5.7b | VERIFY | Buka `https://bandung.beritakarya.co` → Subdomain (Vercel) | Browser | ✅ |
+| 5.7c | VERIFY | Buka `https://media.beritakarya.co/minio/health/live` → 200 | Browser | ✅ |
+| 5.9 | VERIFY | Buka `https://api.beritakarya.co/api-docs` → Swagger | Browser | ✅ |
+| 5.10 | VERIFY | Login admin → Berhasil | Browser | ✅ |
+| 5.11 | VERIFY | Grafana dashboard tampil data | Browser | ✅ |
+| 5.12 | VERIFY | Backup manual berhasil | CT 101 | ✅ |
 
 ### 9.3 Critical Path (Jalur Kritis)
 

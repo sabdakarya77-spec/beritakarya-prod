@@ -110,14 +110,14 @@ MikroTik Router: 192.168.10.1 (VLAN 10), 10.0.0.1 (VLAN 20)
 
 ### 2.1 Checklist
 
-- [ ] **1.1** Buat bridge `bridge-local` dengan VLAN filtering
-- [ ] **1.2** Daftarkan port: Ether2 (trunk), Ether3-5 (access VLAN 10)
-- [ ] **1.3** Buat interface VLAN: `vlan10-LAN`, `vlan20-SRV`
-- [ ] **1.4** Assign IP gateway: `192.168.10.1` (VLAN 10), `10.0.0.1` (VLAN 20)
-- [ ] **1.5** Setup DHCP server untuk VLAN 10 (range `.100-.254`)
-- [ ] **1.6** Konfigurasi bridge VLAN table (tagged/untagged)
-- [ ] **1.7** Aktifkan VLAN filtering
-- [ ] **1.8** Setup WAN: DHCP client di Ether1, NAT masquerade
+- [x] **1.1** Buat bridge `bridge-local` dengan VLAN filtering
+- [x] **1.2** Daftarkan port: Ether2 (trunk), Ether3-5 (access VLAN 10)
+- [x] **1.3** Buat interface VLAN: `vlan10-LAN`, `vlan20-SRV`
+- [x] **1.4** Assign IP gateway: `192.168.10.1` (VLAN 10), `10.0.0.1` (VLAN 20)
+- [x] **1.5** Setup DHCP server untuk VLAN 10 (range `.100-.254`)
+- [x] **1.6** Konfigurasi bridge VLAN table (tagged/untagged)
+- [x] **1.7** Aktifkan VLAN filtering
+- [x] **1.8** Setup WAN: DHCP client di Ether1, NAT masquerade
 
 ### 2.2 Firewall Rules (Urutan Penting)
 
@@ -281,54 +281,54 @@ exit
 
 ### 4.1 Checklist Global Tuning
 
-- [ ] **3.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
-- [ ] **3.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
-- [ ] **3.3** Install Node Exporter (`prometheus-node-exporter`)
+- [x] **3.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
+- [x] **3.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
+- [x] **3.3** Install Node Exporter (`prometheus-node-exporter`)
 
 ### 4.2 Checklist PostgreSQL 15
 
-- [ ] **3.4** Install PostgreSQL 15 dari official repo
-- [ ] **3.5** Tuning `postgresql.conf`:
+- [x] **3.4** Install PostgreSQL 15 dari official repo
+- [x] **3.5** Tuning `postgresql.conf`:
   - `listen_addresses = '10.0.0.11'`
   - `max_connections = 100`
   - `shared_buffers = 1GB`
   - `effective_cache_size = 3GB`
   - `work_mem = 10MB`
-- [ ] **3.6** Konfigurasi `pg_hba.conf`:
+- [x] **3.6** Konfigurasi `pg_hba.conf`:
   - `host beritakarya berita_user 10.0.0.12/32 scram-sha-256`
   - `host beritakarya berita_user 10.0.0.13/32 scram-sha-256`
-- [ ] **3.7** Buat database `beritakarya` dan user `berita_user`
-- [ ] **3.8** Enable & start PostgreSQL: `systemctl enable --now postgresql`
+- [x] **3.7** Buat database `beritakarya` dan user `berita_user`
+- [x] **3.8** Enable & start PostgreSQL: `systemctl enable --now postgresql`
 
 ### 4.3 Checklist Redis 7
 
-- [ ] **3.9** Install Redis 7 dari official repo
-- [ ] **3.10** Konfigurasi `/etc/redis/redis.conf`:
+- [x] **3.9** Install Redis 7 dari official repo
+- [x] **3.10** Konfigurasi `/etc/redis/redis.conf`:
   - `bind 10.0.0.11`
   - `protected-mode yes`
   - `requirepass <PASSWORD_KUAT>`
   - `maxmemory 512mb`
   - `maxmemory-policy allkeys-lru`
   - Rename commands berbahaya (FLUSHDB, FLUSHALL, DEBUG)
-- [ ] **3.11** Enable & start Redis: `systemctl enable --now redis-server`
+- [x] **3.11** Enable & start Redis: `systemctl enable --now redis-server`
 
 ### 4.4 Checklist Meilisearch v1.6
 
-- [ ] **3.12** Download binary Meilisearch ke `/usr/local/bin/meilisearch`
-- [ ] **3.13** Buat systemd service (`/etc/systemd/system/meilisearch.service`)
-- [ ] **3.14** Konfigurasi: `--http-addr 10.0.0.11:7700 --master-key <KEY_MIN_32_CHAR> --env production`
-- [ ] **3.15** Buat data directory: `mkdir -p /var/lib/meilisearch`
-- [ ] **3.16** Enable & start Meilisearch
+- [x] **3.12** Download binary Meilisearch ke `/usr/local/bin/meilisearch`
+- [x] **3.13** Buat systemd service (`/etc/systemd/system/meilisearch.service`)
+- [x] **3.14** Konfigurasi: `--http-addr 10.0.0.11:7700 --master-key <KEY_MIN_32_CHAR> --env production`
+- [x] **3.15** Buat data directory: `mkdir -p /var/lib/meilisearch`
+- [x] **3.16** Enable & start Meilisearch
 
 ### 4.5 Checklist MinIO (S3-Compatible Storage)
 
-- [ ] **3.17** Download binary MinIO ke `/usr/local/bin/minio`
-- [ ] **3.18** Buat data directory: `mkdir -p /var/lib/minio/{media,kyc}`
-- [ ] **3.19** Buat systemd service (`/etc/systemd/system/minio.service`)
-- [ ] **3.20** Konfigurasi: `--address 10.0.0.11:9000 --console-address 10.0.0.11:9001`
-- [ ] **3.21** Enable & start MinIO
-- [ ] **3.22** Buat bucket `media` dan `kyc` via MinIO Client (`mc`)
-- [ ] **3.23** Buat access key untuk aplikasi
+- [x] **3.17** Download binary MinIO ke `/usr/local/bin/minio`
+- [x] **3.18** Buat data directory: `mkdir -p /var/lib/minio/{media,kyc}`
+- [x] **3.19** Buat systemd service (`/etc/systemd/system/minio.service`)
+- [x] **3.20** Konfigurasi: `--address 10.0.0.11:9000 --console-address 10.0.0.11:9001`
+- [x] **3.21** Enable & start MinIO
+- [x] **3.22** Buat bucket `media` dan `kyc` via MinIO Client (`mc`)
+- [x] **3.23** Buat access key untuk aplikasi
 
 #### Install MinIO
 
@@ -387,10 +387,10 @@ mc admin policy set readwrite user=beritakarya
 
 ### 4.6 Checklist Backup
 
-- [ ] **3.24** Buat script `/usr/local/bin/backup_db.sh`
-- [ ] **3.25** Tambahkan cron: `0 2 * * * root /usr/local/bin/backup_db.sh`
-- [ ] **3.26** Test backup manual: `bash /usr/local/bin/backup_db.sh`
-- [ ] **3.27** Konfigurasi backup retensi 3 hari (bukan 7) karena disk sharing dengan MinIO
+- [x] **3.24** Buat script `/usr/local/bin/backup_db.sh`
+- [x] **3.25** Tambahkan cron: `0 2 * * * root /usr/local/bin/backup_db.sh`
+- [x] **3.26** Test backup manual: `bash /usr/local/bin/backup_db.sh`
+- [x] **3.27** Konfigurasi backup retensi 3 hari (bukan 7) karena disk sharing dengan MinIO
 
 **CATATAN PENTING — Disk Sharing:**
 CT 101 (64 GB) menjalankan DB + MinIO di disk yang sama. Backup PostgreSQL harus hemat tempat:
@@ -400,11 +400,11 @@ CT 101 (64 GB) menjalankan DB + MinIO di disk yang sama. Backup PostgreSQL harus
 
 ### 4.7 Checklist Monitoring Exporters
 
-- [ ] **3.28** Install PostgreSQL Exporter (`postgres_exporter`)
-- [ ] **3.29** Buat user `postgres_exporter` di PostgreSQL dengan role `pg_monitor`
-- [ ] **3.30** Buat systemd service untuk postgres_exporter
-- [ ] **3.31** Install Redis Exporter (`prometheus-redis-exporter`)
-- [ ] **3.32** Konfigurasi Redis Exporter dengan password
+- [x] **3.28** Install PostgreSQL Exporter (`postgres_exporter`)
+- [x] **3.29** Buat user `postgres_exporter` di PostgreSQL dengan role `pg_monitor`
+- [x] **3.30** Buat systemd service untuk postgres_exporter
+- [x] **3.31** Install Redis Exporter (`prometheus-redis-exporter`)
+- [x] **3.32** Konfigurasi Redis Exporter dengan password
 
 ### 4.8 Port yang Harus Terbuka di CT 101
 
@@ -458,37 +458,37 @@ Simpan di password manager, **bukan di file**:
 
 ### 5.1 Checklist Global Tuning
 
-- [ ] **4.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
-- [ ] **4.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
-- [ ] **4.3** Install Node Exporter (`prometheus-node-exporter`)
+- [x] **4.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
+- [x] **4.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
+- [x] **4.3** Install Node Exporter (`prometheus-node-exporter`)
 
 ### 5.2 Checklist Runtime
 
-- [ ] **4.4** Install Node.js 20 LTS (NodeSource)
-- [ ] **4.5** Install pnpm global: `npm install -g pnpm`
-- [ ] **4.6** Install PM2 global: `npm install -g pm2`
-- [ ] **4.7** Install Caddy (dari official repo)
+- [x] **4.4** Install Node.js 20 LTS (NodeSource)
+- [x] **4.5** Install pnpm global: `npm install -g pnpm`
+- [x] **4.6** Install PM2 global: `npm install -g pm2`
+- [x] **4.7** Install Caddy (dari official repo)
 
 > **Catatan**: Frontend (Next.js) di-deploy ke **Vercel**, tidak perlu di CT 102. CT 102 hanya menjalankan Express API.
 
 ### 5.3 Checklist Deploy Aplikasi (API Only)
 
-- [ ] **4.8** Clone repo ke `/var/www/beritakarya-prod`
-- [ ] **4.9** Buat `.env` untuk API (lihat `implementasi-codebase.md` untuk nilai yang benar)
-- [ ] **4.10** `pnpm install --frozen-lockfile`
-- [ ] **4.11** `pnpm --filter @beritakarya/api db:generate`
-- [ ] **4.12** `pnpm --filter @beritakarya/api db:migrate:deploy`
-- [ ] **4.13** `pnpm --filter @beritakarya/api db:seed`
-- [ ] **4.14** Build API: `pnpm --filter @beritakarya/api build`
+- [x] **4.8** Clone repo ke `/var/www/beritakarya-prod`
+- [x] **4.9** Buat `.env` untuk API (lihat `implementasi-codebase.md` untuk nilai yang benar)
+- [x] **4.10** `pnpm install --frozen-lockfile`
+- [x] **4.11** `pnpm --filter @beritakarya/api db:generate`
+- [x] **4.12** `pnpm --filter @beritakarya/api db:migrate:deploy`
+- [x] **4.13** `pnpm --filter @beritakarya/api db:seed`
+- [x] **4.14** Build API: `pnpm --filter @beritakarya/api build`
 
 > **Catatan**: Frontend di-deploy ke Vercel via Git push. Tidak perlu build web di CT 102.
 
 ### 5.4 Checklist PM2
 
-- [ ] **4.17** Buat `ecosystem.config.js` (lihat konfigurasi di bawah)
-- [ ] **4.18** `pm2 start ecosystem.config.js`
-- [ ] **4.19** `pm2 save`
-- [ ] **4.20** `pm2 startup` (ikuti instruksi output)
+- [x] **4.17** Buat `ecosystem.config.js` (lihat konfigurasi di bawah)
+- [x] **4.18** `pm2 start ecosystem.config.js`
+- [x] **4.19** `pm2 save`
+- [x] **4.20** `pm2 startup` (ikuti instruksi output)
 
 ### 5.5 PM2 Configuration (`ecosystem.config.js`)
 
@@ -524,8 +524,8 @@ module.exports = {
 
 ### 5.6 Checklist Caddy
 
-- [ ] **4.21** Edit `/etc/caddy/Caddyfile` (lihat konfigurasi di bawah)
-- [ ] **4.22** `systemctl restart caddy`
+- [x] **4.21** Edit `/etc/caddy/Caddyfile` (lihat konfigurasi di bawah)
+- [x] **4.22** `systemctl restart caddy`
 
 ### 5.7 Caddy Configuration (`/etc/caddy/Caddyfile`)
 
@@ -586,12 +586,12 @@ media.beritakarya.co {
 
 ### 5.8 Checklist Cloudflare Tunnel & DNS
 
-- [ ] **4.23** Install `cloudflared`
-- [ ] **4.24** `cloudflared tunnel login`
-- [ ] **4.25** `cloudflared tunnel create beritakarya-api-tunnel`
-- [ ] **4.26** Konfigurasi tunnel → `http://localhost:80` (Caddy)
-- [ ] **4.27** `cloudflared service install <TUNNEL_TOKEN>`
-- [ ] **4.28** `systemctl enable --now cloudflared`
+- [x] **4.23** Install `cloudflared`
+- [x] **4.24** `cloudflared tunnel login`
+- [x] **4.25** `cloudflared tunnel create beritakarya-api-tunnel`
+- [x] **4.26** Konfigurasi tunnel → `http://localhost:80` (Caddy)
+- [x] **4.27** `cloudflared service install <TUNNEL_TOKEN>`
+- [x] **4.28** `systemctl enable --now cloudflared`
 
 #### DNS Configuration (Cloudflare Dashboard)
 
@@ -659,8 +659,8 @@ ingress:
 
 Codebase BeritaKarya memiliki endpoint `/api/cron/*` yang dirancang untuk dipanggil secara periodik (cleanup expired tokens, KYC cleanup, pageview retention, dll). Di self-hosted, perlu scheduler manual via crontab.
 
-- [ ] **4.29** Buat cron script `/usr/local/bin/beritakarya-cron.sh`
-- [ ] **4.30** Tambahkan ke crontab
+- [x] **4.29** Buat cron script `/usr/local/bin/beritakarya-cron.sh`
+- [x] **4.30** Tambahkan ke crontab
 
 #### Cron Script (`/usr/local/bin/beritakarya-cron.sh`)
 
@@ -701,15 +701,15 @@ echo "*/5 * * * * root /usr/local/bin/beritakarya-cron.sh" >> /etc/crontab
 
 ### 6.1 Checklist Global Tuning
 
-- [ ] **5.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
-- [ ] **5.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
-- [ ] **5.3** Install Node Exporter (`prometheus-node-exporter`)
+- [x] **5.1** Optimasi `/etc/security/limits.conf` (nofile 65536)
+- [x] **5.2** Tuning sysctl (`/etc/sysctl.d/99-production.conf`)
+- [x] **5.3** Install Node Exporter (`prometheus-node-exporter`)
 
 ### 6.2 Checklist Prometheus
 
-- [ ] **5.4** Install Prometheus (`apt install prometheus`)
-- [ ] **5.5** Edit `/etc/prometheus/prometheus.yml` (lihat konfigurasi di bawah)
-- [ ] **5.6** Enable & start: `systemctl enable --now prometheus`
+- [x] **5.4** Install Prometheus (`apt install prometheus`)
+- [x] **5.5** Edit `/etc/prometheus/prometheus.yml` (lihat konfigurasi di bawah)
+- [x] **5.6** Enable & start: `systemctl enable --now prometheus`
 
 ### 6.3 Prometheus Configuration (`/etc/prometheus/prometheus.yml`)
 
@@ -746,23 +746,23 @@ scrape_configs:
 
 ### 6.4 Checklist Grafana
 
-- [ ] **5.7** Install Grafana (`apt install grafana`)
-- [ ] **5.8** Enable & start: `systemctl enable --now grafana-server`
-- [ ] **5.9** Akses `http://10.0.0.13:3000` (login: `admin`/`admin`)
-- [ ] **5.10** Tambahkan Prometheus data source: `http://localhost:9090`
-- [ ] **5.11** Import dashboard:
+- [x] **5.7** Install Grafana (`apt install grafana`)
+- [x] **5.8** Enable & start: `systemctl enable --now grafana-server`
+- [x] **5.9** Akses `http://10.0.0.13:3000` (login: `admin`/`admin`)
+- [x] **5.10** Tambahkan Prometheus data source: `http://localhost:9090`
+- [x] **5.11** Import dashboard:
   - ID **1860** — Node Exporter Full
   - ID **9628** — PostgreSQL Database
   - ID **763** — Redis Dashboard
 
 ### 6.5 Checklist Alerting
 
-- [ ] **5.12** Konfigurasi Grafana alert rules:
+- [x] **5.12** Konfigurasi Grafana alert rules:
   - CPU > 80% selama 5 menit
   - RAM > 85% selama 5 menit
   - Disk > 80% selama 5 menit
   - PostgreSQL down selama 1 menit
-- [ ] **5.13** Setup notifikasi (email/Slack/Discord)
+- [x] **5.13** Setup notifikasi (email/Slack/Discord)
 
 ### 6.6 Port yang Harus Terbuka di CT 103
 
@@ -780,33 +780,33 @@ scrape_configs:
 
 ### 7.1 Checklist Verifikasi Jaringan
 
-- [ ] **6.1** Dari CT 102: `nc -zv 10.0.0.11 5432` → PostgreSQL connected
-- [ ] **6.2** Dari CT 102: `nc -zv 10.0.0.11 6379` → Redis connected
-- [ ] **6.3** Dari CT 102: `nc -zv 10.0.0.11 7700` → Meilisearch connected
-- [ ] **6.4** Dari CT 101: `ping google.com` → **GAGAL** (diblokir firewall, ini yang benar)
-- [ ] **6.5** Dari CT 102: `ping google.com` → Berhasil
+- [x] **6.1** Dari CT 102: `nc -zv 10.0.0.11 5432` → PostgreSQL connected
+- [x] **6.2** Dari CT 102: `nc -zv 10.0.0.11 6379` → Redis connected
+- [x] **6.3** Dari CT 102: `nc -zv 10.0.0.11 7700` → Meilisearch connected
+- [x] **6.4** Dari CT 101: `ping google.com` → **GAGAL** (diblokir firewall, ini yang benar)
+- [x] **6.5** Dari CT 102: `ping google.com` → Berhasil
 
 ### 7.2 Checklist Verifikasi Aplikasi
 
-- [ ] **6.6** `pm2 status` → beritakarya-api online
-- [ ] **6.7** `curl http://localhost:3001/health` → `{"status":"healthy"}`
-- [ ] **6.8** Buka `https://beritakarya.co` di browser → Site tampil (Vercel)
-- [ ] **6.9** Buka `https://api.beritakarya.co/api-docs` → Swagger tampil (self-hosted)
-- [ ] **6.10** Login dengan admin seed credentials → Berhasil
-- [ ] **6.11** Buka `https://bandung.beritakarya.co` → Subdomain berfungsi (Vercel wildcard)
+- [x] **6.6** `pm2 status` → beritakarya-api online
+- [x] **6.7** `curl http://localhost:3001/health` → `{"status":"healthy"}`
+- [x] **6.8** Buka `https://beritakarya.co` di browser → Site tampil (Vercel)
+- [x] **6.9** Buka `https://api.beritakarya.co/api-docs` → Swagger tampil (self-hosted)
+- [x] **6.10** Login dengan admin seed credentials → Berhasil
+- [x] **6.11** Buka `https://bandung.beritakarya.co` → Subdomain berfungsi (Vercel wildcard)
 
 ### 7.3 Checklist Verifikasi Monitoring
 
-- [ ] **6.12** Buka Grafana `http://10.0.0.13:3000` → Dashboard tampil
-- [ ] **6.13** Node Exporter targets UP di Prometheus (`http://10.0.0.13:9090/targets`)
-- [ ] **6.14** PostgreSQL Exporter target UP
-- [ ] **6.15** Redis Exporter target UP
+- [x] **6.12** Buka Grafana `http://10.0.0.13:3000` → Dashboard tampil
+- [x] **6.13** Node Exporter targets UP di Prometheus (`http://10.0.0.13:9090/targets`)
+- [x] **6.14** PostgreSQL Exporter target UP
+- [x] **6.15** Redis Exporter target UP
 
 ### 7.4 Checklist Verifikasi Backup
 
-- [ ] **6.16** Jalankan manual: `bash /usr/local/bin/backup_db.sh`
-- [ ] **6.17** Verifikasi file backup ada di `/var/backups/postgresql/`
-- [ ] **6.18** Verifikasi cron berjalan: `grep backup_db /etc/crontab`
+- [x] **6.16** Jalankan manual: `bash /usr/local/bin/backup_db.sh`
+- [x] **6.17** Verifikasi file backup ada di `/var/backups/postgresql/`
+- [x] **6.18** Verifikasi cron berjalan: `grep backup_db /etc/crontab`
 
 ---
 
