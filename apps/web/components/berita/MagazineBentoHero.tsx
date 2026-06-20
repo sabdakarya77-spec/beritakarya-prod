@@ -19,14 +19,14 @@ type HeroArticle = {
 };
 
 const getImageUrl = (article: HeroArticle) =>
-  article.featuredImage || article.blocks?.find((block) => block.type === 'image')?.url || '/placeholder.jpg';
+  article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((block) => block.type === 'image')?.url || '/placeholder.jpg';
 
 const getPrimaryImageBlock = (article: HeroArticle) => {
   const imageUrl = getImageUrl(article);
 
   return (
-    article.blocks?.find((block) => block.type === 'image' && block.url === imageUrl) ||
-    article.blocks?.find((block) => block.type === 'image')
+    (Array.isArray(article.blocks) ? article.blocks : []).find((block) => block.type === 'image' && block.url === imageUrl) ||
+    (Array.isArray(article.blocks) ? article.blocks : []).find((block) => block.type === 'image')
   );
 };
 

@@ -822,7 +822,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                             </h4>
                           </Link>
                           <p className="line-clamp-3 text-xs leading-relaxed text-brand-text-muted">
-                            {article.excerpt || article.blocks?.find((b: ArticleBlock) => b.type === 'paragraph')?.content || ''}
+                            {article.excerpt || (Array.isArray(article.blocks) ? article.blocks : []).find((b: ArticleBlock) => b.type === 'paragraph')?.content || ''}
                           </p>
                         </div>
                         <div className="mt-3 flex items-center gap-2 border-t border-black/5 pt-3 dark:border-white/5">

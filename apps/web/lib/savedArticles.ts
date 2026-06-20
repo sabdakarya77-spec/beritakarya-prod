@@ -92,7 +92,7 @@ interface ArticleInput {
 }
 
 export function createSavedArticlePayload(article: ArticleInput, site: string): SavedArticle {
-  const excerpt = article.blocks?.find(block => block.type === 'paragraph')?.content || '';
+  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find(block => block.type === 'paragraph')?.content || '';
 
   return {
     id: article.id || article.slug,

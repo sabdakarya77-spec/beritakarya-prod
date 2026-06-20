@@ -35,11 +35,11 @@ export function PremiumHero({ article, site }: PremiumHeroProps) {
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'shared'>('idle');
 
   const imageUrl = useMemo(() => {
-    return article?.featuredImage || article?.blocks?.find(b => b.type === 'image')?.url || '/placeholder.jpg';
+    return article?.featuredImage || (Array.isArray(article?.blocks) ? article.blocks : []).find(b => b.type === 'image')?.url || '/placeholder.jpg';
   }, [article]);
 
   const excerpt = useMemo(() => {
-    return article?.blocks?.find(b => b.type === 'paragraph')?.content || '';
+    return (Array.isArray(article?.blocks) ? article.blocks : []).find(b => b.type === 'paragraph')?.content || '';
   }, [article]);
 
   const date = useMemo(() => {

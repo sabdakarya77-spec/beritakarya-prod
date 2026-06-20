@@ -139,7 +139,7 @@ export default async function sitemap({ params }: { params: { site: string } }):
     blocks?: Array<{ type?: string; url?: string }>
   }) => {
     const image = article.featuredImage ||
-      article.blocks?.find((b) => b.type === 'image')?.url ||
+      (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'image')?.url ||
       DEFAULT_IMAGE
     entries.push({
       url: `${siteUrl}/artikel/${article.slug}`,

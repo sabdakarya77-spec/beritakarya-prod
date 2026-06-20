@@ -62,8 +62,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteName = siteSettings?.name || fallbackConfig?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1));
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico';
 
-  const excerpt = article.blocks.find((b: Block) => b.type === 'paragraph')?.content || ''
-  const coverImage = article.featuredImage || article.blocks.find((b: Block) => b.type === 'image')?.url || '/logo.png'
+  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'paragraph')?.content || ''
+  const coverImage = article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')?.url || '/logo.png'
 
   return constructMetadata({
     title: article.metaTitle || `${article.title} - ${siteName}`,
@@ -153,11 +153,11 @@ export default async function ArticlePage({ params }: Props) {
     getRelatedArticles(siteParam, slugParam, article.category?.name),
     getPopularArticles(siteParam, slugParam)
   ])
-  const coverImage = article.featuredImage || article.blocks.find((b: Block) => b.type === 'image')?.url || '/placeholder.jpg'
-  const coverImageBlock = article.blocks.find((b: Block) => b.type === 'image' && b.url === coverImage)
-    || article.blocks.find((b: Block) => b.type === 'image')
+  const coverImage = article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')?.url || '/placeholder.jpg'
+  const coverImageBlock = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image' && b.url === coverImage)
+    || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')
   const coverImageCaption = coverImageBlock?.caption || null
-  const excerpt = article.blocks.find((b: Block) => b.type === 'paragraph')?.content || ''
+  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'paragraph')?.content || ''
   const articleUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/artikel/${slugParam}`
   const authorProfileUrl = article.author?.id
     ? `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/penulis/${article.author.id}`
@@ -308,7 +308,7 @@ export default async function ArticlePage({ params }: Props) {
                     <div className="space-y-8">
                       <div className="article-content max-w-[40rem] space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
                         {(() => {
-                          const blocks = article.blocks as Block[];
+                          const blocks = (Array.isArray(article.blocks) ? article.blocks : []) as Block[];
                           let paragraphCount = 0;
                           const elements: React.ReactNode[] = [];
 
@@ -351,7 +351,7 @@ export default async function ArticlePage({ params }: Props) {
                                     <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
                                       <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
                                         <SmartImage
-                                          src={rel.featuredImage || rel.blocks?.find((b: Block) => b.type === 'image')?.url}
+                                          src={rel.featuredImage || (Array.isArray(rel.blocks) ? rel.blocks : []).find((b: Block) => b.type === 'image')?.url}
                                           context="card"
                                           alt={rel.title}
                                           fill

@@ -88,7 +88,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
     return '/placeholder.jpg';
   })();
-  const excerpt = article.blocks?.find((b) => b.type === 'paragraph')?.content || '';
+  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'paragraph')?.content || '';
   const articleHref = `/${site}/artikel/${article.slug}`;
   const date = new Date(article.publishedAt || article.createdAt || '').toLocaleDateString('id-ID', {
     day: 'numeric',
