@@ -70,8 +70,8 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
   return (
     <footer className="mt-20 border-t border-gray-200 bg-white pb-10 pt-12 text-brand-text transition-colors duration-500 sm:mt-24 sm:pb-12 sm:pt-14 dark:border-white/5 dark:bg-[#020617]">
       <Container>
-        <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-10">
-          <div className="col-span-1">
+        <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-4 md:gap-10 lg:grid-cols-5">
+          <div className="col-span-1 md:col-span-2">
             <button 
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'instant' });
@@ -128,7 +128,7 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
             </div>
           </div>
 
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 lg:col-span-2">
             <h5 className="mb-4 text-[10px] font-medium tracking-[0.06em] text-brand-red/90">Kategori Utama</h5>
             <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
               {mainCategories.map((cat) => (
@@ -143,7 +143,7 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
             </div>
           </div>
 
-          <div>
+          <div className="md:col-span-1">
             <h5 className="mb-4 text-[10px] font-medium tracking-[0.06em] text-brand-red/90">Kerja Sama</h5>
             <ul className="space-y-2.5 text-[13px] text-brand-text-muted">
               {partnershipLinks.map((item, index) => (
