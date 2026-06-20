@@ -88,7 +88,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 h-auto lg:h-[350px] xl:h-[380px]">
         
         {/* Kiri: Slider Gambar Utama */}
-        <div className="relative overflow-hidden rounded-2xl lg:col-span-8 h-[220px] sm:h-[280px] md:h-[320px] lg:h-full w-full bg-slate-900 border border-white/5">
+        <div className="relative overflow-hidden rounded-2xl lg:col-span-8 h-[220px] sm:h-[280px] md:h-[320px] lg:h-full w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeIndex}
@@ -132,7 +132,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
         </div>
 
         {/* Kanan: Navigasi Menu Vertikal (Hanya tampil di Desktop) */}
-        <div className="hidden lg:flex lg:col-span-4 flex-col gap-3 h-full justify-between rounded-2xl bg-slate-900 border border-white/5 p-3">
+        <div className="hidden lg:flex lg:col-span-4 flex-col gap-3 h-full justify-between rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 p-3">
           {heroArticles.map((article, idx) => {
             const isActive = idx === activeIndex;
             return (
@@ -142,15 +142,15 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                 className={cn(
                   "relative w-full text-left rounded-xl p-3.5 border transition-all duration-300 flex-1 flex flex-col justify-center min-h-0",
                   isActive
-                    ? "bg-white/[0.04] border-l-4 border-l-brand-red border-y-white/5 border-r-white/5 shadow-md shadow-black/15"
-                    : "bg-transparent border-transparent hover:bg-white/[0.02]"
+                    ? "bg-white dark:bg-white/[0.04] border-l-4 border-l-brand-red border-y-slate-200 dark:border-y-white/5 border-r-slate-200 dark:border-r-white/5 shadow-md shadow-black/10"
+                    : "bg-transparent border-transparent hover:bg-white/60 dark:hover:bg-white/[0.02]"
                 )}
               >
                 {/* Label Kategori */}
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className={cn(
                     "text-[10px] xl:text-[10px] font-extrabold uppercase tracking-widest",
-                    isActive ? "text-brand-red" : "text-brand-text-muted"
+                    isActive ? "text-brand-red" : "text-slate-400 dark:text-brand-text-muted"
                   )}>
                     {article.category?.name || 'Headline'}
                   </span>
@@ -164,7 +164,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                 {/* Judul Berita Pendek */}
                 <h3 className={cn(
                   "line-clamp-2 font-sans text-[0.78rem] xl:text-[0.82rem] leading-[1.25] tracking-tight font-bold transition-colors",
-                  isActive ? "text-white" : "text-white/60 hover:text-white/80"
+                  isActive ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/60 hover:text-slate-700 dark:hover:text-white/80"
                 )}>
                   {article.title}
                 </h3>
@@ -186,7 +186,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                 "h-1.5 rounded-full transition-all duration-300",
                 idx === activeIndex 
                   ? "w-6 bg-brand-red" 
-                  : "w-1.5 bg-white/20 hover:bg-white/40"
+                  : "w-1.5 bg-slate-300 dark:bg-white/20 hover:bg-slate-400 dark:hover:bg-white/40"
               )}
               aria-label={`Go to slide ${idx + 1}`}
             />
