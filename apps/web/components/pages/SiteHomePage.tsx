@@ -595,10 +595,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             <aside className="space-y-6 lg:col-span-4">
 
               {/* Akses Redaksi */}
-              <div className="rounded-2xl border border-white/5 bg-[#0a0f1a] p-4 text-white shadow-[0_20px_40px_rgba(2,6,23,0.2)] md:p-5">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
                 <div className="pb-2">
                   <span className={`${sectionEyebrowClass} text-brand-red`}>Akses Redaksi</span>
-                  <h4 className="mt-2 text-lg md:text-xl font-sans font-bold leading-snug text-white">
+                  <h4 className="mt-2 text-lg md:text-xl font-sans font-bold leading-snug text-brand-black dark:text-white">
                     Pilih jalur tercepat ke redaksi.
                   </h4>
                 </div>
@@ -608,20 +608,20 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-3 transition-colors hover:bg-emerald-500/15"
+                      className="group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3.5 py-3 transition-colors hover:bg-emerald-500/10 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/15"
                     >
                       <span className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300">
                           <SiWhatsapp size={16} />
                         </span>
                         <span>
-                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-300/90">
+                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300/90">
                             WhatsApp
                           </span>
-                          <span className="mt-0.5 block text-xs font-bold text-white">Gabung Channel</span>
+                          <span className="mt-0.5 block text-xs font-bold text-brand-black dark:text-white">Gabung Channel</span>
                         </span>
                       </span>
-                      <ArrowRight size={14} className="shrink-0 text-emerald-300 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight size={14} className="shrink-0 text-emerald-600 dark:text-emerald-300 transition-transform group-hover:translate-x-0.5" />
                     </a>
                   )}
                   {telegramUrl && (
@@ -629,38 +629,38 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       href={telegramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-between rounded-xl border border-sky-400/20 bg-sky-400/10 px-3.5 py-3 transition-colors hover:bg-sky-400/15"
+                      className="group flex items-center justify-between rounded-xl border border-sky-400/20 bg-sky-400/5 px-3.5 py-3 transition-colors hover:bg-sky-400/10 dark:border-sky-400/20 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"
                     >
                       <span className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-300/20 bg-sky-300/10 text-sky-200">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-400/20 bg-sky-400/10 text-sky-600 dark:bg-sky-300/10 dark:text-sky-200">
                           <SiTelegram size={16} />
                         </span>
                         <span>
-                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-sky-200/90">
+                          <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-sky-600 dark:text-sky-200/90">
                             Telegram
                           </span>
-                          <span className="mt-0.5 block text-xs font-bold text-white">Ikuti Kanal</span>
+                          <span className="mt-0.5 block text-xs font-bold text-brand-black dark:text-white">Ikuti Kanal</span>
                         </span>
                       </span>
-                      <ArrowRight size={14} className="shrink-0 text-sky-200 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight size={14} className="shrink-0 text-sky-600 dark:text-sky-200 transition-transform group-hover:translate-x-0.5" />
                     </a>
                   )}
                   <a
                     href={reportUrl}
-                    className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3.5 py-3 transition-colors hover:bg-white/10"
+                    className="group flex items-center justify-between rounded-xl border border-black/5 bg-black/5 px-3.5 py-3 transition-colors hover:bg-black/10 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-white">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/10 bg-black/10 text-brand-black dark:border-white/10 dark:bg-white/10 dark:text-white">
                         <Mail size={16} />
                       </span>
                       <span>
-                        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-white/75">
+                        <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-brand-text-muted dark:text-white/75">
                           Email
                         </span>
-                        <span className="mt-0.5 block text-xs font-bold text-white">Kirim Email</span>
+                        <span className="mt-0.5 block text-xs font-bold text-brand-black dark:text-white">Kirim Email</span>
                       </span>
                     </span>
-                    <ArrowRight size={14} className="shrink-0 text-white transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight size={14} className="shrink-0 text-brand-black dark:text-white transition-transform group-hover:translate-x-0.5" />
                   </a>
                 </div>
               </div>
@@ -884,13 +884,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                 </ScrollAnimate>
               )}
 
-              {/* Video Eksklusif — dark bg, aspect-video */}
+              {/* Video Eksklusif — dark-mode/light-mode consistent bg, aspect-video */}
               {showVideoSection && (
-                <ScrollAnimate className="rounded-2xl bg-[#0a0f1a] px-5 py-6 text-white md:px-6 md:py-8">
+                <ScrollAnimate className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:px-6 md:py-8">
                   <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                     <div className="flex items-center gap-2">
                       <Zap size={14} className="fill-brand-red text-brand-red" />
-                      <h3 className={`${sectionEyebrowClass} tracking-[0.14em] text-white`}>
+                      <h3 className={`${sectionEyebrowClass} tracking-[0.14em] text-brand-black dark:text-white`}>
                         Laporan Video Eksklusif
                       </h3>
                     </div>
@@ -920,7 +920,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           )}
                           <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">
                             <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-red">
-                              Video Report
+                                Video Report
                             </span>
                             <h4 className="line-clamp-2 text-sm font-semibold text-white">{article.title}</h4>
                           </div>
