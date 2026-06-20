@@ -3,25 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
-import { Loader2, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Loader2, ArrowRight, AlertCircle, Eye, EyeOff, Mail, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
-  const { login, isLoading, error, clearError, user } = useAuthStore();
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
+  const { login, isLoading, error, errorCode, errorEmail, clearError, user } = useAuthStore();
   const router = useRouter();
 
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      // [MULTI-SITE] Gunakan user.siteId (bukan cookie subdomain)
-      // - Superadmin & user tanpa siteId: default ke 'pusat'
-      // - User dengan siteId: ke situsnya sendiri
       const targetSite = user.siteId || 'pusat';
-      
+
       if (user.role === 'reader') {
         router.push(`/${targetSite}`);
       } else {
@@ -38,12 +37,34 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    
+    setResendSuccess(false);
+
     try {
       await login(email, password);
-      // Let the useEffect handle the redirect once user is set
     } catch (_err) {
       // Error is handled by the store
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const targetEmail = errorEmail || email;
+    setIsResending(true);
+    setResendSuccess(false);
+
+    try {
+      const response = await fetch('/api/v1/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+
+      if (response.ok) {
+        setResendSuccess(true);
+      }
+    } catch {
+      // Silently handle
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -69,9 +90,41 @@ export default function LoginPage() {
           <p className="text-xs text-brand-text-muted font-bold uppercase tracking-widest mb-8">Silakan masukkan kredensial Anda</p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex items-start gap-3 rounded-sm">
-              <AlertCircle size={16} className="text-brand-red shrink-0 mt-0.5" />
-              <p className="text-xs font-bold text-brand-red tracking-tight">{error}</p>
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-sm">
+              <div className="flex items-start gap-3">
+                <AlertCircle size={16} className="text-brand-red shrink-0 mt-0.5" />
+                <p className="text-xs font-bold text-brand-red tracking-tight">{error}</p>
+              </div>
+              {errorCode === 'EMAIL_NOT_VERIFIED' && (
+                <div className="mt-3 pt-3 border-t border-red-100 dark:border-red-500/20">
+                  {resendSuccess ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={14} className="text-green-600 dark:text-green-400" />
+                      <p className="text-xs font-bold text-green-700 dark:text-green-400">
+                        Email verifikasi telah dikirim!
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleResendVerification}
+                      disabled={isResending}
+                      className="flex items-center gap-2 text-xs font-bold text-brand-red hover:text-brand-black dark:hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {isResending ? (
+                        <>
+                          <Loader2 size={12} className="animate-spin" />
+                          Mengirim...
+                        </>
+                      ) : (
+                        <>
+                          <Mail size={12} />
+                          Kirim ulang email verifikasi
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

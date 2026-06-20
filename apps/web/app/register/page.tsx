@@ -14,7 +14,7 @@ function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  
+
   const { register, isLoading, error, clearError, user } = useAuthStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,12 +28,11 @@ function RegisterForm() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      // Get the site ID from cookies or default to 'pusat'
       const siteId = document.cookie
         .split('; ')
         .find(row => row.startsWith('siteId='))
         ?.split('=')[1] || 'pusat';
-      
+
       if (user.role === 'advertiser') {
         router.push(`/${siteId}/dashboard`);
       } else {
@@ -51,7 +50,7 @@ function RegisterForm() {
     e.preventDefault();
     clearError();
     setLocalError(null);
-    
+
     if (password !== confirmPassword) {
       setLocalError('Konfirmasi kata sandi tidak cocok.');
       return;
@@ -63,6 +62,8 @@ function RegisterForm() {
         .find(row => row.startsWith('siteId='))
         ?.split('=')[1] || 'pusat';
       await register(name, email, password, siteId, roleParam);
+      // Redirect to "check your email" page
+      router.push(`/auth/verify-email/sent?email=${encodeURIComponent(email)}`);
     } catch (_err) {
       // Error is handled by the store
     }

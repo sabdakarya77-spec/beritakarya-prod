@@ -92,6 +92,18 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
     // [MULTI-SITE] Validasi kredensial dulu (return user, bukan token)
     const user = await authService.validateLoginCredentials(email, password)
 
+    // [EMAIL-VERIFY] Block login for unverified users
+    if (!user.emailVerifiedAt) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'EMAIL_NOT_VERIFIED',
+          message: 'Email belum diverifikasi. Silakan cek email Anda atau minta kirim ulang.',
+          email: user.email
+        }
+      })
+    }
+
     // [MULTI-SITE] Enforce site-scope: tolak login lintas subdomain
     // - Superadmin: bebas lintas situs
     // - User tanpa siteId (global user): bebas
@@ -137,12 +149,26 @@ authRouter.post('/register', asyncHandler(async (req: Request, res: Response) =>
     role as Role, input.siteId
   )
 
-  // Set httpOnly cookies
-  const isProd = process.env.NODE_ENV === 'production'
-  res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
-  res.cookie('refreshToken', result.refreshToken, getCookieOptions(isProd, 30 * 24 * 60 * 60 * 1000))
+  res.status(201).json(result)
+}))
 
-  res.status(201).json({ success: true, data: { user: result.user } })
+authRouter.post('/verify-email', asyncHandler(async (req: Request, res: Response) => {
+  const { email, token } = z.object({
+    email: z.string().email('Email tidak valid'),
+    token: z.string()
+  }).parse(req.body)
+
+  const result = await authService.verifyEmail(email, token)
+  res.json(result)
+}))
+
+authRouter.post('/resend-verification', asyncHandler(async (req: Request, res: Response) => {
+  const { email } = z.object({
+    email: z.string().email('Email tidak valid')
+  }).parse(req.body)
+
+  const result = await authService.resendVerification(email)
+  res.json(result)
 }))
 
 authRouter.post('/refresh', asyncHandler(async (req: Request, res: Response) => {

@@ -264,6 +264,42 @@ class EmailService {
     return this.sendEmail(userEmail, subject, html)
   }
 
+  async sendVerificationEmail(userEmail: string, userName: string, verifyLink: string): Promise<boolean> {
+    const subject = '✉️ Verifikasi Email Anda - BeritaKarya'
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
+        <div style="background: #e11d48; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">BeritaKarya</h1>
+        </div>
+
+        <div style="padding: 30px; background: #f9f9f9;">
+          <h2 style="color: #3b82f6;">Verifikasi Email</h2>
+
+          <p>Halo <strong>${userName}</strong>,</p>
+
+          <p>Terima kasih telah mendaftar di BeritaKarya! Silakan klik tombol di bawah ini untuk memverifikasi email Anda:</p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verifyLink}" style="background-color: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verifikasi Email</a>
+          </div>
+
+          <p>Atau salin link berikut ke browser Anda:</p>
+          <p style="word-break: break-all; font-size: 13px; color: #3b82f6;">${verifyLink}</p>
+
+          <p>Link ini akan kedaluwarsa dalam 24 jam. Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+        </div>
+
+        <div style="background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+          <p>Email ini dikirim otomatis. Mohon jangan membalas email ini.</p>
+          <p>&copy; ${new Date().getFullYear()} BeritaKarya Nusantara</p>
+        </div>
+      </div>
+    `
+
+    return this.sendEmail(userEmail, subject, html)
+  }
+
   async sendPasswordResetEmail(userEmail: string, userName: string, resetLink: string): Promise<boolean> {
     const subject = '🔒 Reset Password - BeritaKarya'
     

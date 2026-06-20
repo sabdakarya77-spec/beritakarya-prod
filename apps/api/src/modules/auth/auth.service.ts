@@ -50,8 +50,8 @@ export async function registerUser(
   role: Role, siteId: string | null
 ) {
   const normalizedEmail = email.toLowerCase().trim()
-  const exists = await prisma.user.findFirst({ 
-    where: { email: normalizedEmail } 
+  const exists = await prisma.user.findFirst({
+    where: { email: normalizedEmail }
   })
   if (exists) throw new AppError('Email sudah terdaftar', 400, 'BAD_REQUEST')
 
@@ -63,7 +63,15 @@ export async function registerUser(
   const user = await prisma.user.create({
     data: { email: normalizedEmail, passwordHash, name, role, siteId }
   })
-  return generateTokenPair(user)
+
+  // Send verification email
+  const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
+  const token = jwt.sign({ userId: user.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
+  await emailService.sendVerificationEmail(normalizedEmail, name, verifyLink)
+
+  return { success: true, message: 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.' }
 }
 
 export async function refreshAccessToken(refreshToken: string) {
@@ -105,6 +113,54 @@ export async function logoutUser(userId: string, refreshToken: string) {
       where: { id: refreshTokenRecord.id }
     })
   }
+}
+
+export async function verifyEmail(email: string, token: string) {
+  const normalizedEmail = email.toLowerCase().trim()
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+  if (!user) throw new AppError('Token tidak valid atau sudah expired', 400, 'BAD_REQUEST')
+
+  if (user.emailVerifiedAt) {
+    return { success: true, message: 'Email sudah terverifikasi sebelumnya.' }
+  }
+
+  const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
+  try {
+    const decoded = jwt.verify(token, secret) as jwt.JwtPayload & { userId?: string; purpose?: string }
+    if (decoded.userId !== user.id || decoded.purpose !== 'email-verify') {
+      throw new AppError('Token tidak valid', 400, 'BAD_REQUEST')
+    }
+  } catch {
+    throw new AppError('Token tidak valid atau sudah expired', 400, 'BAD_REQUEST')
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { emailVerifiedAt: new Date() }
+  })
+
+  return { success: true, message: 'Email berhasil diverifikasi. Silakan login.' }
+}
+
+export async function resendVerification(email: string) {
+  const normalizedEmail = email.toLowerCase().trim()
+  const user = await prisma.user.findFirst({
+    where: { email: normalizedEmail, deletedAt: null }
+  })
+  // Return success even if user not found (prevent enumeration)
+  if (!user) return { success: true, message: 'Jika email terdaftar, email verifikasi telah dikirim.' }
+
+  if (user.emailVerifiedAt) {
+    return { success: true, message: 'Email sudah terverifikasi.' }
+  }
+
+  const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
+  const token = jwt.sign({ userId: user.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
+  await emailService.sendVerificationEmail(normalizedEmail, user.name, verifyLink)
+
+  return { success: true, message: 'Jika email terdaftar, email verifikasi telah dikirim.' }
 }
 
 export async function forgotPassword(email: string) {

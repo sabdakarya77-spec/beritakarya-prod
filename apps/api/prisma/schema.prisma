@@ -110,6 +110,9 @@ model User {
   kycAttempts       Int       @default(0) // Number of failed KYC attempts (max 3)
   kycLockedUntil    DateTime? // Account lock until this timestamp
 
+  // Email Verification
+  emailVerifiedAt    DateTime?
+
   // AI Quota Fields
   aiEnabled          Boolean   @default(true)
   aiDailyLimit       Int       @default(50) // Daily request limit
