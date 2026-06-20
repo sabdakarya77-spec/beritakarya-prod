@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   const { login, isLoading, error, errorCode, errorEmail, clearError, user } = useAuthStore();
   const router = useRouter();
@@ -50,6 +51,7 @@ export default function LoginPage() {
     const targetEmail = errorEmail || email;
     setIsResending(true);
     setResendSuccess(false);
+    setResendError(null);
 
     try {
       const response = await fetch('/api/v1/auth/resend-verification', {
@@ -58,11 +60,29 @@ export default function LoginPage() {
         body: JSON.stringify({ email: targetEmail }),
       });
 
-      if (response.ok) {
-        setResendSuccess(true);
+      // Safely parse response — may be HTML if proxy/server error
+      let data: Record<string, unknown> = {};
+      try {
+        data = await response.json();
+      } catch {
+        if (!response.ok) {
+          throw new Error(`Server error (${response.status}). Pastikan API server berjalan.`);
+        }
       }
-    } catch {
-      // Silently handle
+
+      if (!response.ok) {
+        const errorData = data as { error?: { message?: string }; message?: string };
+        throw new Error(errorData.error?.message || errorData.message || 'Gagal mengirim email');
+      }
+
+      // Check if email was actually sent
+      if (data.emailSent === false) {
+        throw new Error(data.message as string || 'Gagal mengirim email verifikasi.');
+      }
+
+      setResendSuccess(true);
+    } catch (err: unknown) {
+      setResendError(err instanceof Error ? err.message : 'Gagal mengirim email.');
     } finally {
       setIsResending(false);
     }
@@ -103,6 +123,27 @@ export default function LoginPage() {
                       <p className="text-xs font-bold text-green-700 dark:text-green-400">
                         Email verifikasi telah dikirim!
                       </p>
+                    </div>
+                  ) : resendError ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-brand-red">{resendError}</p>
+                      <button
+                        onClick={handleResendVerification}
+                        disabled={isResending}
+                        className="flex items-center gap-2 text-xs font-bold text-brand-red hover:text-brand-black dark:hover:text-white transition-colors disabled:opacity-50"
+                      >
+                        {isResending ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            Mengirim...
+                          </>
+                        ) : (
+                          <>
+                            <Mail size={12} />
+                            Coba lagi
+                          </>
+                        )}
+                      </button>
                     </div>
                   ) : (
                     <button

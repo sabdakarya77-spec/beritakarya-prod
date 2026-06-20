@@ -60,10 +60,25 @@ function VerifyEmailContent() {
         body: JSON.stringify({ email: resendEmail }),
       });
 
-      const data = await response.json();
+      // Safely parse response — may be HTML if proxy/server error
+      let data: Record<string, unknown> = {};
+      try {
+        data = await response.json();
+      } catch {
+        // Response is not JSON (e.g., HTML error page)
+        if (!response.ok) {
+          throw new Error(`Server error (${response.status}). Pastikan API server berjalan.`);
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(data.error?.message || data.message || 'Gagal mengirim email');
+        const errorData = data as { error?: { message?: string }; message?: string };
+        throw new Error(errorData.error?.message || errorData.message || 'Gagal mengirim email');
+      }
+
+      // Check if email was actually sent
+      if (data.emailSent === false) {
+        throw new Error(data.message as string || 'Gagal mengirim email verifikasi. Silakan coba lagi nanti.');
       }
 
       setResendSuccess(true);

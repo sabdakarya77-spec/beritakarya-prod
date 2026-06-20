@@ -59,7 +59,6 @@ export const useAuthStore = create<AuthState>()(
     set({ isLoading: true, error: null })
     try {
       await api.post('/auth/register', { name, email, password, siteId, role })
-      // Registration now requires email verification — no auto-login
       set({ isLoading: false })
     } catch (err: unknown) {
       let msg = 'Pendaftaran gagal'

@@ -62,8 +62,8 @@ function RegisterForm() {
         .find(row => row.startsWith('siteId='))
         ?.split('=')[1] || 'pusat';
       await register(name, email, password, siteId, roleParam);
-      // Redirect to "check your email" page
-      router.push(`/auth/verify-email/sent?email=${encodeURIComponent(email)}`);
+      // Registration successful — redirect to login page
+      router.push('/login');
     } catch (_err) {
       // Error is handled by the store
     }

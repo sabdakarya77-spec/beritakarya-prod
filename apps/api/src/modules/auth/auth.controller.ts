@@ -92,8 +92,11 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
     // [MULTI-SITE] Validasi kredensial dulu (return user, bukan token)
     const user = await authService.validateLoginCredentials(email, password)
 
-    // [EMAIL-VERIFY] Block login for unverified users
-    if (!user.emailVerifiedAt) {
+    // [EMAIL-VERIFY] Block login for unverified non-reader users
+    // Reader & advertiser can login without email verification
+    // Other roles (reporter, kontributor, wapimred, superadmin) must verify
+    const requiresVerification = !['reader', 'advertiser'].includes(user.role)
+    if (requiresVerification && !user.emailVerifiedAt) {
       return res.status(403).json({
         success: false,
         error: {

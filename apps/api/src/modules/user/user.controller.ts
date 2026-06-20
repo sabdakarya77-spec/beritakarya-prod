@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 import { prisma } from '../../db/client'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -7,6 +8,7 @@ import { asyncHandler } from '../../utils/asyncHandler'
 import { redis } from '../../lib/redis'
 import { emailService } from '../../services/email.service'
 import { logger } from '../../lib/logger'
+import { env } from '../../lib/env'
 
 export const userRouter = Router()
 
@@ -484,6 +486,16 @@ userRouter.put('/:id/role',
       }
     }
 
+    // Check if role is being upgraded from reader to a content role
+    const wasReader = oldRole === 'reader'
+    const isNowContentRole = !['reader', 'advertiser'].includes(role)
+    const roleUpgraded = wasReader && isNowContentRole
+
+    // If upgrading from reader → reset email verification & require re-verify
+    if (roleUpgraded) {
+      updateData.emailVerifiedAt = null
+    }
+
     const updated = await prisma.user.update({
       where: { id },
       data: updateData,
@@ -492,7 +504,8 @@ userRouter.put('/:id/role',
         email: true,
         name: true,
         role: true,
-        siteId: true
+        siteId: true,
+        emailVerifiedAt: true
       }
     })
 
@@ -521,6 +534,20 @@ userRouter.put('/:id/role',
       )
     } catch (emailErr) {
       logger.error('Gagal mengirim email notifikasi perubahan peran:', emailErr)
+    }
+
+    // If upgraded from reader → send verification email so user can verify before login
+    if (roleUpgraded) {
+      try {
+        const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
+        const token = jwt.sign({ userId: updated.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+        const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(updated.email)}`
+        await emailService.sendVerificationEmail(updated.email, updated.name, verifyLink)
+        logger.info(`Verification email sent to ${updated.email} after role upgrade: ${oldRole} → ${role}`)
+      } catch (emailErr) {
+        logger.error('Gagal mengirim email verifikasi setelah perubahan peran:', emailErr)
+      }
     }
 
     res.json({ success: true, data: updated })

@@ -64,14 +64,9 @@ export async function registerUser(
     data: { email: normalizedEmail, passwordHash, name, role, siteId }
   })
 
-  // Send verification email
-  const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
-  const token = jwt.sign({ userId: user.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
-  const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
-  await emailService.sendVerificationEmail(normalizedEmail, name, verifyLink)
-
-  return { success: true, message: 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.' }
+  // Reader & advertiser: no email verification needed — direct login allowed
+  // Email verification is sent later when superadmin upgrades role (e.g. to reporter)
+  return { success: true, message: 'Registrasi berhasil. Silakan login.' }
 }
 
 export async function refreshAccessToken(refreshToken: string) {
@@ -158,9 +153,13 @@ export async function resendVerification(email: string) {
   const token = jwt.sign({ userId: user.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
   const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
-  await emailService.sendVerificationEmail(normalizedEmail, user.name, verifyLink)
+  const emailSent = await emailService.sendVerificationEmail(normalizedEmail, user.name, verifyLink)
 
-  return { success: true, message: 'Jika email terdaftar, email verifikasi telah dikirim.' }
+  if (!emailSent) {
+    return { success: false, emailSent: false, message: 'Gagal mengirim email verifikasi. Silakan coba lagi nanti atau hubungi admin.' }
+  }
+
+  return { success: true, emailSent: true, message: 'Jika email terdaftar, email verifikasi telah dikirim.' }
 }
 
 export async function forgotPassword(email: string) {
