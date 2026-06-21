@@ -83,7 +83,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
 
   return (
     <section
-      className="relative mb-6 w-full md:mb-8 overflow-hidden"
+      className="relative mb-6 w-full md:mb-8"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
