@@ -211,16 +211,16 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         <ArticleBookmarkButton
           article={article}
           site={site}
-          className="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
-          activeClassName="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
-          idleClassName="absolute right-0 top-0 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
-          iconSize={15}
+          className="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 backdrop-blur-sm dark:border-white/10 dark:bg-black/20"
+          activeClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-brand-red/40 bg-brand-red/10 text-brand-red"
+          idleClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-black/20"
+          iconSize={14}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <article
-            className="group flex cursor-pointer gap-3 border-b border-gray-100 pb-3 pr-12 transition-transform duration-300 ease-out hover:translate-x-0.5 dark:border-white/5 md:gap-4 last:border-0"
+            className="group flex cursor-pointer gap-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20"
           >
-            <div className="relative aspect-[16/10] w-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-24">
+            <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
               <SmartImage 
                 src={imageUrl} 
                 blur={article.featuredImageBlur}
@@ -232,20 +232,20 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 priority={priority}
               />
             </div>
-            <div className="flex flex-1 flex-col justify-center gap-1.5">
+            <div className="flex flex-1 flex-col justify-center gap-2 py-1 pr-10">
               <div className="flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
                 <span className={categoryLabelClass}>
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
-              <h3 className="line-clamp-2 font-sans text-xs font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-sm">
+              <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.3] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[15px]">
                 {article.title}
               </h3>
-              <p className="hidden line-clamp-2 text-xs leading-relaxed text-brand-text-muted/90 dark:text-brand-text-muted md:block">
+              <p className="line-clamp-2 text-xs leading-relaxed text-brand-text-muted dark:text-brand-text-muted/80">
                 {excerptText}
               </p>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
+              <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
                  <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>
                  <span>{date}</span>
               </div>
