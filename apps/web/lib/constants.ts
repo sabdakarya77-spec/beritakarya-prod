@@ -75,11 +75,14 @@ export type CategoryItem = CategoryConfigItem
 
 export type AdSlotId = 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed'
 
+export type AdPlacementPage = 'homepage' | 'artikel'
+
 export interface AdSlotDefinition {
   id: AdSlotId;
   name: string;
   size: string;
   desc: string;
+  placementPages: AdPlacementPage[];
   publicSize: string;
   publicBadge: string;
   publicTitle: string;
@@ -112,6 +115,7 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
     name: 'Leaderboard Atas',
     size: '970 x 250 px',
     desc: 'Muncul di bagian atas homepage sebagai billboard utama.',
+    placementPages: ['homepage'],
     publicSize: '970 x 250 px / Mobile: 320 x 100 px',
     publicBadge: 'Slot Premium',
     publicTitle: 'Billboard Atas',
@@ -128,6 +132,7 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
     name: 'Sidebar Rectangle Utama',
     size: '300 x 250 px',
     desc: 'Muncul di sidebar homepage dan sidebar artikel sebagai slot promosi utama.',
+    placementPages: ['homepage', 'artikel'],
     publicSize: '300 x 250 px',
     publicBadge: 'Slot Utama',
     publicTitle: 'Sidebar Rectangle Utama',
@@ -144,6 +149,7 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
     name: 'Sidebar Rectangle Sekunder',
     size: '300 x 250 px',
     desc: 'Muncul sebagai slot iklan tambahan di sidebar halaman detail artikel.',
+    placementPages: ['artikel'],
     publicSize: '300 x 250 px',
     publicBadge: 'Slot Tambahan',
     publicTitle: 'Sidebar Rectangle Sekunder',
@@ -157,17 +163,18 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
   },
   {
     id: 'in_feed',
-    name: 'In-Feed Homepage',
+    name: 'In-Feed',
     size: '300 x 250 px',
-    desc: 'Disisipkan secara otomatis di area feed homepage.',
+    desc: 'Disisipkan secara otomatis di area feed homepage dan di tengah konten artikel.',
+    placementPages: ['homepage', 'artikel'],
     publicSize: '300 x 250 px',
     publicBadge: 'Slot Feed',
-    publicTitle: 'In-Feed Homepage',
-    publicDescription: 'Slot sponsor yang disisipkan di area feed homepage. Cocok untuk promosi native-style karena tampil di sela alur jelajah konten utama pembaca.',
+    publicTitle: 'In-Feed',
+    publicDescription: 'Slot sponsor yang disisipkan di area feed homepage dan di tengah konten artikel. Cocok untuk promosi native-style karena tampil di sela alur jelajah konten utama pembaca.',
     publicHighlights: [
       'Ukuran: 300 x 250 px (Rectangle)',
       'Format: Gambar statis, GIF, Video ringkas',
-      'Penempatan: Area feed homepage',
+      'Penempatan: Area feed homepage dan konten artikel',
     ],
     publicMockup: '300 x 250 px',
   },

@@ -67,9 +67,17 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
       {/* Card Header with Status Toggle */}
       <div className="p-6 border-b border-gray-50 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">{slot.name}</h3>
             <span className="text-[9px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">{slot.size}</span>
+            {slot.placementPages?.map(page => (
+              <span
+                key={page}
+                className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+              >
+                {page === 'homepage' ? '🏠 Homepage' : '📄 Artikel'}
+              </span>
+            ))}
           </div>
           <p className="text-[10px] text-gray-400">{slot.desc}</p>
         </div>
