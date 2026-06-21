@@ -34,6 +34,7 @@ interface NewsCardArticle {
   isBreaking?: boolean;
   isExclusive?: boolean;
   isFeatured?: boolean;
+  excerpt?: string | null;
   status?: string;
 }
 
@@ -88,7 +89,11 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
     return '/placeholder.jpg';
   })();
-  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'paragraph')?.content || '';
+  // Prioritaskan field excerpt langsung dari API, fallback ke paragraf pertama dari blocks
+  const excerptText =
+    article.excerpt ||
+    (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'paragraph')?.content ||
+    '';
   const articleHref = `/${site}/artikel/${article.slug}`;
   const date = new Date(article.publishedAt || article.createdAt || '').toLocaleDateString('id-ID', {
     day: 'numeric',
@@ -146,7 +151,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 {article.title}
               </h2>
               <p className="mb-5 max-w-2xl line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
-                {excerpt}
+                {excerptText}
               </p>
               <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[11px] font-semibold text-white/70">
                 <div className="flex items-center gap-1.5">
@@ -238,7 +243,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                 {article.title}
               </h3>
               <p className="hidden line-clamp-2 text-xs leading-relaxed text-brand-text-muted/90 dark:text-brand-text-muted md:block">
-                {excerpt}
+                {excerptText}
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
                  <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>

@@ -2,11 +2,12 @@ import NewsCard from '../ui/NewsCard'
 import PublicSiteLayout from '../layout/PublicSiteLayout'
 import AdSpace from '../ui/AdSpace'
 import Link from 'next/link'
-import { TrendingUp, Zap, Star, Mail, ArrowRight } from 'lucide-react'
+import { TrendingUp, Zap, Star, Clock, Mail, ArrowRight, Play } from 'lucide-react'
 import { SiTelegram, SiWhatsapp } from 'react-icons/si'
 import LoadMoreArticles from '../ui/LoadMoreArticles'
 import SavedArticlesFeed from '../ui/SavedArticlesFeed'
 import VideoWidget from '../ui/VideoWidget'
+import { SmartImage } from '../ui/SmartImage'
 import { MagazineBentoHero } from '../berita/MagazineBentoHero'
 import { notFound } from 'next/navigation'
 import ScrollAnimate from '../ui/ScrollAnimate'
@@ -233,14 +234,14 @@ async function getMarketSnapshot() {
 //  hero          [0..3]   — 4 artikel terbaru → MagazineBentoHero
 //  fokusRedaksi  [4..7]   — prioritas isFeatured/isExclusive, grid asimetris
 //  feedFeatured  [8..9]   — 2 kartu horizontal besar (Berita Terbaru atas)
-//  feedStream    [10..15] — 6 kartu medium 2-kolom (Berita Lanjutan)
+//  feedStream    [10..15] — 6 kartu medium 2-kolom (Berita Lainnya)
 //  editorChoice           — dari sisa: filter isFeatured, maks 3
 //  opinion                — dari sisa: maks 3
 //  photoJournal           — dari sisa: maks 3
 //  videoStories           — dari sisa: maks 3
 //  popular                — 5 artikel non-hero (boleh overlap, untuk sidebar)
 // ─────────────────────────────────────────────────────────────────────────
-function distributeArticles(articles: HomeArticle[]) {
+function distributeArticles(articles: HomeArticle[], trendingIds: Set<string> = new Set()) {
   const empty = {
     hero: [], fokusRedaksi: [], feedFeatured: [], feedStream: [],
     editorChoice: [], opinion: [], photoJournal: [], videoStories: [], popular: []
@@ -307,8 +308,11 @@ function distributeArticles(articles: HomeArticle[]) {
     return opinionSlugs.includes(catSlug) || opinionSlugs.includes(parentSlug)
   }).slice(0, 3)
 
-  // Sidebar populer: dari artikel non-hero (boleh overlap dengan section lain)
-  const popular = articles.filter((a: HomeArticle) => !heroIds.has(a.id)).slice(0, 5)
+  // Sidebar Terbaru: artikel terbaru yang tidak ada di hero maupun trending
+  // Sengaja berbeda dari TRENDING section (yang by views) agar tidak ada duplikasi
+  const popular = articles
+    .filter((a: HomeArticle) => !heroIds.has(a.id) && !trendingIds.has(a.id))
+    .slice(0, 5)
 
   return { hero, fokusRedaksi, feedFeatured, feedStream, editorChoice, opinion, photoJournal, videoStories, popular }
 }
@@ -342,7 +346,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const showSavedFeed = categoryFilter === 'tersimpan'
 
   // ── Distribusi artikel (homepage) ──
-  const dist = isHomepage ? distributeArticles(articlesList) : null
+  // Teruskan trendingIds agar sidebar tidak menampilkan artikel yang sama dengan TRENDING
+  const trendingIds = new Set<string>(trendingArticles.map((a: HomeArticle) => a.id))
+  const dist = isHomepage ? distributeArticles(articlesList, trendingIds) : null
 
   const heroArticles = dist?.hero || []
   const fokusRedaksi = dist?.fokusRedaksi || []
@@ -383,13 +389,6 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     <PublicSiteLayout siteConfig={siteConfig} initialCategory={categoryFilter}>
       <main id="main-content" className="pb-20 md:pb-6">
 
-        {/* ─── AD LEADERBOARD ─── */}
-        <Container className="py-4 md:py-5">
-          <div className="flex justify-center rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
-            <AdSpace type="leaderboard" />
-          </div>
-        </Container>
-
         {/* ════════════════════════════════════════════════════════
             ZONA 1 — HERO  (Full Width)
             Artikel: [0..3] — 4 berita paling baru
@@ -402,6 +401,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             </Container>
           </section>
         )}
+
+        {/* ─── AD LEADERBOARD — setelah hero agar user disambut konten terlebih dahulu ─── */}
+        <Container className="py-4 md:py-5">
+          <div className="flex justify-center rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
+            <AdSpace type="leaderboard" />
+          </div>
+        </Container>
 
         {/* ════════════════════════════════════════════════════════
             ZONA 2 — FOKUS REDAKSI  (Full Width, Grid Asimetris)
@@ -567,7 +573,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     <div>
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <span className={`${sectionEyebrowClass} text-brand-red`}>
-                          Berita Lanjutan
+                          Berita Lainnya
                         </span>
                         <Link
                           href={`/${siteParam}`}
@@ -697,13 +703,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                 </div>
               </div>
 
-              {/* Paling Populer */}
+              {/* Terbaru — artikel non-hero, berbeda dari TRENDING section */}
               {popular.length > 0 && (
                 <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
                   <div className="mb-4 flex items-center gap-3">
-                    <Star size={15} className="fill-brand-red text-brand-red" />
+                    <Clock size={15} className="text-brand-red" />
                     <h4 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
-                      Paling Populer
+                      Terbaru
                     </h4>
                   </div>
                   <div className="flex flex-col">
@@ -719,7 +725,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         <div className="min-w-0 flex-1">
                           <div className="mb-1.5 flex items-center gap-2">
                             <span className="rounded-full bg-brand-red/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-red">
-                              {index === 0 ? 'Top Story' : 'Trending'}
+                              {index === 0 ? 'Top Story' : 'Terbaru'}
                             </span>
                             <span className={sectionMetaClass}>
                               {formatSidebarDate(article.publishedAt || article.createdAt)}
@@ -802,10 +808,12 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md"
                       >
                         {article.featuredImage && (
-                          <img
+                          <SmartImage
                             src={article.featuredImage}
+                            context="gallery_full"
                             alt={article.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
@@ -892,12 +900,12 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-md block"
                         >
                           {photoImg && (
-                            <img
+                            <SmartImage
                               src={photoImg}
+                              context="gallery_full"
                               alt={article.title}
-                              loading="lazy"
-                              decoding="async"
-                              className="h-full w-full object-cover transition-transform duration-[5s] group-hover:scale-110"
+                              fill
+                              className="object-cover transition-transform duration-[5s] group-hover:scale-110"
                             />
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
@@ -938,16 +946,16 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         >
                           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors group-hover:bg-black/60">
                             <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/20 backdrop-blur-md transition-transform group-hover:scale-110 group-hover:border-transparent group-hover:bg-brand-red">
-                              <span className="ml-0.5 text-md text-white">▶</span>
+                              <Play size={20} className="ml-0.5 fill-white text-white" />
                             </div>
                           </div>
                           {videoImg && (
-                            <img
+                            <SmartImage
                               src={videoImg}
+                              context="card"
                               alt={article.title}
-                              loading="lazy"
-                              decoding="async"
-                              className="h-full w-full object-cover transition-transform duration-[4s] group-hover:scale-105"
+                              fill
+                              className="object-cover transition-transform duration-[4s] group-hover:scale-105"
                             />
                           )}
                           <div className="absolute bottom-0 left-0 z-20 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-4">

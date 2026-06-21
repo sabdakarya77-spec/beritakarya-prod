@@ -57,19 +57,20 @@ const getHeroImagePosition = (article: HeroArticle, variant: 'lead' | 'side') =>
 export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[], site: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [timerTrigger, setTimerTrigger] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const heroArticles = articles?.slice(0, 4) || [];
 
-  // Interval otomatis berganti slide setiap 5 detik
+  // Interval otomatis berganti slide setiap 5 detik, berhenti saat user hover
   useEffect(() => {
-    if (heroArticles.length <= 1) return;
+    if (heroArticles.length <= 1 || isPaused) return;
 
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % heroArticles.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [timerTrigger, heroArticles.length]);
+  }, [timerTrigger, heroArticles.length, isPaused]);
 
   if (!articles || articles.length === 0) return null;
 
@@ -81,7 +82,11 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
   };
 
   return (
-    <section className="relative mb-6 w-full md:mb-8 overflow-hidden">
+    <section
+      className="relative mb-6 w-full md:mb-8 overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] bg-brand-red/5 dark:bg-brand-red/10 blur-[80px] -z-10 rounded-full" />
       
@@ -122,7 +127,7 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                     </span>
                   </div>
                   
-                  <h1 className="max-w-[22ch] text-balance font-sans text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
+                  <h1 className="line-clamp-2 max-w-[22ch] text-balance font-sans text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
                     {currentArticle.title}
                   </h1>
                 </div>

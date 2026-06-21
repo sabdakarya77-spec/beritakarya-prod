@@ -1,187 +1,234 @@
-# Implementation Plan for Leaderboard Ad Slot Improvements
+# Homepage Improvement Plan
 
-The homepage **leaderboard** ad slot is already functional, but we identified four
-areas where it can be improved:
-
-1. **Add a video example to the `BillboardShowcase` fallback**
-2. **Track impressions for every carousel slide**
-3. **Make the leaderboard height responsive on mobile**
-4. **Make the fallback content configurable via the CMS**
-
-Below is a concrete plan for each point, including the files that need to be
-modified, the required code changes, and any supporting tasks (e.g., CMS schema
-updates).
+> Analisis dan rencana perbaikan homepage BeritaKarya berdasarkan review per section.
+> Target: lebih modern, profesional, dan konsisten dengan standar media digital.
 
 ---
 
-## 1️⃣ Add a video example to the `BillboardShowcase` fallback
+## Ringkasan Prioritas
 
-*Goal*: When there are no real ads, the placeholder should showcase a video
-instead of only static graphic billboards, demonstrating that the slot can also
-render video banners.
+| # | Perbaikan | Impact | Effort | Status |
+|---|---|---|---|---|
+| 1 | Hapus duplikasi TRENDING ↔ Paling Populer | 🔴 Tinggi | Rendah | ⏳ Pending |
+| 2 | Ganti `<img>` → `<SmartImage>` di Pilihan Editor & Video | 🔴 Tinggi | Rendah | ⏳ Pending |
+| 3 | Pindahkan ad leaderboard dari atas | 🟡 Sedang | Rendah | ⏳ Pending |
+| 4 | Ganti label "Berita Lanjutan" → "Berita Lainnya" | 🟡 Sedang | Rendah | ⏳ Pending |
+| 5 | Tambah excerpt di card horizontal feed | 🟡 Sedang | Sedang | ⏳ Pending |
+| 6 | Ganti emoji ▶ → Lucide Play icon di Video Eksklusif | 🟢 Rendah | Rendah | ⏳ Pending |
 
-**Steps**
+---
 
-1. Extend `CATEGORY_ADS` in `apps/web/components/ui/BillboardShowcase.tsx` with a
-   new entry that includes a video URL.
-2. Add a `mediaType: 'video' | 'image'` field to the `CategoryAd` interface so the
-   component knows whether to render a `<video>` element.
-3. In the render loop, conditionally render `<video>` when `mediaType === 'video'`
-   (similar to the logic in `AdSlide`).
-4. Provide a short description in the comment block to make the purpose clear.
+## Detail Per Section
 
-**Code sketch** (insert into `BillboardShowcase.tsx`):
+### 1. AD LEADERBOARD (atas)
 
-```tsx
-interface CategoryAd {
-  id: string;
-  headline: string;
-  subheadline: string;
-  category: string;
-  accentFrom: string;
-  accentTo: string;
-  ctaText: string;
-  icon: React.ReactNode;
-  mediaType?: 'image' | 'video'; // new optional prop
-  mediaUrl?: string; // URL to image or video
-}
+**Sekarang:** Iklan di paling atas, sebelum hero section.
 
-// Example video ad (you can host a short looped video in the public folder)
-{
-  id: 'video_demo',
-  headline: 'Video Demo Billboard',
-  subheadline: 'Contoh iklan video pada slot leaderboard',
-  category: 'Demo Video',
-  accentFrom: 'from-pink-600',
-  accentTo: 'to-rose-800',
-  ctaText: 'Lihat Demo',
-  icon: <YourSvgIcon />, // reuse an existing icon
-  mediaType: 'video',
-  mediaUrl: '/videos/leaderboard-demo.mp4',
-}
-```
+**Masalah:** Pengunjung langsung disambut iklan, bukan konten. Mengurangi kesan profesional. Media besar (Kompas, CNN Indonesia) tidak menempatkan iklan di posisi pertama.
 
-In the JSX, after the gradient/background, render:
+**Solusi:** Pindahkan iklan ke bawah hero section atau hapus dari atas.
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 386-391)
 
 ```tsx
-{ad.mediaType === 'video' && ad.mediaUrl ? (
-  <video src={ad.mediaUrl} autoPlay loop muted className="w-full h-full object-cover" />
-) : (
-  // existing image/background stays unchanged
-)}
+// SEBELUM — iklan di atas hero
+<Container className="py-4 md:py-5">
+  <AdSpace type="leaderboard" />
+</Container>
+{showHomepageHero && (...)}
+
+// SESUDAH — iklan di bawah hero
+{showHomepageHero && (...)}
+<Container className="py-4 md:py-5">
+  <AdSpace type="leaderboard" />
+</Container>
 ```
 
 ---
 
-## 2️⃣ Track impressions for every carousel slide
+### 2. ZONA 1 — HERO (MagazineBentoHero)
 
-*Goal*: Currently only the first displayed ad is tracked. We want an impression to
-be recorded each time a new slide becomes visible.
+**Sekarang:** 4 artikel terbaru, slider otomatis 5 detik.
 
-**Steps**
+**Masalah:**
+- Headline terlalu panjang (100+ karakter) — sulit dibaca
+- 3 dari 4 hero sama kategori ("Peristiwa") — kurang variasi
+- Slider otomatis mengganggu user yang sedang membaca
 
-1. Move the `IntersectionObserver` logic from a single‑ad effect to a separate
-   effect that watches the **currently visible slide** (`currentIndex`).
-2. When `currentIndex` changes, call the tracking endpoint for that ad if it has
-   not been tracked yet.
-3. Store tracked IDs in a `Set` (already present) so we do not double‑count.
+**Solusi:**
+- Batasi tampilan headline max 2 baris (`line-clamp-2`) di komponen MagazineBentoHero
+- Tambahkan `pauseOnHover` pada slider
+- Pertimbangkan filter kategori agar hero lebih bervariasi
 
-**Patch outline** (in `AdSpace.tsx`):
+**File:** `apps/web/components/berita/MagazineBentoHero.tsx`
+
+---
+
+### 3. ZONA 2 — FOKUS REDAKSI
+
+**Sekarang:** 1 card besar (`large`) + 3 card horizontal stacked.
+
+**Masalah:**
+- Sering cuma 1 artikel terlihat karena data kurang dari 4
+- Card horizontal di kanan terlalu kecil dibanding card besar di kiri
+- Tidak ada excerpt pada card besar
+
+**Solusi:**
+- Kondisi `showFokusRedaksi` sudah ada (`fokusRedaksi.length > 0`) — pastikan minimal 2 artikel baru tampilkan
+- Tambahkan excerpt pada card `large` variant
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 412-451)
 
 ```tsx
-// New effect – runs whenever currentIndex changes
-useEffect(() => {
-  const ad = ads[currentIndex];
-  if (!ad || trackedRef.current.has(ad.id)) return;
-  // Same IntersectionObserver logic as before, but observe the container of the new slide
-  const observer = new IntersectionObserver((entries) => {
-    const [entry] = entries;
-    if (entry?.isIntersecting) {
-      trackedRef.current.add(ad.id);
-      fetch(`${API_URL}/api/v1/ads/track/${ad.id}?action=impression`, { method: 'POST' }).catch(() => {});
-      observer.disconnect();
-    }
-  }, { threshold: 0.5 });
-  if (containerRef.current) observer.observe(containerRef.current);
-  return () => observer.disconnect();
-}, [ads, currentIndex]);
+// Saran: ubah threshold dari > 0 ke >= 2
+const showFokusRedaksi = isHomepage && fokusRedaksi.length >= 2
 ```
 
 ---
 
-## 3️⃣ Make the leaderboard height responsive on mobile
+### 4. ZONA 3 — TRENDING
 
-*Goal*: Reduce the vertical space the leaderboard consumes on small screens.
+**Sekarang:** 5 artikel populer berdasarkan views (sudah diperbaiki).
 
-**Steps**
+**Masalah:** Data trending bisa overlap dengan sidebar "Paling Populer" karena sumber data mirip.
 
-1. Update the `styles` object in `AdSpace.tsx` to use Tailwind responsive values.
-   Replace the static `h-24 md:h-[250px]` with something like:
-   ```tsx
-   leaderboard: "w-full h-[120px] md:h-[250px] mb-6",
-   ```
-   (`h-[120px]` ≈ 30 rem on mobile).
-2. Ensure the fallback `BillboardShowcase` container also respects the same
-   class (it already uses `h-24 md:h-[250px]`). Adjust its class list to the new
-   values.
-3. Run a quick visual test (`npm run dev`) and verify that the ad slot shrinks
-   on mobile while staying full‑width on desktop.
+**Solusi:**
+- TRENDING: `sort=views&order=desc` (sudah diterapkan)
+- Sidebar "Paling Populer": ganti sumber data jadi artikel terbaru non-hero (bukan by views)
+- Dengan begitu tidak ada duplikasi
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx`
+- `getTrendingArticles()` — sudah by views ✅
+- `distributeArticles()` → `popular` — ganti dari `.slice(0, 5)` ke artikel terbaru yang tidak ada di hero/fokus/trending
 
 ---
 
-## 4️⃣ Make the fallback content configurable via the CMS
+### 5. ZONA 4 — BERITA TERBARU + SIDEBAR
 
-*Goal*: Content editors should be able to change the placeholder billboard
-examples without touching code.
+#### 5a. Feed Utama
 
-**Steps**
+**Masalah:**
+- Label "Berita Lanjutan" kurang profesional — terkesan "sisa"
+- Ad placement di tengah feed mengganggu alur baca
+- Card horizontal tidak ada excerpt
 
-1. **Backend** – Add a new API endpoint (e.g., `GET /api/v1/ads/fallback`) that
-   returns a JSON array of fallback ads. This can reuse the same shape as the
-   regular ad objects (`id`, `headline`, `subheadline`, `category`, `accentFrom`,
-   `accentTo`, `ctaText`, `icon`, `mediaType`, `mediaUrl`).
-2. **CMS** – Add a simple UI page under the admin panel where editors can
-   create / edit fallback items (title, description, optional video URL). Store
-   the data in the existing `ads` collection with a flag `isFallback: true`.
-3. **Front‑end** – In `AdSpace.tsx`, when `ads` is empty and the slot is
-   `leaderboard`, fetch the fallback endpoint instead of rendering the static
-   `BillboardShowcase`. Map the received items to the same UI used by
-   `BillboardShowcase` (or reuse the component with a prop `fallbackAds`).
-4. **Graceful fallback** – Keep the current hard‑coded `BillboardShowcase`
-   as a secondary fallback in case the CMS request fails.
-
-**High‑level code change** (pseudo‑code):
+**Solusi:**
 
 ```tsx
-if (ads.length === 0) {
-  // Try to load CMS‑configured fallback ads
-  const { data: fallbackAds } = useSWR(`/api/v1/ads/fallback?slot=leaderboard`);
-  if (fallbackAds?.length) return <BillboardShowcase ads={fallbackAds} ... />;
-  // Old static fallback
-  return <BillboardShowcase site={site || 'pusat'} className={className} />;
-}
+// Ganti label
+// SEBELUM:
+<span className="...">Berita Lanjutan</span>
+
+// SESUDAH:
+<span className="...">Berita Lainnya</span>
+```
+
+- Pindahkan `<AdSpace>` ke bawah grid, bukan di antara featured dan stream
+- Tambahkan 1 baris excerpt pada card horizontal (di komponen NewsCard, variant horizontal)
+
+**File:**
+- `apps/web/components/pages/SiteHomePage.tsx` (baris 565-591)
+- `apps/web/components/ui/NewsCard.tsx` (variant horizontal, baris 203-252)
+
+#### 5b. Sidebar — Paling Populer
+
+**Masalah:** Duplikasi dengan TRENDING section.
+
+**Solusi:** Ganti nama dan sumber data:
+
+```tsx
+// SEBELUM — by views (sama dengan trending)
+const popular = articles.filter(a => !heroIds.has(a.id)).slice(0, 5)
+
+// SESUDAH — terbaru non-hero (berbeda dari trending)
+const latestNonHero = articles.filter(a => !heroIds.has(a.id)).slice(0, 5)
+```
+
+Ganti label sidebar:
+```tsx
+// SEBELUM:
+<Star size={15} className="fill-brand-red text-brand-red" />
+<h4>Paling Populer</h4>
+
+// SESUDAH:
+<Clock size={15} className="text-brand-red" />
+<h4>Terbaru</h4>
 ```
 
 ---
 
-## Timeline & Ownership
+### 6. ZONA 5+ — EDITORIAL EXTRAS
 
-| Item | Owner | Estimate |
-|------|-------|----------|
-| Video example in `BillboardShowcase` | Front‑end dev | 0.5 day |
-| Carousel impression tracking | Front‑end dev | 0.5 day |
-| Mobile‑responsive height | Front‑end dev | 0.25 day |
-| CMS fallback endpoint & UI | Back‑end & admin‑panel dev | 2 days |
+#### 6a. Pilihan Editor
 
-The total effort is roughly **3 working days**. All changes are backward
-compatible; existing ads continue to work, and the new logic only activates
-when the corresponding conditions are met.
+**Masalah:** Pakai `<img>` biasa, bukan `<SmartImage>`. Tidak ada blur placeholder, tidak ada optimasi gambar.
+
+**Solusi:** Ganti ke `<SmartImage>`:
+
+```tsx
+// SEBELUM:
+<img
+  src={article.featuredImage}
+  alt={article.title}
+  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+/>
+
+// SESUDAH:
+<SmartImage
+  src={article.featuredImage}
+  context="editor_choice"
+  alt={article.title}
+  fill
+  className="object-cover transition-transform duration-700 group-hover:scale-105"
+/>
+```
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 798-831)
+
+#### 6b. Foto Jurnalistik
+
+**Masalah:** Pakai `<img>` biasa.
+
+**Solusi:** Ganti ke `<SmartImage>` (sama seperti Pilihan Editor).
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 885-916)
+
+#### 6c. Video Eksklusif
+
+**Masalah:**
+- Pakai `<img>` biasa
+- Play button pakai emoji `▶` — kurang profesional
+
+**Solusi:**
+- Ganti `<img>` ke `<SmartImage>`
+- Ganti emoji ke Lucide `Play` icon
+
+```tsx
+// SEBELUM:
+<span className="ml-0.5 text-md text-white">▶</span>
+
+// SESUDAH:
+import { Play } from 'lucide-react'
+<Play size={20} className="ml-0.5 text-white fill-white" />
+```
+
+**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 920-964)
 
 ---
 
-**Next steps**: Merge this plan, create a feature branch (`feature/leaderboard-
-improvements`), and start implementing the items in the order listed.
+## File yang Perlu Diubah
+
+| File | Perubahan |
+|---|---|
+| `apps/web/components/pages/SiteHomePage.tsx` | Pindahkan ad, ganti label, hapus duplikasi, ganti img → SmartImage, ganti emoji |
+| `apps/web/components/berita/MagazineBentoHero.tsx` | Tambah line-clamp pada headline, pauseOnHover |
+| `apps/web/components/ui/NewsCard.tsx` | Tambah excerpt pada variant horizontal |
 
 ---
 
-*Generated by Cline – a virtual software engineer.*
+## Catatan Tambahan
+
+- **Konsistensi badge:** Saat ini ada 3 badge berbeda (BREAKING, EKSKLUSIF, PILIHAN). Pertimbangkan standarisasi.
+- **Geografi konten:** Mayoritas konten Jawa Timur. Tidak masalah untuk sekarang, tapi perlu diingat untuk branding "Nusantara".
+- **Footer:** Alamat "Jl. Merdeka No. 123" kemungkinan placeholder — perlu diganti.
+- **Social media:** Footer belum ada link Instagram, Twitter/X, YouTube.
