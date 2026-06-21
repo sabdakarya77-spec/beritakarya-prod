@@ -140,6 +140,47 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
                   ))}
                 </div>
               )}
+
+              {/* Preview: posisi iklan di halaman publik */}
+              {selectedPkgId && (() => {
+                const selectedPkg = packages.find(p => p.id === selectedPkgId);
+                const slotDef = selectedPkg ? getAdSlotDefinition(selectedPkg.slot) : null;
+                if (!slotDef || selectedPkg?.slot !== 'leaderboard') return null;
+                return (
+                  <div className="rounded-xl border border-gray-100 dark:border-white/10 overflow-hidden">
+                    <div className="px-4 py-2.5 bg-gray-50 dark:bg-white/[0.03] border-b border-gray-100 dark:border-white/5 flex items-center gap-2">
+                      <Eye size={12} className="text-gray-400" />
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pratinjau Posisi di Homepage</p>
+                    </div>
+                    <div className="p-4 bg-gray-100 dark:bg-white/[0.02]">
+                      {/* Mini homepage mockup */}
+                      <div className="max-w-md mx-auto space-y-2">
+                        {/* Navbar mock */}
+                        <div className="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4" />
+                        {/* Billboard slot */}
+                        <div className="relative h-16 md:h-20 rounded-lg overflow-hidden border-2 border-dashed border-brand-red/40 bg-brand-red/5 flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-[9px] font-black text-brand-red uppercase tracking-widest">Iklan Anda Di Sini</p>
+                            <p className="text-[8px] text-gray-400 mt-0.5">{slotDef.publicSize}</p>
+                          </div>
+                        </div>
+                        {/* Content mock */}
+                        <div className="flex gap-2">
+                          <div className="h-8 bg-gray-200 dark:bg-white/10 rounded-sm flex-1" />
+                          <div className="h-8 bg-gray-200 dark:bg-white/10 rounded-sm flex-1" />
+                          <div className="h-8 bg-gray-200 dark:bg-white/10 rounded-sm flex-1" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-2 bg-gray-50 dark:bg-white/[0.03] border-t border-gray-100 dark:border-white/5">
+                      <p className="text-[10px] text-gray-400 text-center">
+                        Billboard premium di bagian atas homepage — <span className="font-bold text-brand-black dark:text-white">posisi paling terlihat oleh pembaca</span>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="flex justify-end">
                 <button onClick={() => { if (selectedPkgId) setBookingStep(2); }} disabled={!selectedPkgId} className="px-6 py-3 bg-brand-red hover:bg-brand-black text-white text-[10px] font-black uppercase tracking-widest disabled:opacity-50 rounded-lg flex items-center gap-2">
                   Lanjut <ArrowRight size={14} />
