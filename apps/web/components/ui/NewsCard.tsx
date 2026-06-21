@@ -115,7 +115,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
   if (variant === 'large') {
     return (
-      <div className="relative">
+      <div className="relative h-full">
         <ArticleBookmarkButton
           article={article}
           site={site}
@@ -124,9 +124,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           idleClassName="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
           iconSize={16}
         />
-        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="h-full block">
           <article
-            className="group relative h-[340px] min-h-[300px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5 lg:h-[400px]"
+            className="group relative h-full min-h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5"
           >
             <SmartImage 
               src={imageUrl} 
@@ -207,7 +207,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
   if (variant === 'horizontal') {
     return (
-      <div className="relative">
+      <div className="relative h-full flex flex-col">
         <ArticleBookmarkButton
           article={article}
           site={site}
@@ -216,9 +216,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           idleClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-black/20"
           iconSize={14}
         />
-        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="flex-1 flex">
           <article
-            className="group flex cursor-pointer gap-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20"
+            className="group flex flex-1 cursor-pointer gap-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20"
           >
             <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
               <SmartImage 

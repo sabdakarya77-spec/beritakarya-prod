@@ -426,11 +426,11 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                 </h2>
               </div>
 
-              {/* Grid asimetris: 2 kolom kiri (besar) + 1 kolom kanan (3 stacked) */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {/* Kartu Besar — artikel pertama, mengambil 2/3 lebar */}
+              {/* Grid asimetris: 2 kolom kiri (besar) + 1 kolom kanan (2 stacked, balance) */}
+              <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3">
+                {/* Kartu Besar — artikel pertama, mengambil 2/3 lebar, tinggi mengikuti kolom kanan */}
                 {fokusRedaksi[0] && (
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 md:h-full">
                     <NewsCard
                       article={fokusRedaksi[0]}
                       variant="large"
@@ -440,9 +440,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   </div>
                 )}
 
-                {/* Kolom kanan — 3 artikel stacked vertikal */}
-                <div className="flex flex-col gap-3">
-                  {fokusRedaksi.slice(1, 4).map((article: HomeArticle) => (
+                {/* Kolom kanan — 2 artikel saja agar balance dengan kartu besar */}
+                <div className="flex flex-col gap-3 md:h-full">
+                  {fokusRedaksi.slice(1, 3).map((article: HomeArticle) => (
                     <NewsCard
                       key={article.id}
                       article={article}
