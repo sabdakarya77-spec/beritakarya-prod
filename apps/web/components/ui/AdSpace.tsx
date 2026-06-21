@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
 import { API_URL } from '../../lib/api';
+import BillboardShowcase from './BillboardShowcase';
 
 interface AdSpaceProps {
   type: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in-feed';
@@ -147,6 +148,12 @@ export default function AdSpace({
 
   // No ads at all — fallback placeholder
   if (ads.length === 0) {
+    // Leaderboard: show billboard showcase with category examples
+    if (type === 'leaderboard') {
+      return <BillboardShowcase site={site || 'pusat'} className={className} />;
+    }
+
+    // Other slots: keep existing placeholder
     return (
       <div
         className={cn(
