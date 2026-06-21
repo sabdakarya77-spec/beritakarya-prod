@@ -151,3 +151,35 @@ Ini standar industri (Google AdSense melakukan ini). Implementasi butuh perubaha
 | Dynamic slot sizing | Terlalu kompleks, bisa merusak layout halaman |
 | Accept semua ukuran tanpa proses | Hasil jelek, pengiklan kecewa |
 | Client-side resize | Tidak konsisten, kualitas kalah dari server-side |
+
+---
+
+## Analisis Bisnis: Harga Slot Iklan
+
+> Urutan harga slot berdasarkan nilai bisnis (visibilitas, exposure, engagement).
+
+### Ranking Harga Slot
+
+| Peringkat | Slot | Alasan |
+|-----------|------|--------|
+| 🥇 1 | **Leaderboard** (970×250) | Above the fold, ukuran paling besar, impresi pertama visitor, hanya 1 slot (scarcity), bisa carousel multi-banner. CPM 2-3× lipat dari slot lain. |
+| 🥈 2 | **In-Feed** (300×250) | Native placement di tengah konten, attention rate tinggi, tampil di homepage + artikel, tidak bisa di-skip (bukan sidebar), CTR tertinggi. |
+| 🥉 3 | **Rectangle** (300×250) | Sidebar placement standar, tampil di homepage + artikel, ad blindness lebih tinggi karena posisi pinggir. |
+| 4 | **Rectangle Secondary** (300×250) | Hanya di sidebar artikel, posisi kedua di sidebar, cocok untuk bundling atau UMKM. |
+
+### Strategi Pricing
+
+| Slot | Model | Strategi |
+|------|-------|----------|
+| Leaderboard | **Premium** | Jual per minggu, carousel 3-5 banner, harga tertinggi |
+| In-Feed | **Premium** | Jual per minggu, 1 advertiser eksklusif per slot |
+| Rectangle | **Standard** | Jual per bulan, bisa bundling dengan rectangle_secondary |
+| Rectangle Secondary | **Economy** | Bundling dengan rectangle, atau jual murah untuk UMKM |
+
+### Insight Kunci
+
+- **Leaderboard** dan **In-Feed** adalah revenue driver utama — fokus penjualan ke brand besar dan agency
+- **Rectangle** dan **Rectangle Secondary** lebih ke fill rate — mengisi slot agar tidak kosong, sambil tetap menghasilkan
+- In-Feed punya CTR tertinggi karena terasa seperti bagian dari konten (native ads)
+- Leaderboard cocok dijual sebagai slot eksklusif atau carousel (beberapa pengiklan bergantian)
+- Rectangle Secondary ideal dijual sebagai addon bundling, bukan slot utama
