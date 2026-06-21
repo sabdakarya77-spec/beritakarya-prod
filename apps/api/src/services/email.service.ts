@@ -268,31 +268,36 @@ class EmailService {
     const subject = '✉️ Verifikasi Email Anda - BeritaKarya'
 
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-        <div style="background: #e11d48; color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px;">BeritaKarya</h1>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; line-height: 1.7; color: #1a1a1a;">
+        <div style="padding-bottom: 24px; border-bottom: 1px solid #e5e5e5;">
+          <p style="margin: 0; font-size: 20px; font-weight: bold; letter-spacing: -0.5px;">BeritaKarya</p>
         </div>
 
-        <div style="padding: 30px; background: #f9f9f9;">
-          <h2 style="color: #3b82f6;">Verifikasi Email</h2>
+        <div style="padding: 32px 0;">
+          <h2 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #1a1a1a;">Verifikasi Email</h2>
 
-          <p>Halo <strong>${userName}</strong>,</p>
+          <p style="margin: 0 0 16px 0;">Halo <strong>${userName}</strong>,</p>
 
-          <p>Terima kasih telah mendaftar di BeritaKarya! Silakan klik tombol di bawah ini untuk memverifikasi email Anda:</p>
+          <p style="margin: 0 0 16px 0;">Terima kasih telah mendaftar di BeritaKarya. Klik tombol di bawah untuk mengaktifkan akun Anda:</p>
 
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verifyLink}" style="background-color: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verifikasi Email</a>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${verifyLink}" style="background-color: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; display: inline-block;">Verifikasi Email</a>
           </div>
 
-          <p>Atau salin link berikut ke browser Anda:</p>
-          <p style="word-break: break-all; font-size: 13px; color: #3b82f6;">${verifyLink}</p>
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #666;">Atau salin link berikut ke browser Anda:</p>
+          <p style="word-break: break-all; font-size: 13px; color: #666; margin: 0 0 24px 0;">${verifyLink}</p>
 
-          <p>Link ini akan kedaluwarsa dalam 24 jam. Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #666;">Link ini akan kedaluwarsa dalam 24 jam.</p>
+
+          <p style="margin: 24px 0 0 0; padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 13px; color: #999;">
+            Jangan bagikan link ini kepada siapapun. Tim BeritaKarya tidak akan pernah meminta link verifikasi Anda.
+          </p>
         </div>
 
-        <div style="background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666;">
-          <p>Email ini dikirim otomatis. Mohon jangan membalas email ini.</p>
-          <p>&copy; ${new Date().getFullYear()} BeritaKarya Nusantara</p>
+        <div style="padding-top: 24px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #999;">
+          <p style="margin: 0 0 4px 0;">Email ini dikirim otomatis. Mohon jangan membalas email ini.</p>
+          <p style="margin: 0;">Butuh bantuan? Hubungi <a href="mailto:support@beritakarya.co" style="color: #666;">support@beritakarya.co</a></p>
+          <p style="margin: 12px 0 0 0;">&copy; ${new Date().getFullYear()} BeritaKarya Nusantara</p>
         </div>
       </div>
     `
