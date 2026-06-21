@@ -115,18 +115,18 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
   if (variant === 'large') {
     return (
-      <div className="relative h-full">
+      <div className="group relative h-full transition-transform duration-300 ease-out hover:-translate-y-0.5">
         <ArticleBookmarkButton
           article={article}
           site={site}
-          className="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
-          activeClassName="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-          idleClassName="absolute right-4 top-4 z-10 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
+          className="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
+          activeClassName="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+          idleClassName="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
           iconSize={16}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="h-full block">
           <article
-            className="group relative h-full min-h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl transition-transform duration-300 ease-out hover:-translate-y-0.5"
+            className="relative h-full min-h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl"
           >
             <SmartImage 
               src={imageUrl} 
@@ -141,9 +141,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-transparent" />
             
             <div className="absolute bottom-0 left-0 w-full max-w-3xl p-5 pb-12 md:p-6 md:pb-8">
-              <div className="mb-3.5 flex items-center gap-2">
+              <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
-                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                <span className="inline-block rounded-sm bg-brand-red px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-sm">
                   {article.category?.name || 'UMUM'}
                 </span>
               </div>
@@ -207,7 +207,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
 
   if (variant === 'horizontal') {
     return (
-      <div className="relative h-full flex flex-col">
+      <article className="group relative h-full flex flex-col rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20">
         <ArticleBookmarkButton
           article={article}
           site={site}
@@ -216,59 +216,55 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           idleClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-black/20"
           iconSize={14}
         />
-        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="flex-1 flex">
-          <article
-            className="group flex flex-1 cursor-pointer gap-4 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20"
-          >
-            <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
-              <SmartImage 
-                src={imageUrl} 
-                blur={article.featuredImageBlur}
-                dominantColor={article.featuredImageColor}
-                context="card_horizontal"
-                alt={article.title} 
-                fill
-                className={horizontalImageClass}
-                priority={priority}
-              />
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="flex-1 flex gap-4">
+          <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
+            <SmartImage 
+              src={imageUrl} 
+              blur={article.featuredImageBlur}
+              dominantColor={article.featuredImageColor}
+              context="card_horizontal"
+              alt={article.title} 
+              fill
+              className={horizontalImageClass}
+              priority={priority}
+            />
+          </div>
+          <div className="flex flex-1 flex-col justify-center gap-2 py-1 pr-10 min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+              <span className={categoryLabelClass}>
+                {article.category?.name || 'UMUM'}
+              </span>
             </div>
-            <div className="flex flex-1 flex-col justify-center gap-2 py-1 pr-10">
-              <div className="flex items-center gap-2">
-                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
-                <span className={categoryLabelClass}>
-                  {article.category?.name || 'UMUM'}
-                </span>
-              </div>
-              <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.3] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[15px]">
-                {article.title}
-              </h3>
-              <p className="line-clamp-2 text-xs leading-relaxed text-brand-text-muted dark:text-brand-text-muted/80">
-                {excerptText}
-              </p>
-              <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
-                 <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>
-                 <span>{date}</span>
-              </div>
+            <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.3] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[15px]">
+              {article.title}
+            </h3>
+            <p className="line-clamp-2 text-xs leading-relaxed text-brand-text-muted dark:text-brand-text-muted/80">
+              {excerptText}
+            </p>
+            <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
+               <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>
+               <span>{date}</span>
             </div>
-          </article>
+          </div>
         </Link>
-      </div>
+      </article>
     );
   }
 
   return (
-    <div className="relative">
+    <div className="group relative transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01]">
       <ArticleBookmarkButton
         article={article}
         site={site}
-        className="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
-        activeClassName="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-        idleClassName="absolute right-3 top-3 z-10 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
+        className="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
+        activeClassName="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+        idleClassName="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
         iconSize={15}
       />
       <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
         <article
-          className="group relative flex cursor-pointer flex-col gap-2 transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] md:gap-3"
+          className="relative flex cursor-pointer flex-col gap-2 md:gap-3"
         >
           <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
             <SmartImage 
@@ -281,12 +277,12 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               className={defaultImageClass}
               priority={priority}
             />
-            <div className="absolute left-3.5 top-3.5 flex flex-col gap-1.5">
+            <div className="absolute left-3.5 top-3.5 flex flex-wrap gap-1.5">
               {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="flex items-center">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span className={categoryLabelClass}>
                 {article.category?.name || 'UMUM'}
               </span>

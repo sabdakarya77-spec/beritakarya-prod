@@ -28,8 +28,8 @@ export default function EditorialBadge({ variant, className, size = 'sm' }: Edit
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 font-black uppercase tracking-widest',
-        size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[11px]',
+        'inline-flex items-center gap-1 font-black uppercase rounded-sm',
+        size === 'sm' ? 'px-2.5 py-0.5 text-[11px] tracking-[0.14em]' : 'px-3 py-1 text-[12px] tracking-[0.14em]',
         config.classes,
         className
       )}
