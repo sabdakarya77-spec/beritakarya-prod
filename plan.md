@@ -241,3 +241,34 @@ Banner 970×250 otomatis di-scale full-width di mobile dengan layout yang lebih 
 **File terkait:**
 - `apps/web/components/ui/AdSpace.tsx` — ubah layout mobile leaderboard
 - `apps/web/lib/constants.ts` — update size description untuk mobile
+
+#### 3. Image-to-Video Animation (Fitur Tambahan)
+
+Konversi gambar statis yang di-upload pengiklan menjadi video dengan efek animasi otomatis.
+
+**Masalah:**
+- Pengiklan UMKM/kecil biasanya hanya punya gambar (PNG/JPG), tidak punya video
+- Tapi slot leaderboard butuh visual impact yang lebih dari gambar statis
+- Tanpa fitur ini, gambar statis di slot premium terlihat kurang profesional
+
+**Cara kerja:**
+1. Pengiklan upload gambar statis (PNG/JPG) seperti biasa
+2. Pengiklan pilih efek animasi yang diinginkan
+3. Server convert gambar ke video (MP4/WebP animasi) dengan efek terpilih
+4. Hasilnya tampil sebagai video di slot leaderboard
+
+**Pilihan efek animasi:**
+
+| Efek | Deskripsi |
+|------|-----------|
+| Ken Burns | Gambar perlahan zoom-in/zoom-out |
+| Fade Slide | Gambar geser perlahan ke kiri/kanan |
+| Parallax | Layer bergerak dengan kecepatan berbeda |
+| Pulse/Scale | Gambar perlahan membesar-mengecil |
+
+**Teknologi:** FFmpeg di server, atau library `sharp` + `canvas` untuk generate animasi.
+
+**File terkait:**
+- `apps/api/src/modules/ad/` — tambah service image-to-video conversion
+- `apps/web/components/dashboard/ads/AdSlotCard.tsx` — tambah pilihan efek animasi saat upload gambar
+- `apps/web/components/dashboard/ads/LeaderboardBannerRow.tsx` — tambah preview efek animasi
