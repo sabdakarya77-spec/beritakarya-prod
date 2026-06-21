@@ -105,7 +105,7 @@ async function getRelatedArticles(site: string, currentSlug: string, category?: 
     if (!res.ok) return []
     const json = await res.json()
     const articles = json.data?.articles || json.data?.items || []
-    return articles.filter((a: { slug: string }) => a.slug !== currentSlug).slice(0, 3)
+    return articles.filter((a: { slug: string }) => a.slug !== currentSlug).slice(0, 6)
   } catch {
     return []
   }
@@ -447,29 +447,10 @@ export default async function ArticlePage({ params }: Props) {
                       </div>
 
                       {relatedArticles.length > 0 ? (
-                        <div className="space-y-5">
-                          {/* Hero row: 2 horizontal cards */}
-                          {relatedArticles.length >= 2 && (
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                              {relatedArticles.slice(0, 2).map((rel: RelatedArticle) => (
-                                <NewsCard key={rel.id} article={rel} variant="horizontal" site={siteParam} />
-                              ))}
-                            </div>
-                          )}
-                          {/* Medium cards below */}
-                          {relatedArticles.length > 2 && (
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                              {relatedArticles.slice(2).map((rel: RelatedArticle) => (
-                                <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
-                              ))}
-                            </div>
-                          )}
-                          {/* Fallback: if only 1 article, show as medium */}
-                          {relatedArticles.length === 1 && (
-                            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-                              <NewsCard key={relatedArticles[0].id} article={relatedArticles[0]} variant="medium" site={siteParam} />
-                            </div>
-                          )}
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                          {relatedArticles.map((rel: RelatedArticle) => (
+                            <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
+                          ))}
                         </div>
                       ) : (
                         <div className="col-span-full rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center dark:border-white/10">
