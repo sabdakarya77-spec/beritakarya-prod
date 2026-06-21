@@ -201,9 +201,10 @@ export default async function ArticlePage({ params }: Props) {
       <ReadingProgress />
       <ImageLightboxWrapper>
         <article className="min-h-screen">
-          {/* --- FULL-BLEED HERO --- */}
-          <section className="relative w-full h-[50vh] min-h-[400px] max-h-[600px] md:h-[55vh] lg:h-[60vh]">
-            <div className="absolute inset-0">
+          {/* --- RESPONSIVE HERO --- */}
+          <section className="relative w-full">
+            {/* Image Container: Aspect-video on mobile, fixed-height/cover on desktop */}
+            <div className="relative w-full aspect-video md:aspect-none md:h-[55vh] lg:h-[60vh] min-h-[200px] md:min-h-[450px] max-h-[600px]">
               <SmartImage
                 src={coverImage}
                 blur={article.featuredImageBlur}
@@ -212,14 +213,17 @@ export default async function ArticlePage({ params }: Props) {
                 alt={article.title}
                 fill
                 priority
-                className="object-cover"
+                className="object-cover animate-fade-in"
               />
+              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
             </div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
-            <div className="relative flex h-full items-end">
+
+            {/* Text Overlay / Metadata Container */}
+            {/* Absolute positioning on desktop, relative flow with background on mobile */}
+            <div className="relative md:absolute md:inset-0 md:flex md:items-end bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0">
               <Container>
-                <div className="max-w-4xl pb-8 md:pb-12">
+                <div className="max-w-4xl md:pb-12">
                   <div className="flex flex-wrap items-center gap-2.5 mb-4">
                     {badgeVariant && (
                       <EditorialBadge
