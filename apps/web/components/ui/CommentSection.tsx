@@ -84,7 +84,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
   };
 
   return (
-    <section className="mt-12 pt-10 md:mt-16 md:pt-12">
+    <section className="mt-8 pt-6 md:mt-10 md:pt-8">
       <div className="mb-7 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-red text-white shadow-lg shadow-brand-red/20">
@@ -99,8 +99,8 @@ export default function CommentSection({ articleId }: { articleId: string }) {
         </div>
       </div>
 
-      <div className="mb-8 rounded-[1.75rem] border border-gray-100 bg-gray-50/75 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-white/[0.02] dark:shadow-[0_18px_50px_rgba(0,0,0,0.2)] md:p-5">
-        {user ? (
+      {user ? (
+        <div className="mb-8 rounded-[1.75rem] border border-gray-100 bg-gray-50/75 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-white/[0.02] dark:shadow-[0_18px_50px_rgba(0,0,0,0.2)] md:p-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-text-muted shadow-sm dark:bg-white/5">
@@ -132,50 +132,52 @@ export default function CommentSection({ articleId }: { articleId: string }) {
               </div>
             </div>
           </form>
-        ) : (
-          <div className="flex gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-brand-text-muted shadow-sm dark:bg-white/5">
-              <User size={18} />
-            </div>
-            <div className="flex-1 rounded-2xl border border-dashed border-gray-200/90 bg-white px-4 py-3.5 shadow-sm dark:border-white/10 dark:bg-slate-900">
-              <p className="text-sm leading-relaxed text-brand-text-muted">
-                Untuk ikut berdiskusi, silakan masuk atau daftar terlebih dahulu.
-              </p>
-              <div className="mt-2.5 flex flex-wrap items-center gap-2.5 border-t border-gray-100 pt-2.5 dark:border-white/5">
-                <Link
-                  href={loginHref}
-                  className="inline-flex items-center rounded-full bg-brand-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-white transition-all hover:bg-brand-black"
-                >
-                  Masuk
-                </Link>
-                <Link
-                  href={registerHref}
-                  className="inline-flex items-center rounded-full border border-gray-200 px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-brand-black transition-all hover:border-brand-red hover:text-brand-red dark:border-white/10 dark:text-white"
-                >
-                  Daftar
-                </Link>
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
-                  Hanya akun terdaftar yang dapat mengirim komentar
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {message && (
-          <div
-            className={cn(
-              'mt-4 flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold',
-              message.type === 'success'
-                ? 'border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
-                : 'border-red-100 bg-red-50 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
-            )}
-          >
-            {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {message.text}
+          {message && (
+            <div
+              className={cn(
+                'mt-4 flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold',
+                message.type === 'success'
+                  ? 'border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                  : 'border-red-100 bg-red-50 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
+              )}
+            >
+              {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              {message.text}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mb-6 rounded-2xl border border-gray-100 bg-gray-50/50 p-4 shadow-[0_8px_30px_rgba(15,23,42,0.03)] dark:border-white/5 dark:bg-white/[0.015] dark:shadow-none">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-brand-text-muted shadow-sm dark:bg-white/5">
+                <User size={14} />
+              </div>
+              <p className="text-xs text-brand-text-muted">
+                Untuk ikut berdiskusi, silakan <Link href={loginHref} className="font-bold text-brand-red hover:underline">Masuk</Link> atau <Link href={registerHref} className="font-bold text-brand-red hover:underline">Daftar</Link> terlebih dahulu.
+              </p>
+            </div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-brand-text-muted sm:text-right">
+              Hanya akun terdaftar yang dapat mengirim komentar
+            </div>
           </div>
-        )}
-      </div>
+
+          {message && (
+            <div
+              className={cn(
+                'mt-3 flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold',
+                message.type === 'success'
+                  ? 'border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400'
+                  : 'border-red-100 bg-red-50 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
+              )}
+            >
+              {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              {message.text}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-6">
         {isLoading ? (
@@ -184,10 +186,10 @@ export default function CommentSection({ articleId }: { articleId: string }) {
             <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-brand-text-muted">Memuat komentar...</p>
           </div>
         ) : comments.length === 0 ? (
-          <div className="rounded-[1.75rem] border border-dashed border-gray-200 bg-white/[0.02] px-6 py-10 text-center dark:border-white/10 dark:bg-white/[0.015] md:py-11">
-            <MessageSquare size={30} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-white/[0.01] px-6 py-7 text-center dark:border-white/10 dark:bg-white/[0.005] md:py-8">
+            <MessageSquare size={24} className="mx-auto mb-2.5 text-gray-300 dark:text-gray-600" />
             <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-muted">Belum ada komentar.</p>
-            <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">
+            <p className="mt-1.5 text-xs text-brand-text-muted">
               Jadilah yang pertama berdiskusi setelah masuk ke akun Anda.
             </p>
           </div>

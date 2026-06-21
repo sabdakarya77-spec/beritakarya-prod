@@ -414,7 +414,7 @@ export default async function ArticlePage({ params }: Props) {
                   </div>
 
                   {/* Tags */}
-                  <div className="mt-10 flex flex-wrap gap-2 border-t border-gray-100 pt-6 dark:border-white/5 md:mt-12 md:pt-8">
+                  <div className="mt-5 flex flex-wrap gap-2 pt-2">
                     {(article.tags || ['Investigasi', 'KaryaNyata', 'Nusantara', 'Politik']).map((tag: string) => (
                       <Link
                         key={tag}
