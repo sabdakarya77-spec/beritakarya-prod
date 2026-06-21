@@ -1,234 +1,153 @@
-# Homepage Improvement Plan
+## Mapping File Sistem Iklan (Ads)
 
-> Analisis dan rencana perbaikan homepage BeritaKarya berdasarkan review per section.
-> Target: lebih modern, profesional, dan konsisten dengan standar media digital.
+> Referensi untuk pembahasan periklanan BeritaKarya.
 
----
+### Komponen Frontend (Tampilan Iklan)
 
-## Ringkasan Prioritas
-
-| # | Perbaikan | Impact | Effort | Status |
-|---|---|---|---|---|
-| 1 | Hapus duplikasi TRENDING ↔ Paling Populer | 🔴 Tinggi | Rendah | ⏳ Pending |
-| 2 | Ganti `<img>` → `<SmartImage>` di Pilihan Editor & Video | 🔴 Tinggi | Rendah | ⏳ Pending |
-| 3 | Pindahkan ad leaderboard dari atas | 🟡 Sedang | Rendah | ⏳ Pending |
-| 4 | Ganti label "Berita Lanjutan" → "Berita Lainnya" | 🟡 Sedang | Rendah | ⏳ Pending |
-| 5 | Tambah excerpt di card horizontal feed | 🟡 Sedang | Sedang | ⏳ Pending |
-| 6 | Ganti emoji ▶ → Lucide Play icon di Video Eksklusif | 🟢 Rendah | Rendah | ⏳ Pending |
-
----
-
-## Detail Per Section
-
-### 1. AD LEADERBOARD (atas)
-
-**Sekarang:** Iklan di paling atas, sebelum hero section.
-
-**Masalah:** Pengunjung langsung disambut iklan, bukan konten. Mengurangi kesan profesional. Media besar (Kompas, CNN Indonesia) tidak menempatkan iklan di posisi pertama.
-
-**Solusi:** Pindahkan iklan ke bawah hero section atau hapus dari atas.
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 386-391)
-
-```tsx
-// SEBELUM — iklan di atas hero
-<Container className="py-4 md:py-5">
-  <AdSpace type="leaderboard" />
-</Container>
-{showHomepageHero && (...)}
-
-// SESUDAH — iklan di bawah hero
-{showHomepageHero && (...)}
-<Container className="py-4 md:py-5">
-  <AdSpace type="leaderboard" />
-</Container>
-```
-
----
-
-### 2. ZONA 1 — HERO (MagazineBentoHero)
-
-**Sekarang:** 4 artikel terbaru, slider otomatis 5 detik.
-
-**Masalah:**
-- Headline terlalu panjang (100+ karakter) — sulit dibaca
-- 3 dari 4 hero sama kategori ("Peristiwa") — kurang variasi
-- Slider otomatis mengganggu user yang sedang membaca
-
-**Solusi:**
-- Batasi tampilan headline max 2 baris (`line-clamp-2`) di komponen MagazineBentoHero
-- Tambahkan `pauseOnHover` pada slider
-- Pertimbangkan filter kategori agar hero lebih bervariasi
-
-**File:** `apps/web/components/berita/MagazineBentoHero.tsx`
-
----
-
-### 3. ZONA 2 — FOKUS REDAKSI
-
-**Sekarang:** 1 card besar (`large`) + 3 card horizontal stacked.
-
-**Masalah:**
-- Sering cuma 1 artikel terlihat karena data kurang dari 4
-- Card horizontal di kanan terlalu kecil dibanding card besar di kiri
-- Tidak ada excerpt pada card besar
-
-**Solusi:**
-- Kondisi `showFokusRedaksi` sudah ada (`fokusRedaksi.length > 0`) — pastikan minimal 2 artikel baru tampilkan
-- Tambahkan excerpt pada card `large` variant
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 412-451)
-
-```tsx
-// Saran: ubah threshold dari > 0 ke >= 2
-const showFokusRedaksi = isHomepage && fokusRedaksi.length >= 2
-```
-
----
-
-### 4. ZONA 3 — TRENDING
-
-**Sekarang:** 5 artikel populer berdasarkan views (sudah diperbaiki).
-
-**Masalah:** Data trending bisa overlap dengan sidebar "Paling Populer" karena sumber data mirip.
-
-**Solusi:**
-- TRENDING: `sort=views&order=desc` (sudah diterapkan)
-- Sidebar "Paling Populer": ganti sumber data jadi artikel terbaru non-hero (bukan by views)
-- Dengan begitu tidak ada duplikasi
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx`
-- `getTrendingArticles()` — sudah by views ✅
-- `distributeArticles()` → `popular` — ganti dari `.slice(0, 5)` ke artikel terbaru yang tidak ada di hero/fokus/trending
-
----
-
-### 5. ZONA 4 — BERITA TERBARU + SIDEBAR
-
-#### 5a. Feed Utama
-
-**Masalah:**
-- Label "Berita Lanjutan" kurang profesional — terkesan "sisa"
-- Ad placement di tengah feed mengganggu alur baca
-- Card horizontal tidak ada excerpt
-
-**Solusi:**
-
-```tsx
-// Ganti label
-// SEBELUM:
-<span className="...">Berita Lanjutan</span>
-
-// SESUDAH:
-<span className="...">Berita Lainnya</span>
-```
-
-- Pindahkan `<AdSpace>` ke bawah grid, bukan di antara featured dan stream
-- Tambahkan 1 baris excerpt pada card horizontal (di komponen NewsCard, variant horizontal)
-
-**File:**
-- `apps/web/components/pages/SiteHomePage.tsx` (baris 565-591)
-- `apps/web/components/ui/NewsCard.tsx` (variant horizontal, baris 203-252)
-
-#### 5b. Sidebar — Paling Populer
-
-**Masalah:** Duplikasi dengan TRENDING section.
-
-**Solusi:** Ganti nama dan sumber data:
-
-```tsx
-// SEBELUM — by views (sama dengan trending)
-const popular = articles.filter(a => !heroIds.has(a.id)).slice(0, 5)
-
-// SESUDAH — terbaru non-hero (berbeda dari trending)
-const latestNonHero = articles.filter(a => !heroIds.has(a.id)).slice(0, 5)
-```
-
-Ganti label sidebar:
-```tsx
-// SEBELUM:
-<Star size={15} className="fill-brand-red text-brand-red" />
-<h4>Paling Populer</h4>
-
-// SESUDAH:
-<Clock size={15} className="text-brand-red" />
-<h4>Terbaru</h4>
-```
-
----
-
-### 6. ZONA 5+ — EDITORIAL EXTRAS
-
-#### 6a. Pilihan Editor
-
-**Masalah:** Pakai `<img>` biasa, bukan `<SmartImage>`. Tidak ada blur placeholder, tidak ada optimasi gambar.
-
-**Solusi:** Ganti ke `<SmartImage>`:
-
-```tsx
-// SEBELUM:
-<img
-  src={article.featuredImage}
-  alt={article.title}
-  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-/>
-
-// SESUDAH:
-<SmartImage
-  src={article.featuredImage}
-  context="editor_choice"
-  alt={article.title}
-  fill
-  className="object-cover transition-transform duration-700 group-hover:scale-105"
-/>
-```
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 798-831)
-
-#### 6b. Foto Jurnalistik
-
-**Masalah:** Pakai `<img>` biasa.
-
-**Solusi:** Ganti ke `<SmartImage>` (sama seperti Pilihan Editor).
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 885-916)
-
-#### 6c. Video Eksklusif
-
-**Masalah:**
-- Pakai `<img>` biasa
-- Play button pakai emoji `▶` — kurang profesional
-
-**Solusi:**
-- Ganti `<img>` ke `<SmartImage>`
-- Ganti emoji ke Lucide `Play` icon
-
-```tsx
-// SEBELUM:
-<span className="ml-0.5 text-md text-white">▶</span>
-
-// SESUDAH:
-import { Play } from 'lucide-react'
-<Play size={20} className="ml-0.5 text-white fill-white" />
-```
-
-**File:** `apps/web/components/pages/SiteHomePage.tsx` (baris 920-964)
-
----
-
-## File yang Perlu Diubah
-
-| File | Perubahan |
+| File | Keterangan |
 |---|---|
-| `apps/web/components/pages/SiteHomePage.tsx` | Pindahkan ad, ganti label, hapus duplikasi, ganti img → SmartImage, ganti emoji |
-| `apps/web/components/berita/MagazineBentoHero.tsx` | Tambah line-clamp pada headline, pauseOnHover |
-| `apps/web/components/ui/NewsCard.tsx` | Tambah excerpt pada variant horizontal |
+| `apps/web/components/ui/AdSpace.tsx` | Komponen utama untuk render slot iklan (leaderboard, in-feed, rectangle) |
+| `apps/web/components/ui/BillboardShowcase.tsx` | Komponen showcase iklan billboard |
+
+### Dashboard Manajemen Iklan
+
+| File | Keterangan |
+|---|---|
+| `apps/web/app/[site]/dashboard/ads/page.tsx` | Halaman utama dashboard iklan |
+| `apps/web/app/[site]/dashboard/ads/order/page.tsx` | Halaman pemesanan/booking iklan |
+| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Card detail informasi slot iklan |
+| `apps/web/components/dashboard/ads/SuperadminAdsView.tsx` | View manajemen iklan untuk superadmin |
+| `apps/web/components/dashboard/ads/AdvertiserAdsView.tsx` | View manajemen iklan untuk advertiser |
+| `apps/web/components/dashboard/ads/LeaderboardManager.tsx` | Komponen manager leaderboard ads |
+| `apps/web/components/dashboard/ads/LeaderboardBannerRow.tsx` | Baris banner pada leaderboard |
+| `apps/web/components/dashboard/ads/types.ts` | TypeScript types/interface untuk modul ads |
+| `apps/web/components/dashboard/AdvertiserDashboardOverview.tsx` | Overview dashboard role advertiser |
+
+### Backend API
+
+| File | Keterangan |
+|---|---|
+| `apps/api/src/modules/ad/ad.controller.ts` | Controller endpoint CRUD iklan |
+| `apps/api/src/modules/ad/ad.service.ts` | Business logic dan validasi iklan |
+| `apps/api/src/modules/ad/ad.repository.ts` | Query database untuk iklan |
+| `apps/api/src/cron/ad-expiry.ts` | Cron job auto-expire iklan yang sudah habis masa tayang |
+
+### Penggunaan di Halaman
+
+| File | Keterangan |
+|---|---|
+| `apps/web/components/pages/SiteHomePage.tsx` | Menggunakan `<AdSpace>` di leaderboard (atas) & in-feed (tengah) |
+| `apps/web/app/[site]/artikel/[slug]/page.tsx` | Slot iklan di halaman detail artikel |
+| `apps/web/components/marketing/AdsMarketingPage.tsx` | Halaman marketing layanan iklan BeritaKarya |
+
+### Testing
+
+| File | Keterangan |
+|---|---|
+| `apps/web/tests/e2e/ad-booking.spec.ts` | E2E test alur booking iklan |
+
+### Konfigurasi & Types
+
+| File | Keterangan |
+|---|---|
+| `apps/web/lib/constants.ts` | Konstanta terkait tipe/slot iklan |
+| `apps/web/lib/siteSettings.ts` | Pengaturan site termasuk konfigurasi slot iklan |
+| `packages/types/src/user.ts` | User types (role advertiser) |
+| `packages/config/src/roles.ts` | Role permissions (akses advertiser) |
+| `packages/config/src/site.ts` | Konfigurasi site termasuk pengaturan ads |
 
 ---
 
-## Catatan Tambahan
+## Rencana Infrastruktur & Tool Slot Iklan
 
-- **Konsistensi badge:** Saat ini ada 3 badge berbeda (BREAKING, EKSKLUSIF, PILIHAN). Pertimbangkan standarisasi.
-- **Geografi konten:** Mayoritas konten Jawa Timur. Tidak masalah untuk sekarang, tapi perlu diingat untuk branding "Nusantara".
-- **Footer:** Alamat "Jl. Merdeka No. 123" kemungkinan placeholder — perlu diganti.
-- **Social media:** Footer belum ada link Instagram, Twitter/X, YouTube.
+> Tidak semua pengiklan bisa menyesuaikan dengan ukuran slot iklan yang ada. Banyak yang punya banner dari platform lain (Google Ads, Meta) dengan ukuran IAB standar berbeda, atau agency/UMKM yang kirim banner dengan rasio aspek asal-asalan. Sistem perlu adaptif.
+
+### Masalah
+
+- Slot saat ini mengasumsikan ukuran pasti: `leaderboard` 970×250, `rectangle` 300×250, `in_feed` 300×250
+- Fitur crop yang ada di dashboard bisa merusak materi (teks/logo terpotong)
+- Tidak ada mekanisme untuk menangani banner dengan rasio aspek yang tidak cocok
+
+### Slot Sizes Saat Ini
+
+| Slot ID | Ukuran Desktop | Ukuran Mobile |
+|---------|---------------|---------------|
+| `leaderboard` | 970 × 250 px | 320 × 100 px |
+| `rectangle` | 300 × 250 px | 300 × 250 px |
+| `rectangle_secondary` | 300 × 250 px | 300 × 250 px |
+| `in_feed` | 300 × 250 px | 300 × 250 px |
+
+### Rencana Fitur (Prioritas)
+
+| # | Fitur | Effort | Impact | Status |
+|---|-------|--------|--------|--------|
+| 1 | Smart Resize + Letterbox Server-Side | Sedang | Tinggi | 🔲 Belum |
+| 2 | Template Download per Slot (PSD/Figma) | Kecil | Sedang | 🔲 Belum |
+| 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | 🔲 Belum |
+| 4 | Multi-Size IAB per Slot | Besar | Tinggi | 🔲 Belum |
+
+### Detail Fitur
+
+#### 1. Smart Resize + Letterbox Server-Side (Prioritas Utama)
+
+Saat upload banner, server otomatis detect dimensi asli dan proses:
+
+- **Rasio aspek tidak cocok** → letterbox (tambah padding dengan warna dominan atau blur background), bukan crop
+- **Terlalu kecil** → reject dengan pesan jelas: "Minimum 600×200 untuk slot leaderboard"
+- **Terlalu besar** → auto-compress ke WebP + resize proporsional
+- **Sudah cocok** → langsung proses tanpa perubahan
+
+**Mengapa letterbox, bukan crop?** Crop memotong materi kreatif (teks, logo, CTA). Letterbox mempertahankan 100% konten dengan menambahkan padding estetis di sisi yang kosong.
+
+**File terkait:**
+- `apps/api/src/modules/ad/` — tambah service resize server-side (sharp / jimp)
+- `apps/web/components/ui/AdImageCropper.tsx` — ubah dari crop-only ke smart resize
+
+#### 2. Template Download per Slot
+
+Sediakan file template (PSD/Figma/SVG) untuk setiap slot agar pengiklan punya referensi desain yang benar.
+
+- Include: safe zone, bleed area, font minimum size
+- Format: PSD (untuk agency), Figma link (untuk tim internal), SVG (untuk UMKM)
+- Letakkan di halaman upload dan halaman marketing iklan
+
+**File terkait:**
+- `apps/web/public/templates/` — taruh file template
+- `apps/web/components/dashboard/ads/AdSlotCard.tsx` — tambah tombol download template
+- `apps/web/components/marketing/AdsMarketingPage.tsx` — tambah section template
+
+#### 3. Preview Sesuai Tampilan Aktual
+
+Dashboard saat ini menampilkan preview mentah banner. Perlu preview yang persis seperti yang dilihat visitor:
+
+- Tampilkan banner di dalam mockup slot (dengan border, shadow, label "Iklan")
+- Jika ada letterbox/padding, tampilkan juga di preview
+- Tambah toggle "Desktop" vs "Mobile" untuk melihat responsivitas
+
+**File terkait:**
+- `apps/web/components/dashboard/ads/AdSlotCard.tsx` — upgrade preview area
+- `apps/web/components/dashboard/ads/LeaderboardBannerRow.tsx` — upgrade preview
+
+#### 4. Multi-Size IAB per Slot (Fitur Lanjutan)
+
+Satu slot bisa menerima beberapa ukuran standar IAB, browser paling cocok berdasarkan viewport:
+
+| Slot | Ukuran yang Diterima |
+|------|---------------------|
+| `leaderboard` | 970×250, 728×90, 320×50 (mobile) |
+| `rectangle` | 300×250, 336×280 |
+| `in_feed` | 300×250, 336×280 |
+
+Ini standar industri (Google AdSense melakukan ini). Implementasi butuh perubahan di:
+
+- `apps/web/components/ui/AdSpace.tsx` — render responsive berdasarkan viewport
+- Database `Advertisement` model — tambah field `width`, `height`, `breakpoint`
+- Dashboard — upload multiple sizes per slot
+
+### Yang TIDAK Akan Dibangun
+
+| Alasan | Penjelasan |
+|--------|-----------|
+| Dynamic slot sizing | Terlalu kompleks, bisa merusak layout halaman |
+| Accept semua ukuran tanpa proses | Hasil jelek, pengiklan kecewa |
+| Client-side resize | Tidak konsisten, kualitas kalah dari server-side |
