@@ -183,3 +183,61 @@ Ini standar industri (Google AdSense melakukan ini). Implementasi butuh perubaha
 - In-Feed punya CTR tertinggi karena terasa seperti bagian dari konten (native ads)
 - Leaderboard cocok dijual sebagai slot eksklusif atau carousel (beberapa pengiklan bergantian)
 - Rectangle Secondary ideal dijual sebagai addon bundling, bukan slot utama
+
+---
+
+## Optimasi Leaderboard Mobile
+
+> Masalah: Leaderboard adalah slot termahal, tapi di mobile ukurannya mengecil drastis (970×250 → 320×100) sementara slot lain tetap 300×250. Satu harga, tampil di semua device — jadi solusinya bukan pisahkan pricing, tapi buat leaderboard tetap impactful di mobile.
+
+### Perbandingan Ukuran
+
+| Slot | Desktop | Mobile | Perubahan |
+|------|---------|--------|-----------|
+| Leaderboard | 970×250 (242.500 px²) | 320×100 (32.000 px²) | **Turun 87%** ⚠️ |
+| In-Feed | 300×250 (75.000 px²) | 300×250 (75.000 px²) | Tetap |
+| Rectangle | 300×250 (75.000 px²) | 300×250 (75.000 px²) | Tetap |
+
+### Prinsip
+
+- Satu banner upload, satu harga, tampil di desktop dan mobile
+- Tidak minta pengiklan upload versi terpisah
+- Tidak pisahkan pricing desktop vs mobile
+- Sistem yang adaptif membuat leaderboard tetap besar dan lama di mobile
+
+### Rencana Solusi
+
+| # | Solusi | Effort | Impact | Status |
+|---|--------|--------|--------|--------|
+| 1 | Sticky Leaderboard Mobile | Kecil | Tinggi | 🔲 Belum |
+| 2 | Full-Width Auto-Adapt | Sedang | Sedang | 🔲 Belum |
+
+### Detail Solusi
+
+#### 1. Sticky Leaderboard Mobile (Prioritas)
+
+Leaderboard menempel di atas layar saat visitor scroll di mobile.
+
+- Visitor scroll ke bawah → leaderboard tetap terlihat di posisi atas
+- Durasi exposure naik drastis (dari 2-3 detik → 30+ detik)
+- Tambah tombol close (×) setelah 5 detik agar tidak mengganggu UX
+- Tidak mengubah ukuran, tapi meningkatkan waktu tampil secara signifikan
+- **Ini cara paling efektif meningkatkan value tanpa mengubah slot definition**
+
+**File terkait:**
+- `apps/web/components/ui/AdSpace.tsx` — tambah sticky behavior untuk leaderboard di mobile
+- CSS: tambah class sticky + z-index yang tepat agar tidak menutupi navigasi
+
+#### 2. Full-Width Auto-Adapt
+
+Banner 970×250 otomatis di-scale full-width di mobile dengan layout yang lebih baik.
+
+- Lebar penuh layar (bukan max 320px)
+- Tinggi dinaikkan dari 100px → 140-160px
+- Gambar di-scale proporsional, tambah letterbox/padding jika rasio aspek tidak cocok
+- Background blur/gradient di sisi agar gambar tetap terlihat bagus
+- **Area visual naik ~60% tanpa minta pengiklan upload terpisah**
+
+**File terkait:**
+- `apps/web/components/ui/AdSpace.tsx` — ubah layout mobile leaderboard
+- `apps/web/lib/constants.ts` — update size description untuk mobile
