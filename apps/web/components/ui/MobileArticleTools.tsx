@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bookmark, Share2, X } from 'lucide-react';
+import { Bookmark, Share2, Type, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import ArticleShareActions from './ArticleShareActions';
 import {
@@ -39,8 +39,21 @@ export default function MobileArticleTools({
   site,
 }: MobileArticleToolsProps) {
   const [isShareSheetOpen, setIsShareSheetOpen] = useState(false);
+  const [isFontPanelOpen, setIsFontPanelOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [fontSize, setFontSize] = useState(1);
+
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  const fontPanelRef = useRef<HTMLDivElement | null>(null);
+  const contentElRef = useRef<HTMLElement | null>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
+
+  const fontSizes = [
+    { label: 'A-', value: 0.85 },
+    { label: 'Normal', value: 1 },
+    { label: 'A+', value: 1.15 },
+    { label: 'A++', value: 1.3 },
+  ];
 
   // Sync bookmark state
   useEffect(() => {
@@ -56,16 +69,72 @@ export default function MobileArticleTools({
     };
   }, [site, article.slug]);
 
-  // Close sheet on outside click
+  // Handle font size scaling on the article-content element
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (sheetRef.current && !sheetRef.current.contains(e.target as Node)) {
-        setIsShareSheetOpen(false);
+    const findContent = () => document.querySelector('.article-content') as HTMLElement | null;
+
+    const applyFontSize = (el: HTMLElement | null) => {
+      if (el) {
+        el.style.setProperty('--article-font-scale', String(fontSize));
+        contentElRef.current = el;
       }
     };
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsShareSheetOpen(false);
+
+    const content = findContent();
+    if (content) {
+      applyFontSize(content);
+      return;
+    }
+
+    observerRef.current = new MutationObserver(() => {
+      const el = findContent();
+      if (el && !contentElRef.current) {
+        applyFontSize(el);
+        observerRef.current?.disconnect();
+      }
+    });
+
+    observerRef.current.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
     };
+  }, [fontSize]);
+
+  useEffect(() => {
+    if (contentElRef.current) {
+      contentElRef.current.style.setProperty('--article-font-scale', String(fontSize));
+    }
+  }, [fontSize]);
+
+  // Close panels on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (sheetRef.current && !sheetRef.current.contains(target)) {
+        const shareBtn = document.getElementById('mobile-share-button');
+        if (!shareBtn?.contains(target)) {
+          setIsShareSheetOpen(false);
+        }
+      }
+      if (fontPanelRef.current && !fontPanelRef.current.contains(target)) {
+        const fontBtn = document.getElementById('mobile-font-button');
+        if (!fontBtn?.contains(target)) {
+          setIsFontPanelOpen(false);
+        }
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsShareSheetOpen(false);
+        setIsFontPanelOpen(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
     return () => {
@@ -155,6 +224,42 @@ export default function MobileArticleTools({
         )}
       </AnimatePresence>
 
+      {/* Font options panel */}
+      <AnimatePresence>
+        {isFontPanelOpen && (
+          <motion.div
+            key="font-panel"
+            ref={fontPanelRef}
+            initial={{ y: 15, opacity: 0, scale: 0.97 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 15, opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,12px))] inset-x-4 z-40 mx-auto max-w-sm rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+          >
+            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted text-center">
+              Ukuran Teks
+            </p>
+            <div className="mt-3 flex justify-center gap-2">
+              {fontSizes.map((size) => (
+                <button
+                  key={size.value}
+                  type="button"
+                  onClick={() => setFontSize(size.value)}
+                  className={cn(
+                    'rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all flex-1 text-center',
+                    fontSize === size.value
+                      ? 'border-brand-red/40 bg-brand-red text-white'
+                      : 'border-white/10 bg-white/[0.03] text-gray-300 hover:border-brand-red/30 hover:text-white'
+                  )}
+                >
+                  {size.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Fixed bottom bar — hidden at xl and above (floating sidebar takes over) */}
       <div
         className="fixed bottom-0 inset-x-0 z-30 md:hidden"
@@ -183,6 +288,30 @@ export default function MobileArticleTools({
             >
               <Share2 size={20} />
               <span className="text-[10px] font-black uppercase tracking-[0.12em]">Bagikan</span>
+            </button>
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-white/[0.08]" />
+
+            {/* Font Size button */}
+            <button
+              type="button"
+              id="mobile-font-button"
+              onClick={() => {
+                setIsFontPanelOpen((prev) => !prev);
+                setIsShareSheetOpen(false); // close share sheet if open
+              }}
+              aria-label="Atur ukuran teks"
+              title="Atur ukuran teks"
+              className={cn(
+                'flex flex-1 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 transition-all',
+                isFontPanelOpen
+                  ? 'bg-brand-red/10 text-brand-red'
+                  : 'text-brand-text-muted hover:bg-white/[0.05] hover:text-white active:scale-95'
+              )}
+            >
+              <Type size={20} />
+              <span className="text-[10px] font-black uppercase tracking-[0.12em]">Teks</span>
             </button>
 
             {/* Divider */}

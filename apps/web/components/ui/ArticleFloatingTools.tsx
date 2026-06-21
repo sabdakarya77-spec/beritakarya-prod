@@ -118,7 +118,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
   };
 
   return (
-    <div ref={rootRef} className={cn('relative hidden md:block', className)}>
+    <div ref={rootRef} className={cn('relative z-40 hidden md:block', className)}>
       <div className="flex w-[4rem] flex-col items-center gap-2 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.78)] p-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl">
         <button
           type="button"

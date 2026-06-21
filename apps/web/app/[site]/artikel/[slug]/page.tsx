@@ -298,7 +298,7 @@ export default async function ArticlePage({ params }: Props) {
             <div className={cn(articleRailClassName, 'mb-12 md:mb-16')}>
               {/* Main Content */}
               <div className="min-w-0 xl:grid xl:grid-cols-[4.25rem_minmax(0,40rem)] xl:gap-8 2xl:grid-cols-[4.5rem_minmax(0,42rem)]">
-                <div className="hidden xl:block">
+                <div className="hidden xl:block relative z-30">
                   <div className="sticky top-32">
                     <ArticleFloatingTools title={article.title} url={articleUrl} />
                   </div>
@@ -674,17 +674,17 @@ export default async function ArticlePage({ params }: Props) {
 }
 function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
   const bodyTextClass =
-    'font-sans text-[calc(1rem*var(--article-font-scale,1))] leading-[calc(1.75rem*var(--article-font-scale,1))] antialiased text-left md:text-[calc(1.05rem*var(--article-font-scale,1))] md:leading-[calc(1.85rem*var(--article-font-scale,1))]';
+    'font-sans text-[calc(1rem*var(--article-font-scale))] leading-[calc(1.75rem*var(--article-font-scale))] antialiased text-left md:text-[calc(1.05rem*var(--article-font-scale))] md:leading-[calc(1.85rem*var(--article-font-scale))]';
+
+  const leadTextClass =
+    'font-sans text-[calc(1.125rem*var(--article-font-scale))] leading-relaxed font-medium text-brand-black/90 dark:text-white/90 antialiased md:text-[calc(1.25rem*var(--article-font-scale))]';
 
   switch (block.type) {
     case 'paragraph':
       const isLeadParagraph = index === 0
       return (
         <p
-          className={isLeadParagraph
-            ? 'font-sans text-lg md:text-xl font-medium leading-relaxed text-brand-black/90 dark:text-white/90 antialiased'
-            : bodyTextClass
-          }
+          className={isLeadParagraph ? leadTextClass : bodyTextClass}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
         />
       )
@@ -692,10 +692,10 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       const Tag = `h${block.level}` as keyof JSX.IntrinsicElements
       const headingSizeClass =
         block.level === 2
-          ? 'text-[calc(1.35rem*var(--article-font-scale,1))] md:text-[calc(1.75rem*var(--article-font-scale,1))]'
+          ? 'text-[calc(1.35rem*var(--article-font-scale))] md:text-[calc(1.75rem*var(--article-font-scale))]'
           : block.level === 3
-            ? 'text-[calc(1.15rem*var(--article-font-scale,1))] md:text-[calc(1.45rem*var(--article-font-scale,1))]'
-            : 'text-[calc(1rem*var(--article-font-scale,1))] md:text-[calc(1.25rem*var(--article-font-scale,1))]'
+            ? 'text-[calc(1.15rem*var(--article-font-scale))] md:text-[calc(1.45rem*var(--article-font-scale))]'
+            : 'text-[calc(1rem*var(--article-font-scale))] md:text-[calc(1.25rem*var(--article-font-scale))]'
       return (
         <Tag
           className={cn(
@@ -709,7 +709,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       return (
         <div className="relative my-10 rounded-r-xl border-l-4 border-brand-red bg-gray-50 px-5 py-8 dark:bg-white/[0.03] md:px-8 md:py-10 lg:px-12">
           <span className="absolute left-4 top-4 text-6xl font-serif leading-none text-brand-red opacity-10 select-none md:left-6 md:top-5 md:text-7xl">“</span>
-          <blockquote className="relative z-10 font-sans text-[calc(1.1rem*var(--article-font-scale,1))] italic leading-[calc(1.7rem*var(--article-font-scale,1))] text-brand-black dark:text-white md:text-[calc(1.35rem*var(--article-font-scale,1))] md:leading-[calc(2.1rem*var(--article-font-scale,1))]">
+          <blockquote className="relative z-10 font-sans text-[calc(1.1rem*var(--article-font-scale))] italic leading-[calc(1.7rem*var(--article-font-scale))] text-brand-black dark:text-white md:text-[calc(1.35rem*var(--article-font-scale))] md:leading-[calc(2.1rem*var(--article-font-scale))]">
             <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }} />
             {block.attribution && (
               <footer className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red mt-4">— {block.attribution}</footer>
@@ -811,7 +811,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       return (
         <div
           className={cn(
-            "my-10 rounded-xl border-l-4 p-5 font-sans text-[calc(1rem*var(--article-font-scale,1))] leading-[calc(1.75rem*var(--article-font-scale,1))] antialiased text-left md:p-8 md:text-[calc(1.1rem*var(--article-font-scale,1))] md:leading-[calc(1.9rem*var(--article-font-scale,1))] shadow-sm",
+            "my-10 rounded-xl border-l-4 p-5 font-sans text-[calc(1rem*var(--article-font-scale))] leading-[calc(1.75rem*var(--article-font-scale))] antialiased text-left md:p-8 md:text-[calc(1.1rem*var(--article-font-scale))] md:leading-[calc(1.9rem*var(--article-font-scale))] shadow-sm",
             variants[block.variant as keyof typeof variants] || variants.editorial
           )}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
