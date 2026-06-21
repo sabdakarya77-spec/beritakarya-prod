@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bookmark, Share2, Type, X } from 'lucide-react';
+import { Bookmark, ChevronLeft, ChevronRight, Share2, Type, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import ArticleShareActions from './ArticleShareActions';
 import {
@@ -42,7 +42,7 @@ export default function MobileArticleTools({
   const [isFontPanelOpen, setIsFontPanelOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [fontSize, setFontSize] = useState(1);
-  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const fontPanelRef = useRef<HTMLDivElement | null>(null);
@@ -71,18 +71,15 @@ export default function MobileArticleTools({
     };
   }, [site, article.slug]);
 
-  // Handle smart hide/show on scroll
+  // Handle smart collapse on scroll down
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      // Hide if scrolling down and scrolled more than 100px
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsScrollingDown(true);
-        // Also close panels if we scroll down
+      // Auto-collapse if scrolling down and scrolled more than 150px
+      if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+        setIsCollapsed(true);
         setIsFontPanelOpen(false);
         setIsShareSheetOpen(false);
-      } else {
-        setIsScrollingDown(false);
       }
       lastScrollY.current = currentScrollY;
     };
@@ -181,7 +178,7 @@ export default function MobileArticleTools({
       }
       return;
     }
-    // Fallback: open bottom sheet with share options
+    // Fallback: open side share sheet or share options
     setIsShareSheetOpen((prev) => !prev);
     setIsFontPanelOpen(false); // close font panel
   };
@@ -190,7 +187,7 @@ export default function MobileArticleTools({
     <>
       {/* Share options panel (fallback when Web Share API is not supported) */}
       <AnimatePresence>
-        {isShareSheetOpen && !isScrollingDown && (
+        {isShareSheetOpen && !isCollapsed && (
           <motion.div
             key="share-panel"
             ref={sheetRef}
@@ -225,7 +222,7 @@ export default function MobileArticleTools({
 
       {/* Font options panel */}
       <AnimatePresence>
-        {isFontPanelOpen && !isScrollingDown && (
+        {isFontPanelOpen && !isCollapsed && (
           <motion.div
             key="font-panel"
             ref={fontPanelRef}
@@ -259,68 +256,112 @@ export default function MobileArticleTools({
         )}
       </AnimatePresence>
 
-      {/* Vertical floating bar — positioned on the left side of the viewport, hidden on md and above */}
-      <motion.div
-        animate={{ x: isScrollingDown ? -80 : 0, opacity: isScrollingDown ? 0 : 1 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
-        role="toolbar"
-        aria-label="Alat artikel"
-      >
-        {/* Share button */}
-        <button
-          type="button"
-          id="mobile-share-button"
-          onClick={handleShare}
-          aria-label="Bagikan artikel"
-          title="Bagikan artikel"
-          className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
-            isShareSheetOpen
-              ? 'border-brand-red/40 bg-brand-red text-white'
-              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
-          )}
-        >
-          <Share2 size={16} />
-        </button>
+      {/* Collapsed Tab handle stuck to the left edge */}
+      <AnimatePresence>
+        {isCollapsed && (
+          <motion.button
+            key="collapsed-tab"
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -20, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            type="button"
+            onClick={() => setIsCollapsed(false)}
+            aria-label="Tampilkan alat artikel"
+            className="fixed left-0 top-1/2 -translate-y-1/2 z-40 flex h-14 w-6 items-center justify-center rounded-r-2xl border-y border-r border-white/10 bg-[rgba(7,15,33,0.85)] text-gray-300 shadow-md backdrop-blur-xl md:hidden"
+          >
+            <ChevronRight size={14} className="animate-pulse" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-        {/* Font Size button */}
-        <button
-          type="button"
-          id="mobile-font-button"
-          onClick={() => {
-            setIsFontPanelOpen((prev) => !prev);
-            setIsShareSheetOpen(false); // close share panel
-          }}
-          aria-label="Atur ukuran teks"
-          title="Atur ukuran teks"
-          className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
-            isFontPanelOpen
-              ? 'border-brand-red/40 bg-brand-red text-white'
-              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
-          )}
-        >
-          <Type size={16} />
-        </button>
+      {/* Expanded Vertical Floating Sidebar */}
+      <AnimatePresence>
+        {!isCollapsed && (
+          <motion.div
+            key="expanded-bar"
+            initial={{ x: -60, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -60, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            role="toolbar"
+            aria-label="Alat artikel"
+          >
+            {/* Collapse button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsCollapsed(true);
+                setIsFontPanelOpen(false);
+                setIsShareSheetOpen(false);
+              }}
+              aria-label="Sembunyikan alat artikel"
+              title="Sembunyikan"
+              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white active:scale-95 transition-all"
+            >
+              <ChevronLeft size={16} />
+            </button>
 
-        {/* Bookmark button */}
-        <button
-          type="button"
-          id="mobile-bookmark-button"
-          onClick={handleBookmark}
-          aria-label={isSaved ? 'Hapus dari artikel tersimpan' : 'Simpan artikel'}
-          title={isSaved ? 'Tersimpan' : 'Simpan artikel'}
-          className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
-            isSaved
-              ? 'border-brand-red/40 bg-brand-red text-white'
-              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
-          )}
-        >
-          <Bookmark size={16} className={isSaved ? 'fill-current' : undefined} />
-        </button>
-      </motion.div>
+            {/* Slim divider line */}
+            <div className="w-6 h-px bg-white/[0.08]" />
+
+            {/* Share button */}
+            <button
+              type="button"
+              id="mobile-share-button"
+              onClick={handleShare}
+              aria-label="Bagikan artikel"
+              title="Bagikan artikel"
+              className={cn(
+                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                isShareSheetOpen
+                  ? 'border-brand-red/40 bg-brand-red text-white'
+                  : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+              )}
+            >
+              <Share2 size={16} />
+            </button>
+
+            {/* Font Size button */}
+            <button
+              type="button"
+              id="mobile-font-button"
+              onClick={() => {
+                setIsFontPanelOpen((prev) => !prev);
+                setIsShareSheetOpen(false); // close share panel
+              }}
+              aria-label="Atur ukuran teks"
+              title="Atur ukuran teks"
+              className={cn(
+                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                isFontPanelOpen
+                  ? 'border-brand-red/40 bg-brand-red text-white'
+                  : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+              )}
+            >
+              <Type size={16} />
+            </button>
+
+            {/* Bookmark button */}
+            <button
+              type="button"
+              id="mobile-bookmark-button"
+              onClick={handleBookmark}
+              aria-label={isSaved ? 'Hapus dari artikel tersimpan' : 'Simpan artikel'}
+              title={isSaved ? 'Tersimpan' : 'Simpan artikel'}
+              className={cn(
+                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                isSaved
+                  ? 'border-brand-red/40 bg-brand-red text-white'
+                  : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+              )}
+            >
+              <Bookmark size={16} className={isSaved ? 'fill-current' : undefined} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
