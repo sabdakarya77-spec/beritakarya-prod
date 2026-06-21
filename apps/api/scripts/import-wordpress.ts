@@ -22,6 +22,21 @@ import { generateSlug } from '@beritakarya/utils'
 import { StorageService } from '../src/services/storage.service'
 import { v4 as uuidv4 } from 'uuid'
 
+// ── Utilities ────────────────────────────────────────────────────────────────
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')       // Remove HTML tags
+    .replace(/&nbsp;/gi, ' ')       // Decode common entities
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')           // Collapse whitespace
+    .trim()
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface WordPressItem {
