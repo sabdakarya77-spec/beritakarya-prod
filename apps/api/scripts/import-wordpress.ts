@@ -25,6 +25,8 @@ import { v4 as uuidv4 } from 'uuid'
 // ── Utilities ────────────────────────────────────────────────────────────────
 
 function stripHtml(html: string): string {
+  // Ensure we are working with a string
+  if (typeof html !== 'string') return ''
   return html
     .replace(/<[^>]*>/g, ' ')       // Remove HTML tags
     .replace(/&nbsp;/gi, ' ')       // Decode common entities
