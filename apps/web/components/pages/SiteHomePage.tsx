@@ -178,6 +178,28 @@ async function getArticles(siteId: string, category?: string, search?: string) {
   }
 }
 
+async function getTrendingArticles(siteId: string) {
+  try {
+    const params = new URLSearchParams({
+      site: siteId,
+      status: 'published',
+      limit: '5',
+      sort: 'views',
+      order: 'desc',
+    })
+    const res = await fetch(
+      `${API_URL}/api/v1/articles/public?${params.toString()}`,
+      { next: { revalidate: 120 } }
+    )
+    if (!res.ok) return []
+    const json = await res.json()
+    return json?.data?.articles || json?.data?.items || []
+  } catch (e) {
+    console.error('Error fetching trending articles:', e)
+    return []
+  }
+}
+
 async function getCategories(siteId: string) {
   try {
     const res = await fetch(`${API_URL}/api/v1/categories/tree?site=${siteId}`, { next: { revalidate: 60 } })
@@ -307,9 +329,12 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
-  const articlesList = await getArticles(siteConfig.id, categoryFilter, searchQuery)
-  const categoriesTree = await getCategories(siteConfig.id)
-  const marketData = await getMarketSnapshot()
+  const [articlesList, categoriesTree, marketData, trendingArticles] = await Promise.all([
+    getArticles(siteConfig.id, categoryFilter, searchQuery),
+    getCategories(siteConfig.id),
+    getMarketSnapshot(),
+    getTrendingArticles(siteConfig.id),
+  ])
 
   // Mode halaman
   const isHomepage = !searchQuery && categoryFilter === 'terbaru'
@@ -342,18 +367,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   // ── Conditional flags ──
   const showHomepageHero = isHomepage && heroArticles.length > 0
   const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
-  const showTrending = true
+  const showTrending = isHomepage && trendingArticles.length > 0
   const showInlineSponsor = mainFeedFeatured.length > 0 || mainFeedStream.length > 0
   const showEditorChoice = isHomepage && editorChoice.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1
   const showVideoSection = isHomepage && videoStories.length >= 1
   const showEditorialExtras = isHomepage && (showEditorChoice || showOpinionSection || showPhotoSection || showVideoSection)
-
-  const defaultTags = ['Politik', 'Ekonomi', 'Investigasi', 'Teknologi', 'Gaya Hidup', 'Hiburan']
-  const tags = (siteSettings?.trendingTopics as string[])?.length > 0
-    ? (siteSettings.trendingTopics as string[])
-    : defaultTags
 
   const whatsappUrl = buildWhatsAppUrl(siteConfig.phone, siteConfig.name)
   const telegramUrl = siteConfig.socialLinks?.telegram || null
@@ -435,23 +455,35 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             Sumber: trendingTopics dari site settings atau default tags
             Sidebar: TIDAK ADA — strip horizontal sederhana
         ════════════════════════════════════════════════════════ */}
-        {showTrending && tags.length > 0 && (
+        {showTrending && trendingArticles.length > 0 && (
           <Container className="pb-4 md:pb-6">
-            <section className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
-              <div className="flex shrink-0 items-center gap-2">
+            <section>
+              <div className="mb-4 flex items-center gap-2">
                 <TrendingUp size={14} className="text-brand-red" />
                 <span className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
                   Trending
                 </span>
               </div>
-              <div className="flex flex-1 flex-wrap items-center gap-1.5 md:gap-2 md:justify-end">
-                {tags.map(tag => (
+              <div className="grid grid-cols-1 gap-0 divide-y divide-black/5 dark:divide-white/5 md:grid-cols-5 md:divide-x md:divide-y-0">
+                {trendingArticles.map((article: HomeArticle, index: number) => (
                   <Link
-                    key={tag}
-                    href={`/${siteParam}?q=${encodeURIComponent(tag)}`}
-                    className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03]"
+                    key={article.id}
+                    href={`/${siteParam}/artikel/${article.slug}`}
+                    className="group flex items-start gap-3 py-3 md:px-4 md:py-0 md:pb-3 first:pt-0 last:pb-0"
                   >
-                    #{tag}
+                    <span className="tabular-nums font-sans text-2xl font-bold leading-none tracking-tight text-gray-100 transition-colors group-hover:text-brand-red dark:text-white/5 md:text-3xl">
+                      {(index + 1).toString().padStart(2, '0')}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="line-clamp-2 font-sans text-xs font-bold leading-snug tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[13px]">
+                        {article.title}
+                      </h4>
+                      <div className="mt-1.5 flex items-center gap-2 text-[10px] text-brand-text-muted">
+                        <span className="truncate">{article.author?.name || 'Redaksi'}</span>
+                        <span className="opacity-30">·</span>
+                        <span>{article.readingTimeMin || 3} min</span>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
