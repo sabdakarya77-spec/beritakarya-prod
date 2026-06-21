@@ -42,11 +42,13 @@ export default function MobileArticleTools({
   const [isFontPanelOpen, setIsFontPanelOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [fontSize, setFontSize] = useState(1);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
 
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const fontPanelRef = useRef<HTMLDivElement | null>(null);
   const contentElRef = useRef<HTMLElement | null>(null);
   const observerRef = useRef<MutationObserver | null>(null);
+  const lastScrollY = useRef(0);
 
   const fontSizes = [
     { label: 'A-', value: 0.85 },
@@ -68,6 +70,26 @@ export default function MobileArticleTools({
       window.removeEventListener(SAVED_ARTICLES_UPDATED_EVENT, syncSavedState);
     };
   }, [site, article.slug]);
+
+  // Handle smart hide/show on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      // Hide if scrolling down and scrolled more than 100px
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsScrollingDown(true);
+        // Also close panels if we scroll down
+        setIsFontPanelOpen(false);
+        setIsShareSheetOpen(false);
+      } else {
+        setIsScrollingDown(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Handle font size scaling on the article-content element
   useEffect(() => {
@@ -161,59 +183,36 @@ export default function MobileArticleTools({
     }
     // Fallback: open bottom sheet with share options
     setIsShareSheetOpen((prev) => !prev);
+    setIsFontPanelOpen(false); // close font panel
   };
 
   return (
     <>
-      {/* Overlay */}
+      {/* Share options panel (fallback when Web Share API is not supported) */}
       <AnimatePresence>
-        {isShareSheetOpen && (
+        {isShareSheetOpen && !isScrollingDown && (
           <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Bottom sheet (fallback for browsers without Web Share API) */}
-      <AnimatePresence>
-        {isShareSheetOpen && (
-          <motion.div
-            key="sheet"
+            key="share-panel"
             ref={sheetRef}
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-            className="fixed bottom-0 inset-x-0 z-50 rounded-t-[2rem] border-t border-white/10 bg-[rgba(7,15,33,0.97)] px-5 pb-8 pt-5 shadow-[0_-20px_60px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Bagikan artikel"
+            initial={{ x: -15, opacity: 0, scale: 0.95 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
+            exit={{ x: -15, opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="fixed left-20 top-1/2 -translate-y-1/2 z-50 w-[15rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
           >
-            {/* Handle bar */}
-            <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-white/20" />
-
-            {/* Header */}
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-text-muted">
-                Bagikan Artikel
+                Bagikan
               </p>
               <button
                 type="button"
                 onClick={() => setIsShareSheetOpen(false)}
                 aria-label="Tutup panel berbagi"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/[0.06] text-gray-300 transition-colors hover:bg-white/[0.12] hover:text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-gray-300 transition-colors hover:bg-white/[0.12] hover:text-white"
               >
-                <X size={14} />
+                <X size={10} />
               </button>
             </div>
-
-            {/* Share options */}
             <ArticleShareActions
               title={title}
               url={url}
@@ -226,27 +225,27 @@ export default function MobileArticleTools({
 
       {/* Font options panel */}
       <AnimatePresence>
-        {isFontPanelOpen && (
+        {isFontPanelOpen && !isScrollingDown && (
           <motion.div
             key="font-panel"
             ref={fontPanelRef}
-            initial={{ y: 15, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 15, opacity: 0, scale: 0.97 }}
+            initial={{ x: -15, opacity: 0, scale: 0.95 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
+            exit={{ x: -15, opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,12px))] inset-x-4 z-40 mx-auto max-w-sm rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            className="fixed left-20 top-1/2 -translate-y-1/2 z-50 w-[11.5rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
           >
-            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted text-center">
+            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted text-left">
               Ukuran Teks
             </p>
-            <div className="mt-3 flex justify-center gap-2">
+            <div className="mt-3 flex flex-col gap-2">
               {fontSizes.map((size) => (
                 <button
                   key={size.value}
                   type="button"
                   onClick={() => setFontSize(size.value)}
                   className={cn(
-                    'rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all flex-1 text-center',
+                    'rounded-2xl border py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all text-center',
                     fontSize === size.value
                       ? 'border-brand-red/40 bg-brand-red text-white'
                       : 'border-white/10 bg-white/[0.03] text-gray-300 hover:border-brand-red/30 hover:text-white'
@@ -260,87 +259,68 @@ export default function MobileArticleTools({
         )}
       </AnimatePresence>
 
-      {/* Fixed bottom bar — hidden at xl and above (floating sidebar takes over) */}
-      <div
-        className="fixed bottom-0 inset-x-0 z-30 md:hidden"
+      {/* Vertical floating bar — positioned on the left side of the viewport, hidden on md and above */}
+      <motion.div
+        animate={{ x: isScrollingDown ? -80 : 0, opacity: isScrollingDown ? 0 : 1 }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
         role="toolbar"
         aria-label="Alat artikel"
       >
-        {/* Safe area gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-full h-10 bg-gradient-to-t from-black/20 to-transparent" />
+        {/* Share button */}
+        <button
+          type="button"
+          id="mobile-share-button"
+          onClick={handleShare}
+          aria-label="Bagikan artikel"
+          title="Bagikan artikel"
+          className={cn(
+            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+            isShareSheetOpen
+              ? 'border-brand-red/40 bg-brand-red text-white'
+              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+          )}
+        >
+          <Share2 size={16} />
+        </button>
 
-        <div className="border-t border-white/[0.07] bg-[rgba(7,15,33,0.92)] px-4 pb-[env(safe-area-inset-bottom,12px)] pt-3 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-lg items-center justify-around gap-2">
+        {/* Font Size button */}
+        <button
+          type="button"
+          id="mobile-font-button"
+          onClick={() => {
+            setIsFontPanelOpen((prev) => !prev);
+            setIsShareSheetOpen(false); // close share panel
+          }}
+          aria-label="Atur ukuran teks"
+          title="Atur ukuran teks"
+          className={cn(
+            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+            isFontPanelOpen
+              ? 'border-brand-red/40 bg-brand-red text-white'
+              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+          )}
+        >
+          <Type size={16} />
+        </button>
 
-            {/* Share button */}
-            <button
-              type="button"
-              id="mobile-share-button"
-              onClick={handleShare}
-              aria-label="Bagikan artikel"
-              title="Bagikan artikel"
-              className={cn(
-                'flex flex-1 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 transition-all',
-                isShareSheetOpen
-                  ? 'bg-brand-red/10 text-brand-red'
-                  : 'text-brand-text-muted hover:bg-white/[0.05] hover:text-white active:scale-95'
-              )}
-            >
-              <Share2 size={20} />
-              <span className="text-[10px] font-black uppercase tracking-[0.12em]">Bagikan</span>
-            </button>
-
-            {/* Divider */}
-            <div className="h-8 w-px bg-white/[0.08]" />
-
-            {/* Font Size button */}
-            <button
-              type="button"
-              id="mobile-font-button"
-              onClick={() => {
-                setIsFontPanelOpen((prev) => !prev);
-                setIsShareSheetOpen(false); // close share sheet if open
-              }}
-              aria-label="Atur ukuran teks"
-              title="Atur ukuran teks"
-              className={cn(
-                'flex flex-1 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 transition-all',
-                isFontPanelOpen
-                  ? 'bg-brand-red/10 text-brand-red'
-                  : 'text-brand-text-muted hover:bg-white/[0.05] hover:text-white active:scale-95'
-              )}
-            >
-              <Type size={20} />
-              <span className="text-[10px] font-black uppercase tracking-[0.12em]">Teks</span>
-            </button>
-
-            {/* Divider */}
-            <div className="h-8 w-px bg-white/[0.08]" />
-
-            {/* Bookmark button */}
-            <button
-              type="button"
-              id="mobile-bookmark-button"
-              onClick={handleBookmark}
-              aria-label={isSaved ? 'Hapus dari artikel tersimpan' : 'Simpan artikel'}
-              aria-pressed={isSaved}
-              title={isSaved ? 'Tersimpan' : 'Simpan artikel'}
-              className={cn(
-                'flex flex-1 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 transition-all',
-                isSaved
-                  ? 'bg-brand-red/10 text-brand-red'
-                  : 'text-brand-text-muted hover:bg-white/[0.05] hover:text-white active:scale-95'
-              )}
-            >
-              <Bookmark size={20} className={isSaved ? 'fill-current' : undefined} />
-              <span className="text-[10px] font-black uppercase tracking-[0.12em]">
-                {isSaved ? 'Tersimpan' : 'Simpan'}
-              </span>
-            </button>
-
-          </div>
-        </div>
-      </div>
+        {/* Bookmark button */}
+        <button
+          type="button"
+          id="mobile-bookmark-button"
+          onClick={handleBookmark}
+          aria-label={isSaved ? 'Hapus dari artikel tersimpan' : 'Simpan artikel'}
+          title={isSaved ? 'Tersimpan' : 'Simpan artikel'}
+          className={cn(
+            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+            isSaved
+              ? 'border-brand-red/40 bg-brand-red text-white'
+              : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
+          )}
+        >
+          <Bookmark size={16} className={isSaved ? 'fill-current' : undefined} />
+        </button>
+      </motion.div>
     </>
   );
 }
