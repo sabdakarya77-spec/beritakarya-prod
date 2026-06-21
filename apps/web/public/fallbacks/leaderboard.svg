@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 250" width="970" height="250">
+  <defs>
+    <!-- Animated gradient background -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a">
+        <animate attributeName="stop-color" values="#0f172a;#1e1b4b;#0f172a" dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" stop-color="#1e1b4b">
+        <animate attributeName="stop-color" values="#1e1b4b;#0f172a;#1e1b4b" dur="8s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#172554">
+        <animate attributeName="stop-color" values="#172554;#1e1b4b;#172554" dur="8s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Accent gradient -->
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="0.3" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="970" height="250" fill="url(#bg)"/>
+
+  <!-- Grid overlay -->
+  <rect width="970" height="250" fill="url(#grid)" opacity="0.6"/>
+
+  <!-- Animated glow orbs -->
+  <circle cx="200" cy="125" r="120" fill="url(#glow)">
+    <animate attributeName="cx" values="200;770;200" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="120;150;120" dur="6s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="770" cy="125" r="100" fill="url(#glow)">
+    <animate attributeName="cx" values="770;200;770" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="r" values="100;130;100" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Decorative geometric shapes -->
+  <!-- Floating circles -->
+  <circle cx="820" cy="60" r="25" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.3">
+    <animate attributeName="r" values="25;30;25" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.5;0.3" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="860" cy="180" r="15" fill="none" stroke="#ef4444" stroke-width="0.8" opacity="0.2">
+    <animate attributeName="cy" values="180;160;180" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="150" cy="200" r="20" fill="none" stroke="#dc2626" stroke-width="0.8" opacity="0.15">
+    <animate attributeName="r" values="20;25;20" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Animated lines -->
+  <line x1="700" y1="30" x2="900" y2="30" stroke="url(#accent)" stroke-width="1" opacity="0.2">
+    <animate attributeName="x2" values="900;750;900" dur="5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="720" y1="220" x2="920" y2="220" stroke="url(#accent)" stroke-width="0.5" opacity="0.15">
+    <animate attributeName="x1" values="720;850;720" dur="7s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Diamond shapes -->
+  <rect x="890" y="100" width="12" height="12" fill="#dc2626" opacity="0.2" transform="rotate(45 896 106)">
+    <animate attributeName="opacity" values="0.2;0.4;0.2" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="780" y="160" width="8" height="8" fill="#ef4444" opacity="0.15" transform="rotate(45 784 164)">
+    <animate attributeName="opacity" values="0.15;0.3;0.15" dur="4s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Accent bar top -->
+  <rect x="0" y="0" width="970" height="3" fill="url(#accent)" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Content area -->
+  <!-- Brand badge -->
+  <rect x="50" y="40" width="60" height="20" rx="4" fill="#dc2626" opacity="0.9"/>
+  <text x="80" y="54" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.5">IKLAN</text>
+
+  <!-- Main headline -->
+  <text x="50" y="100" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.5">
+    Ruang Iklan Premium
+    <animate attributeName="opacity" values="0;1" dur="1s" fill="freeze"/>
+  </text>
+
+  <!-- Subheadline -->
+  <text x="50" y="130" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" opacity="0.6">
+    Jangkau audiens luas dengan banner berkualitas tinggi
+    <animate attributeName="opacity" values="0;0.6" dur="1.2s" fill="freeze"/>
+  </text>
+
+  <!-- Feature pills -->
+  <g opacity="0.5">
+    <rect x="50" y="155" width="110" height="24" rx="12" fill="white" fill-opacity="0.08"/>
+    <text x="105" y="171" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Multi-Site</text>
+    <animate attributeName="opacity" values="0;0.5" dur="1.4s" fill="freeze"/>
+  </g>
+  <g opacity="0.5">
+    <rect x="170" y="155" width="110" height="24" rx="12" fill="white" fill-opacity="0.08"/>
+    <text x="225" y="171" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Realtime Stats</text>
+    <animate attributeName="opacity" values="0;0.5" dur="1.6s" fill="freeze"/>
+  </g>
+  <g opacity="0.5">
+    <rect x="290" y="155" width="110" height="24" rx="12" fill="white" fill-opacity="0.08"/>
+    <text x="345" y="171" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Targeted</text>
+    <animate attributeName="opacity" values="0;0.5" dur="1.8s" fill="freeze"/>
+  </g>
+
+  <!-- CTA Button -->
+  <g>
+    <rect x="50" y="195" width="180" height="36" rx="8" fill="#dc2626">
+      <animate attributeName="opacity" values="0;1" dur="2s" fill="freeze"/>
+    </rect>
+    <text x="140" y="218" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="0.5">
+      Pasang Iklan Anda →
+      <animate attributeName="opacity" values="0;1" dur="2s" fill="freeze"/>
+    </text>
+  </g>
+
+  <!-- Right side: abstract ad mockup -->
+  <g transform="translate(580, 25)" opacity="0.4">
+    <!-- Mock browser frame -->
+    <rect x="0" y="0" width="340" height="200" rx="8" fill="white" fill-opacity="0.05" stroke="white" stroke-opacity="0.1" stroke-width="1"/>
+    <rect x="10" y="10" width="320" height="14" rx="3" fill="white" fill-opacity="0.03"/>
+    <!-- Dots -->
+    <circle cx="22" cy="17" r="3" fill="#ef4444" opacity="0.5"/>
+    <circle cx="34" cy="17" r="3" fill="#f59e0b" opacity="0.5"/>
+    <circle cx="46" cy="17" r="3" fill="#22c55e" opacity="0.5"/>
+    <!-- Content blocks -->
+    <rect x="10" y="34" width="140" height="10" rx="2" fill="white" fill-opacity="0.08">
+      <animate attributeName="width" values="140;160;140" dur="4s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="10" y="52" width="200" height="6" rx="2" fill="white" fill-opacity="0.05"/>
+    <rect x="10" y="64" width="180" height="6" rx="2" fill="white" fill-opacity="0.05"/>
+    <rect x="10" y="76" width="160" height="6" rx="2" fill="white" fill-opacity="0.05"/>
+    <!-- Image placeholder -->
+    <rect x="10" y="95" width="320" height="90" rx="4" fill="white" fill-opacity="0.04"/>
+    <rect x="130" y="125" width="80" height="30" rx="4" fill="#dc2626" fill-opacity="0.2">
+      <animate attributeName="fill-opacity" values="0.2;0.35;0.2" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <!-- Pulse dot -->
+    <circle cx="320" cy="45" r="4" fill="#22c55e" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

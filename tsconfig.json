@@ -13,7 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "incremental": true,
-    "baseUrl": ".",
+        "baseUrl": ".",
+        "ignoreDeprecations": "5.0",
     "paths": {
       "@beritakarya/types": ["packages/types/src"],
       "@beritakarya/config": ["packages/config/src"],

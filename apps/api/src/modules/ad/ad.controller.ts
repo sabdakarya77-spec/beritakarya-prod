@@ -61,9 +61,10 @@ adRouter.get('/public',
           id: 'fallback-1',
           slot,
           mediaType: 'image',
-          mediaUrl: '/public/fallbacks/leaderboard.jpg',
-          headline: 'Contoh Iklan Fallback',
-          subheadline: 'Ini contoh iklan fallback untuk slot ' + slot,
+          // Next.js serves files from the `public` folder at the root URL without the `/public` prefix
+          mediaUrl: '/fallbacks/leaderboard.svg',
+          headline: 'Ruang Iklan Premium',
+          subheadline: 'Jangkau audiens luas dengan banner berkualitas tinggi di BeritaKarya',
         }
       ]
       res.json({ success: true, data: fallbackAds })
