@@ -64,7 +64,7 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
     },
     {
       kind: 'action',
-      label: 'Search',
+      label: 'Cari',
       icon: Search,
       onClick: onSearchClick,
       active: false,
