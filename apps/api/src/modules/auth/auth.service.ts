@@ -151,7 +151,7 @@ export async function resendVerification(email: string) {
 
   const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
   const token = jwt.sign({ userId: user.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const frontendUrl = process.env.FRONTEND_URL || 'https://beritakarya.co'
   const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`
   const emailSent = await emailService.sendVerificationEmail(normalizedEmail, user.name, verifyLink)
 
@@ -176,7 +176,7 @@ export async function forgotPassword(email: string) {
   const token = jwt.sign({ userId: user.id, purpose: 'reset-password' }, secret, { expiresIn: '1h' })
 
   // Define frontend URL, assuming a web application runs somewhere
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const frontendUrl = process.env.FRONTEND_URL || 'https://beritakarya.co'
   const resetLink = `${frontendUrl}/auth/reset-password?token=${token}&email=${encodeURIComponent(email)}`
 
   await emailService.sendPasswordResetEmail(user.email, user.name, resetLink)

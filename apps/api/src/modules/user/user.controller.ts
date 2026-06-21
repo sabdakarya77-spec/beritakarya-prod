@@ -541,7 +541,7 @@ userRouter.put('/:id/role',
       try {
         const secret = env.EMAIL_VERIFICATION_SECRET || env.JWT_SECRET
         const token = jwt.sign({ userId: updated.id, purpose: 'email-verify' }, secret, { expiresIn: '24h' })
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+        const frontendUrl = process.env.FRONTEND_URL || 'https://beritakarya.co'
         const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(updated.email)}`
         await emailService.sendVerificationEmail(updated.email, updated.name, verifyLink)
         logger.info(`Verification email sent to ${updated.email} after role upgrade: ${oldRole} → ${role}`)
