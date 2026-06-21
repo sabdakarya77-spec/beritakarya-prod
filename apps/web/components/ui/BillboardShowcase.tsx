@@ -17,6 +17,10 @@ interface CategoryAd {
   accentTo: string;
   ctaText: string;
   icon: React.ReactNode;
+  /** Optional media type for the fallback showcase. */
+  mediaType?: 'image' | 'video';
+  /** URL to image or video when mediaType is defined. */
+  mediaUrl?: string;
 }
 
 const CATEGORY_ADS: CategoryAd[] = [
@@ -86,6 +90,24 @@ const CATEGORY_ADS: CategoryAd[] = [
         <path d="M30 40l6 6 12-12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
+  },
+  // Video demo ad – demonstrates that the fallback can show a video banner
+  {
+    id: 'video_demo',
+    headline: 'Video Demo Billboard',
+    subheadline: 'Contoh iklan video pada slot leaderboard',
+    category: 'Demo Video',
+    accentFrom: 'from-pink-600',
+    accentTo: 'to-rose-800',
+    ctaText: 'Lihat Demo',
+    icon: (
+      <svg viewBox="0 0 80 80" fill="none" className="w-full h-full opacity-20">
+        <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="2" />
+        <path d="M30 35h20v10H30z" fill="currentColor" />
+      </svg>
+    ),
+    mediaType: 'video',
+    mediaUrl: '/videos/leaderboard-demo.mp4',
   },
 ];
 
@@ -163,6 +185,17 @@ export default function BillboardShowcase({ site, className }: BillboardShowcase
           <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-16 h-16 md:w-32 md:h-32 text-white pointer-events-none">
             {ad.icon}
           </div>
+
+          {/* Media handling – show video when defined */}
+          {ad.mediaType === 'video' && ad.mediaUrl ? (
+            <video
+              src={ad.mediaUrl}
+              autoPlay
+              loop
+              muted
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : null}
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-center px-4 md:px-10 max-w-container mx-auto">

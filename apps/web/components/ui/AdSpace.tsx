@@ -32,6 +32,8 @@ export default function AdSpace({
   const params = useParams();
   const site = params?.site as string | undefined;
   const [ads, setAds] = useState<AdItem[]>([]);
+  // Fallback ads fetched from CMS when no ads are configured for the slot
+  const [fallbackAds, setFallbackAds] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,30 +93,35 @@ export default function AdSpace({
     return stopRotation;
   }, [startRotation, stopRotation]);
 
-  // Track impression for current ad
+  // Fetch CMS fallback ads when there are no ads for the slot (only for leaderboard)
+  useEffect(() => {
+    if (loading) return;
+    if (ads.length === 0 && type === 'leaderboard') {
+      const fetchFallback = async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/v1/ads/fallback?slot=leaderboard`);
+          if (!res.ok) return;
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            setFallbackAds(json.data);
+          }
+        } catch (e) {
+          // ignore errors – fallback will remain empty
+        }
+      };
+      fetchFallback();
+    }
+  }, [ads, loading, type]);
+
+  // Track impression for each displayed ad (one‑time per ad ID)
   useEffect(() => {
     const ad = ads[currentIndex];
     if (!ad || trackedRef.current.has(ad.id)) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry?.isIntersecting) return;
-
-        trackedRef.current.add(ad.id);
-        fetch(`${API_URL}/api/v1/ads/track/${ad.id}?action=impression`, {
-          method: 'POST'
-        }).catch(() => {});
-        observer.disconnect();
-      },
-      { threshold: 0.5 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
+    // Since the ad element is always in view when its slide is active, we can record the impression directly.
+    trackedRef.current.add(ad.id);
+    fetch(`${API_URL}/api/v1/ads/track/${ad.id}?action=impression`, {
+      method: 'POST'
+    }).catch(() => {});
   }, [ads, currentIndex]);
 
   const handleAdClick = (ad: AdItem) => {
@@ -127,7 +134,8 @@ export default function AdSpace({
   };
 
   const styles = {
-    leaderboard: "w-full h-24 md:h-[250px] mb-6",
+    // Responsive height: 120px on mobile, 250px on desktop
+    leaderboard: "w-full h-[120px] md:h-[250px] mb-6",
     rectangle: "w-full h-[250px] mb-8",
     rectangle_secondary: "w-full h-[250px] mb-8",
     'in-feed': "w-full h-40 mb-12"
@@ -146,9 +154,33 @@ export default function AdSpace({
     );
   }
 
-  // No ads at all — fallback placeholder
+  // No ads at all — render fallback handling
   if (ads.length === 0) {
-    // Leaderboard: show billboard showcase with category examples
+    // Leaderboard: try to render CMS‑configured fallback ads
+    if (type === 'leaderboard' && fallbackAds.length > 0) {
+      const ad = fallbackAds[0];
+      return (
+        <div className={cn(
+          "relative w-full h-[120px] md:h-[250px] overflow-hidden rounded-xl",
+          className
+        )}>
+          {/* Media (image or video) */}
+          {ad.mediaType === 'video' && ad.mediaUrl ? (
+            <video src={ad.mediaUrl} autoPlay loop muted className="w-full h-full object-cover" />
+          ) : ad.mediaUrl ? (
+            <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
+          ) : null}
+          {/* Simple overlay with headline */}
+          {ad.headline && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <h3 className="text-white text-center text-lg md:text-2xl font-black">{ad.headline}</h3>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Default static fallback for leaderboard when no CMS data
     if (type === 'leaderboard') {
       return <BillboardShowcase site={site || 'pusat'} className={className} />;
     }

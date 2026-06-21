@@ -50,6 +50,26 @@ adRouter.get('/public',
   })
 )
 
+  // Public endpoint for fetching fallback ads (e.g., static examples for empty slots)
+  // This is a simple hard‑coded response that can later be hooked into a CMS.
+  adRouter.get('/fallback',
+    asyncHandler(async (req: Request, res: Response) => {
+      const slot = req.query.slot as string || 'leaderboard'
+      // Minimal static fallback data – matches the shape used by the front‑end fallback UI.
+      const fallbackAds = [
+        {
+          id: 'fallback-1',
+          slot,
+          mediaType: 'image',
+          mediaUrl: '/public/fallbacks/leaderboard.jpg',
+          headline: 'Contoh Iklan Fallback',
+          subheadline: 'Ini contoh iklan fallback untuk slot ' + slot,
+        }
+      ]
+      res.json({ success: true, data: fallbackAds })
+    })
+  )
+
 adRouter.get('/',
   requireAuth,
   siteMiddleware,
