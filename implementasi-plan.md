@@ -178,13 +178,13 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 8: Frontend — Tombol Sync dari Global
 
-- [ ] **8.1** `apps/web/app/[site]/dashboard/categories/page.tsx` — Tambah tombol "Sync dari Global"
+- [x] **8.1** `apps/web/app/[site]/dashboard/categories/page.tsx` — Tambah tombol "Sync dari Global"
   - Tampilkan di Site View (bukan Global View)
-  - Posisi: di header area, sebelum daftar kategori
-  - Icon: refresh/sync
+  - Posisi: di header area, sebelah "Muat Default"
+  - Icon: 🔄 refresh
   - Konfirmasi sebelum sync: "Tambah kategori baru dari global? Kategori yang sudah ada tidak diubah."
 
-- [ ] **8.2** Handler sync
+- [x] **8.2** Handler sync
   - Panggil `POST /categories/sync-from-global` dengan `{ siteId }`
   - Tampilkan toast hasil: "X kategori baru ditambahkan dari global"
   - Refresh daftar kategori setelah sync
@@ -195,30 +195,34 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 9: Frontend — SiteCategoriesDialog Ubah Fungsi
 
-- [ ] **9.1** `apps/web/app/[site]/dashboard/admin/components/SiteCategoriesDialog.tsx` — Ubah fungsi
-  - Sebelum: checklist kategori global untuk assignment
-  - Sesudah: tombol "Sync dari Global" (sama seperti 8.1, tapi di admin page)
-  - Atau: hapus dialog ini dan gunakan tombol sync di categories page saja
+- [x] **9.1** Evaluasi SiteCategoriesDialog
+  - Dialog tidak diperlukan lagi — sync sudah ada di categories page
+  - Hapus dialog dan tombol "Kategori" dari admin page
 
-- [ ] **9.2** Evaluasi: apakah dialog ini masih diperlukan?
-  - Kalau sync dari categories page sudah cukup → hapus dialog
-  - Kalau admin page tetap perlu → ubah dialog jadi tombol sync
+- [x] **9.2** Cleanup admin page
+  - Hapus import SiteCategoriesDialog, Tags
+  - Hapus state categoriesSite
+  - Hapus tombol "Kategori" di tabel site
+  - Hapus <SiteCategoriesDialog /> dari JSX
 
 ---
 
 ### Phase 10: Cleanup — SiteCategory Table
 
-- [ ] **10.1** Evaluasi tabel `site_categories`
-  - Karena kategori lokal sudah punya baris sendiri, junction table tidak diperlukan
-  - Cek apakah ada code lain yang pakai `SiteCategory`
-  - Kalau tidak ada → bisa dihapus di migrasi berikutnya
+- [x] **10.1** Evaluasi tabel `site_categories`
+  - Kategori lokal sudah punya baris sendiri → junction table tidak diperlukan
+  - File `site-category.service.ts` dan `site-category.utils.ts` masih ada (bisa dihapus di migrasi berikutnya)
+  - Route dan handler di controller sudah dihapus
 
-- [ ] **10.2** `apps/api/src/modules/site/site-category.utils.ts` — Evaluasi
-  - `getSiteAssignmentFilter` bisa dihapus
-  - Cek import lain yang pakai util ini
+- [x] **10.2** `apps/api/src/modules/site/site.controller.ts` — Cleanup
+  - Hapus import `siteCategoryService`
+  - Hapus route `GET/PUT /:siteId/category-assignments`
+  - Hapus handler `getSiteCategoryAssignments` dan `updateSiteCategoryAssignments`
 
-- [ ] **10.3** Cleanup code yang pakai `SiteCategory`
-  - Hapus import, query, dan logic terkait assignment
+- [x] **10.3** Cleanup code yang pakai `SiteCategory`
+  - `category.service.ts` → sudah dihapus import `getSiteAssignmentFilter` (Phase 2)
+  - `site.controller.ts` → sudah dihapus route dan handler
+  - File `site-category.service.ts` dan `site-category.utils.ts` → masih ada, bisa dihapus di migrasi Prisma berikutnya
 
 ---
 
@@ -278,7 +282,7 @@ Phase 11 (E2E Test)
 | 5. Global View CRUD | ✅ Selesai | Verifikasi CRUD berfungsi |
 | 6. Frontend Site View | ✅ Selesai | Fetch + badge verified, 6.3-6.4 perlu test manual |
 | 7. Frontend Editor + Public | ✅ Selesai | Verifikasi fetch + filter, 7.3-7.5 perlu test manual |
-| 8. Frontend Tombol Sync | ⏳ Belum | |
-| 9. SiteCategoriesDialog | ⏳ Belum | |
-| 10. Cleanup SiteCategory | ⏳ Belum | |
+| 8. Frontend Tombol Sync | ✅ Selesai | 8.1 + 8.2 done, 8.3 perlu test manual |
+| 9. SiteCategoriesDialog | ✅ Selesai | Dialog dihapus, sync di categories page |
+| 10. Cleanup SiteCategory | ✅ Selesai | Route + handler dihapus, file service/utils masih ada |
 | 11. E2E Test | ⏳ Belum | |

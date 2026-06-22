@@ -21,6 +21,7 @@ export default function CategoriesDashboard() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
   const [migrating, setMigrating] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
 
@@ -78,6 +79,29 @@ export default function CategoriesDashboard() {
       showToast(msg || 'Gagal migrasi kategori', 'error');
     } finally {
       setMigrating(false);
+    }
+  };
+
+  const handleSyncFromGlobal = async () => {
+    const confirmed = window.confirm(
+      'Tambah kategori baru dari global?\n\nKategori yang sudah ada di lokal tidak akan diubah. Hanya kategori baru yang belum ada yang akan ditambahkan.'
+    );
+    if (!confirmed) return;
+
+    setSyncing(true);
+    try {
+      const { data } = await api.post('/categories/sync-from-global', { siteId });
+      if (data.success) {
+        showToast(data.data.message);
+        fetchCategories(); // Refresh tampilan
+      }
+    } catch (error: unknown) {
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.error?.message
+        : undefined;
+      showToast(msg || 'Gagal sync kategori dari global', 'error');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -351,6 +375,17 @@ export default function CategoriesDashboard() {
           >
             <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
           </button>
+
+          {!isGlobalView && (
+            <button
+              onClick={handleSyncFromGlobal}
+              disabled={syncing || loading}
+              className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
+            >
+              <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
+            </button>
+          )}
 
           <button
             onClick={() => setIsGlobalView(!isGlobalView)}

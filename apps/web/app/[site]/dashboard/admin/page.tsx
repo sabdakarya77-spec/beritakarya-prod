@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { api } from '../../../../lib/api'
-import { SiteCategoriesDialog } from './components/SiteCategoriesDialog'
 import {
   Plus,
   Settings,
@@ -14,7 +13,6 @@ import {
   Users,
   FileText,
   FolderOpen,
-  Tags,
   AlertTriangle,
   X,
   CheckCircle2
@@ -48,7 +46,6 @@ export default function AdminDashboardPage() {
     contactEmail: ''
   })
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [categoriesSite, setCategoriesSite] = useState<Site | null>(null)
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type })
@@ -422,13 +419,7 @@ export default function AdminDashboardPage() {
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex gap-2 justify-end">
-                        <button 
-                          onClick={() => setCategoriesSite(site)}
-                          className="px-3.5 py-1.5 border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all flex items-center gap-1"
-                        >
-                          <Tags size={13} />
-                          Kategori
-                        </button>
+                        {/* Tombol Kategori dihapus — sync dilakukan dari halaman Categories */}
                         <button 
                           onClick={() => openEditDialog(site)}
                           className="px-3.5 py-1.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
@@ -457,13 +448,6 @@ export default function AdminDashboardPage() {
 
       {createEditDialog}
       {deleteDialog}
-
-      <SiteCategoriesDialog
-        site={categoriesSite}
-        open={!!categoriesSite}
-        onClose={() => setCategoriesSite(null)}
-        onToast={showToast}
-      />
     </div>
   )
 }

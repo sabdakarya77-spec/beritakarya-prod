@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { AppError } from '../../utils/AppError'
 import { siteService } from './site.service'
-import { siteCategoryService } from './site-category.service'
 import { logger } from '../../lib/logger'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -12,12 +11,6 @@ export const siteRouter: Router = Router()
 
 siteRouter.get('/', publicLimiter, asyncHandler(getSites))
 siteRouter.get('/settings', publicLimiter, asyncHandler(getSiteSettings))
-siteRouter.get('/:siteId/category-assignments',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(getSiteCategoryAssignments))
-siteRouter.put('/:siteId/category-assignments',
-  requireAuth, requireRole(['superadmin']),
-  asyncHandler(updateSiteCategoryAssignments))
 siteRouter.get('/:id', asyncHandler(getSiteById))
 siteRouter.patch('/settings',
   requireAuth, siteMiddleware, requireSiteAccess,
@@ -174,66 +167,6 @@ export async function updateSiteSettings(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'SITE_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
-    })
-  }
-}
-
-/**
- * GET /api/v1/sites/:siteId/category-assignments
- * Get global category allowlist for a site (superadmin only)
- */
-export async function getSiteCategoryAssignments(req: Request, res: Response) {
-  try {
-    const { siteId } = req.params
-    const data = await siteCategoryService.getCategoryAssignments(siteId)
-    res.json({ success: true, data })
-  } catch (error: unknown) {
-    const statusCode = getErrorStatus(error)
-    res.status(statusCode).json({
-      success: false,
-      error: {
-        code: getErrorCode(error, 'SITE_CATEGORIES_FETCH_FAILED'),
-        message: getErrorMessage(error)
-      }
-    })
-  }
-}
-
-/**
- * PUT /api/v1/sites/:siteId/category-assignments
- * Replace global category allowlist for a site (superadmin only)
- */
-export async function updateSiteCategoryAssignments(req: Request, res: Response) {
-  try {
-    const { siteId } = req.params
-    const { categoryIds } = req.body
-    const actorUserId = req.user!.userId
-
-    if (!Array.isArray(categoryIds)) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'categoryIds must be an array'
-        }
-      })
-    }
-
-    const data = await siteCategoryService.replaceCategoryAssignments(
-      siteId,
-      categoryIds,
-      actorUserId
-    )
-
-    res.json({ success: true, data })
-  } catch (error: unknown) {
-    const statusCode = getErrorStatus(error)
-    res.status(statusCode).json({
-      success: false,
-      error: {
-        code: getErrorCode(error, 'SITE_CATEGORIES_UPDATE_FAILED'),
-        message: getErrorMessage(error)
-      }
     })
   }
 }
