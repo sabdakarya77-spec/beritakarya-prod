@@ -205,11 +205,17 @@ export class SiteService {
         })
 
         if (!user) {
-          throw new Error(`User ${wapimredId} not found`)
+          throw Object.assign(
+            new Error(`User ${wapimredId} not found`),
+            { statusCode: 400 }
+          )
         }
 
         if (user.role !== 'wapimred') {
-          throw new Error(`User ${wapimredId} is not a wapimred`)
+          throw Object.assign(
+            new Error(`User ${wapimredId} is not a wapimred`),
+            { statusCode: 400 }
+          )
         }
 
         await tx.user.update({
@@ -422,27 +428,68 @@ export class SiteService {
       throw Object.assign(new Error('Site not found'), { statusCode: 404 })
     }
 
-    // Check if site has articles before deletion (using count)
-    const articleCount = await prisma.article.count({
-      where: { siteId: site.id }
-    })
+    // Check all tables with ON DELETE RESTRICT foreign keys to Site.
+    // PostgreSQL will refuse the delete if any of these have matching rows.
+    const checks = await Promise.all([
+      prisma.article.count({ where: { siteId } }),
+      prisma.auditLog.count({ where: { siteId } }),
+      prisma.pageView.count({ where: { siteId } }),
+      prisma.media.count({ where: { siteId } }),
+      prisma.aIUsage.count({ where: { siteId } }),
+      prisma.comment.count({ where: { siteId } }),
+      prisma.notification.count({ where: { siteId } }),
+      prisma.newsletterSubscriber.count({ where: { siteId } }),
+      prisma.kYCViewLog.count({ where: { siteId } }),
+      prisma.advertisement.count({ where: { siteId } }),
+      prisma.adBooking.count({ where: { siteId } }),
+    ])
 
-    if (articleCount > 0) {
+    const [
+      articleCount,
+      auditLogCount,
+      pageViewCount,
+      mediaCount,
+      aiUsageCount,
+      commentCount,
+      notificationCount,
+      newsletterCount,
+      kycViewLogCount,
+      adCount,
+      adBookingCount,
+    ] = checks
+
+    const blockers: string[] = []
+    if (articleCount > 0) blockers.push(`${articleCount} artikel`)
+    if (auditLogCount > 0) blockers.push(`${auditLogCount} audit log`)
+    if (pageViewCount > 0) blockers.push(`${pageViewCount} page view`)
+    if (mediaCount > 0) blockers.push(`${mediaCount} media`)
+    if (aiUsageCount > 0) blockers.push(`${aiUsageCount} penggunaan AI`)
+    if (commentCount > 0) blockers.push(`${commentCount} komentar`)
+    if (notificationCount > 0) blockers.push(`${notificationCount} notifikasi`)
+    if (newsletterCount > 0) blockers.push(`${newsletterCount} subscriber newsletter`)
+    if (kycViewLogCount > 0) blockers.push(`${kycViewLogCount} KYC view log`)
+    if (adCount > 0) blockers.push(`${adCount} iklan`)
+    if (adBookingCount > 0) blockers.push(`${adBookingCount} booking iklan`)
+
+    if (blockers.length > 0) {
       throw Object.assign(
-        new Error('Cannot delete site with existing articles. Archive them first.'),
+        new Error(`Tidak bisa menghapus site yang masih memiliki data: ${blockers.join(', ')}. Hapus data terkait terlebih dahulu.`),
         { statusCode: 400 }
       )
     }
 
-    await prisma.site.delete({
-      where: { id: siteId }
-    })
-
+    // Log audit BEFORE deleting the site (AuditLog.siteId has ON DELETE RESTRICT)
     await this.logAudit(actorUserId, 'site.deleted', {
       siteId
     })
 
-    return { success: true, message: 'Site deleted' }
+    // SiteCategory has ON DELETE CASCADE, so it will be auto-deleted.
+    // User.siteId and Category.siteId have ON DELETE SET NULL, safe to delete.
+    await prisma.site.delete({
+      where: { id: siteId }
+    })
+
+    return { success: true, message: 'Site berhasil dihapus' }
   }
 
   async assignWapimred(siteId: string, wapimredId: string, actorUserId: string) {

@@ -38,6 +38,22 @@ export function errorMiddleware(
         }
       })
     }
+
+    // Foreign key constraint violation (e.g., trying to delete a record
+    // that is still referenced by other tables)
+    if (err.code === 'P2003') {
+      const field = err.meta?.field_name as string | undefined
+      const message = field
+        ? `Tidak dapat memproses: masih ada data terkait (${field}). Hapus data terkait terlebih dahulu.`
+        : 'Tidak dapat memproses: masih ada data terkait. Hapus data terkait terlebih dahulu.'
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'FOREIGN_KEY_CONSTRAINT_ERROR',
+          message
+        }
+      })
+    }
   }
 
   if (err instanceof ZodError) {
