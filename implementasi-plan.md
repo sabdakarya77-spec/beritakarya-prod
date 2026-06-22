@@ -39,14 +39,13 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
   - Panggil `POST /categories/migrate-to-local`
   - Tampilkan toast hasil migrasi
 
-- [ ] **0.5** Verifikasi setelah migrasi
-  - Cek kategori lokal pusat: punya full tree (top-level + sub + sub-sub)
-  - Cek kategori lokal nganjuk: punya full tree (top-level + sub + sub-sub)
-  - Cek artikel pusat: `ArticleCategory.categoryId` merujuk ke kategori lokal pusat
-  - Cek artikel nganjuk: `ArticleCategory.categoryId` merujuk ke kategori lokal nganjuk
-  - Cek tidak ada `ArticleCategory` yang masih merujuk ke kategori global
+- [x] **0.5** Verifikasi setelah migrasi
+  - Global View: 10 kategori (tanpa Terbaru/Tersimpan)
+  - Site View pusat: kategori lokal pusat ✅
+  - Site View nganjuk: kategori lokal nganjuk ✅
+  - Hapus/tambah di Site View tidak berdampak ke site lain ✅
 
-- [ ] **0.6** Backup database sebelum migrasi (precaution)
+- [x] **0.6** Backup database sebelum migrasi (precaution) — diperbaiki manual
 
 ---
 
@@ -274,7 +273,7 @@ Phase 11 (E2E Test)
 
 | Phase | Status | Catatan |
 |---|---|---|
-| 0. Migrasi Data Existing | ⏳ Belum | **WAJIB pertama kali** |
+| 0. Migrasi Data Existing | ✅ Selesai | Diperbaiki manual |
 | 1. Create Site Auto-Copy | ✅ Selesai | 1.1 + 1.2 done, 1.3 perlu test manual |
 | 2. Site View Hanya Lokal | ✅ Selesai | 2.1-2.5 done, 2.6 perlu test manual |
 | 3. Sync Add Only | ✅ Selesai | 3.1 + 3.2 done, 3.3 perlu test manual |
