@@ -11,7 +11,8 @@ vi.mock('../../db/client', () => ({
   prisma: {
     user: { findUnique: vi.fn(), findMany: vi.fn() },
     site: { findUnique: vi.fn().mockResolvedValue({ id: 'bandung', domain: 'bandung.beritakarya.co' }) },
-    category: { findUnique: vi.fn(), findFirst: vi.fn() }
+    category: { findUnique: vi.fn(), findFirst: vi.fn() },
+    article: { update: vi.fn() }
   }
 }))
 vi.mock('../../services/google-indexing.service', () => ({
@@ -176,9 +177,10 @@ describe('updateArticle — ownership', () => {
     vi.mocked(repo.findArticleById).mockResolvedValue(mockArticle({ authorId: 'user-lain' }) as unknown as ArticleWithDetails)
     vi.mocked(prisma.category.findUnique).mockResolvedValue(null)
     vi.mocked(prisma.category.findFirst).mockResolvedValue({ id: 'cat-1' } as unknown as Category)
-    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle({ categoryId: 'cat-1' }) as unknown as ArticleWithDetails)
+    vi.mocked(repo.updateArticle).mockResolvedValue(mockArticle() as unknown as ArticleWithDetails)
+    vi.mocked(prisma.article.update).mockResolvedValue({} as unknown as Article)
 
-    await updateArticle('art-1', 'bandung', { categoryId: 'nasional' }, editorPusat)
+    await updateArticle('art-1', 'bandung', { categoryIds: ['nasional'] }, editorPusat)
 
     expect(prisma.category.findFirst).toHaveBeenCalledWith({
       where: {
@@ -189,7 +191,16 @@ describe('updateArticle — ownership', () => {
         ]
       }
     })
-    expect(repo.updateArticle).toHaveBeenCalledWith('art-1', 'bandung', expect.objectContaining({ categoryId: 'cat-1' }))
+    // Categories updated via separate prisma.article.update with nested write
+    expect(prisma.article.update).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'art-1' },
+      data: expect.objectContaining({
+        categories: {
+          deleteMany: {},
+          create: [{ categoryId: 'cat-1' }]
+        }
+      })
+    }))
   })
 })
 
