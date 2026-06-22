@@ -124,8 +124,10 @@ Swagger documentation: `http://localhost:3001/api-docs`
 PostgreSQL 15 with Prisma ORM. Key models:
 - **Site** - Multi-site configuration
 - **User** - With KYC and AI quota fields
-- **Article** - With versioning and editorial workflow
+- **Article** - With versioning, editorial workflow, and multi-category support (max 3)
 - **Category** - Global and site-specific categories
+- **ArticleCategory** - Join table for article-category many-to-many relation
+- **SiteCategory** - Site-category junction for global category allowlists
 - **Advertisement/AdBooking** - Ad management system
 
 Article workflow statuses: `draft`, `submitted`, `review`, `revision`, `approved`, `scheduled`, `published`, `archived`, `rejected`

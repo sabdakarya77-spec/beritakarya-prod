@@ -218,10 +218,11 @@ All major tables have `siteId` foreign key: `User`, `Article`, `Category`, `Medi
 |-------|-------------|
 | Site | Multi-site configuration |
 | User | Users with KYC and AI quota fields |
-| Article | Articles with versioning and workflow |
+| Article | Articles with versioning, workflow, and multi-category (max 3) |
 | ArticleVersion | Article version history |
+| ArticleCategory | Article-category many-to-many junction |
 | Category | Global and site-specific categories |
-| SiteCategory | Site-category junction |
+| SiteCategory | Site-category junction for global category allowlists |
 | Media | Uploaded files |
 | Advertisement | Ad banners and slots |
 | AdPackage | Ad pricing packages |
