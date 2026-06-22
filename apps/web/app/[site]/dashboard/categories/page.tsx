@@ -250,21 +250,25 @@ export default function CategoriesDashboard() {
 
   // Get parent candidates for dropdown: flatten tree to include Level 1 + Level 2.
   // Exclude self, descendants of self, and Level 3 (to enforce 3-level max).
+  // potentialParents: in Site View use position index (1,2,3...) as display code;
+  // in Global View use the real order field value.
   const potentialParents = (() => {
     const result: Array<Category & { displayCode?: string }> = [];
-    const flatten = (items: Category[], depth: number = 0, parentCode: string = '') => {
-      for (const item of items) {
+    const flatten = (items: Category[], depth: number = 0, parentCode: string = '', parentIdx: number = 0) => {
+      items.forEach((item, idx) => {
         // Skip self when editing
-        if (editingCategory && item.id === editingCategory.id) continue;
-        const currentCode = parentCode ? `${parentCode}.${item.order || 0}` : `${item.order || 0}`;
+        if (editingCategory && item.id === editingCategory.id) return;
+        // In Site View use sequential index (1-based); in Global View use stored order
+        const thisNum = isGlobalView ? (item.order || 0) : (idx + 1);
+        const currentCode = parentCode ? `${parentCode}.${thisNum}` : `${thisNum}`;
         // Level 0 (parent) and Level 1 (sub) can be parents
         if (depth < 2) {
           result.push({ ...item, displayCode: currentCode });
         }
         if (item.subCategories?.length) {
-          flatten(item.subCategories, depth + 1, currentCode);
+          flatten(item.subCategories, depth + 1, currentCode, thisNum);
         }
-      }
+      });
     };
     flatten(categories);
     return result;
@@ -496,8 +500,11 @@ export default function CategoriesDashboard() {
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {categories.map((parent) => {
+                {categories.map((parent, parentIdx) => {
                   const borderClass = getCategoryColor(parent.name);
+                  // In Site View: use sequential position (1-based index) as display number
+                  // In Global View: use the actual stored order value
+                  const parentDisplayNum = isGlobalView ? (parent.order || 0) : (parentIdx + 1);
                   
                   return (
                     <div 
@@ -509,15 +516,16 @@ export default function CategoriesDashboard() {
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-md font-extrabold text-gray-900 dark:text-white tracking-tight">
-                              [{parent.order || 0}] {parent.name}
+                              [{parentDisplayNum}] {parent.name}
                             </h3>
-                            {parent.isGlobal ? (
+                            {/* In Site View: always show site name badge (no GLOBAL label confusion) */}
+                            {isGlobalView && parent.isGlobal ? (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[8px] xl:text-[9px] font-black tracking-wider bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 uppercase">
                                 Global
                               </span>
                             ) : (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[8px] xl:text-[9px] font-black tracking-wider bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 uppercase">
-                                {parent.siteId?.toUpperCase() || siteId.toUpperCase()}
+                                {siteId.toUpperCase()}
                               </span>
                             )}
                           </div>
@@ -545,10 +553,10 @@ export default function CategoriesDashboard() {
                         
                         <div className="flex items-center gap-3">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black border uppercase tracking-wider ${borderClass}`}>
-                            [{parent.order || 0}] {parent.name}
+                            [{parentDisplayNum}] {parent.name}
                           </span>
                           <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium font-mono">
-                            Urutan: {parent.order ?? 0}
+                            Urutan: {parentDisplayNum}
                           </span>
                         </div>
                       </div>
@@ -559,13 +567,15 @@ export default function CategoriesDashboard() {
                         
                         {parent.subCategories && parent.subCategories.length > 0 ? (
                           <div className="space-y-2">
-                            {parent.subCategories.map((sub) => (
+                            {parent.subCategories.map((sub, subIdx) => {
+                              const subDisplayNum = isGlobalView ? (sub.order || 0) : (subIdx + 1);
+                              return (
                               <div key={sub.id} className="space-y-1">
                                 <div
                                   className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-700/80 rounded-xl text-xs text-gray-750 dark:text-gray-300 font-semibold hover:border-rose-500/30 dark:hover:border-rose-500/30 transition-all"
                                 >
                                   <span className="text-[10px] text-gray-400 font-mono">
-                                    {parent.order || 0}.{sub.order || 0}
+                                    {parentDisplayNum}.{subDisplayNum}
                                   </span>
                                   <span>{sub.name}</span>
                                   <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity ml-1 border-l border-gray-200 dark:border-gray-700 pl-1.5">
@@ -603,14 +613,16 @@ export default function CategoriesDashboard() {
                                 {/* Sub-subcategories */}
                                 {sub.subCategories && sub.subCategories.length > 0 && (
                                   <div className="ml-4 flex flex-wrap gap-1.5">
-                                    {sub.subCategories.map((subsub) => (
+                                    {sub.subCategories.map((subsub, subsubIdx) => {
+                                      const subsubDisplayNum = isGlobalView ? (subsub.order || 0) : (subsubIdx + 1);
+                                      return (
                                       <div
                                         key={subsub.id}
                                         className="group inline-flex items-center gap-1 px-2 py-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-250/50 dark:border-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 font-medium hover:border-rose-500/30 transition-all"
                                       >
                                         <span className="text-gray-400 dark:text-gray-600">↳</span>
                                         <span className="text-[9px] text-gray-400 font-mono">
-                                          {parent.order || 0}.{sub.order || 0}.{subsub.order || 0}
+                                          {parentDisplayNum}.{subDisplayNum}.{subsubDisplayNum}
                                         </span>
                                         <span>{subsub.name}</span>
                                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
@@ -632,11 +644,11 @@ export default function CategoriesDashboard() {
                                           </button>
                                         </div>
                                       </div>
-                                    ))}
+                                    )})}
                                   </div>
                                 )}
                               </div>
-                            ))}
+                            );})}
                           </div>
                         ) : (
                           <p className="text-xs text-gray-400 dark:text-gray-500 italic">Belum ada sub-kategori.</p>
