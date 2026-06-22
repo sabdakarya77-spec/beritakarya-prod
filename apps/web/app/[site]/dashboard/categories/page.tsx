@@ -62,6 +62,31 @@ export default function CategoriesDashboard() {
     setSlug(generated);
   }, [name, editingCategory]);
 
+  // Auto-calculate order based on siblings with the same parentId
+  useEffect(() => {
+    if (editingCategory) return; // Keep existing order when editing
+
+    // Flatten tree to find siblings
+    const flat: Category[] = [];
+    const flatten = (items: Category[]) => {
+      for (const item of items) {
+        flat.push(item);
+        if (item.subCategories?.length) flatten(item.subCategories);
+      }
+    };
+    flatten(categories);
+
+    // Find siblings with same parentId
+    const siblings = flat.filter(c => {
+      const cParentId = c.parentId || '';
+      const currentParentId = parentId || '';
+      return cParentId === currentParentId;
+    });
+
+    const maxOrder = siblings.reduce((max, c) => Math.max(max, c.order ?? 0), 0);
+    setOrder(String(maxOrder + 1));
+  }, [parentId, categories, editingCategory]);
+
   if (!isAllowed) return null;
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -380,19 +405,28 @@ export default function CategoriesDashboard() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Order Selection */}
+                {/* Order - auto-calculated for new, editable for edit */}
                 <div>
-                  <label htmlFor="category-order" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Urutan (Order)</label>
-                  <input
-                    id="category-order"
-                    type="number"
-                    value={order}
-                    onChange={(e) => setOrder(e.target.value)}
-                    placeholder="0"
-                    min="0"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-rose-500 transition-all font-semibold"
-                    required
-                  />
+                  <label htmlFor="category-order" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Urutan (Order) {editingCategory ? '' : '— Otomatis'}
+                  </label>
+                  {editingCategory ? (
+                    <input
+                      id="category-order"
+                      type="number"
+                      value={order}
+                      onChange={(e) => setOrder(e.target.value)}
+                      placeholder="0"
+                      min="0"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-rose-500 transition-all font-semibold"
+                      required
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-100/50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">
+                      {order}
+                      <span className="text-[10px] text-gray-400 ml-2">(otomatis)</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Color Info (read-only) */}
