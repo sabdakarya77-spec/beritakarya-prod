@@ -240,65 +240,71 @@ export default function ReviewQueuePage() {
 
       {/* Workflow Flow */}
       <div className="dash-card p-4">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {[
-            { label: 'Draft', color: 'bg-amber-100 text-amber-700', count: stats.draft || 0 },
-            { label: '→', color: 'text-gray-300', count: null },
-            { label: 'Dikirim', color: 'bg-blue-100 text-blue-700', count: stats.submitted || 0 },
-            { label: '→', color: 'text-gray-300', count: null },
-            { label: 'Review', color: 'bg-violet-100 text-violet-700', count: stats.review || 0 },
-            { label: '→', color: 'text-gray-300', count: null },
-            { label: 'Revisi', color: 'bg-orange-100 text-orange-700', count: stats.revision || 0 },
-            { label: '→', color: 'text-gray-300', count: null },
-            { label: 'Disetujui', color: 'bg-emerald-100 text-emerald-700', count: stats.approved || 0 },
-            { label: '→', color: 'text-gray-300', count: null },
-            { label: 'Terbit', color: 'bg-green-100 text-green-700', count: stats.published || 0 },
-          ].map((step, i) => (
-            step.label === '→'
-              ? <ChevronRight key={i} size={16} className="text-gray-300 flex-shrink-0" />
-              : (
-                <div key={i} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0', step.color)}>
-                  <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
-                  {step.count !== null && (
-                    <span className="text-[10px] font-black opacity-70">({step.count})</span>
-                  )}
-                </div>
-              )
-          ))}
+        <div className="relative">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+            {[
+              { label: 'Draft', color: 'bg-amber-100 text-amber-700', count: stats.draft || 0 },
+              { label: '→', color: 'text-gray-300', count: null },
+              { label: 'Dikirim', color: 'bg-blue-100 text-blue-700', count: stats.submitted || 0 },
+              { label: '→', color: 'text-gray-300', count: null },
+              { label: 'Review', color: 'bg-violet-100 text-violet-700', count: stats.review || 0 },
+              { label: '→', color: 'text-gray-300', count: null },
+              { label: 'Revisi', color: 'bg-orange-100 text-orange-700', count: stats.revision || 0 },
+              { label: '→', color: 'text-gray-300', count: null },
+              { label: 'Disetujui', color: 'bg-emerald-100 text-emerald-700', count: stats.approved || 0 },
+              { label: '→', color: 'text-gray-300', count: null },
+              { label: 'Terbit', color: 'bg-green-100 text-green-700', count: stats.published || 0 },
+            ].map((step, i) => (
+              step.label === '→'
+                ? <ChevronRight key={i} size={16} className="text-gray-300 flex-shrink-0" />
+                : (
+                  <div key={i} className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full flex-shrink-0', step.color)}>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{step.label}</span>
+                    {step.count !== null && (
+                      <span className="text-[10px] font-black opacity-70">({step.count})</span>
+                    )}
+                  </div>
+                )
+            ))}
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white dark:from-slate-900 to-transparent pointer-events-none block md:hidden" />
         </div>
       </div>
 
       {/* Tabs */}
       <div className="border-b border-gray-100 dark:border-white/5">
-        <div className="flex gap-6 overflow-x-auto no-scrollbar">
-          {tabs.map(tab => {
-            const count = stats[tab.key] || 0;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setActiveTab(tab.key);
-                  router.replace(`/${site}/dashboard/review?tab=${tab.key}`);
-                }}
-                className={cn(
-                  'flex items-center gap-2 pb-3 text-xs font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap',
-                  activeTab === tab.key
-                    ? `border-brand-red ${tab.color}`
-                    : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-                )}
-              >
-                {tab.label}
-                {count > 0 && (
-                  <span className={cn(
-                    'text-[10px] font-black px-1.5 py-0.5 rounded-full',
-                    activeTab === tab.key ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'
-                  )}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <div className="relative">
+          <div className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-0.5">
+            {tabs.map(tab => {
+              const count = stats[tab.key] || 0;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    router.replace(`/${site}/dashboard/review?tab=${tab.key}`);
+                  }}
+                  className={cn(
+                    'flex items-center gap-2 pb-3 text-xs font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap',
+                    activeTab === tab.key
+                      ? `border-brand-red ${tab.color}`
+                      : 'border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                  )}
+                >
+                  {tab.label}
+                  {count > 0 && (
+                    <span className={cn(
+                      'text-[10px] font-black px-1.5 py-0.5 rounded-full',
+                      activeTab === tab.key ? 'bg-brand-red text-white' : 'bg-gray-100 dark:bg-white/5 text-gray-400'
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white dark:from-slate-900 to-transparent pointer-events-none block md:hidden" />
         </div>
       </div>
 
@@ -354,11 +360,11 @@ export default function ReviewQueuePage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ delay: i * 0.05 }}
-                className="dash-card p-5"
+                className="dash-card p-4 md:p-5"
               >
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 md:gap-2 mb-2 flex-wrap">
                       <StatusBadge status={article.status} />
                       {article.isBreaking && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-600 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
@@ -384,7 +390,7 @@ export default function ReviewQueuePage() {
                     <h3 className="text-sm font-bold text-brand-black dark:text-white leading-snug mb-2">
                       {article.title}
                     </h3>
-                    <div className="flex items-center gap-4 text-[10px] text-gray-400 flex-wrap">
+                    <div className="flex items-center gap-x-2 md:gap-x-4 gap-y-1.5 text-[10px] text-gray-400 flex-wrap">
                       <span className="flex items-center gap-1">
                         <UserIcon size={11} /> {article.author?.name || 'Redaksi'}
                       </span>
@@ -419,26 +425,28 @@ export default function ReviewQueuePage() {
                   {/* Actions */}
                   <div className="w-full md:w-[280px] shrink-0">
                     <div className="rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.03] p-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                        Aksi Utama
-                      </p>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-300">
-                        {getCardActionHint(article)}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="hidden md:block">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                          Aksi Utama
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+                          {getCardActionHint(article)}
+                        </p>
+                      </div>
+                      <div className="mt-2 md:mt-3 flex flex-wrap gap-1.5 md:gap-2">
                         {(activeTab === 'submitted' || activeTab === 'review') && (
                           <>
                             <button
                               onClick={() => { setReviewModal(article); setReviewNotes(''); }}
                               disabled={!!actionLoading}
-                              className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 shadow-sm"
+                              className="flex-1 min-w-[100px] md:min-w-[120px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition-all disabled:opacity-50 shadow-sm"
                             >
                               <CheckCircle size={12} /> {getPrimaryActionLabel()}
                             </button>
                             <button
                               onClick={() => handleAction(article.id, 'request_revision')}
                               disabled={!!actionLoading}
-                              className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-orange-100 transition-all disabled:opacity-50"
+                              className="flex-1 min-w-[100px] md:min-w-[120px] flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-orange-100 transition-all disabled:opacity-50"
                             >
                               {actionLoading === article.id + 'request_revision'
                                 ? <Loader2 size={12} className="animate-spin" />
@@ -453,7 +461,7 @@ export default function ReviewQueuePage() {
                                 }
                               }}
                               disabled={!!actionLoading}
-                              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all disabled:opacity-50"
+                              className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all disabled:opacity-50"
                             >
                               {actionLoading === article.id + 'reject'
                                 ? <Loader2 size={12} className="animate-spin" />
@@ -467,7 +475,7 @@ export default function ReviewQueuePage() {
                           <button
                             onClick={() => handleAction(article.id, 'publish')}
                             disabled={!!actionLoading}
-                            className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
+                            className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
                           >
                             {actionLoading === article.id + 'publish' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
                             {getPrimaryActionLabel()}
@@ -476,7 +484,7 @@ export default function ReviewQueuePage() {
                         {activeTab === 'revision' && (
                           <Link
                             href={`/${site}/dashboard/articles/${article.id}`}
-                            className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-brand-black dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:opacity-90 transition-all shadow-sm"
+                            className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-black dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded-lg hover:opacity-90 transition-all shadow-sm"
                           >
                             <Eye size={12} /> {getPrimaryActionLabel()}
                           </Link>
@@ -484,7 +492,7 @@ export default function ReviewQueuePage() {
                         {(activeTab === 'submitted' || activeTab === 'review' || activeTab === 'approved') && (
                           <Link
                             href={`/${site}/dashboard/articles/${article.id}`}
-                            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-900/80 border border-gray-200 dark:border-white/10 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
+                            className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-2 bg-white dark:bg-slate-900/80 border border-gray-200 dark:border-white/10 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
                           >
                             <Eye size={12} /> Buka Detail
                           </Link>
