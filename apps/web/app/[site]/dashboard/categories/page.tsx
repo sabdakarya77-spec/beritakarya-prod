@@ -32,9 +32,10 @@ export default function CategoriesDashboard() {
     try {
       const queryParams: Record<string, string> = {};
       if (isGlobalView) {
+        // Global View: hanya tampilkan kategori global saja
         queryParams.view = 'global';
       } else {
-        queryParams.view = 'local';
+        // Site View: tampilkan semua kategori yang relevan untuk situs ini (lokal + global yang di-assign)
         queryParams.site = siteId;
       }
       // Use /categories/tree endpoint to get hierarchical structure (synced with homepage & editor)
