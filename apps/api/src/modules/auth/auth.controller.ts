@@ -134,8 +134,8 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
 
     // Set httpOnly cookies
     const isProd = process.env.NODE_ENV === 'production'
-    res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
-    res.cookie('refreshToken', result.refreshToken, getCookieOptions(isProd, 30 * 24 * 60 * 60 * 1000))
+    res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 60 * 60 * 1000))
+    res.cookie('refreshToken', result.refreshToken, getCookieOptions(isProd, 7 * 24 * 60 * 60 * 1000))
 
     res.json({ success: true, data: { user: result.user } })
   } catch (error) {
@@ -185,8 +185,8 @@ authRouter.post('/refresh', asyncHandler(async (req: Request, res: Response) => 
 
   // Update cookies
   const isProd = process.env.NODE_ENV === 'production'
-  res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 15 * 60 * 1000))
-  res.cookie('refreshToken', result.refreshToken, getCookieOptions(isProd, 30 * 24 * 60 * 60 * 1000))
+  res.cookie('accessToken', result.accessToken, getCookieOptions(isProd, 60 * 60 * 1000))
+  res.cookie('refreshToken', result.refreshToken, getCookieOptions(isProd, 7 * 24 * 60 * 60 * 1000))
 
   res.json({ success: true, data: { user: result.user } })
 }))
