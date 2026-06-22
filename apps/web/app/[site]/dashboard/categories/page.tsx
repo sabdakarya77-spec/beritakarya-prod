@@ -225,17 +225,26 @@ export default function CategoriesDashboard() {
     }
   };
 
-  // Get parent candidates for dropdown: top-level and subcategories (max depth 3).
-  // Exclude self, descendants of self, and sub-subcategories (to enforce 3-level max).
-  const potentialParents = categories.filter(parent => {
-    if (editingCategory && parent.id === editingCategory.id) return false;
-    // Sub-subcategories (level 3) cannot be parents
-    if (parent.parentId) {
-      const grandparent = categories.find(c => c.id === parent.parentId);
-      if (grandparent?.parentId) return false;
-    }
-    return true;
-  });
+  // Get parent candidates for dropdown: flatten tree to include Level 1 + Level 2.
+  // Exclude self, descendants of self, and Level 3 (to enforce 3-level max).
+  const potentialParents = (() => {
+    const result: Category[] = [];
+    const flatten = (items: Category[], depth: number = 0) => {
+      for (const item of items) {
+        // Skip self when editing
+        if (editingCategory && item.id === editingCategory.id) continue;
+        // Level 0 (parent) and Level 1 (sub) can be parents
+        if (depth < 2) {
+          result.push(item);
+        }
+        if (item.subCategories?.length) {
+          flatten(item.subCategories, depth + 1);
+        }
+      }
+    };
+    flatten(categories);
+    return result;
+  })();
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 px-4">
