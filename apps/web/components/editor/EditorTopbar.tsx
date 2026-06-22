@@ -67,7 +67,11 @@ export function EditorTopbar({
   }
 
   const handleBackToArticles = () => {
-    router.push(`/${siteId}/dashboard/articles`)
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.push(`/${siteId}/dashboard/articles`)
+    }
   }
   
   return (

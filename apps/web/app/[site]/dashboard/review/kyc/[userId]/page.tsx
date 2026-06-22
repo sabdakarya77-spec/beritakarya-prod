@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ShieldCheck, 
-  ArrowLeft, 
-  CheckCircle2, 
-  XCircle, 
-  Loader2, 
+import {
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Loader2,
   AlertCircle,
   FileText,
   Eye,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import BackButton from '../../../../../../components/ui/BackButton'
 import axios from 'axios'
 import { api } from '../../../../../../lib/api'
 import { useRequireRole } from '../../../../../../hooks/useRequireRole'
@@ -107,9 +107,12 @@ export default function KYCDetailReviewPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <h2 className="text-xl font-bold dark:text-white">User tidak ditemukan</h2>
-        <Link href={`/${siteId}/dashboard/review/kyc`} className="mt-4 text-brand-red font-bold uppercase tracking-widest text-xs">
-          Kembali ke Antrian
-        </Link>
+        <div className="mt-4">
+          <BackButton
+            fallbackHref={`/${siteId}/dashboard/review/kyc`}
+            label="Kembali ke Antrian"
+          />
+        </div>
       </div>
     )
   }
@@ -123,12 +126,10 @@ export default function KYCDetailReviewPage() {
       {/* Back & Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <Link 
-            href={`/${siteId}/dashboard/review/kyc`}
-            className="flex items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-brand-red transition-colors mb-2"
-          >
-            <ArrowLeft className="w-3 h-3 mr-1" /> Kembali ke Antrian
-          </Link>
+          <BackButton
+            fallbackHref={`/${siteId}/dashboard/review/kyc`}
+            label="Kembali ke Antrian"
+          />
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
             Tinjau Identitas: {user.name}
           </h1>

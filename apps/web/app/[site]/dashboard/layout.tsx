@@ -3,14 +3,13 @@
 import Link from 'next/link'
 import { usePathname, useParams } from 'next/navigation'
 import { useAuthStore } from '../../../store/authStore'
-import { 
-  ArrowLeft,
-  FileText, 
-  Tag, 
-  LayoutDashboard, 
-  Image as ImageIcon, 
-  Settings, 
-  LogOut, 
+import {
+  FileText,
+  Tag,
+  LayoutDashboard,
+  Image as ImageIcon,
+  Settings,
+  LogOut,
   ExternalLink,
   ChevronRight,
   Users as UsersIcon,
@@ -28,6 +27,7 @@ import {
   Lock,
   User
 } from 'lucide-react'
+import BackButton from '../../../components/ui/BackButton'
 import { ROLE_LABELS } from '../../../lib/constants'
 import { useState, useEffect } from 'react'
 import { cn } from '../../../lib/utils'
@@ -205,13 +205,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <div className="px-4 py-4">
-              <Link
-                href={articleListHref}
+              <BackButton
+                fallbackHref={articleListHref}
+                label="Kembali ke Daftar Post"
                 className="flex items-center gap-3 rounded-2xl border border-gray-200/80 bg-gray-50/80 px-4 py-3 text-sm font-semibold text-brand-black transition-colors hover:border-brand-red/20 hover:text-brand-red dark:border-white/10 dark:bg-white/5 dark:text-white"
-              >
-                <ArrowLeft size={16} />
-                Kembali ke Daftar Post
-              </Link>
+                iconSize={16}
+              />
             </div>
 
             <div className="px-4">

@@ -3,20 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { api } from '../../../../../lib/api';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  Upload, 
-  CheckCircle2, 
-  Image as ImageIcon, 
-  Video as VideoIcon, 
-  AlertCircle, 
-  QrCode, 
-  Building2, 
+import {
+  ArrowLeft,
+  ArrowRight,
+  Upload,
+  CheckCircle2,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  AlertCircle,
+  QrCode,
+  Building2,
   Sparkles,
   RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
+import BackButton from '../../../../../components/ui/BackButton';
 import { cn } from '../../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../../lib/constants';
 
@@ -210,12 +211,11 @@ export default function OrderAdPage() {
     <div className="space-y-8 max-w-4xl mx-auto pb-12">
       {/* Back button */}
       <div>
-        <Link 
-          href={`/${site}/dashboard`}
+        <BackButton
+          fallbackHref={`/${site}/dashboard`}
+          label="Kembali ke Dasbor"
           className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-brand-red uppercase tracking-widest transition-colors"
-        >
-          <ArrowLeft size={14} /> Kembali ke Dasbor
-        </Link>
+        />
       </div>
 
       {/* Steps Indicator */}
@@ -272,12 +272,11 @@ export default function OrderAdPage() {
                   <AlertCircle size={24} className="text-gray-300 mx-auto" />
                   <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Belum Ada Paket Iklan Tersedia</p>
                   <p className="text-[10px] text-gray-400">Hubungi admin untuk membuat paket iklan baru.</p>
-                  <Link
-                    href={`/${site}/dashboard`}
+                  <BackButton
+                    fallbackHref={`/${site}/dashboard`}
+                    label="Kembali ke Dashboard"
                     className="inline-flex items-center gap-2 mt-4 px-6 py-3 border border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/40 text-brand-black dark:text-white text-[10px] font-black uppercase tracking-widest transition-all rounded-sm"
-                  >
-                    <ArrowLeft size={14} /> Kembali ke Dashboard
-                  </Link>
+                  />
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -678,12 +677,11 @@ export default function OrderAdPage() {
               </p>
 
               <div className="pt-4">
-                <button
-                  onClick={() => router.push(`/${site}/dashboard`)}
+                <BackButton
+                  fallbackHref={`/${site}/dashboard`}
+                  label="Kembali ke Dashboard Anda"
                   className="px-8 py-4 bg-brand-black dark:bg-white text-white dark:text-brand-black text-[11px] font-black uppercase tracking-[0.2em] hover:bg-brand-red dark:hover:bg-brand-red dark:hover:text-white transition-all rounded-sm shadow-md"
-                >
-                  Kembali ke Dashboard Anda
-                </button>
+                />
               </div>
             </div>
           )}

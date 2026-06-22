@@ -2,13 +2,23 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface BackButtonProps {
   fallbackHref: string;
   label?: string;
+  className?: string;
+  iconSize?: number;
 }
 
-export default function BackButton({ fallbackHref, label = 'Kembali' }: BackButtonProps) {
+const DEFAULT_CLASS = 'inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted transition-colors hover:text-brand-red';
+
+export default function BackButton({
+  fallbackHref,
+  label = 'Kembali',
+  className,
+  iconSize = 14,
+}: BackButtonProps) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -23,9 +33,9 @@ export default function BackButton({ fallbackHref, label = 'Kembali' }: BackButt
     <button
       type="button"
       onClick={handleClick}
-      className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted transition-colors hover:text-brand-red"
+      className={cn(DEFAULT_CLASS, className)}
     >
-      <ArrowLeft size={14} />
+      <ArrowLeft size={iconSize} />
       {label}
     </button>
   );
