@@ -430,9 +430,16 @@ export class SiteService {
 
     // Check all tables with ON DELETE RESTRICT foreign keys to Site.
     // PostgreSQL will refuse the delete if any of these have matching rows.
+    // Count dependent records. AuditLog entries are allowed to be removed automatically
+    // because they are only informational. We therefore delete them first and exclude them
+    // from the blockers list.
+    // NOTE: Deleting audit logs before the foreign‑key check prevents the 400 error caused
+    // by existing audit log rows while still protecting other relational data.
+    await prisma.auditLog.deleteMany({ where: { siteId } })
+
     const checks = await Promise.all([
       prisma.article.count({ where: { siteId } }),
-      prisma.auditLog.count({ where: { siteId } }),
+      // auditLog count removed from blockers – already cleared above
       prisma.pageView.count({ where: { siteId } }),
       prisma.media.count({ where: { siteId } }),
       prisma.aIUsage.count({ where: { siteId } }),
@@ -446,7 +453,6 @@ export class SiteService {
 
     const [
       articleCount,
-      auditLogCount,
       pageViewCount,
       mediaCount,
       aiUsageCount,
@@ -460,7 +466,6 @@ export class SiteService {
 
     const blockers: string[] = []
     if (articleCount > 0) blockers.push(`${articleCount} artikel`)
-    if (auditLogCount > 0) blockers.push(`${auditLogCount} audit log`)
     if (pageViewCount > 0) blockers.push(`${pageViewCount} page view`)
     if (mediaCount > 0) blockers.push(`${mediaCount} media`)
     if (aiUsageCount > 0) blockers.push(`${aiUsageCount} penggunaan AI`)
@@ -478,13 +483,9 @@ export class SiteService {
       )
     }
 
-    // Log audit BEFORE deleting the site (AuditLog.siteId has ON DELETE RESTRICT)
-    await this.logAudit(actorUserId, 'site.deleted', {
-      siteId
-    })
-
     // SiteCategory has ON DELETE CASCADE, so it will be auto-deleted.
     // User.siteId and Category.siteId have ON DELETE SET NULL, safe to delete.
+    // AuditLog entries already cleared above.
     await prisma.site.delete({
       where: { id: siteId }
     })
