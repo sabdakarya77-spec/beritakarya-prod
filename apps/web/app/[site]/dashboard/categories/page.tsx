@@ -62,7 +62,7 @@ export default function CategoriesDashboard() {
     setSlug(generated);
   }, [name, editingCategory]);
 
-  // Auto-calculate order based on siblings with the same parentId
+  // Auto-calculate order based on count of siblings (sinkron dengan posisi visual chip)
   useEffect(() => {
     if (editingCategory) return; // Keep existing order when editing
 
@@ -83,8 +83,8 @@ export default function CategoriesDashboard() {
       return cParentId === currentParentId;
     });
 
-    const maxOrder = siblings.reduce((max, c) => Math.max(max, c.order ?? 0), 0);
-    setOrder(String(maxOrder + 1));
+    // Use count + 1 (not max order + 1) to stay in sync with visual chip position
+    setOrder(String(siblings.length + 1));
   }, [parentId, categories, editingCategory]);
 
   if (!isAllowed) return null;
