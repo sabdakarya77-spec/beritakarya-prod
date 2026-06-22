@@ -165,11 +165,11 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  site            Site?          @relation(fields: [siteId], references: [id])
-  articles        Article[]
-  parent          Category?      @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  subCategories   Category[]     @relation("CategoryHierarchy")
-  siteAssignments SiteCategory[]
+  site              Site?             @relation(fields: [siteId], references: [id])
+  articleCategories ArticleCategory[]
+  parent            Category?         @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  subCategories     Category[]        @relation("CategoryHierarchy")
+  siteAssignments   SiteCategory[]
 
   // Unique constraint: allows (slug, NULL) for global categories
   // and (slug, siteId) for site-specific categories
@@ -190,6 +190,19 @@ model SiteCategory {
   @@id([siteId, categoryId])
   @@index([categoryId])
   @@map("site_categories")
+}
+
+model ArticleCategory {
+  articleId  String   @map("article_id")
+  categoryId String   @map("category_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  article  Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, categoryId])
+  @@index([categoryId])
+  @@map("article_categories")
 }
 
 model Advertisement {
@@ -220,7 +233,6 @@ model Article {
   slug        String
   excerpt     String?
   siteId      String
-  categoryId  String?
   authorId    String
   blocks      Json        @default("[]")
   tags        Json        @default("[]")
@@ -257,16 +269,15 @@ model Article {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  site      Site       @relation(fields: [siteId], references: [id])
-  author    User       @relation(fields: [authorId], references: [id])
-  category  Category?  @relation(fields: [categoryId], references: [id])
-  comments  Comment[]
-  pageViews PageView[]
+  site       Site              @relation(fields: [siteId], references: [id])
+  author     User              @relation(fields: [authorId], references: [id])
+  categories ArticleCategory[]
+  comments   Comment[]
+  pageViews  PageView[]
 
   @@unique([siteId, slug])
   @@index([siteId, status])
   @@index([authorId])
-  @@index([categoryId])
   @@index([scheduledAt])
   @@index([publishedAt, viewCount])
   @@index([siteId, status, publishedAt])
