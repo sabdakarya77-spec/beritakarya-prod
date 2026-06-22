@@ -40,7 +40,7 @@ import {
 } from './article.service'
 import { prisma } from '../../db/client'
 import type { JWTPayload } from '@beritakarya/types'
-import type { User, Category } from '@prisma/client'
+import type { User, Category, Article } from '@prisma/client'
 
 // Derive mock return types from repository function signatures
 type ArticleWithDetails = NonNullable<Awaited<ReturnType<typeof repo.findArticleById>>>
