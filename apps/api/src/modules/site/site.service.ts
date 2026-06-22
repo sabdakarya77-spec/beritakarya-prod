@@ -32,6 +32,58 @@ function isEmptyValue(value: unknown): boolean {
 }
 
 export class SiteService {
+  /**
+   * Phase 1: Copy global categories to local for a new site.
+   * Copies full tree (top-level + sub + sub-sub) from global categories.
+   * Uses the provided Prisma transaction client for atomicity.
+   */
+  async copyGlobalToLocal(tx: Prisma.TransactionClient, siteId: string): Promise<number> {
+    // Fetch all global categories
+    const globalCategories = await tx.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) return 0
+
+    const idMap = new Map<string, string>() // globalId → localId
+    let copied = 0
+
+    // Sort: parents first (null parentId), then children
+    const sorted = [...globalCategories].sort((a, b) => {
+      if (!a.parentId && b.parentId) return -1
+      if (a.parentId && !b.parentId) return 1
+      return (a.order || 0) - (b.order || 0)
+    })
+
+    for (const cat of sorted) {
+      // Resolve local parentId
+      let localParentId: string | null = null
+      if (cat.parentId) {
+        localParentId = idMap.get(cat.parentId) || null
+        if (!localParentId) continue // Parent not mapped, skip
+      }
+
+      const localCat = await tx.category.create({
+        data: {
+          name: cat.name,
+          slug: cat.slug,
+          siteId,
+          isGlobal: false,
+          parentId: localParentId,
+          description: cat.description,
+          order: cat.order,
+          color: cat.color
+        }
+      })
+
+      idMap.set(cat.id, localCat.id)
+      copied++
+    }
+
+    return copied
+  }
+
   async getAllSites(includeStats = false) {
     const sites = await prisma.site.findMany({
       where: { deletedAt: null },
@@ -233,6 +285,17 @@ export class SiteService {
             newValue: { siteId: newSite.id }
           }
         })
+      }
+
+      // Phase 1: Auto-copy global categories to local for the new site
+      try {
+        const copied = await this.copyGlobalToLocal(tx, newSite.id)
+        if (copied > 0) {
+          logger.info(`[Site] Copied ${copied} global categories to local for site "${newSite.id}"`)
+        }
+      } catch (err) {
+        // Non-fatal: site creation should succeed even if category copy fails
+        logger.error(`[Site] Failed to copy global categories to local for site "${newSite.id}":`, err)
       }
 
       return newSite

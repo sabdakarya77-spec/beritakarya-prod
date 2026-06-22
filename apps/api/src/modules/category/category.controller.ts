@@ -16,6 +16,9 @@ categoryRouter.post('/seed-global',
 categoryRouter.post('/sync-from-template',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(syncFromTemplate))
+categoryRouter.post('/migrate-to-local',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(migrateToLocal))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin']),
@@ -305,6 +308,45 @@ export async function syncFromTemplate(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'CATEGORY_SYNC_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/categories/migrate-to-local
+ * Phase 0: Migrate global categories to local for all sites (or specific site).
+ * Copies full global tree to local and re-maps ArticleCategory references.
+ * Superadmin only. One-time operation.
+ */
+export async function migrateToLocal(req: Request, res: Response) {
+  try {
+    const { siteId } = req.body || {}
+
+    const results = await categoryService.migrateAllSites(
+      typeof siteId === 'string' && siteId ? siteId : undefined
+    )
+
+    const totalCategories = results.reduce((sum, r) => sum + r.categoriesCreated, 0)
+    const totalArticles = results.reduce((sum, r) => sum + r.articlesRemapped, 0)
+    const errors = results.filter(r => r.error)
+
+    res.json({
+      success: true,
+      data: {
+        results,
+        summary: {
+          sitesProcessed: results.length,
+          totalCategoriesCreated: totalCategories,
+          totalArticlesRemapped: totalArticles,
+          errors: errors.length
+        }
+      }
+    })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_MIGRATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }

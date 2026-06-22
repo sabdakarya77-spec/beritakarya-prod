@@ -704,21 +704,20 @@ async function resolveCategoryId(categoryId: string | null | undefined, siteId: 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryId)
 
   if (isUuid) {
-    const cat = await prisma.category.findUnique({
-      where: { id: categoryId }
+    // Phase 2: Only find local categories (site-specific)
+    const cat = await prisma.category.findFirst({
+      where: { id: categoryId, siteId }
     })
     if (cat) return cat.id
-    throw new AppError(`Kategori dengan ID "${categoryId}" tidak ditemukan`, 400)
+    throw new AppError(`Kategori dengan ID "${categoryId}" tidak ditemukan di site ini`, 400)
   }
 
   // Otherwise, try to find by slug (case-insensitive)
+  // Phase 2: Only look for local categories (site-specific, not global)
   const catBySlug = await prisma.category.findFirst({
     where: {
       slug: { equals: categoryId, mode: 'insensitive' },
-      OR: [
-        { siteId },
-        { isGlobal: true }
-      ]
+      siteId
     }
   })
 

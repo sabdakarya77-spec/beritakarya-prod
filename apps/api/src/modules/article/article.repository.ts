@@ -21,12 +21,7 @@ export async function findArticlesBySite(
               { slug: { equals: category, mode: 'insensitive' } }
             ]
           },
-          {
-            OR: [
-              { siteId },
-              { isGlobal: true }
-            ]
-          }
+          { siteId }
         ]
       },
       include: {

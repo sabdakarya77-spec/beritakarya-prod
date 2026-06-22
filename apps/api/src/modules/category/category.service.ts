@@ -1,5 +1,4 @@
 import { prisma } from '../../db/client'
-import { getSiteAssignmentFilter } from '../site/site-category.utils'
 import { CATEGORY_TREE_CONFIG } from '@beritakarya/config'
 import type { Prisma } from '@prisma/client'
 
@@ -100,25 +99,10 @@ export class CategoryService {
   }
 
   private async findCategoriesForSite(siteId: string) {
-    const assignment = await getSiteAssignmentFilter(siteId)
-
-    const where =
-      assignment.isConfigured
-        ? {
-            OR: [
-              { siteId },
-              {
-                isGlobal: true,
-                id: { in: assignment.expandedGlobalIds }
-              }
-            ]
-          }
-        : {
-            OR: [{ siteId }, { isGlobal: true }]
-          }
-
+    // Phase 2: Site View hanya menampilkan kategori lokal (berdiri sendiri).
+    // Global tidak ikut masuk. Setiap site punya kategori lokal masing-masing.
     return prisma.category.findMany({
-      where,
+      where: { siteId },
       include: categoryInclude,
       orderBy: { order: 'asc' }
     })
@@ -483,6 +467,222 @@ export class CategoryService {
     }
 
     return created
+  }
+
+  /**
+   * Phase 0: Migrate global categories to local for a specific site.
+   * Copies the full global tree (top-level + sub + sub-sub) as site-specific categories.
+   * Returns a mapping of globalId → localId for re-mapping ArticleCategory.
+   */
+  async migrateGlobalToLocal(siteId: string): Promise<{
+    mapping: Map<string, string>
+    categoriesCreated: number
+  }> {
+    // 1. Fetch full global tree (flat list, ordered)
+    const globalCategories = await prisma.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) {
+      throw Object.assign(
+        new Error('Tidak ada kategori global untuk di-migrasi. Jalankan seed-global terlebih dahulu.'),
+        { statusCode: 400 }
+      )
+    }
+
+    // 2. Check if local categories already exist for this site
+    const existingLocal = await prisma.category.count({
+      where: { siteId, isGlobal: false, deletedAt: null }
+    })
+
+    if (existingLocal > 0) {
+      throw Object.assign(
+        new Error(`Site "${siteId}" sudah memiliki ${existingLocal} kategori lokal. Migrasi hanya bisa dijalankan sekali.`),
+        { statusCode: 409 }
+      )
+    }
+
+    // 3. Copy with hierarchy mapping
+    const idMap = new Map<string, string>() // globalId → localId
+    let created = 0
+
+    // Process in order: parents first, then children (parentId already resolved)
+    // Sort: null parentId first, then by order
+    const sorted = [...globalCategories].sort((a, b) => {
+      if (!a.parentId && b.parentId) return -1
+      if (a.parentId && !b.parentId) return 1
+      return (a.order || 0) - (b.order || 0)
+    })
+
+    for (const cat of sorted) {
+      // Resolve local parentId
+      let localParentId: string | null = null
+      if (cat.parentId) {
+        localParentId = idMap.get(cat.parentId) || null
+        // If parent wasn't mapped (shouldn't happen), skip this child
+        if (!localParentId) continue
+      }
+
+      // Check if a local category with same slug already exists
+      const existingBySlug = await prisma.category.findFirst({
+        where: { slug: cat.slug, siteId, deletedAt: null }
+      })
+
+      if (existingBySlug) {
+        // Already exists (e.g. from a previous partial migration), reuse it
+        idMap.set(cat.id, existingBySlug.id)
+        continue
+      }
+
+      const localCat = await prisma.category.create({
+        data: {
+          name: cat.name,
+          slug: cat.slug,
+          siteId,
+          isGlobal: false,
+          parentId: localParentId,
+          description: cat.description,
+          order: cat.order,
+          color: cat.color
+        }
+      })
+
+      idMap.set(cat.id, localCat.id)
+      created++
+    }
+
+    return { mapping: idMap, categoriesCreated: created }
+  }
+
+  /**
+   * Phase 0: Re-map ArticleCategory from global category IDs to local category IDs.
+   * Only affects articles belonging to the given siteId.
+   */
+  async remapArticleCategories(
+    siteId: string,
+    idMapping: Map<string, string>
+  ): Promise<{ articlesRemapped: number; rowsUpdated: number }> {
+    let rowsUpdated = 0
+    const articleIds = new Set<string>()
+
+    // Find all ArticleCategory rows where categoryId is a global ID in the mapping
+    // and the article belongs to this site
+    const globalIds = [...idMapping.keys()]
+
+    for (const globalId of globalIds) {
+      const localId = idMapping.get(globalId)
+      if (!localId) continue
+
+      // Find ArticleCategory rows pointing to this global category
+      const rows = await prisma.articleCategory.findMany({
+        where: {
+          categoryId: globalId,
+          article: { siteId }
+        },
+        select: { articleId: true }
+      })
+
+      if (rows.length === 0) continue
+
+      // Delete old rows and create new ones (composite key, can't update)
+      for (const row of rows) {
+        try {
+          await prisma.articleCategory.delete({
+            where: {
+              articleId_categoryId: {
+                articleId: row.articleId,
+                categoryId: globalId
+              }
+            }
+          })
+
+          await prisma.articleCategory.create({
+            data: {
+              articleId: row.articleId,
+              categoryId: localId
+            }
+          })
+
+          articleIds.add(row.articleId)
+          rowsUpdated++
+        } catch {
+          // Skip if already exists or other constraint error
+        }
+      }
+    }
+
+    return {
+      articlesRemapped: articleIds.size,
+      rowsUpdated
+    }
+  }
+
+  /**
+   * Phase 0: Run full migration for one site (copy global → local + re-map articles).
+   */
+  async migrateSite(siteId: string) {
+    // 1. Copy global categories to local
+    const { mapping, categoriesCreated } = await this.migrateGlobalToLocal(siteId)
+
+    // 2. Re-map article categories
+    const { articlesRemapped, rowsUpdated } = await this.remapArticleCategories(siteId, mapping)
+
+    return {
+      siteId,
+      categoriesCreated,
+      articlesRemapped,
+      rowsUpdated
+    }
+  }
+
+  /**
+   * Phase 0: Run migration for all sites (or specific site).
+   */
+  async migrateAllSites(targetSiteId?: string) {
+    const results: Array<{
+      siteId: string
+      categoriesCreated: number
+      articlesRemapped: number
+      rowsUpdated: number
+      error?: string
+    }> = []
+
+    if (targetSiteId) {
+      try {
+        const result = await this.migrateSite(targetSiteId)
+        results.push(result)
+      } catch (error: unknown) {
+        results.push({
+          siteId: targetSiteId,
+          categoriesCreated: 0,
+          articlesRemapped: 0,
+          rowsUpdated: 0,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+      return results
+    }
+
+    // Migrate all sites
+    const sites = await prisma.site.findMany({ select: { id: true } })
+
+    for (const site of sites) {
+      try {
+        const result = await this.migrateSite(site.id)
+        results.push(result)
+      } catch (error: unknown) {
+        results.push({
+          siteId: site.id,
+          categoriesCreated: 0,
+          articlesRemapped: 0,
+          rowsUpdated: 0,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+    }
+
+    return results
   }
 
   /**
