@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ArrowLeft, CalendarDays, Eye, FileText, Flame, Globe, Mail, Tags, User2, Users } from 'lucide-react'
+import { CalendarDays, Eye, FileText, Flame, Globe, Mail, Tags, User2, Users } from 'lucide-react'
+import BackButton from '../../../../components/ui/BackButton'
 import { SITE_MAP } from '@beritakarya/config'
 import type { Block } from '@beritakarya/types'
 import PublicSiteLayout from '../../../../components/layout/PublicSiteLayout'
@@ -214,13 +215,10 @@ export default async function AuthorProfilePage({ params }: Props) {
           <Container>
             <div className="pb-10 md:pb-14">
               {/* Back link */}
-              <Link
-                href={`/${siteParam}/penulis`}
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted transition-colors hover:text-brand-red"
-              >
-                <ArrowLeft size={14} />
-                Kembali ke Halaman Penulis
-              </Link>
+              <BackButton
+                fallbackHref={`/${siteParam}/penulis`}
+                label="Kembali"
+              />
 
               {/* Profile header */}
               <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8 md:gap-10">
