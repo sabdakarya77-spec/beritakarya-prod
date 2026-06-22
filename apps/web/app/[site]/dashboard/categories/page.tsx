@@ -529,6 +529,19 @@ export default function CategoriesDashboard() {
                                     <button
                                       type="button"
                                       onClick={() => {
+                                        setParentId(sub.id);
+                                        const inputEl = document.querySelector('input[placeholder*="Misal: Olahraga"]') as HTMLInputElement;
+                                        inputEl?.focus();
+                                        showToast(`Parent diatur ke "${sub.name}". Silakan ketik nama sub-subkategori baru.`);
+                                      }}
+                                      className="text-[10px] hover:text-emerald-600 p-0.5"
+                                      title="Tambah Sub-Sub"
+                                    >
+                                      ➕
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
                                         if (sub.isGlobal && !isGlobalView) {
                                           showToast('Kategori global hanya dapat diedit di Global View', 'error');
                                           return;
