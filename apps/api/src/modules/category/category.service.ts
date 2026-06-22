@@ -281,7 +281,7 @@ export class CategoryService {
     return category
   }
 
-  async deleteCategory(categoryId: string, _actorUserId: string) {
+  async deleteCategory(categoryId: string, _actorUserId: string, allowGlobal = false) {
     const existing = await prisma.category.findUnique({
       where: { id: categoryId }
     })
@@ -290,6 +290,15 @@ export class CategoryService {
       throw Object.assign(new Error('Category not found'), { statusCode: 404 })
     }
 
+    // Defense in depth: global categories cannot be deleted from Site View.
+    // Even though Site View only shows local categories (UI protection),
+    // this check prevents accidental deletion via direct API call.
+    if (existing.isGlobal && !allowGlobal) {
+      throw Object.assign(
+        new Error('Kategori global tidak bisa dihapus dari Site View. Gunakan Global View.'),
+        { statusCode: 403 }
+      )
+    }
 
     await prisma.category.delete({
       where: { id: categoryId }
@@ -683,6 +692,95 @@ export class CategoryService {
     }
 
     return results
+  }
+
+  /**
+   * Phase 3: Sync global categories to local (Add Only).
+   * Compares global and local by slug — adds missing, keeps existing intact.
+   * Preserves hierarchy when copying.
+   */
+  async syncGlobalToLocal(siteId: string): Promise<{
+    added: number
+    skipped: number
+  }> {
+    // 1. Fetch global categories
+    const globalCategories = await prisma.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) {
+      return { added: 0, skipped: 0 }
+    }
+
+    // 2. Fetch existing local categories
+    const localCategories = await prisma.category.findMany({
+      where: { siteId, isGlobal: false, deletedAt: null }
+    })
+
+    // Build set of existing local slugs for fast lookup
+    const localSlugs = new Set(localCategories.map(c => c.slug))
+
+    // 3. Build local parentId mapping (existing local categories)
+    const localSlugToId = new Map<string, string>()
+    for (const cat of localCategories) {
+      localSlugToId.set(cat.slug, cat.id)
+    }
+
+    // 4. Sort: parents first, then children
+    const sorted = [...globalCategories].sort((a, b) => {
+      if (!a.parentId && b.parentId) return -1
+      if (a.parentId && !b.parentId) return 1
+      return (a.order || 0) - (b.order || 0)
+    })
+
+    let added = 0
+    let skipped = 0
+
+    // 5. Process each global category
+    for (const cat of sorted) {
+      // Skip if already exists locally (by slug)
+      if (localSlugs.has(cat.slug)) {
+        skipped++
+        continue
+      }
+
+      // Resolve local parentId
+      let localParentId: string | null = null
+      if (cat.parentId) {
+        // Find parent's slug from global categories
+        const parentGlobal = globalCategories.find(g => g.id === cat.parentId)
+        if (parentGlobal) {
+          localParentId = localSlugToId.get(parentGlobal.slug) || null
+        }
+        // If parent doesn't exist locally and wasn't just created, skip
+        if (!localParentId) {
+          skipped++
+          continue
+        }
+      }
+
+      // Create local category
+      const localCat = await prisma.category.create({
+        data: {
+          name: cat.name,
+          slug: cat.slug,
+          siteId,
+          isGlobal: false,
+          parentId: localParentId,
+          description: cat.description,
+          order: cat.order,
+          color: cat.color
+        }
+      })
+
+      // Add to tracking maps so children can reference it
+      localSlugs.add(cat.slug)
+      localSlugToId.set(cat.slug, localCat.id)
+      added++
+    }
+
+    return { added, skipped }
   }
 
   /**

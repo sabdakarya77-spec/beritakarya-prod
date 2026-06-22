@@ -97,13 +97,13 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 3: API — Sync dari Global (Add Only)
 
-- [ ] **3.1** `apps/api/src/modules/category/category.service.ts` — Tambah method `syncGlobalToLocal(siteId)`
+- [x] **3.1** `apps/api/src/modules/category/category.service.ts` — Tambah method `syncGlobalToLocal(siteId)`
   - Ambil kategori global, ambil kategori lokal site
   - Bandingkan by slug — yang belum ada di lokal, tambahkan
   - Yang sudah ada di lokal → biarkan (tidak diubah)
   - Pertahankan hierarki saat copy
 
-- [ ] **3.2** `apps/api/src/modules/category/category.controller.ts` — Tambah endpoint `POST /categories/sync-from-global`
+- [x] **3.2** `apps/api/src/modules/category/category.controller.ts` — Tambah endpoint `POST /categories/sync-from-global`
   - Body: `{ siteId: string }`
   - Auth: superadmin only
   - Panggil `syncGlobalToLocal(siteId)`
@@ -115,10 +115,10 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 4: API — Delete Aman (Otomatis)
 
-- [ ] **4.1** Verifikasi `deleteCategory` — tidak perlu perubahan
-  - Karena Site View hanya menampilkan kategori lokal, delete otomatis aman
-  - Yang dihapus pasti baris lokal (`siteId=<siteId>`, `isGlobal=false`)
-  - Tidak perlu proteksi `isGlobal` karena global tidak masuk ke Site View
+- [x] **4.1** Verifikasi `deleteCategory` — tambah proteksi defense in depth
+  - Site View hanya menampilkan kategori lokal → delete otomatis aman
+  - Tambah check `isGlobal` → tolak hapus kategori global dari Site View
+  - Parameter `allowGlobal` → Global View tetap bisa hapus global
 
 - [ ] **4.2** Test: hapus sub-kategori di Site View pusat → kategori lokal pusat yang terhapus, global tidak terpengaruh
 - [ ] **4.3** Test: hapus sub-kategori di Site View nganjuk → kategori lokal nganjuk yang terhapus, pusat tidak terpengaruh
@@ -127,15 +127,16 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 5: API — Global View CRUD
 
-- [ ] **5.1** Verifikasi `createCategory` — pastikan Global View bisa buat kategori global
+- [x] **5.1** Verifikasi `createCategory` — Global View bisa buat kategori global
   - Parameter `siteId: null` → `isGlobal: true`
   - Tidak masalah karena Global View terpisah dari Site View
 
-- [ ] **5.2** Verifikasi `updateCategory` — pastikan Global View bisa edit kategori global
+- [x] **5.2** Verifikasi `updateCategory` — Global View bisa edit kategori global
 
-- [ ] **5.3** Verifikasi `deleteCategory` — pastikan Global View bisa hapus kategori global
+- [x] **5.3** Verifikasi `deleteCategory` — Global View bisa hapus kategori global
   - Hapus kategori global di Global View = aman (tidak ada site yang pakai baris global)
   - Site sudah pakai kategori lokal masing-masing
+  - Controller pass `allowGlobal=true` dari `?view=global`
 
 - [ ] **5.4** Test: CRUD di Global View → kategori global berubah, kategori lokal site tidak terpengaruh
 
@@ -143,12 +144,12 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 6: Frontend — Site View Hanya Kategori Lokal
 
-- [ ] **6.1** `apps/web/app/[site]/dashboard/categories/page.tsx` — Pastikan fetch benar
+- [x] **6.1** `apps/web/app/[site]/dashboard/categories/page.tsx` — Pastikan fetch benar
   - Site View: `?site=<siteId>` → hanya kategori lokal
   - Global View: `?view=global` → hanya global
   - Sudah benar dari commit 311e442, pastikan tidak ada perubahan yang rusak
 
-- [ ] **6.2** Badge — pastikan Site View menampilkan nama site (bukan "GLOBAL")
+- [x] **6.2** Badge — pastikan Site View menampilkan nama site (bukan "GLOBAL")
   - Sudah benar dari commit 311e442
   - Karena sekarang yang tampil pasti lokal, badge otomatis benar
 
@@ -159,12 +160,12 @@ Site View menampilkan kategori lokal yang berdiri sendiri (tidak terikat global)
 
 ### Phase 7: Frontend — Editor dan Public Navbar
 
-- [ ] **7.1** `apps/web/components/editor/tabs/TabSettings.tsx` — Verifikasi editor
+- [x] **7.1** `apps/web/components/editor/tabs/TabSettings.tsx` — Verifikasi editor
   - Fetch `GET /categories/tree?site=<siteId>` → sudah return lokal saja
   - Dropdown kategori menampilkan kategori lokal site tersebut
   - Pastikan artikel lama yang sudah di-remap (Phase 0) tetap ter-assign dengan benar
 
-- [ ] **7.2** `apps/web/components/layout/PublicSiteLayout.tsx` — Verifikasi public navbar
+- [x] **7.2** `apps/web/components/layout/PublicSiteLayout.tsx` — Verifikasi public navbar
   - Fetch `GET /categories/tree?site=<siteId>` → sudah return lokal saja
   - Chipcard/navbar menampilkan kategori lokal site tersebut
   - Filter artikel by slug → tetap berfungsi (slug lokal = slug global)
@@ -272,11 +273,11 @@ Phase 11 (E2E Test)
 | 0. Migrasi Data Existing | ⏳ Belum | **WAJIB pertama kali** |
 | 1. Create Site Auto-Copy | ✅ Selesai | 1.1 + 1.2 done, 1.3 perlu test manual |
 | 2. Site View Hanya Lokal | ✅ Selesai | 2.1-2.5 done, 2.6 perlu test manual |
-| 3. Sync Add Only | ⏳ Belum | |
-| 4. Delete Aman | ⏳ Belum | |
-| 5. Global View CRUD | ⏳ Belum | |
-| 6. Frontend Site View | ⏳ Belum | |
-| 7. Frontend Editor + Public | ⏳ Belum | |
+| 3. Sync Add Only | ✅ Selesai | 3.1 + 3.2 done, 3.3 perlu test manual |
+| 4. Delete Aman | ✅ Selesai | Defense in depth + allowGlobal param |
+| 5. Global View CRUD | ✅ Selesai | Verifikasi CRUD berfungsi |
+| 6. Frontend Site View | ✅ Selesai | Fetch + badge verified, 6.3-6.4 perlu test manual |
+| 7. Frontend Editor + Public | ✅ Selesai | Verifikasi fetch + filter, 7.3-7.5 perlu test manual |
 | 8. Frontend Tombol Sync | ⏳ Belum | |
 | 9. SiteCategoriesDialog | ⏳ Belum | |
 | 10. Cleanup SiteCategory | ⏳ Belum | |

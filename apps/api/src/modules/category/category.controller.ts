@@ -19,6 +19,9 @@ categoryRouter.post('/sync-from-template',
 categoryRouter.post('/migrate-to-local',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(migrateToLocal))
+categoryRouter.post('/sync-from-global',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(syncFromGlobal))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin']),
@@ -272,14 +275,19 @@ export async function seedGlobalCategories(req: Request, res: Response) {
 
 /**
  * DELETE /api/v1/categories/:id
- * Delete a category (global categories cannot be deleted)
+ * Delete a category.
+ * Global categories can only be deleted from Global View (view=global).
  */
 export async function deleteCategory(req: Request, res: Response) {
   try {
     const { id } = req.params
+    const { view } = req.query
     const actorUserId = req.user!.userId
 
-    await categoryService.deleteCategory(id, actorUserId)
+    // Allow global category deletion only from Global View
+    const allowGlobal = view === 'global'
+
+    await categoryService.deleteCategory(id, actorUserId, allowGlobal)
 
     res.json({ success: true, message: 'Category deleted' })
   } catch (error: unknown) {
@@ -347,6 +355,45 @@ export async function migrateToLocal(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'CATEGORY_MIGRATE_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/categories/sync-from-global
+ * Phase 3: Sync global categories to local site (Add Only).
+ * Adds missing categories from global, keeps existing local intact.
+ * Superadmin only.
+ */
+export async function syncFromGlobal(req: Request, res: Response) {
+  try {
+    const { siteId } = req.body
+
+    if (!siteId || typeof siteId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'siteId diperlukan' }
+      })
+    }
+
+    const result = await categoryService.syncGlobalToLocal(siteId)
+
+    res.json({
+      success: true,
+      data: {
+        siteId,
+        added: result.added,
+        skipped: result.skipped,
+        message: result.added > 0
+          ? `Berhasil menambahkan ${result.added} kategori baru dari global. ${result.skipped} kategori sudah ada (tidak diubah).`
+          : 'Tidak ada kategori baru dari global. Semua sudah ada di lokal.'
+      }
+    })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_SYNC_FAILED', message: getErrorMessage(error) }
     })
   }
 }

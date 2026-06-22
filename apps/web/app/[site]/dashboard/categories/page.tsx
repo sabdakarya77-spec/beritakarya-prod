@@ -36,7 +36,7 @@ export default function CategoriesDashboard() {
         // Global View: hanya tampilkan kategori global saja
         queryParams.view = 'global';
       } else {
-        // Site View: tampilkan semua kategori yang relevan untuk situs ini (lokal + global yang di-assign)
+        // Site View: hanya tampilkan kategori lokal site ini (berdiri sendiri, tidak termasuk global)
         queryParams.site = siteId;
       }
       // Use /categories/tree endpoint to get hierarchical structure (synced with homepage & editor)
@@ -180,7 +180,10 @@ export default function CategoriesDashboard() {
   const confirmDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      await api.delete(`/categories/${deleteConfirm.id}`);
+      // Pass view context so backend knows if delete is from Global View
+      await api.delete(`/categories/${deleteConfirm.id}`, {
+        params: isGlobalView ? { view: 'global' } : {}
+      });
       showToast('Kategori berhasil dihapus');
       fetchCategories();
     } catch (error: unknown) {
