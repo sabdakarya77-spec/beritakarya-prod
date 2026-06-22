@@ -90,15 +90,27 @@ export function parseArticleBlocks(blocks: unknown) {
   return blocksArraySchema.parse(normalizeArticleBlocks(blocks))
 }
 
+// Legacy single categoryId (untuk backward compat)
 const optionalCategoryId = z.preprocess(
   (val) => (val === '' ? null : val),
   z.string().nullable().optional()
 )
 
+// Multi-category: max 3, normalisasi dari string tunggal atau array
+const optionalCategoryIds = z.preprocess(
+  (val) => {
+    if (val === '' || val === null || val === undefined) return []
+    if (typeof val === 'string') return [val]
+    return val
+  },
+  z.array(z.string()).max(3, 'Maksimal 3 kategori per artikel').default([])
+)
+
 export const createArticleSchema = z.object({
   title: z.string().trim().min(1, 'Judul wajib diisi').max(200),
   excerpt: z.string().trim().max(280).optional(),
-  categoryId: optionalCategoryId,
+  categoryId: optionalCategoryId,       // legacy field
+  categoryIds: optionalCategoryIds,     // baru: array max 3
   tags: z.array(z.string()).default([]),
   blocks: blocksField,
   contentType: z.enum(['article', 'photo_journalism', 'video_exclusive']).default('article'),
@@ -108,29 +120,58 @@ export const createArticleSchema = z.object({
   isExclusive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   featuredImage: z.string().optional(),
+}).transform((data) => {
+  // Konsolidasikan categoryId (legacy) dan categoryIds (baru)
+  const categoryIds = [...data.categoryIds]
+  if (data.categoryId && !categoryIds.includes(data.categoryId)) {
+    categoryIds.unshift(data.categoryId) // legacy → index 0 (primary)
+  }
+  const { categoryId, ...rest } = data
+  return {
+    ...rest,
+    categoryIds: Array.from(new Set(categoryIds)).slice(0, 3)
+  }
 })
 
 export const updateArticleSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   excerpt: z.string().trim().max(280).optional(),
-  categoryId: optionalCategoryId,
+  categoryId: optionalCategoryId,       // legacy field
+  categoryIds: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined
+      if (typeof val === 'string') return [val]
+      return val
+    },
+    z.array(z.string()).max(3, 'Maksimal 3 kategori per artikel').optional()
+  ),
   tags: z.array(z.string()).optional(),
   blocks: blocksField.optional(),
   contentType: z.enum(['article', 'photo_journalism', 'video_exclusive']).optional(),
   scheduledAt: z.coerce.date().optional().nullable(),
   metaTitle: z.string().max(60).optional(),
   metaDescription: z.string().max(160).optional(),
-  // [FIX] Extended status enum to cover all workflow states
   status: z.enum(['draft','submitted','review','revision','approved','scheduled','published','archived']).optional(),
   publishedAt: z.coerce.date().optional(),
-  // [FIX] Added missing editorial fields that were silently stripped before
   isBreaking: z.boolean().optional(),
   isExclusive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   featuredImage: z.string().optional(),
   reviewNotes: z.string().optional(),
   reviewedBy: z.string().optional(),
-  // [FIX] Removed slug field - service auto-generates from title change
+}).transform((data) => {
+  const result = { ...data } as Record<string, unknown>
+  // Konsolidasikan hanya jika salah satu dikirim
+  if (data.categoryId !== undefined || data.categoryIds !== undefined) {
+    let resolved: string[] = []
+    if (data.categoryIds) resolved = [...data.categoryIds]
+    if (data.categoryId) {
+      if (!resolved.includes(data.categoryId)) resolved.unshift(data.categoryId)
+    }
+    result.categoryIds = Array.from(new Set(resolved)).slice(0, 3)
+  }
+  delete result.categoryId
+  return result
 })
 
 export const articleQuerySchema = z.object({

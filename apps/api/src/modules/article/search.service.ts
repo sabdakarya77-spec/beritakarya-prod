@@ -26,12 +26,20 @@ const index = client ? client.index('articles') : null
 
 async function _indexArticle(article: Record<string, unknown>): Promise<void> {
   if (!index) return
+  // Ekstrak categoryIds dari relasi categories (join table)
+  const categories = article.categories as Array<Record<string, unknown>> | undefined
+  const categoryIds = categories
+    ? categories.map(c => (c.category as Record<string, unknown>)?.id || c.categoryId).filter(Boolean)
+    : []
+  const primaryCategoryId = categoryIds[0] || null
+
   await index.addDocuments([{
     id: article.id,
     title: article.title,
     slug: article.slug,
     siteId: article.siteId,
-    categoryId: article.categoryId,
+    categoryId: primaryCategoryId,  // backward compat: primary category
+    categoryIds,                     // baru: semua kategori
     authorId: article.authorId,
     status: article.status,
     blocks: article.blocks,

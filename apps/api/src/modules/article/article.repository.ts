@@ -38,9 +38,9 @@ export async function findArticlesBySite(
     
     if (catRecord) {
       const ids = [catRecord.id, ...catRecord.subCategories.map((sub: { id: string }) => sub.id)]
-      categoryFilter.categoryId = { in: ids }
+      categoryFilter.categories = { some: { categoryId: { in: ids } } }
     } else {
-      categoryFilter.categoryId = { in: [] }
+      categoryFilter.categories = { some: { categoryId: { in: [] } } }
     }
   }
 
@@ -70,14 +70,16 @@ export async function findArticlesBySite(
     prisma.article.findMany({
       where,
       select: {
-        id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+        id: true, title: true, slug: true, excerpt: true, status: true,
         siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
         isBreaking: true, isExclusive: true, isFeatured: true,
         featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
         viewCount: true, wordCount: true, readingTimeMin: true,
         blocks: true, tags: true, metaTitle: true, metaDescription: true,
         contentType: true,
-        category: { select: { id: true, name: true, slug: true } },
+        categories: {
+          include: { category: { select: { id: true, name: true, slug: true } } }
+        },
         author: { select: { id: true, name: true, role: true } }
       },
       orderBy: { createdAt: 'desc' },
@@ -104,14 +106,14 @@ export async function findArticlesByIds(
       ...(opts.authorId && { authorId: opts.authorId })
     },
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, role: true } }
     }
   })
@@ -141,14 +143,14 @@ export async function findArticleById(id: string, siteId: string) {
   return prisma.article.findFirst({
     where: { id, siteId, ...articleNotDeleted },
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, email: true, role: true } }
     }
   })
@@ -158,14 +160,14 @@ export async function findArticleBySlug(slug: string, siteId: string) {
   return prisma.article.findFirst({
     where: { siteId, slug, ...articleNotDeleted },
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, role: true } }
     }
   })
@@ -175,14 +177,14 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
   return prisma.article.findFirst({
     where: { siteId, slug, status: 'published', ...articleNotDeleted },
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, role: true } }
     }
   })
@@ -190,23 +192,32 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
 
 export async function createArticle(data: {
   title: string; slug: string; excerpt?: string; siteId: string
-  authorId: string; categoryId?: string | null; tags?: Prisma.InputJsonValue; blocks?: Prisma.InputJsonValue[]
+  authorId: string; categoryIds?: string[]; tags?: Prisma.InputJsonValue; blocks?: Prisma.InputJsonValue[]
   contentType?: ContentType;
   metaTitle?: string; metaDescription?: string
   isBreaking?: boolean; isExclusive?: boolean; isFeatured?: boolean;
   featuredImage?: string;
 }) {
+  const { categoryIds, ...rest } = data
   return prisma.article.create({
-    data: { ...data, blocks: data.blocks ?? [] },
+    data: {
+      ...rest,
+      blocks: data.blocks ?? [],
+      ...(categoryIds && categoryIds.length > 0 && {
+        categories: {
+          create: categoryIds.map(catId => ({ categoryId: catId }))
+        }
+      })
+    },
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, role: true } }
     }
   })
@@ -216,7 +227,7 @@ export async function updateArticle(
   id: string, siteId: string,
   data: Partial<{
     title: string; slug: string; excerpt: string; blocks: Prisma.InputJsonValue[]; metaTitle: string; metaDescription: string;
-    status: string; categoryId: string | null; tags: Prisma.InputJsonValue;
+    status: string; tags: Prisma.InputJsonValue;
     contentType: ContentType;
     isBreaking: boolean; isExclusive: boolean; isFeatured: boolean;
     wordCount: number; readingTimeMin: number; publishedAt: Date;
@@ -229,14 +240,14 @@ export async function updateArticle(
     where: { id },
     data: data as Prisma.ArticleUpdateInput,
     select: {
-      id: true, title: true, slug: true, excerpt: true, categoryId: true, status: true,
+      id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
       featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      category: { select: { id: true, name: true, slug: true } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
       author: { select: { id: true, name: true, role: true } }
     }
   })

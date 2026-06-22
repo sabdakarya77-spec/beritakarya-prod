@@ -153,7 +153,7 @@ export async function createArticle(
     title: string;
     excerpt?: string;
     blocks?: ArticleBlock[];
-    categoryId?: string | null;
+    categoryIds?: string[];
     tags?: string[];
     contentType?: string;
     metaTitle?: string;
@@ -205,7 +205,7 @@ export async function createArticle(
       metaDescription: input.metaDescription
     })
 
-    const resolvedCategoryId = await resolveCategoryId(input.categoryId, siteId)
+    const resolvedCategoryIds = await resolveCategoryIds(input.categoryIds || [], siteId)
     const slug = await resolveUniqueSlug(input.title, siteId)
     const article = await createArticleWithSlugRetry({
       title: input.title,
@@ -213,7 +213,7 @@ export async function createArticle(
       excerpt: input.excerpt?.trim() || undefined,
       siteId,
       authorId: user.userId,
-      categoryId: resolvedCategoryId,
+      categoryIds: resolvedCategoryIds,
       tags: input.tags ?? [],
       blocks: (withSeo.blocks ?? []) as unknown as Prisma.InputJsonValue[],
       contentType: (input.contentType as ContentType) ?? 'article',
@@ -249,7 +249,7 @@ export async function updateArticle(
   id: string, siteId: string,
   input: Partial<{
     title: string; excerpt: string; blocks: ArticleBlock[]; metaTitle: string; metaDescription: string;
-    categoryId: string | null; tags: string[]; status: string;
+    categoryIds: string[]; tags: string[]; status: string;
     contentType: string;
     isBreaking: boolean; isExclusive: boolean; isFeatured: boolean;
     featuredImage: string; reviewNotes: string; reviewedBy: string;
@@ -327,9 +327,10 @@ export async function updateArticle(
 
   let data: Record<string, unknown> = { ...input }
 
-  // Resolve categoryId from slug to UUID if provided
-  if (input.categoryId !== undefined) {
-    data.categoryId = await resolveCategoryId(input.categoryId, siteId)
+  // Resolve categoryIds from slug to UUID if provided
+  let resolvedCategoryIds: string[] | undefined
+  if (input.categoryIds !== undefined) {
+    resolvedCategoryIds = await resolveCategoryIds(input.categoryIds, siteId)
   }
 
   if (input.blocks && !input.metaDescription?.trim()) {
@@ -378,9 +379,25 @@ export async function updateArticle(
     data.readingTimeMin = Math.max(1, Math.ceil(words / 200))
   }
 
+  // Hapus categoryId dari data (kolom sudah tidak ada di schema)
+  delete data.categoryId
+
   const updated = data.slug
     ? await updateArticleWithSlugRetry(id, siteId, data)
     : await repo.updateArticle(id, siteId, data)
+
+  // Update kategori via join table (atomic nested write)
+  if (resolvedCategoryIds !== undefined) {
+    await prisma.article.update({
+      where: { id },
+      data: {
+        categories: {
+          deleteMany: {},
+          create: resolvedCategoryIds.map(catId => ({ categoryId: catId }))
+        }
+      }
+    })
+  }
 
   // Auto-save version on submission
   if (input.status === 'submitted') {
@@ -708,4 +725,24 @@ async function resolveCategoryId(categoryId: string | null | undefined, siteId: 
 
   // Slug tidak ditemukan — throw error agar tidak silent null
   throw new AppError(`Kategori "${categoryId}" tidak ditemukan di database`, 400)
+}
+
+/**
+ * Resolve array of category slugs/UUIDs to UUIDs.
+ * Wrapper around resolveCategoryId for multi-category support.
+ */
+async function resolveCategoryIds(categoryIds: string[], siteId: string): Promise<string[]> {
+  if (!categoryIds.length) return []
+
+  const resolved: string[] = []
+  for (const id of categoryIds) {
+    const catId = await resolveCategoryId(id, siteId)
+    if (catId) resolved.push(catId)
+  }
+
+  if (resolved.length > 3) {
+    throw new AppError('Maksimal 3 kategori per artikel', 400)
+  }
+
+  return resolved
 }
