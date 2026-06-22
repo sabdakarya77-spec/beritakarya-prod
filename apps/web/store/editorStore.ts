@@ -22,7 +22,7 @@ export interface EditorState {
   // Metadata & Editorial
   metaTitle: string
   metaDescription: string
-  categoryId: string | null
+  categoryIds: string[]
   tags: string[]
   featuredImage: string
   isBreaking: boolean
@@ -82,10 +82,10 @@ function createInitialParagraphBlock() {
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 
-function hasMeaningfulContent(state: Pick<EditorState, 'title' | 'blocks' | 'categoryId' | 'tags' | 'featuredImage' | 'isBreaking' | 'isExclusive' | 'isFeatured'>) {
+function hasMeaningfulContent(state: Pick<EditorState, 'title' | 'blocks' | 'categoryIds' | 'tags' | 'featuredImage' | 'isBreaking' | 'isExclusive' | 'isFeatured'>) {
   const firstBlock = state.blocks[0] as { content?: string } | undefined
   const firstBlockContent = typeof firstBlock?.content === 'string' ? firstBlock.content.trim() : ''
-  const hasEditorialData = Boolean(state.categoryId || (state.tags && state.tags.length > 0) || state.featuredImage || state.isBreaking || state.isExclusive || state.isFeatured)
+  const hasEditorialData = Boolean((state.categoryIds && state.categoryIds.length > 0) || (state.tags && state.tags.length > 0) || state.featuredImage || state.isBreaking || state.isExclusive || state.isFeatured)
   return Boolean(state.title.trim() || firstBlockContent || state.blocks.length > 1 || hasEditorialData)
 }
 
@@ -105,7 +105,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   
   metaTitle: '',
   metaDescription: '',
-  categoryId: null,
+  categoryIds: [],
   tags: [],
   featuredImage: '',
   isBreaking: false,
@@ -133,15 +133,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setContentType: (contentType) => {
     // Auto-set category and flags based on content type
     let updates: Partial<EditorState> = { contentType }
-    
+
     if (contentType === 'photo_journalism') {
-      updates.categoryId = 'foto-jurnalistik'
+      updates.categoryIds = ['foto-jurnalistik']
       updates.isExclusive = true
     } else if (contentType === 'video_exclusive') {
-      updates.categoryId = 'video'
+      updates.categoryIds = ['video']
       updates.isExclusive = true
     }
-    
+
     set({ ...updates, isDirty: true })
     scheduleAutoSave(get)
   },
@@ -339,9 +339,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const blocks: Block[] = Array.isArray(rawBlocks) && rawBlocks.length > 0
         ? rawBlocks
         : [createInitialParagraphBlock()]
-      // Use category slug for frontend compatibility (frontend uses slug, not UUID)
-      const resolvedCategoryId = article.category?.slug || article.categoryId || null
-      
+      // Use category slugs for frontend compatibility (frontend uses slug, not UUID)
+      const categoryIds = article.categories?.map(
+        (c: { category?: { slug: string } }) => c.category?.slug
+      ).filter(Boolean) || []
+
       set({
         articleId: article.id,
         title: article.title || '',
@@ -351,7 +353,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         status: article.status,
         metaTitle: article.metaTitle || '',
         metaDescription: article.metaDescription || '',
-        categoryId: resolvedCategoryId,
+        categoryIds,
         tags: article.tags || [],
         featuredImage: article.featuredImage || '',
         isBreaking: article.isBreaking || false,
@@ -374,7 +376,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const s = get()
     // Don't save if it's a new article with no data at all
     const firstBlock = s.blocks[0]
-    const hasEditorialData = Boolean(s.categoryId || (s.tags && s.tags.length > 0) || s.featuredImage || s.isBreaking || s.isExclusive || s.isFeatured)
+    const hasEditorialData = Boolean((s.categoryIds && s.categoryIds.length > 0) || (s.tags && s.tags.length > 0) || s.featuredImage || s.isBreaking || s.isExclusive || s.isFeatured)
     const hasFirstBlockContent = firstBlock && 'content' in firstBlock && typeof firstBlock.content === 'string' && firstBlock.content.trim()
     if (!s.articleId && !s.title.trim() && !hasEditorialData && s.blocks.length <= 1 && !hasFirstBlockContent) return
 
@@ -387,7 +389,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         contentType: s.contentType,
         metaTitle: s.metaTitle?.slice(0, 60) || undefined,
         metaDescription: s.metaDescription?.slice(0, 160) || undefined,
-        categoryId: s.categoryId || null,
+        categoryIds: s.categoryIds,
         tags: s.tags,
         featuredImage: s.featuredImage || undefined,
         isBreaking: s.isBreaking,
@@ -483,7 +485,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     articleId: null, siteId: siteId ?? null, title: '', status: 'draft',
     excerpt: '',
     saving: false, saveError: null, lastSaved: null, isDirty: false, isLoading: false, undoStack: [],
-    metaTitle: '', metaDescription: '', categoryId: null, tags: [],
+    metaTitle: '', metaDescription: '', categoryIds: [], tags: [],
     featuredImage: '', isBreaking: false, isExclusive: false, isFeatured: false,
     isSidebarOpen: false, activeTab: 'content', contentType: 'article'
   }),
@@ -494,7 +496,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     if (!s.title?.trim()) missing.push('Judul artikel belum diisi')
     if (!s.excerpt?.trim()) missing.push('Deck / Excerpt belum diisi')
-    if (!s.categoryId) missing.push('Kategori belum dipilih')
+    if (!s.categoryIds?.length) missing.push('Kategori belum dipilih')
     if (!s.featuredImage) missing.push('Gambar utama belum diunggah')
 
     // Helper: hitung kata dari paragraph/heading blocks
@@ -536,7 +538,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     if (s.title?.trim()) score += 20
     if (s.excerpt?.trim()) score += 20
-    if (s.categoryId) score += 20
+    if (s.categoryIds?.length) score += 20
     if (s.featuredImage) score += 20
 
     // Helper: hitung kata dari paragraph/heading blocks

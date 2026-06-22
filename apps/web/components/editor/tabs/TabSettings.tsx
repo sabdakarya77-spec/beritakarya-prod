@@ -16,17 +16,17 @@ interface EditorCategoryItem extends CategoryItem {
 }
 
 export function TabSettings() {
-  const { 
+  const {
     siteId,
-    categoryId, 
-    tags, 
+    categoryIds,
+    tags,
     featuredImage,
     isBreaking,
     isExclusive,
     isFeatured,
     contentType,
     setContentType,
-    updateArticleData 
+    updateArticleData
   } = useEditorStore()
 
   const { upload, uploading, reset: resetUpload } = useImageUpload()
@@ -83,11 +83,13 @@ export function TabSettings() {
     return result
   }, [categories])
 
-  // Find selected category name
-  const selectedCategoryName = useMemo(() => {
-    const found = flatCategories.find(c => c.slug === categoryId || c.id === categoryId)
-    return found?.name || 'Pilih kategori...'
-  }, [categoryId, flatCategories])
+  // Find selected category names
+  const selectedCategoryNames = useMemo(() => {
+    return categoryIds.map(slug => {
+      const found = flatCategories.find(c => c.slug === slug || c.id === slug)
+      return found?.name || slug
+    })
+  }, [categoryIds, flatCategories])
 
   const handleAddTag = () => {
     if (tagInput.trim() && !localTags.includes(tagInput.trim())) {
@@ -112,8 +114,20 @@ export function TabSettings() {
   }
 
   const handleCategorySelect = (slug: string) => {
-    updateArticleData({ categoryId: slug || null })
-    setShowCategoryDropdown(false)
+    if (categoryIds.includes(slug)) {
+      // Deselect
+      updateArticleData({ categoryIds: categoryIds.filter(s => s !== slug) })
+    } else {
+      // Select (max 3)
+      if (categoryIds.length >= 3) return
+      updateArticleData({ categoryIds: [...categoryIds, slug] })
+    }
+    // Jangan tutup dropdown — biarkan user pilih beberapa
+  }
+
+  const handleSetPrimary = (slug: string) => {
+    const reordered = [slug, ...categoryIds.filter(s => s !== slug)]
+    updateArticleData({ categoryIds: reordered })
   }
 
   const handleMediaSelect = (media: MediaItem) => {
@@ -272,89 +286,170 @@ export function TabSettings() {
         )}
       </div>
 
-      {/* Category Dropdown */}
+      {/* Category Multi-Select (maks 3) */}
       <div className="space-y-2">
         <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">
           <Tag size={12} />
           Kategori
         </label>
+
+        {/* Selected Categories as chips */}
+        {categoryIds.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {categoryIds.map((slug, index) => {
+              const name = flatCategories.find(c => c.slug === slug)?.name || slug
+              const isPrimary = index === 0
+              return (
+                <span key={slug} className={cn(
+                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold",
+                  isPrimary
+                    ? "bg-panel-accent/20 text-panel-accent ring-1 ring-panel-accent/30"
+                    : "bg-panel-accent/10 text-panel-accent"
+                )}>
+                  {isPrimary && <Star size={8} className="fill-current" />}
+                  {name}
+                  {!isPrimary && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSetPrimary(slug) }}
+                      className="ml-0.5 hover:text-panel-accent/70 text-[8px] underline"
+                      title="Jadikan Kategori Utama"
+                    >
+                      Utama
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleCategorySelect(slug) }}
+                    className="hover:text-panel-accent/70"
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              )
+            })}
+          </div>
+        )}
+
         <div className="relative">
           <button
             onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-panel-border bg-panel-surface text-xs font-medium text-panel-text-primary hover:bg-panel-elevated hover:border-panel-border-hover transition-all text-left"
           >
-            <span className={categoryId ? 'text-panel-text-primary font-semibold' : 'text-panel-text-muted'}>
-              {selectedCategoryName}
+            <span className={categoryIds.length > 0 ? 'text-panel-text-primary font-semibold' : 'text-panel-text-muted'}>
+              {categoryIds.length > 0 ? `${categoryIds.length}/3 dipilih` : 'Pilih kategori...'}
             </span>
             <ChevronDown size={14} className="text-panel-text-secondary" />
           </button>
-          
+
           {showCategoryDropdown && (
             <>
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setShowCategoryDropdown(false)} 
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowCategoryDropdown(false)}
               />
               <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-panel-surface dark:bg-panel-elevated rounded-lg border border-panel-border shadow-xl max-h-[220px] overflow-y-auto animate-fade-in py-1">
-                <button
-                  onClick={() => handleCategorySelect('')}
-                  className="w-full px-3 py-2 text-left text-[11px] font-semibold text-panel-text-muted hover:bg-panel-elevated border-b border-panel-border"
-                >
-                  Hapus Pilihan
-                </button>
-                {categories.map((cat) => (
-                  <div key={cat.slug} className="border-b border-panel-border/30 last:border-0">
-                    {/* Parent Category */}
-                    <button
-                      onClick={() => handleCategorySelect(cat.slug)}
-                      className={cn(
-                        "w-full px-3 py-2 text-left text-xs font-semibold hover:bg-panel-elevated transition-colors flex items-center justify-between",
-                        categoryId === cat.slug ? 'text-panel-accent bg-panel-accent/5' : 'text-panel-text-primary'
-                      )}
-                    >
-                      <span>{cat.name}</span>
-                      {categoryId === cat.slug && <span className="text-[10px]">✓</span>}
-                    </button>
-                    {/* Sub Categories */}
-                    {cat.subCategories?.map((sub) => (
-                      <div key={sub.slug}>
-                        <button
-                          onClick={() => handleCategorySelect(sub.slug)}
-                          className={cn(
-                            "w-full px-5 py-1.5 text-left text-[11px] hover:bg-panel-elevated transition-colors flex items-center justify-between",
-                            categoryId === sub.slug ? 'text-panel-accent bg-panel-accent/5 font-semibold' : 'text-panel-text-secondary'
-                          )}
-                        >
-                          <span className="flex items-center gap-1">
-                            <span className="text-panel-text-muted/60">↳</span> {sub.name}
-                          </span>
-                          {categoryId === sub.slug && <span className="text-[9px]">✓</span>}
-                        </button>
-                        {/* Sub-Sub Categories */}
-                        {sub.subCategories?.map((subsub) => (
+                {categoryIds.length > 0 && (
+                  <button
+                    onClick={() => updateArticleData({ categoryIds: [] })}
+                    className="w-full px-3 py-2 text-left text-[11px] font-semibold text-red-500 hover:bg-panel-elevated border-b border-panel-border"
+                  >
+                    Hapus Semua Kategori
+                  </button>
+                )}
+                {(() => {
+                  const isMaxReached = categoryIds.length >= 3
+                  return categories.map((cat) => (
+                    <div key={cat.slug} className="border-b border-panel-border/30 last:border-0">
+                      {/* Parent Category */}
+                      <button
+                        onClick={() => handleCategorySelect(cat.slug)}
+                        disabled={isMaxReached && !categoryIds.includes(cat.slug)}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs font-semibold transition-colors flex items-center justify-between",
+                          categoryIds.includes(cat.slug) ? 'text-panel-accent bg-panel-accent/5' : 'text-panel-text-primary',
+                          isMaxReached && !categoryIds.includes(cat.slug)
+                            ? "opacity-40 cursor-not-allowed"
+                            : "hover:bg-panel-elevated cursor-pointer"
+                        )}
+                        title={isMaxReached && !categoryIds.includes(cat.slug) ? "Maksimal 3 kategori telah dipilih" : undefined}
+                      >
+                        <span>{cat.name}</span>
+                        <span className={cn(
+                          "w-3.5 h-3.5 rounded border flex items-center justify-center",
+                          categoryIds.includes(cat.slug)
+                            ? "bg-panel-accent border-panel-accent text-white"
+                            : "border-panel-border"
+                        )}>
+                          {categoryIds.includes(cat.slug) && <span className="text-[8px]">✓</span>}
+                        </span>
+                      </button>
+                      {/* Sub Categories */}
+                      {cat.subCategories?.map((sub) => (
+                        <div key={sub.slug}>
                           <button
-                            key={subsub.slug}
-                            onClick={() => handleCategorySelect(subsub.slug)}
+                            onClick={() => handleCategorySelect(sub.slug)}
+                            disabled={isMaxReached && !categoryIds.includes(sub.slug)}
                             className={cn(
-                              "w-full py-1 text-left text-[10px] hover:bg-panel-elevated transition-colors flex items-center justify-between",
-                              categoryId === subsub.slug ? 'text-panel-accent bg-panel-accent/5 font-semibold' : 'text-panel-text-muted'
+                              "w-full px-5 py-1.5 text-left text-[11px] transition-colors flex items-center justify-between",
+                              categoryIds.includes(sub.slug) ? 'text-panel-accent bg-panel-accent/5 font-semibold' : 'text-panel-text-secondary',
+                              isMaxReached && !categoryIds.includes(sub.slug)
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:bg-panel-elevated cursor-pointer"
                             )}
-                            style={{ paddingLeft: '2.75rem' }}
+                            title={isMaxReached && !categoryIds.includes(sub.slug) ? "Maksimal 3 kategori telah dipilih" : undefined}
                           >
                             <span className="flex items-center gap-1">
-                              <span className="text-panel-text-muted/40">↳</span> {subsub.name}
+                              <span className="text-panel-text-muted/60">↳</span> {sub.name}
                             </span>
-                            {categoryId === subsub.slug && <span className="text-[9px]">✓</span>}
+                            <span className={cn(
+                              "w-3 h-3 rounded border flex items-center justify-center",
+                              categoryIds.includes(sub.slug)
+                                ? "bg-panel-accent border-panel-accent text-white"
+                                : "border-panel-border"
+                            )}>
+                              {categoryIds.includes(sub.slug) && <span className="text-[7px]">✓</span>}
+                            </span>
                           </button>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                          {/* Sub-Sub Categories */}
+                          {sub.subCategories?.map((subsub) => (
+                            <button
+                              key={subsub.slug}
+                              onClick={() => handleCategorySelect(subsub.slug)}
+                              disabled={isMaxReached && !categoryIds.includes(subsub.slug)}
+                              className={cn(
+                                "w-full py-1 text-left text-[10px] transition-colors flex items-center justify-between",
+                                categoryIds.includes(subsub.slug) ? 'text-panel-accent bg-panel-accent/5 font-semibold' : 'text-panel-text-muted',
+                                isMaxReached && !categoryIds.includes(subsub.slug)
+                                  ? "opacity-40 cursor-not-allowed"
+                                  : "hover:bg-panel-elevated cursor-pointer"
+                              )}
+                              style={{ paddingLeft: '2.75rem' }}
+                              title={isMaxReached && !categoryIds.includes(subsub.slug) ? "Maksimal 3 kategori telah dipilih" : undefined}
+                            >
+                              <span className="flex items-center gap-1">
+                                <span className="text-panel-text-muted/40">↳</span> {subsub.name}
+                              </span>
+                              <span className={cn(
+                                "w-2.5 h-2.5 rounded border flex items-center justify-center",
+                                categoryIds.includes(subsub.slug)
+                                  ? "bg-panel-accent border-panel-accent text-white"
+                                  : "border-panel-border"
+                              )}>
+                                {categoryIds.includes(subsub.slug) && <span className="text-[6px]">✓</span>}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                })()}
               </div>
             </>
           )}
         </div>
+        <p className="text-[10px] text-panel-text-muted leading-relaxed">
+          * Kategori pertama = kategori utama (URL kanonis). Klik "Utama" pada chip lain untuk mengubah.
+        </p>
       </div>
 
       {/* Tags */}
