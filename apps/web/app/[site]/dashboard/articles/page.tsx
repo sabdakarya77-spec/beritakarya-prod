@@ -356,42 +356,46 @@ export default function ArticlesPage() {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-          {visibleStatuses.map(s => {
-            const count = countByStatus(s);
-            return (
-              <button 
-                key={s}
-                onClick={() => {
-                  // Langsung set state untuk feedback visual instan (tidak menunggu URL update)
-                  setFilter(s);
-                  setPage(1);
-                  // Gunakan replace agar filter tidak menumpuk di browser history
-                  const params = new URLSearchParams();
-                  params.set('view', viewMode);
-                  if (s) params.set('status', s);
-                  if (searchQuery) params.set('search', searchQuery);
-                  router.replace(`/${site}/dashboard/articles?${params.toString()}`);
-                }}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap',
-                  filter === s
-                    ? 'bg-brand-black dark:bg-white text-white dark:text-slate-900 border-brand-black dark:border-white'
-                    : 'bg-transparent text-gray-400 border-gray-200 dark:border-white/10 hover:border-brand-red hover:text-brand-red'
-                )}
-              >
-                {STATUS_LABELS[s]}
-                {count > 0 && (
-                  <span className={cn(
-                    'text-[8px] font-black px-1.5 py-0.5 rounded-full',
-                    filter === s ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-white/10 text-gray-400'
-                  )}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <div className="relative">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1.5 scroll-smooth">
+            {visibleStatuses.map(s => {
+              const count = countByStatus(s);
+              return (
+                <button 
+                  key={s}
+                  onClick={() => {
+                    // Langsung set state untuk feedback visual instan (tidak menunggu URL update)
+                    setFilter(s);
+                    setPage(1);
+                    // Gunakan replace agar filter tidak menumpuk di browser history
+                    const params = new URLSearchParams();
+                    params.set('view', viewMode);
+                    if (s) params.set('status', s);
+                    if (searchQuery) params.set('search', searchQuery);
+                    router.replace(`/${site}/dashboard/articles?${params.toString()}`);
+                  }}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap',
+                    filter === s
+                      ? 'bg-brand-black dark:bg-white text-white dark:text-slate-900 border-brand-black dark:border-white'
+                      : 'bg-transparent text-gray-400 border-gray-200 dark:border-white/10 hover:border-brand-red hover:text-brand-red'
+                  )}
+                >
+                  {STATUS_LABELS[s]}
+                  {count > 0 && (
+                    <span className={cn(
+                      'text-[8px] font-black px-1.5 py-0.5 rounded-full',
+                      filter === s ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-white/10 text-gray-400'
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {/* Gradient fade overlay tipis di kanan untuk visual cue geser di mobile */}
+          <div className="absolute right-0 top-0 bottom-1.5 w-10 bg-gradient-to-l from-white dark:from-slate-900/90 to-transparent pointer-events-none block md:hidden" />
         </div>
       </div>
 
@@ -407,229 +411,375 @@ export default function ArticlesPage() {
         </div>
       ) : (
         <div className="dash-card overflow-hidden animate-fade-in">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[800px]">
-              <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5">
-              <tr>
-                <th className="px-6 py-3.5 dash-label">Post</th>
-                <th className="px-4 py-3.5 dash-label hidden md:table-cell">Penulis</th>
-                <th className="px-4 py-3.5 dash-label hidden lg:table-cell">Tanggal</th>
-                <th className="px-4 py-3.5 dash-label">Status</th>
-                <th className="px-4 py-3.5 dash-label text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-white/[0.03]">
-              {filtered.filter(a => a?.id).map((article, idx) => (
-                <motion.tr
-                  key={article.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: idx * 0.03 }}
-                  className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
-                >
-                  {/* Title */}
-                  <td className="px-6 py-4 max-w-xs">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {(article.categories?.[0]?.category?.name || article.category?.name) && (
-                          <span className="text-[9px] font-black uppercase tracking-widest text-brand-red">
-                            {article.categories?.[0]?.category?.name || article.category?.name}
-                          </span>
-                        )}
-                        {article.isBreaking && <EditorialBadge variant="breaking" />}
-                        {article.isExclusive && <EditorialBadge variant="exclusive" />}
-                        {article.isFeatured && <EditorialBadge variant="featured" />}
-                      </div>
-                      <Link
-                        href={`/${site}/dashboard/articles/${article.id}`}
-                        className="text-sm font-bold text-brand-black dark:text-white group-hover:text-brand-red transition-colors line-clamp-1 leading-snug"
+          {filtered.length === 0 ? (
+            <div className="px-6 py-20 text-center">
+              <div className="flex flex-col items-center gap-3 text-gray-300 dark:text-white/10">
+                <FileText size={48} strokeWidth={1} />
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                  {searchQuery ? `Tidak ada hasil untuk "${searchQuery}"` : 'Tidak ada post'}
+                </p>
+                {!searchQuery && (
+                  <button
+                    onClick={handleNew}
+                    className="mt-2 flex items-center gap-2 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all"
+                  >
+                    <Plus size={12} /> Tulis Post Pertama
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left min-w-[800px]">
+                  <thead className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-white/5">
+                    <tr>
+                      <th className="px-6 py-3.5 dash-label">Post</th>
+                      <th className="px-4 py-3.5 dash-label hidden md:table-cell">Penulis</th>
+                      <th className="px-4 py-3.5 dash-label hidden lg:table-cell">Tanggal</th>
+                      <th className="px-4 py-3.5 dash-label">Status</th>
+                      <th className="px-4 py-3.5 dash-label text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 dark:divide-white/[0.03]">
+                    {filtered.filter(a => a?.id).map((article, idx) => (
+                      <motion.tr
+                        key={article.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: idx * 0.03 }}
+                        className="group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors"
                       >
-                        {article.title}
-                      </Link>
-                      <div className="flex items-center gap-3 text-[10px] text-gray-400">
-                        {article.viewCount !== undefined && (
-                          <span className="flex items-center gap-1">
-                            <Eye size={10} /> {(article.viewCount || 0).toLocaleString()}
-                          </span>
-                        )}
-                        {article.wordCount && (
-                          <span className="flex items-center gap-1">
-                            <FileText size={10} /> {article.wordCount.toLocaleString()} kata
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Author */}
-                  <td className="px-4 py-4 hidden md:table-cell">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-500 dark:text-gray-400">
-                        {article.author?.name?.[0] || 'R'}
-                      </div>
-                      <span className="text-xs font-medium text-gray-600 dark:text-gray-400 truncate max-w-[100px]">
-                        {article.author?.name || 'Redaksi'}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Date */}
-                  <td className="px-4 py-4 hidden lg:table-cell">
-                    <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                      <Calendar size={11} />
-                      {new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
-                        day:'numeric', month:'short', year:'numeric'
-                      })}
-                    </div>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-4 py-4">
-                    <StatusBadge status={article.status} />
-                  </td>
-
-                  {/* Actions — 4 ikon seragam: Eye, Pencil, Globe, Trash */}
-                  <td className="px-4 py-4">
-                    <div className="flex justify-end items-center gap-1.5 flex-wrap">
-                      {/* 1) EYE — Lihat (publik untuk published, detail untuk non-published) */}
-                      {canViewArticle(article) ? (
-                        <Link
-                          href={`/${site}/artikel/${article.slug}`}
-                          target="_blank"
-                          className="p-2.5 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
-                          title="Lihat Post di Portal Publik"
-                        >
-                          <Eye size={14} />
-                        </Link>
-                      ) : (
-                        <Link
-                          href={`/${site}/dashboard/articles/${article.id}`}
-                          className="p-2.5 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
-                          title="Lihat Detail Post"
-                        >
-                          <Eye size={14} />
-                        </Link>
-                      )}
-
-                      {/* 2) PENCIL — Edit (selalu tersedia untuk author sendiri atau editor) */}
-                      {(() => {
-                        const isOwn = !user?.name || !article.author?.name || article.author.name === user.name
-                        const canEdit = user?.role === 'superadmin'
-                          || user?.role === 'wapimred'
-                          || isOwn
-                        if (!canEdit) {
-                          return (
-                            <button
-                              type="button"
-                              disabled
-                              title="Anda hanya dapat mengedit post milik sendiri"
-                              className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 rounded-lg cursor-not-allowed opacity-50"
+                        {/* Title */}
+                        <td className="px-6 py-4 max-w-xs">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {(article.categories?.[0]?.category?.name || article.category?.name) && (
+                                <span className="text-[9px] font-black uppercase tracking-widest text-brand-red">
+                                  {article.categories?.[0]?.category?.name || article.category?.name}
+                                </span>
+                              )}
+                              {article.isBreaking && <EditorialBadge variant="breaking" />}
+                              {article.isExclusive && <EditorialBadge variant="exclusive" />}
+                              {article.isFeatured && <EditorialBadge variant="featured" />}
+                            </div>
+                            <Link
+                              href={`/${site}/dashboard/articles/${article.id}`}
+                              className="text-sm font-bold text-brand-black dark:text-white group-hover:text-brand-red transition-colors line-clamp-1 leading-snug"
                             >
-                              <Edit3 size={14} />
+                              {article.title}
+                            </Link>
+                            <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                              {article.viewCount !== undefined && (
+                                <span className="flex items-center gap-1">
+                                  <Eye size={10} /> {(article.viewCount || 0).toLocaleString()}
+                                </span>
+                              )}
+                              {article.wordCount && (
+                                <span className="flex items-center gap-1">
+                                  <FileText size={10} /> {article.wordCount.toLocaleString()} kata
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Author */}
+                        <td className="px-4 py-4 hidden md:table-cell">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-500 dark:text-gray-400">
+                              {article.author?.name?.[0] || 'R'}
+                            </div>
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 truncate max-w-[100px]">
+                              {article.author?.name || 'Redaksi'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Date */}
+                        <td className="px-4 py-4 hidden lg:table-cell">
+                          <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                            <Calendar size={11} />
+                            {new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
+                              day:'numeric', month:'short', year:'numeric'
+                            })}
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-4 py-4">
+                          <StatusBadge status={article.status} />
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-4">
+                          <div className="flex justify-end items-center gap-1.5 flex-wrap">
+                            {/* 1) EYE */}
+                            {canViewArticle(article) ? (
+                              <Link
+                                href={`/${site}/artikel/${article.slug}`}
+                                target="_blank"
+                                className="p-2.5 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                                title="Lihat Post di Portal Publik"
+                              >
+                                <Eye size={14} />
+                              </Link>
+                            ) : (
+                              <Link
+                                href={`/${site}/dashboard/articles/${article.id}`}
+                                className="p-2.5 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                                title="Lihat Detail Post"
+                              >
+                                <Eye size={14} />
+                              </Link>
+                            )}
+
+                            {/* 2) PENCIL */}
+                            {(() => {
+                              const isOwn = !user?.name || !article.author?.name || article.author.name === user.name
+                              const canEdit = user?.role === 'superadmin' || user?.role === 'wapimred' || isOwn
+                              if (!canEdit) {
+                                return (
+                                  <button
+                                    type="button"
+                                    disabled
+                                    title="Anda hanya dapat mengedit post milik sendiri"
+                                    className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 rounded-lg cursor-not-allowed opacity-50"
+                                  >
+                                    <Edit3 size={14} />
+                                  </button>
+                                )
+                              }
+                              return (
+                                <Link
+                                  href={`/${site}/dashboard/articles/${article.id}`}
+                                  className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                                  title={getPrimaryActionLabel(article)}
+                                >
+                                  <Edit3 size={14} />
+                                </Link>
+                              )
+                            })()}
+
+                            {/* Tombol Submit-To-Editor (khusus draft) */}
+                            {canSubmitArticle(article) && (
+                              <button
+                                onClick={() => handleSubmitToReview(article.id)}
+                                disabled={actionLoading === article.id}
+                                title="Kirim ke Editor"
+                                className="p-2.5 bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-all disabled:opacity-50"
+                              >
+                                {actionLoading === article.id ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  <Send size={14} />
+                                )}
+                              </button>
+                            )}
+
+                            {/* 3) GLOBE */}
+                            <button
+                              onClick={() => canGoogleIndex(article) && handleGoogleIndex(article.id)}
+                              disabled={!canGoogleIndex(article) || actionLoading === article.id + 'index'}
+                              title={
+                                canGoogleIndex(article)
+                                  ? 'Kirim sinyal indeks Google'
+                                  : user?.role !== 'superadmin'
+                                    ? 'Pengindeksan Google hanya dapat dilakukan oleh Superadmin'
+                                    : 'Post belum terbit — tidak dapat diindeks'
+                              }
+                              className={`p-2.5 rounded-lg transition-all ${
+                                canGoogleIndex(article)
+                                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 cursor-pointer'
+                                  : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 cursor-not-allowed opacity-50'
+                              } disabled:opacity-50`}
+                            >
+                              {actionLoading === article.id + 'index' ? (
+                                <Loader2 size={14} className="animate-spin text-emerald-500" />
+                              ) : (
+                                <Globe size={14} />
+                              )}
                             </button>
-                          )
-                        }
-                        return (
+
+                            {/* 4) TRASH */}
+                            {(() => {
+                              const perm = canDeleteArticleFor(article)
+                              const isDeleting = actionLoading === article.id + 'del'
+                              return (
+                                <button
+                                  onClick={() => perm.allowed && handleDelete(article)}
+                                  disabled={!perm.allowed || isDeleting}
+                                  title={perm.allowed ? 'Hapus Post' : perm.reason}
+                                  className={`p-2.5 rounded-lg transition-all ${
+                                    perm.allowed
+                                      ? 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-red-600 hover:bg-red-500/10 cursor-pointer'
+                                      : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 cursor-not-allowed opacity-50'
+                                  } disabled:opacity-50`}
+                                >
+                                  {isDeleting ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                </button>
+                              )
+                            })()}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card List View */}
+              <div className="block md:hidden divide-y divide-gray-100 dark:divide-white/5">
+                {filtered.filter(a => a?.id).map((article) => (
+                  <div key={article.id} className="p-4 space-y-3 group hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                    {/* Kategori + Editorial Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(article.categories?.[0]?.category?.name || article.category?.name) && (
+                        <span className="text-[9px] font-black uppercase tracking-widest text-brand-red mr-1.5">
+                          {article.categories?.[0]?.category?.name || article.category?.name}
+                        </span>
+                      )}
+                      {article.isBreaking && <EditorialBadge variant="breaking" />}
+                      {article.isExclusive && <EditorialBadge variant="exclusive" />}
+                      {article.isFeatured && <EditorialBadge variant="featured" />}
+                    </div>
+
+                    {/* Judul */}
+                    <Link
+                      href={`/${site}/dashboard/articles/${article.id}`}
+                      className="block text-sm font-bold text-brand-black dark:text-white group-hover:text-brand-red transition-colors leading-snug"
+                    >
+                      {article.title}
+                    </Link>
+
+                    {/* Metadata Row (Penulis, Tanggal, Views, Words) */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-gray-400">
+                      <span className="font-semibold text-gray-600 dark:text-gray-300">
+                        Oleh: {article.author?.name || 'Redaksi'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar size={10} />
+                        {new Date(article.publishedAt || article.createdAt).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'short'
+                        })}
+                      </span>
+                      {article.viewCount !== undefined && (
+                        <span className="flex items-center gap-1">
+                          <Eye size={10} /> {(article.viewCount || 0).toLocaleString()}
+                        </span>
+                      )}
+                      {article.wordCount && (
+                        <span className="flex items-center gap-1">
+                          <FileText size={10} /> {article.wordCount.toLocaleString()} kata
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Status & Actions Row */}
+                    <div className="flex items-center justify-between pt-2.5 border-t border-gray-100 dark:border-white/5">
+                      {/* Status Badge */}
+                      <StatusBadge status={article.status} />
+
+                      {/* Actions Button Group (inline & compact) */}
+                      <div className="flex items-center gap-1.5">
+                        {/* Eye View */}
+                        {canViewArticle(article) ? (
+                          <Link
+                            href={`/${site}/artikel/${article.slug}`}
+                            target="_blank"
+                            className="p-2 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                            title="Lihat Post"
+                          >
+                            <Eye size={13} />
+                          </Link>
+                        ) : (
                           <Link
                             href={`/${site}/dashboard/articles/${article.id}`}
-                            className="p-2.5 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
-                            title={getPrimaryActionLabel(article)}
+                            className="p-2 bg-emerald-600/10 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
+                            title="Lihat Detail"
                           >
-                            <Edit3 size={14} />
+                            <Eye size={13} />
                           </Link>
-                        )
-                      })()}
-
-                      {/* Tombol Submit-To-Editor (khusus draft) — ekstra di samping Edit */}
-                      {canSubmitArticle(article) && (
-                        <button
-                          onClick={() => handleSubmitToReview(article.id)}
-                          disabled={actionLoading === article.id}
-                          title="Kirim ke Editor"
-                          className="p-2.5 bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-all disabled:opacity-50"
-                        >
-                          {actionLoading === article.id
-                            ? <Loader2 size={14} className="animate-spin" />
-                            : <Send size={14} />
-                          }
-                        </button>
-                      )}
-
-                      {/* 3) GLOBE — Google Index (hanya superadmin & post published) */}
-                      <button
-                        onClick={() => canGoogleIndex(article) && handleGoogleIndex(article.id)}
-                        disabled={!canGoogleIndex(article) || actionLoading === article.id + 'index'}
-                        title={
-                          canGoogleIndex(article)
-                            ? 'Kirim sinyal indeks Google'
-                            : user?.role !== 'superadmin'
-                              ? 'Pengindeksan Google hanya dapat dilakukan oleh Superadmin'
-                              : 'Post belum terbit — tidak dapat diindeks'
-                        }
-                        className={`p-2.5 rounded-lg transition-all ${
-                          canGoogleIndex(article)
-                            ? 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 cursor-pointer'
-                            : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 cursor-not-allowed opacity-50'
-                        } disabled:opacity-50`}
-                      >
-                        {actionLoading === article.id + 'index' ? (
-                          <Loader2 size={14} className="animate-spin text-emerald-500" />
-                        ) : (
-                          <Globe size={14} />
                         )}
-                      </button>
 
-                      {/* 4) TRASH — Hapus (bertingkat per-role & status) */}
-                      {(() => {
-                        const perm = canDeleteArticleFor(article)
-                        const isDeleting = actionLoading === article.id + 'del'
-                        return (
+                        {/* Pencil Edit */}
+                        {(() => {
+                          const isOwn = !user?.name || !article.author?.name || article.author.name === user.name
+                          const canEdit = user?.role === 'superadmin' || user?.role === 'wapimred' || isOwn
+                          if (!canEdit) return null
+                          return (
+                            <Link
+                              href={`/${site}/dashboard/articles/${article.id}`}
+                              className="p-2 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-white/10 transition-all"
+                              title={getPrimaryActionLabel(article)}
+                            >
+                              <Edit3 size={13} />
+                            </Link>
+                          )
+                        })()}
+
+                        {/* Submit/Send (khusus draft) */}
+                        {canSubmitArticle(article) && (
                           <button
-                            onClick={() => perm.allowed && handleDelete(article)}
-                            disabled={!perm.allowed || isDeleting}
-                            title={perm.allowed ? 'Hapus Post' : perm.reason}
-                            className={`p-2.5 rounded-lg transition-all ${
-                              perm.allowed
-                                ? 'bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-red-600 hover:bg-red-500/10 cursor-pointer'
-                                : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-white/20 cursor-not-allowed opacity-50'
-                            } disabled:opacity-50`}
+                            onClick={() => handleSubmitToReview(article.id)}
+                            disabled={actionLoading === article.id}
+                            className="p-2 bg-brand-red/10 text-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-all disabled:opacity-50"
                           >
-                            {isDeleting ? (
-                              <Loader2 size={14} className="animate-spin" />
+                            {actionLoading === article.id ? (
+                              <Loader2 size={13} className="animate-spin" />
                             ) : (
-                              <Trash2 size={14} />
+                              <Send size={13} />
                             )}
                           </button>
-                        )
-                      })()}
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+                        )}
 
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center">
-                    <div className="flex flex-col items-center gap-3 text-gray-300 dark:text-white/10">
-                      <FileText size={48} strokeWidth={1} />
-                      <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                        {searchQuery ? `Tidak ada hasil untuk "${searchQuery}"` : 'Tidak ada post'}
-                      </p>
-                      {!searchQuery && (
-                        <button
-                          onClick={handleNew}
-                          className="mt-2 flex items-center gap-2 px-4 py-2 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all"
-                        >
-                          <Plus size={12} /> Tulis Post Pertama
-                        </button>
-                      )}
+                        {/* Globe Indexing */}
+                        {canGoogleIndex(article) && (
+                          <button
+                            onClick={() => handleGoogleIndex(article.id)}
+                            disabled={actionLoading === article.id + 'index'}
+                            className="p-2 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg"
+                          >
+                            {actionLoading === article.id + 'index' ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Globe size={13} />
+                            )}
+                          </button>
+                        )}
+
+                        {/* Trash Hapus */}
+                        {(() => {
+                          const perm = canDeleteArticleFor(article)
+                          if (!perm.allowed) return null
+                          const isDeleting = actionLoading === article.id + 'del'
+                          return (
+                            <button
+                              onClick={() => handleDelete(article)}
+                              disabled={isDeleting}
+                              className="p-2 bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg"
+                            >
+                              {isDeleting ? (
+                                <Loader2 size={13} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={13} />
+                              )}
+                            </button>
+                          )
+                        })()}
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
