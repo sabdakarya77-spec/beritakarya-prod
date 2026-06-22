@@ -161,6 +161,15 @@ export class CategoryService {
     return this.buildCategoryTree(deduplicated)
   }
 
+  async getLocalCategoryTree(siteId: string) {
+    const local = await prisma.category.findMany({
+      where: { siteId, isGlobal: false },
+      include: categoryInclude,
+      orderBy: { order: 'asc' }
+    })
+    return this.buildCategoryTree(local)
+  }
+
   async createCategory(data: {
     name: string
     slug: string
@@ -297,12 +306,6 @@ export class CategoryService {
       throw Object.assign(new Error('Category not found'), { statusCode: 404 })
     }
 
-    if (existing.isGlobal) {
-      throw Object.assign(
-        new Error('Cannot delete global category'),
-        { statusCode: 400 }
-      )
-    }
 
     await prisma.category.delete({
       where: { id: categoryId }

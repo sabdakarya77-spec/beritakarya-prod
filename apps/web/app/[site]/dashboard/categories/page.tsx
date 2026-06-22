@@ -32,8 +32,9 @@ export default function CategoriesDashboard() {
     try {
       const queryParams: Record<string, string> = {};
       if (isGlobalView) {
-        queryParams.view = 'all';
+        queryParams.view = 'global';
       } else {
+        queryParams.view = 'local';
         queryParams.site = siteId;
       }
       // Use /categories/tree endpoint to get hierarchical structure (synced with homepage & editor)
@@ -140,10 +141,6 @@ export default function CategoriesDashboard() {
   };
 
   const handleDeleteRequest = (cat: Category) => {
-    if (cat.isGlobal && !isGlobalView) {
-      showToast('Kategori global hanya dapat dihapus di Global View', 'error');
-      return;
-    }
     setDeleteConfirm(cat);
   };
 
@@ -253,22 +250,30 @@ export default function CategoriesDashboard() {
   // Get parent candidates for dropdown: flatten tree to include Level 1 + Level 2.
   // Exclude self, descendants of self, and Level 3 (to enforce 3-level max).
   const potentialParents = (() => {
-    const result: Category[] = [];
-    const flatten = (items: Category[], depth: number = 0) => {
+    const result: Array<Category & { displayCode?: string }> = [];
+    const flatten = (items: Category[], depth: number = 0, parentCode: string = '') => {
       for (const item of items) {
         // Skip self when editing
         if (editingCategory && item.id === editingCategory.id) continue;
+        const currentCode = parentCode ? `${parentCode}.${item.order || 0}` : `${item.order || 0}`;
         // Level 0 (parent) and Level 1 (sub) can be parents
         if (depth < 2) {
-          result.push(item);
+          result.push({ ...item, displayCode: currentCode });
         }
         if (item.subCategories?.length) {
-          flatten(item.subCategories, depth + 1);
+          flatten(item.subCategories, depth + 1, currentCode);
         }
       }
     };
     flatten(categories);
     return result;
+  })();
+
+  const previewHierarchicalCode = (() => {
+    if (!parentId) return order;
+    const parent = potentialParents.find(p => p.id === parentId);
+    if (!parent) return order;
+    return `${parent.displayCode}.${order}`;
   })();
 
   return (
@@ -391,7 +396,7 @@ export default function CategoriesDashboard() {
                     const prefix = isSub ? '  ↳ ' : '';
                     return (
                       <option key={p.id} value={p.id}>
-                        {prefix}{p.name} {p.isGlobal ? '(Global)' : ''}
+                        {prefix}[{p.displayCode}] {p.name} {p.isGlobal ? '(Global)' : ''}
                       </option>
                     );
                   })}
@@ -410,23 +415,28 @@ export default function CategoriesDashboard() {
                   <label htmlFor="category-order" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                     Urutan (Order) {editingCategory ? '' : '— Otomatis'}
                   </label>
-                  {editingCategory ? (
-                    <input
-                      id="category-order"
-                      type="number"
-                      value={order}
-                      onChange={(e) => setOrder(e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-rose-500 transition-all font-semibold"
-                      required
-                    />
-                  ) : (
-                    <div className="w-full px-4 py-3 bg-gray-100/50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">
-                      {order}
-                      <span className="text-[10px] text-gray-400 ml-2">(otomatis)</span>
-                    </div>
-                  )}
+                  <div className="relative">
+                    {editingCategory ? (
+                      <input
+                        id="category-order"
+                        type="number"
+                        value={order}
+                        onChange={(e) => setOrder(e.target.value)}
+                        placeholder="0"
+                        min="0"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:border-rose-500 transition-all font-semibold"
+                        required
+                      />
+                    ) : (
+                      <div className="w-full px-4 py-3 bg-gray-100/50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">
+                        {order}
+                        <span className="text-[10px] text-gray-400 ml-2">(otomatis)</span>
+                      </div>
+                    )}
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] bg-gray-200/80 dark:bg-gray-750 px-2 py-1 rounded font-mono font-bold text-gray-500 dark:text-gray-400">
+                      Kode: {previewHierarchicalCode}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Color Info (read-only) */}
@@ -498,7 +508,7 @@ export default function CategoriesDashboard() {
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-md font-extrabold text-gray-900 dark:text-white tracking-tight">
-                              {parent.name}
+                              [{parent.order || 0}] {parent.name}
                             </h3>
                             {parent.isGlobal ? (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[8px] xl:text-[9px] font-black tracking-wider bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 uppercase">
@@ -515,31 +525,17 @@ export default function CategoriesDashboard() {
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
-                              onClick={() => {
-                                if (parent.isGlobal && !isGlobalView) {
-                                  showToast('Kategori global hanya dapat diedit di Global View', 'error');
-                                  return;
-                                }
-                                startEdit(parent);
-                              }}
-                              className={`p-1.5 rounded-lg transition-all ${
-                                parent.isGlobal && !isGlobalView
-                                  ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed' 
-                                  : 'text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20'
-                              }`}
-                              title={parent.isGlobal && !isGlobalView ? 'Kategori global hanya bisa diedit dalam Global View' : 'Edit Kategori'}
+                              onClick={() => startEdit(parent)}
+                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20"
+                              title="Edit Kategori"
                             >
                               ✏️
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteRequest(parent)}
-                              className={`p-1.5 rounded-lg transition-all ${
-                                parent.isGlobal && !isGlobalView
-                                  ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed' 
-                                  : 'text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20'
-                              }`}
-                              title={parent.isGlobal && !isGlobalView ? 'Kategori global hanya bisa dihapus dalam Global View' : 'Hapus Kategori'}
+                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20"
+                              title="Hapus Kategori"
                             >
                               🗑️
                             </button>
@@ -548,7 +544,7 @@ export default function CategoriesDashboard() {
                         
                         <div className="flex items-center gap-3">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black border uppercase tracking-wider ${borderClass}`}>
-                            {parent.name}
+                            [{parent.order || 0}] {parent.name}
                           </span>
                           <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium font-mono">
                             Urutan: {parent.order ?? 0}
@@ -567,6 +563,9 @@ export default function CategoriesDashboard() {
                                 <div
                                   className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-700/80 rounded-xl text-xs text-gray-750 dark:text-gray-300 font-semibold hover:border-rose-500/30 dark:hover:border-rose-500/30 transition-all"
                                 >
+                                  <span className="text-[10px] text-gray-400 font-mono">
+                                    {parent.order || 0}.{sub.order || 0}
+                                  </span>
                                   <span>{sub.name}</span>
                                   <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity ml-1 border-l border-gray-200 dark:border-gray-700 pl-1.5">
                                     <button
@@ -584,13 +583,7 @@ export default function CategoriesDashboard() {
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => {
-                                        if (sub.isGlobal && !isGlobalView) {
-                                          showToast('Kategori global hanya dapat diedit di Global View', 'error');
-                                          return;
-                                        }
-                                        startEdit(sub);
-                                      }}
+                                      onClick={() => startEdit(sub)}
                                       className="text-[10px] hover:text-rose-600 p-0.5"
                                       title="Edit Sub"
                                     >
@@ -612,20 +605,17 @@ export default function CategoriesDashboard() {
                                     {sub.subCategories.map((subsub) => (
                                       <div
                                         key={subsub.id}
-                                        className="group inline-flex items-center gap-1 px-2 py-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 font-medium hover:border-rose-500/30 transition-all"
+                                        className="group inline-flex items-center gap-1 px-2 py-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-250/50 dark:border-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 font-medium hover:border-rose-500/30 transition-all"
                                       >
                                         <span className="text-gray-400 dark:text-gray-600">↳</span>
+                                        <span className="text-[9px] text-gray-400 font-mono">
+                                          {parent.order || 0}.{sub.order || 0}.{subsub.order || 0}
+                                        </span>
                                         <span>{subsub.name}</span>
                                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
                                           <button
                                             type="button"
-                                            onClick={() => {
-                                              if (subsub.isGlobal && !isGlobalView) {
-                                                showToast('Kategori global hanya dapat diedit di Global View', 'error');
-                                                return;
-                                              }
-                                              startEdit(subsub);
-                                            }}
+                                            onClick={() => startEdit(subsub)}
                                             className="text-[9px] hover:text-rose-600 p-0.5"
                                             title="Edit"
                                           >

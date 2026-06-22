@@ -18,15 +18,15 @@ categoryRouter.post('/sync-from-template',
   asyncHandler(syncFromTemplate))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin']),
   asyncHandler(createCategory))
 categoryRouter.put('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin']),
   asyncHandler(updateCategory))
 categoryRouter.delete('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin']),
   asyncHandler(deleteCategory))
 
 /**
@@ -103,6 +103,7 @@ export async function getCategories(req: Request, res: Response) {
  * - Regular users: site-specific + global categories (tree format)
  * - Superadmin with ?view=all: all categories across sites (tree format)
  * - Superadmin with ?view=global: only global categories (tree format)
+ * - Superadmin with ?view=local: only local categories (tree format)
  */
 export async function getCategoryTree(req: Request, res: Response) {
   try {
@@ -123,11 +124,22 @@ export async function getCategoryTree(req: Request, res: Response) {
     let categories
 
     if (view === 'global') {
-      // Superadmin: get only global categories
-      categories = await categoryService.getGlobalCategories()
+      // Superadmin: get only global categories (tree format)
+      const globalCats = await categoryService.getGlobalCategories()
+      categories = categoryService.buildCategoryTree(globalCats)
     } else if (view === 'all') {
-      // Superadmin: get all categories (site-specific + global)
-      categories = await categoryService.getAllCategories()
+      // Superadmin: get all categories (site-specific + global) (tree format)
+      const allCats = await categoryService.getAllCategories()
+      categories = categoryService.buildCategoryTree(allCats)
+    } else if (view === 'local') {
+      // Superadmin/Regular: get only local categories (tree format)
+      if (!siteId) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'SITE_REQUIRED', message: 'Site parameter required' }
+        })
+      }
+      categories = await categoryService.getLocalCategoryTree(siteId)
     } else {
       // Regular: site-specific + global (for the current site)
       if (!siteId) {
