@@ -6,63 +6,47 @@ vi.mock('../../db/client', () => ({
   }
 }))
 
-vi.mock('../site/site-category.utils', () => ({
-  getSiteAssignmentFilter: vi.fn()
-}))
-
 import { prisma } from '../../db/client'
-import { getSiteAssignmentFilter } from '../site/site-category.utils'
 import { categoryService } from './category.service'
 
-describe('CategoryService — site assignment filter', () => {
+describe('CategoryService — site local filter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(prisma.category.findMany).mockResolvedValue([])
   })
 
-  it('getSiteCategories memakai query legacy jika site belum dikonfigurasi', async () => {
-    vi.mocked(getSiteAssignmentFilter).mockResolvedValue({ isConfigured: false })
-
+  it('getSiteCategories hanya mengambil kategori lokal (siteId saja)', async () => {
     await categoryService.getSiteCategories('bandung')
 
     expect(prisma.category.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
-          OR: [{ siteId: 'bandung' }, { isGlobal: true }]
-        }
+        where: { siteId: 'bandung' }
       })
     )
   })
 
-  it('getSiteCategories memfilter global ke expanded IDs jika dikonfigurasi', async () => {
-    vi.mocked(getSiteAssignmentFilter).mockResolvedValue({
-      isConfigured: true,
-      expandedGlobalIds: ['cat-1', 'cat-2']
-    })
-
+  it('getSiteCategories tidak mengambil kategori global', async () => {
     await categoryService.getSiteCategories('surabaya')
 
     expect(prisma.category.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
-          OR: [
-            { siteId: 'surabaya' },
-            { isGlobal: true, id: { in: ['cat-1', 'cat-2'] } }
-          ]
-        }
+        where: { siteId: 'surabaya' }
       })
     )
+
+    // Pastikan tidak ada OR dengan isGlobal
+    const call = vi.mocked(prisma.category.findMany).mock.calls[0][0] as Record<string, unknown>
+    const where = call.where as Record<string, unknown>
+    expect(where).not.toHaveProperty('OR')
   })
 
-  it('getCategoryTree memakai filter yang sama', async () => {
-    vi.mocked(getSiteAssignmentFilter).mockResolvedValue({
-      isConfigured: true,
-      expandedGlobalIds: ['root']
-    })
-
+  it('getCategoryTree menggunakan filter lokal saja', async () => {
     await categoryService.getCategoryTree('surabaya')
 
-    expect(getSiteAssignmentFilter).toHaveBeenCalledWith('surabaya')
-    expect(prisma.category.findMany).toHaveBeenCalled()
+    expect(prisma.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { siteId: 'surabaya' }
+      })
+    )
   })
 })

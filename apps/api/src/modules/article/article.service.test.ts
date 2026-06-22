@@ -182,13 +182,11 @@ describe('updateArticle — ownership', () => {
 
     await updateArticle('art-1', 'bandung', { categoryIds: ['nasional'] }, editorPusat)
 
+    // Phase 2: resolveCategoryId hanya cari kategori lokal (siteId saja)
     expect(prisma.category.findFirst).toHaveBeenCalledWith({
       where: {
         slug: { equals: 'nasional', mode: 'insensitive' },
-        OR: [
-          { siteId: 'bandung' },
-          { isGlobal: true }
-        ]
+        siteId: 'bandung'
       }
     })
     // Categories updated via separate prisma.article.update with nested write
