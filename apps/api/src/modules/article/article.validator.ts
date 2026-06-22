@@ -126,7 +126,7 @@ export const createArticleSchema = z.object({
   if (data.categoryId && !categoryIds.includes(data.categoryId)) {
     categoryIds.unshift(data.categoryId) // legacy → index 0 (primary)
   }
-  const { categoryId, ...rest } = data
+  const { categoryId: _legacy, ...rest } = data
   return {
     ...rest,
     categoryIds: Array.from(new Set(categoryIds)).slice(0, 3)

@@ -83,14 +83,6 @@ export function TabSettings() {
     return result
   }, [categories])
 
-  // Find selected category names
-  const selectedCategoryNames = useMemo(() => {
-    return categoryIds.map(slug => {
-      const found = flatCategories.find(c => c.slug === slug || c.id === slug)
-      return found?.name || slug
-    })
-  }, [categoryIds, flatCategories])
-
   const handleAddTag = () => {
     if (tagInput.trim() && !localTags.includes(tagInput.trim())) {
       const newTags = [...localTags, tagInput.trim()]
@@ -448,7 +440,7 @@ export function TabSettings() {
           )}
         </div>
         <p className="text-[10px] text-panel-text-muted leading-relaxed">
-          * Kategori pertama = kategori utama (URL kanonis). Klik "Utama" pada chip lain untuk mengubah.
+          * Kategori pertama = kategori utama (URL kanonis). Klik &ldquo;Utama&rdquo; pada chip lain untuk mengubah.
         </p>
       </div>
 
