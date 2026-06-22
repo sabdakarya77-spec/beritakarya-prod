@@ -379,8 +379,9 @@ export async function updateArticle(
     data.readingTimeMin = Math.max(1, Math.ceil(words / 200))
   }
 
-  // Hapus categoryId dari data (kolom sudah tidak ada di schema)
+  // Hapus category fields dari data (sudah tidak ada di schema Article)
   delete data.categoryId
+  delete data.categoryIds
 
   const updated = data.slug
     ? await updateArticleWithSlugRetry(id, siteId, data)
