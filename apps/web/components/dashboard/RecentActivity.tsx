@@ -11,6 +11,7 @@ interface Article {
   title: string;
   status: string;
   category?: { name: string };
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null;
   createdAt: string;
 }
 
@@ -26,7 +27,7 @@ const ActivityItem = React.memo(function ActivityItem({ article, site, index }: 
         className="flex items-center gap-3 py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0 group cursor-pointer"
       >
         <div className="w-9 h-9 rounded-lg bg-brand-surface dark:bg-white/5 flex items-center justify-center font-serif font-bold text-brand-red text-sm flex-shrink-0 group-hover:bg-brand-red group-hover:text-white transition-all">
-          {article.category?.name?.[0] || 'A'}
+          {(article.categories?.[0]?.category?.name?.[0]) || article.category?.name?.[0] || 'A'}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-brand-black dark:text-white line-clamp-1 group-hover:text-brand-red transition-colors">

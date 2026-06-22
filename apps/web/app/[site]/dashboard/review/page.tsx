@@ -23,6 +23,7 @@ interface Article {
   title: string;
   status: string;
   category?: { name: string };
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null;
   author?: { name: string; role?: string };
   createdAt: string;
   updatedAt: string;
@@ -369,9 +370,9 @@ export default function ReviewQueuePage() {
                           <Clock size={10} /> Antre Lama
                         </span>
                       )}
-                      {article.category?.name && (
+                      {(article.categories?.[0]?.category?.name || article.category?.name) && (
                         <span className="text-[10px] font-black uppercase tracking-widest text-brand-red px-2 py-0.5 bg-brand-red/5 rounded">
-                          {article.category.name}
+                          {article.categories?.[0]?.category?.name || article.category?.name}
                         </span>
                       )}
                       {wordCount(article) > 0 && (

@@ -23,7 +23,8 @@ interface Article {
   title: string;
   slug: string;
   status: string;
-  category?: { name: string };
+  category?: { name: string }; // legacy
+  categories?: Array<{ category?: { name?: string } | null }> | null;
   author?: { name: string };
   createdAt: string;
   publishedAt?: string;
@@ -430,9 +431,9 @@ export default function ArticlesPage() {
                   <td className="px-6 py-4 max-w-xs">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {article.category?.name && (
+                        {(article.categories?.[0]?.category?.name || article.category?.name) && (
                           <span className="text-[9px] font-black uppercase tracking-widest text-brand-red">
-                            {article.category.name}
+                            {article.categories?.[0]?.category?.name || article.category?.name}
                           </span>
                         )}
                         {article.isBreaking && <EditorialBadge variant="breaking" />}

@@ -26,6 +26,7 @@ interface PremiumHeroProps {
     status?: string;
     author?: { name?: string | null } | null;
     category?: { name?: string | null } | null;
+    categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null;
     blocks?: Array<{ type: string; content?: string; url?: string }>;
   };
   site: string;
@@ -102,7 +103,7 @@ export function PremiumHero({ article, site }: PremiumHeroProps) {
               <div className="flex items-center gap-4">
                 <span className="h-px w-12 bg-brand-red hidden md:block"></span>
                 <span className="text-[11px] font-black uppercase tracking-[0.4em] text-brand-red">
-                  {article.category?.name || 'LAPORAN UTAMA'}
+                  {article.categories?.[0]?.category?.name || article.category?.name || 'LAPORAN UTAMA'}
                 </span>
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="md" />}
               </div>

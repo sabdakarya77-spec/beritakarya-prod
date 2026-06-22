@@ -41,7 +41,8 @@ interface HomeArticle {
   readingTimeMin?: number
   wordCount?: number
   author?: { name: string }
-  category?: { name: string; slug?: string; parentSlug?: string }
+  category?: { name: string; slug?: string; parentSlug?: string } // legacy
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   blocks?: ArticleBlock[]
 }
 
@@ -253,19 +254,25 @@ function distributeArticles(articles: HomeArticle[], trendingIds: Set<string> = 
   const photoSlugs = ['foto-jurnalistik']
   const videoSlugs = ['video', 'dokumenter-reportase', 'podcast-audio']
 
-  // 1. Ekstrak Foto Jurnalistik dari seluruh artikel (tidak terbatas dari afterFeed)
-  const photoJournal = articles.filter((a: HomeArticle) => {
+  // Helper: cek apakah artikel punya kategori dengan slug tertentu (multi-category aware)
+  const hasCategorySlug = (a: HomeArticle, slugs: string[]): boolean => {
+    // Cek di categories array (baru)
+    if (a.categories?.some(c => slugs.includes(c.category?.slug?.toLowerCase() || ''))) return true
+    // Fallback: cek di category (legacy)
     const catSlug = a.category?.slug?.toLowerCase() || ''
     const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
-    return a.contentType === 'photo_journalism' || photoSlugs.includes(catSlug) || photoSlugs.includes(parentSlug)
+    return slugs.includes(catSlug) || slugs.includes(parentSlug)
+  }
+
+  // 1. Ekstrak Foto Jurnalistik dari seluruh artikel (tidak terbatas dari afterFeed)
+  const photoJournal = articles.filter((a: HomeArticle) => {
+    return a.contentType === 'photo_journalism' || hasCategorySlug(a, photoSlugs)
   }).slice(0, 3)
   const photoJournalIds = new Set(photoJournal.map((a: HomeArticle) => a.id))
 
   // 2. Ekstrak Video dari seluruh artikel (tidak terbatas dari afterFeed)
   const videoStories = articles.filter((a: HomeArticle) => {
-    const catSlug = a.category?.slug?.toLowerCase() || ''
-    const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
-    return a.contentType === 'video_exclusive' || videoSlugs.includes(catSlug) || videoSlugs.includes(parentSlug)
+    return a.contentType === 'video_exclusive' || hasCategorySlug(a, videoSlugs)
   }).slice(0, 3)
   const videoStoriesIds = new Set(videoStories.map((a: HomeArticle) => a.id))
 
@@ -303,9 +310,7 @@ function distributeArticles(articles: HomeArticle[], trendingIds: Set<string> = 
 
   // Opinion: ambil dari artikel dengan kategori opini/analisis
   const opinion = afterFeed.filter((a: HomeArticle) => {
-    const catSlug = a.category?.slug?.toLowerCase() || ''
-    const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
-    return opinionSlugs.includes(catSlug) || opinionSlugs.includes(parentSlug)
+    return hasCategorySlug(a, opinionSlugs)
   }).slice(0, 3)
 
   // Sidebar Terbaru: artikel terbaru yang tidak ada di hero maupun trending
@@ -819,7 +824,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
                         <div className="absolute bottom-0 left-0 z-10 w-full p-5 md:p-6">
                           <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-brand-red">
-                            {article.category?.name || 'Pilihan Editor'}
+                            {article.categories?.[0]?.category?.name || article.category?.name || 'Pilihan Editor'}
                           </span>
                           <Link href={`/${siteParam}/artikel/${article.slug}`}>
                             <h4 className="line-clamp-3 font-sans text-base font-extrabold leading-snug tracking-tight text-white transition-colors hover:text-white/85 md:text-lg">

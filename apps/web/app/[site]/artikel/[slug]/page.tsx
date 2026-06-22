@@ -34,7 +34,8 @@ interface RelatedArticle {
   title: string
   featuredImage?: string
   readingTimeMin?: number
-  category?: { name?: string }
+  category?: { name?: string } // legacy
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   author?: { id?: string; name?: string }
   blocks?: Block[]
 }
@@ -149,8 +150,11 @@ export default async function ArticlePage({ params }: Props) {
   const article = await getArticle(siteParam, slugParam)
   if (!article || article.status !== 'published') notFound()
 
+  // Primary category: categories[0] (baru) atau category (legacy)
+  const primaryCategoryName = article.categories?.[0]?.category?.name || article.category?.name || null
+
   const [relatedArticles, popularArticles] = await Promise.all([
-    getRelatedArticles(siteParam, slugParam, article.category?.name),
+    getRelatedArticles(siteParam, slugParam, primaryCategoryName || undefined),
     getPopularArticles(siteParam, slugParam)
   ])
   const coverImage = article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')?.url || '/placeholder.jpg'
@@ -176,14 +180,14 @@ export default async function ArticlePage({ params }: Props) {
     siteName: siteConfig.name || 'BeritaKarya',
     siteUrl: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}`,
     articleUrl,
-    category: article.category?.name,
+    category: primaryCategoryName,
     keywords: article.tags,
     wordCount: article.wordCount,
   })
   const breadcrumbSchema = buildBreadcrumb([
     { name: 'Beranda', url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}` },
-    ...(article.category?.name
-      ? [{ name: article.category.name, url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}?cat=${encodeURIComponent(article.category.name)}` }]
+    ...(primaryCategoryName
+      ? [{ name: primaryCategoryName, url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}?cat=${encodeURIComponent(primaryCategoryName)}` }]
       : []),
     { name: article.title, url: articleUrl },
   ])
@@ -232,8 +236,8 @@ export default async function ArticlePage({ params }: Props) {
                         className="rounded-full px-2.5 py-0.5 shadow-sm shadow-black/10"
                       />
                     )}
-                    <span className={`rounded-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] ${getCategoryColor(article.category?.name)}`}>
-                      {article.category?.name || 'NASIONAL'}
+                    <span className={`rounded-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] ${getCategoryColor(primaryCategoryName)}`}>
+                      {primaryCategoryName || 'NASIONAL'}
                     </span>
                     <span className="h-1 w-1 rounded-full bg-white/30" />
                     <span className="text-[10px] font-semibold text-white/70">
@@ -363,8 +367,8 @@ export default async function ArticlePage({ params }: Props) {
                                         />
                                       </div>
                                       <div className="min-w-0 flex flex-col justify-center">
-                                        <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.category?.name)}`}>
-                                          {rel.category?.name || 'Umum'}
+                                        <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.categories?.[0]?.category?.name || rel.category?.name)}`}>
+                                          {rel.categories?.[0]?.category?.name || rel.category?.name || 'Umum'}
                                         </span>
                                         <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
                                           {rel.title}
@@ -550,7 +554,7 @@ export default async function ArticlePage({ params }: Props) {
                           Kanal
                         </div>
                         <p className="mt-2 text-xs font-bold text-brand-black dark:text-white">
-                          {article.category?.name || 'Umum'}
+                          {primaryCategoryName || 'Umum'}
                         </p>
                       </div>
                     </div>
@@ -577,7 +581,7 @@ export default async function ArticlePage({ params }: Props) {
                             Jelajahi berita terbaru untuk menemukan artikel lain dari kategori ini.
                           </p>
                           <Link
-                            href={`/${siteParam}${article.category?.name ? `?cat=${encodeURIComponent(article.category.name)}` : ''}`}
+                            href={`/${siteParam}${primaryCategoryName ? `?cat=${encodeURIComponent(primaryCategoryName)}` : ''}`}
                             className="mt-3 inline-flex rounded-md bg-brand-red px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-white transition-colors hover:bg-brand-red/90"
                           >
                             Lihat Kategori Ini

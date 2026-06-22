@@ -14,7 +14,8 @@ type HeroArticle = {
   featuredImage?: string | null;
   featuredImageBlur?: string | null;
   featuredImageColor?: string | null;
-  category?: { name?: string | null } | null;
+  category?: { name?: string | null } | null; // legacy
+  categories?: Array<{ category?: { name?: string | null } | null }> | null;
   blocks?: Array<{ type?: string; url?: string; width?: number; height?: number }>;
 };
 
@@ -122,8 +123,8 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                 {/* Overlay Konten Teks */}
                 <div className="absolute bottom-0 left-0 w-full p-5 sm:p-7 md:p-8 lg:p-10">
                   <div className="mb-2.5 sm:mb-3">
-                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.category?.name ?? undefined))}>
-                      {currentArticle.category?.name || 'Headline'}
+                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || undefined))}>
+                      {currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || 'Headline'}
                     </span>
                   </div>
                   

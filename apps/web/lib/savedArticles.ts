@@ -13,6 +13,7 @@ export type SavedArticle = {
   publishedAt?: string | null;
   createdAt?: string | null;
   category?: { name?: string | null } | null;
+  categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null;
   author?: { name?: string | null } | null;
   blocks?: Array<{ type: string; content?: string; url?: string }>;
 };
@@ -87,6 +88,7 @@ interface ArticleInput {
   publishedAt?: string | null
   createdAt?: string | null
   category?: { name?: string | null } | null
+  categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null
   author?: { name?: string | null } | null
   blocks?: Array<{ type: string; content?: string; url?: string }>
 }
@@ -106,6 +108,7 @@ export function createSavedArticlePayload(article: ArticleInput, site: string): 
     publishedAt: article.publishedAt || null,
     createdAt: article.createdAt || null,
     category: article.category ? { name: article.category.name } : null,
+    categories: article.categories ?? null,
     author: article.author ? { name: article.author.name } : null,
     blocks: excerpt ? [{ type: 'paragraph', content: excerpt }] : [],
   };

@@ -11,6 +11,7 @@ interface Article {
   title: string;
   status: string;
   category?: { name: string };
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null;
   author?: { name: string };
   createdAt: string;
   updatedAt?: string;
@@ -60,7 +61,7 @@ const ReviewQueueItem = React.memo(function ReviewQueueItem({ article, site, ind
               </span>
             )}
             <span className="text-[10px] font-black uppercase tracking-widest text-brand-red">
-              {article.category?.name || 'Umum'}
+              {article.categories?.[0]?.category?.name || article.category?.name || 'Umum'}
             </span>
           </div>
           <p className="text-xs font-bold text-brand-black dark:text-white line-clamp-1 group-hover:text-brand-red transition-colors">

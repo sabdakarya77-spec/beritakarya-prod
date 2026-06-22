@@ -10,6 +10,7 @@ interface Article {
   status: string;
   author?: { name: string };
   category?: { name: string };
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null;
   viewCount?: number;
 }
 
@@ -67,9 +68,9 @@ export default function KanbanBoard({ articles, site }: KanbanBoardProps) {
                 >
                   <Link href={`/${site}/dashboard/articles/${article.id}`}>
                     <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/5 rounded-xl shadow-sm hover:shadow-md hover:border-brand-red/20 transition-all cursor-pointer">
-                      {article.category?.name && (
+                      {(article.categories?.[0]?.category?.name || article.category?.name) && (
                         <span className="text-[10px] font-black uppercase tracking-widest text-brand-red mb-2 block">
-                          {article.category.name}
+                          {article.categories?.[0]?.category?.name || article.category.name}
                         </span>
                       )}
                       <h4 className="text-sm font-bold text-brand-black dark:text-white leading-snug mb-4 group-hover:text-brand-red transition-colors line-clamp-2">

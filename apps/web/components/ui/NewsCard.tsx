@@ -28,7 +28,8 @@ interface NewsCardArticle {
   readingTimeMin?: number | null;
   publishedAt?: string | null;
   createdAt?: string | null;
-  category?: { name?: string | null } | null;
+  category?: { name?: string | null } | null; // legacy
+  categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null;
   author?: { name?: string | null } | null;
   blocks?: NewsCardBlock[];
   isBreaking?: boolean;
@@ -104,9 +105,11 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
   const readTime = article.readingTimeMin ? `${article.readingTimeMin} min baca` : "3 min baca";
   const badgeVariant = resolveArticleBadge(article);
   const authorName = article.author?.name || 'Redaksi';
+  // Primary category: dari categories[0] (baru) atau category (legacy)
+  const primaryCategoryName = article.categories?.[0]?.category?.name || article.category?.name || null;
   const categoryLabelClass = cn(
     "rounded-sm px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em]",
-    getCategoryColor(article.category?.name ?? undefined)
+    getCategoryColor(primaryCategoryName ?? undefined)
   );
   const calmMetaClass = "flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-brand-text-muted";
   const defaultImageClass = 'object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.03]';
@@ -144,7 +147,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
                 <span className="inline-block rounded-sm bg-brand-red px-2.5 py-0.5 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-sm">
-                  {article.category?.name || 'UMUM'}
+                  {primaryCategoryName || 'UMUM'}
                 </span>
               </div>
               <h2 className="mb-3.5 max-w-[20ch] text-balance font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
@@ -187,7 +190,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               <div className="mb-2 flex items-center gap-2">
                 {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
                 <span className={categoryLabelClass}>
-                  {article.category?.name || 'UMUM'}
+                  {primaryCategoryName || 'UMUM'}
                 </span>
               </div>
               <h3 className="line-clamp-3 font-sans text-xs font-bold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-sm">
@@ -233,7 +236,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
             <div className="flex flex-wrap items-center gap-1.5">
               {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
               <span className={categoryLabelClass}>
-                {article.category?.name || 'UMUM'}
+                {primaryCategoryName || 'UMUM'}
               </span>
             </div>
             <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.3] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[15px]">
@@ -284,7 +287,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className={categoryLabelClass}>
-                {article.category?.name || 'UMUM'}
+                {primaryCategoryName || 'UMUM'}
               </span>
             </div>
               <h3 className="line-clamp-2 font-sans text-sm font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">

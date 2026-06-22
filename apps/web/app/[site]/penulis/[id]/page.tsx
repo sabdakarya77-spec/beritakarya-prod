@@ -22,6 +22,7 @@ interface AuthorArticle {
   title: string
   readingTimeMin?: number
   category?: { name?: string }
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   featuredImage?: string
   publishedAt?: string
   createdAt?: string
@@ -132,7 +133,7 @@ function getRoleBadgeClass(role: string) {
 function extractExpertise(articles: AuthorArticle[]): { name: string; count: number }[] {
   const categoryMap = new Map<string, number>()
   for (const article of articles) {
-    const cat = article.category?.name
+    const cat = article.categories?.[0]?.category?.name || article.category?.name
     if (cat) categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
   }
   return Array.from(categoryMap.entries())
