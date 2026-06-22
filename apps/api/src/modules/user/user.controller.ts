@@ -98,7 +98,7 @@ userRouter.get('/public/:id',
           tags: true,
           metaTitle: true,
           metaDescription: true,
-          category: { select: { id: true, name: true, slug: true } },
+          categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
           author: { select: { id: true, name: true, role: true } }
         },
         orderBy: { publishedAt: 'desc' },

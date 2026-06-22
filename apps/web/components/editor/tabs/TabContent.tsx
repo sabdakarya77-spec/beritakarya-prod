@@ -2,7 +2,7 @@ import { useEditorStore } from '../../../store/editorStore'
 import { FileText, Hash, Image, Layout, Clock, Type } from 'lucide-react'
 
 export function TabContent() {
-  const { blocks, categoryId, tags, featuredImage } = useEditorStore()
+  const { blocks, categoryIds, tags, featuredImage } = useEditorStore()
   
   // Calculate stats
   const paragraphCount = blocks.filter(b => b.type === 'paragraph').length
@@ -39,7 +39,7 @@ export function TabContent() {
     { label: 'Minimal 150 Kata', checked: wordCount >= 150 },
     { label: 'Memiliki Judul & Subjudul', checked: headingCount >= 1 },
     { label: 'Gambar Utama Terpasang', checked: !!featuredImage },
-    { label: 'Kategori Dipilih', checked: !!categoryId },
+    { label: 'Kategori Dipilih', checked: categoryIds.length > 0 },
     { label: 'Tag Ditambahkan', checked: tags && tags.length > 0 },
   ]
   const completedCheckpoints = criteria.filter(c => c.checked).length

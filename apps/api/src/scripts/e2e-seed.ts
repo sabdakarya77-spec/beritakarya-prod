@@ -94,7 +94,7 @@ async function main() {
       status: 'published',
       publishedAt: new Date('2026-06-16T10:00:00.000Z'),
       authorId: reporter.id,
-      categoryId: category.id,
+      categories: { create: [{ categoryId: category.id }] },
       featuredImage: 'https://images.unsplash.com/photo-1504711434969-e33886168d5c',
       contentType: 'article',
       isBreaking: false,
@@ -110,7 +110,7 @@ async function main() {
       excerpt: 'Ini adalah excerpt dari artikel test yang digunakan untuk E2E testing.',
       siteId: 'pusat',
       authorId: reporter.id,
-      categoryId: category.id,
+      categories: { create: [{ categoryId: category.id }] },
       blocks: [
         { type: 'paragraph', id: 'block-1', content: '<p>Ini adalah konten paragraf pertama dari artikel test.</p>' },
         { type: 'heading', id: 'block-2', content: 'Sub Judul Artikel', level: 2 },

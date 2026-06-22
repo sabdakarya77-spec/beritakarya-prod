@@ -56,7 +56,7 @@ export async function getTopContent(siteId: string, limit: number = 5, authorId?
       title: true,
       slug: true,
       viewCount: true,
-      category: { select: { name: true } }
+      categories: { include: { category: { select: { name: true } } } }
     }
   })
 }
