@@ -26,6 +26,12 @@ categoryRouter.post('/reset-to-default',
   requireAuth, requireRole(['superadmin']),
   siteMiddleware, requireSiteAccess,
   asyncHandler(resetToDefault))
+categoryRouter.get('/diff',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(diffCategories))
+categoryRouter.post('/sync-all',
+  requireAuth, requireRole(['superadmin']),
+  asyncHandler(syncAllSites))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin']),
@@ -443,6 +449,73 @@ export async function resetToDefault(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'CATEGORY_RESET_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/categories/diff
+ * Diff detection: bandingkan kategori global vs lokal di semua site.
+ * Return per-site info: kategori baru, kategori yang berubah.
+ * Superadmin only.
+ */
+export async function diffCategories(req: Request, res: Response) {
+  try {
+    const user = req.user
+
+    if (!user || user.role !== 'superadmin') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Superadmin access required' }
+      })
+    }
+
+    const result = await categoryService.diffGlobalCategories()
+
+    res.json({ success: true, data: result })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_DIFF_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/categories/sync-all
+ * Sync global categories ke semua site.
+ * Tambah kategori baru, update kategori yang berubah.
+ * Superadmin only.
+ */
+export async function syncAllSites(req: Request, res: Response) {
+  try {
+    const user = req.user
+
+    if (!user || user.role !== 'superadmin') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Superadmin access required' }
+      })
+    }
+
+    const result = await categoryService.syncGlobalToAllSites()
+
+    const errorCount = result.errors.length
+    let message = `Sync selesai: ${result.totalAdded} kategori ditambah, ${result.totalUpdated} kategori di-update di ${result.sitesProcessed} site.`
+    if (errorCount > 0) {
+      message += ` (${errorCount} error)`
+    }
+
+    res.json({
+      success: true,
+      data: { ...result, message }
+    })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_SYNC_ALL_FAILED', message: getErrorMessage(error) }
     })
   }
 }

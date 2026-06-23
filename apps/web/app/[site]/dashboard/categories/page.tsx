@@ -21,6 +21,16 @@ export default function CategoriesDashboard() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [diffData, setDiffData] = useState<{
+    hasDiff: boolean;
+    sites: Array<{
+      siteId: string;
+      siteName: string;
+      new: Array<{ slug: string; name: string }>;
+      updated: Array<{ slug: string; field: string; globalValue: string; localValue: string }>;
+      total: number;
+    }>;
+  } | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [showForm, setShowForm] = useState(false);
   const params = useParams();
@@ -68,6 +78,25 @@ export default function CategoriesDashboard() {
     fetchCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCategories deps (isGlobalView, siteId) already tracked
   }, [isGlobalView, siteId]);
+
+  // Fetch diff saat Global View ON
+  useEffect(() => {
+    if (!isGlobalView) {
+      setDiffData(null);
+      return;
+    }
+    const fetchDiff = async () => {
+      try {
+        const { data } = await api.get('/categories/diff');
+        if (data.success) {
+          setDiffData(data.data);
+        }
+      } catch {
+        // silent — diff is optional info
+      }
+    };
+    fetchDiff();
+  }, [isGlobalView]);
 
   // Auto-generate slug from name
   useEffect(() => {
@@ -209,24 +238,36 @@ export default function CategoriesDashboard() {
     }
   };
 
-  const handleSyncFromGlobal = async () => {
+  const handleSyncAll = async () => {
+    if (!diffData?.hasDiff) return;
+
+    const sitesWithDiff = diffData.sites.filter(s => s.total > 0);
+    const totalNew = sitesWithDiff.reduce((sum, s) => sum + s.new.length, 0);
+    const totalUpdated = sitesWithDiff.reduce((sum, s) => sum + s.updated.length, 0);
+
     const confirmed = window.confirm(
-      'Tambah kategori baru dari global?\n\nKategori yang sudah ada di lokal tidak akan diubah. Hanya kategori baru yang belum ada yang akan ditambahkan.'
+      `Sinkronkan kategori global ke semua site?\n\n` +
+      `${totalNew > 0 ? `• ${totalNew} kategori baru akan ditambahkan\n` : ''}` +
+      `${totalUpdated > 0 ? `• ${totalUpdated} kategori akan di-update\n` : ''}` +
+      `\nDi ${sitesWithDiff.length} site.`
     );
     if (!confirmed) return;
 
     setSyncing(true);
     try {
-      const { data } = await api.post('/categories/sync-from-global', { siteId });
+      const { data } = await api.post('/categories/sync-all');
       if (data.success) {
         showToast(data.data.message);
         fetchCategories();
+        // Refresh diff
+        const diffRes = await api.get('/categories/diff');
+        if (diffRes.data.success) setDiffData(diffRes.data.data);
       }
     } catch (error: unknown) {
       const msg = axios.isAxiosError(error)
         ? error.response?.data?.error?.message
         : undefined;
-      showToast(msg || 'Gagal sync kategori dari global', 'error');
+      showToast(msg || 'Gagal sync kategori ke semua site', 'error');
     } finally {
       setSyncing(false);
     }
@@ -332,15 +373,15 @@ export default function CategoriesDashboard() {
             <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
           </button>
 
-          {/* Sync from Global (Site View only) */}
-          {!isGlobalView && (
+          {/* Sync ke semua site (Global View only, saat ada diff) */}
+          {isGlobalView && diffData?.hasDiff && (
             <button
-              onClick={handleSyncFromGlobal}
+              onClick={handleSyncAll}
               disabled={syncing || loading}
               className="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-              title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
+              title="Sinkronkan kategori global ke semua site"
             >
-              <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
+              <span>🔄</span> {syncing ? 'Sync...' : `Sync (${diffData.sites.filter(s => s.total > 0).length} site)`}
             </button>
           )}
 

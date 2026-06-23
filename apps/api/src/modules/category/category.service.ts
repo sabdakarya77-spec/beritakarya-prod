@@ -849,24 +849,7 @@ export class CategoryService {
       // 3b. Copy global → lokal dengan topological sort (parent before child)
       const idMap = new Map<string, string>() // globalId → localId
 
-      // Sort topological: hitung depth, lalu sort by depth + order
-      const getDepth = (cat: typeof globalCategories[0]): number => {
-        let depth = 0
-        let current = cat
-        while (current.parentId) {
-          depth++
-          current = globalCategories.find(g => g.id === current.parentId) || current
-          if (depth > 10) break // safety guard
-        }
-        return depth
-      }
-
-      const sorted = [...globalCategories].sort((a, b) => {
-        const depthA = getDepth(a)
-        const depthB = getDepth(b)
-        if (depthA !== depthB) return depthA - depthB
-        return (a.order || 0) - (b.order || 0)
-      })
+      const sorted = this.sortTopological(globalCategories)
 
       let created = 0
       for (const cat of sorted) {
@@ -922,6 +905,279 @@ export class CategoryService {
     })
 
     return result
+  }
+
+  /**
+   * Topological sort: parent diproses sebelum child.
+   * Menghitung depth dengan traverse ke atas, lalu sort by depth + order.
+   */
+  private sortTopological<T extends { id: string; parentId: string | null; order: number }>(
+    items: T[]
+  ): T[] {
+    const depthCache = new Map<string, number>()
+
+    const getDepth = (item: T): number => {
+      if (depthCache.has(item.id)) return depthCache.get(item.id)!
+      let depth = 0
+      let current = item
+      while (current.parentId) {
+        depth++
+        const parent = items.find(i => i.id === current.parentId)
+        if (!parent) break
+        current = parent
+        if (depth > 10) break
+      }
+      depthCache.set(item.id, depth)
+      return depth
+    }
+
+    return [...items].sort((a, b) => {
+      const depthA = getDepth(a)
+      const depthB = getDepth(b)
+      if (depthA !== depthB) return depthA - depthB
+      return (a.order || 0) - (b.order || 0)
+    })
+  }
+
+  /**
+   * Diff detection: bandingkan kategori global vs lokal di semua site.
+   * Return per-site diff (new, updated, same).
+   */
+  async diffGlobalCategories(): Promise<{
+    hasDiff: boolean
+    sites: Array<{
+      siteId: string
+      siteName: string
+      new: Array<{ slug: string; name: string }>
+      updated: Array<{ slug: string; field: string; globalValue: string; localValue: string }>
+      total: number
+    }>
+  }> {
+    // 1. Ambil semua global categories
+    const globalCategories = await prisma.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) {
+      return { hasDiff: false, sites: [] }
+    }
+
+    // 2. Ambil semua site
+    const sites = await prisma.site.findMany({
+      select: { id: true, name: true }
+    })
+
+    // 3. Build global lookup by slug
+    const globalBySlug = new Map<string, typeof globalCategories[0]>()
+    for (const cat of globalCategories) {
+      globalBySlug.set(cat.slug, cat)
+    }
+
+    const result: Array<{
+      siteId: string
+      siteName: string
+      new: Array<{ slug: string; name: string }>
+      updated: Array<{ slug: string; field: string; globalValue: string; localValue: string }>
+      total: number
+    }> = []
+
+    let hasDiff = false
+
+    // 4. Untuk setiap site, bandingkan lokal vs global
+    for (const site of sites) {
+      const localCategories = await prisma.category.findMany({
+        where: { siteId: site.id, isGlobal: false, deletedAt: null },
+        select: { slug: true, name: true, description: true, color: true }
+      })
+
+      const localBySlug = new Map<string, typeof localCategories[0]>()
+      for (const cat of localCategories) {
+        localBySlug.set(cat.slug, cat)
+      }
+
+      const newCats: Array<{ slug: string; name: string }> = []
+      const updatedCats: Array<{ slug: string; field: string; globalValue: string; localValue: string }> = []
+
+      // Cek setiap kategori global
+      for (const globalCat of globalCategories) {
+        const localCat = localBySlug.get(globalCat.slug)
+
+        if (!localCat) {
+          // Baru: ada di global, tidak ada di lokal
+          newCats.push({ slug: globalCat.slug, name: globalCat.name })
+          continue
+        }
+
+        // Bandingkan field
+        if (localCat.name !== globalCat.name) {
+          updatedCats.push({
+            slug: globalCat.slug,
+            field: 'name',
+            globalValue: globalCat.name,
+            localValue: localCat.name
+          })
+        }
+        if ((localCat.description || '') !== (globalCat.description || '')) {
+          updatedCats.push({
+            slug: globalCat.slug,
+            field: 'description',
+            globalValue: globalCat.description || '',
+            localValue: localCat.description || ''
+          })
+        }
+        if ((localCat.color || '') !== (globalCat.color || '')) {
+          updatedCats.push({
+            slug: globalCat.slug,
+            field: 'color',
+            globalValue: globalCat.color || '',
+            localValue: localCat.color || ''
+          })
+        }
+      }
+
+      const total = newCats.length + updatedCats.length
+      if (total > 0) hasDiff = true
+
+      result.push({
+        siteId: site.id,
+        siteName: site.name,
+        new: newCats,
+        updated: updatedCats,
+        total
+      })
+    }
+
+    return { hasDiff, sites: result }
+  }
+
+  /**
+   * Sync global categories ke semua site.
+   * - Kategori baru (slug tidak ada di lokal) → tambah
+   * - Kategori berubah (slug sama, data beda) → update
+   * - Kategori lokal custom → biarkan
+   */
+  async syncGlobalToAllSites(): Promise<{
+    sitesProcessed: number
+    totalAdded: number
+    totalUpdated: number
+    errors: Array<{ siteId: string; error: string }>
+  }> {
+    // 1. Ambil global categories
+    const globalCategories = await prisma.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) {
+      return { sitesProcessed: 0, totalAdded: 0, totalUpdated: 0, errors: [] }
+    }
+
+    const sorted = this.sortTopological(globalCategories)
+
+    // 2. Ambil semua site
+    const sites = await prisma.site.findMany({
+      select: { id: true }
+    })
+
+    let totalAdded = 0
+    let totalUpdated = 0
+    const errors: Array<{ siteId: string; error: string }> = []
+
+    // 3. Untuk setiap site
+    for (const site of sites) {
+      try {
+        const result = await prisma.$transaction(async (tx) => {
+          // Ambil kategori lokal
+          const localCategories = await tx.category.findMany({
+            where: { siteId: site.id, isGlobal: false, deletedAt: null }
+          })
+
+          const localBySlug = new Map<string, typeof localCategories[0]>()
+          for (const cat of localCategories) {
+            localBySlug.set(cat.slug, cat)
+          }
+
+          // Build slug → localId mapping (termasuk yang baru dibuat)
+          const slugToLocalId = new Map<string, string>()
+          for (const cat of localCategories) {
+            slugToLocalId.set(cat.slug, cat.id)
+          }
+
+          let added = 0
+          let updated = 0
+
+          for (const globalCat of sorted) {
+            const localCat = localBySlug.get(globalCat.slug)
+
+            if (!localCat) {
+              // Baru: buat kategori lokal
+              let localParentId: string | null = null
+              if (globalCat.parentId) {
+                const parentGlobal = globalCategories.find(g => g.id === globalCat.parentId)
+                if (parentGlobal) {
+                  localParentId = slugToLocalId.get(parentGlobal.slug) || null
+                }
+                if (!localParentId) continue // parent belum ada, skip
+              }
+
+              const newCat = await tx.category.create({
+                data: {
+                  name: globalCat.name,
+                  slug: globalCat.slug,
+                  siteId: site.id,
+                  isGlobal: false,
+                  parentId: localParentId,
+                  description: globalCat.description,
+                  order: globalCat.order,
+                  color: globalCat.color
+                }
+              })
+
+              slugToLocalId.set(globalCat.slug, newCat.id)
+              added++
+            } else {
+              // Sudah ada: cek apakah ada perubahan
+              const needsUpdate =
+                localCat.name !== globalCat.name ||
+                (localCat.description || '') !== (globalCat.description || '') ||
+                (localCat.color || '') !== (globalCat.color || '') ||
+                localCat.order !== globalCat.order
+
+              if (needsUpdate) {
+                await tx.category.update({
+                  where: { id: localCat.id },
+                  data: {
+                    name: globalCat.name,
+                    description: globalCat.description,
+                    color: globalCat.color,
+                    order: globalCat.order
+                  }
+                })
+                updated++
+              }
+            }
+          }
+
+          return { added, updated }
+        })
+
+        totalAdded += result.added
+        totalUpdated += result.updated
+      } catch (error: unknown) {
+        errors.push({
+          siteId: site.id,
+          error: error instanceof Error ? error.message : String(error)
+        })
+      }
+    }
+
+    return {
+      sitesProcessed: sites.length,
+      totalAdded,
+      totalUpdated,
+      errors
+    }
   }
 
   /**
