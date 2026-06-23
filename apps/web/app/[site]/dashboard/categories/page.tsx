@@ -387,7 +387,7 @@ export default function CategoriesDashboard() {
       </div>
 
       {/* Action Bar — compact controls always visible */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm flex flex-wrap items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {/* Primary: Add Category */}
         <button
           type="button"
@@ -457,22 +457,40 @@ export default function CategoriesDashboard() {
         )}
       </div>
 
+      {/* FAB — mobile only, visible when form is hidden */}
+      {!showForm && (
+        <button
+          type="button"
+          onClick={() => setShowForm(true)}
+          className="fixed bottom-6 right-6 z-40 md:hidden w-14 h-14 bg-rose-600 hover:bg-rose-700 text-white rounded-full shadow-xl shadow-rose-600/30 flex items-center justify-center text-2xl font-bold transition-all duration-200 active:scale-95"
+          aria-label="Tambah Kategori"
+        >
+          +
+        </button>
+      )}
+
+      {/* Mobile backdrop — closes form on tap */}
+      {showForm && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => cancelEdit()}
+        />
+      )}
+
       <div className={showForm ? "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" : ""}>
         {/* Form Add / Edit — conditional */}
         {showForm && (
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-50 overflow-y-auto bg-white dark:bg-gray-900 p-4 md:relative md:inset-auto md:z-auto md:bg-transparent md:dark:bg-transparent md:p-0 lg:col-span-4 space-y-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 sm:mb-6 flex items-center justify-between">
               <span>{editingCategory ? 'Edit Kategori' : 'Tambah Baru'}</span>
-              {editingCategory && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="text-[10px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-2.5 py-1.5 rounded-lg font-bold transition-all"
-                >
-                  BATAL
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-[10px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-2.5 py-1.5 rounded-lg font-bold transition-all"
+              >
+                ✕ TUTUP
+              </button>
             </h2>
             <form onSubmit={handleCreate} className="space-y-5">
               <div>
