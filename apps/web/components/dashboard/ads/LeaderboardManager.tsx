@@ -91,10 +91,9 @@ export function LeaderboardManager({
             </div>
           </div>
 
-          <div className="text-center">
-            <AlertCircle size={24} className="mx-auto text-gray-300 mb-2" />
-            <p className="text-xs text-gray-400">Belum ada banner aktif di slot ini.</p>
-            <p className="text-[10px] text-gray-400 mt-1">Klik &quot;Tambah Banner&quot; untuk mengganti showcase dengan iklan Anda sendiri.</p>
+          <div className="text-center pt-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Showcase Aktif — Banner Belum Diatur</p>
+            <p className="text-[10px] text-gray-400 max-w-sm mx-auto">Visitor melihat contoh iklan kategori di atas. Klik &quot;Tambah Banner&quot; untuk menggantinya dengan iklan Anda sendiri.</p>
           </div>
         </div>
       ) : (

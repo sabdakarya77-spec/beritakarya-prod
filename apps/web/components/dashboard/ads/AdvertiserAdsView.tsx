@@ -80,7 +80,19 @@ export function AdvertiserAdsView({ site, bookings, onRefresh }: Props) {
           <button onClick={onRefresh} className="p-2 text-gray-400 hover:text-brand-red transition-colors"><RefreshCw size={14} /></button>
         </div>
         {bookings.length === 0 ? (
-          <div className="py-12 text-center text-gray-400 text-sm">Belum ada booking.</div>
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+              <BarChart3 size={28} className="text-gray-300 dark:text-gray-600" />
+            </div>
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Belum Ada Riwayat Kampanye</p>
+            <p className="text-[10px] text-gray-400 max-w-xs mx-auto mb-4">Mulai pasang iklan regional untuk menjangkau ribuan pembaca di portal BeritaKarya.</p>
+            <Link
+              href={`/${site}/dashboard/ads/order`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-black transition-colors"
+            >
+              <Megaphone size={14} /> Pesan Iklan Pertama
+            </Link>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">

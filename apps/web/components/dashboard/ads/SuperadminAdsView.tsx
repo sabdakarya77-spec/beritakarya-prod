@@ -320,9 +320,27 @@ export function SuperadminAdsView({
             ))}
           </div>
           {filteredPackages.length === 0 && (
-            <div className="p-12 text-center dash-card">
-              <AlertCircle size={24} className="mx-auto text-gray-300 mb-2" />
-              <p className="text-xs text-gray-400">Tidak ada paket untuk slot "{pkgSlotFilter}".</p>
+            <div className="p-16 text-center dash-card">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+                <Plus size={28} className="text-gray-300 dark:text-gray-600" />
+              </div>
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+                {pkgSlotFilter === 'ALL' ? 'Belum Ada Paket Iklan' : `Tidak Ada Paket untuk Slot Ini`}
+              </p>
+              <p className="text-[10px] text-gray-400 max-w-xs mx-auto mb-4">
+                {pkgSlotFilter === 'ALL'
+                  ? 'Buat paket iklan pertama untuk mulai menerima pesanan dari pengiklan.'
+                  : `Belum ada paket untuk slot "${pkgSlotFilter}". Buat paket baru atau coba slot lain.`
+                }
+              </p>
+              {pkgSlotFilter === 'ALL' && (
+                <button
+                  onClick={() => { setEditingPkgId(null); setPkgName(''); setPkgSlot('leaderboard'); setPkgFormat('ALL'); setPkgDuration('7'); setPkgPrice(''); setPkgDesc(''); setShowPkgForm(true); }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-black transition-colors"
+                >
+                  <Plus size={14} /> Buat Paket Pertama
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -364,9 +382,19 @@ export function SuperadminAdsView({
             </div>
           </div>
           {filteredBookings.length === 0 ? (
-            <div className="p-20 text-center dash-card">
-              <AlertCircle size={32} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-xs text-gray-400">{bookingFilter === 'ALL' ? 'Antrean validasi kosong.' : `Tidak ada booking dengan status "${bookingFilter}".`}</p>
+            <div className="p-16 text-center dash-card">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+                <CheckCircle2 size={28} className="text-gray-300 dark:text-gray-600" />
+              </div>
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+                {bookingFilter === 'ALL' ? 'Antrean Validasi Kosong' : `Tidak Ada Booking "${bookingFilter}"`}
+              </p>
+              <p className="text-[10px] text-gray-400 max-w-xs mx-auto">
+                {bookingFilter === 'ALL'
+                  ? 'Semua pengajuan iklan sudah diproses. Pengajuan baru dari pengiklan akan muncul di sini.'
+                  : `Tidak ada booking dengan status "${bookingFilter}". Coba filter lain.`
+                }
+              </p>
             </div>
           ) : (
             <div className="space-y-6">
