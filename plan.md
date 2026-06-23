@@ -1,6 +1,7 @@
 ## Mapping File Sistem Iklan (Ads)
 
 > Referensi untuk pembahasan periklanan BeritaKarya.
+> **Terakhir di-update:** 23 Juni 2026 — setelah refactor sidebar sub-navigation
 
 ### Komponen Frontend (Tampilan Iklan)
 
@@ -13,15 +14,22 @@
 
 | File | Keterangan |
 |---|---|
-| `apps/web/app/[site]/dashboard/ads/page.tsx` | Halaman utama dashboard iklan |
-| `apps/web/app/[site]/dashboard/ads/order/page.tsx` | Halaman pemesanan/booking iklan |
+| `apps/web/app/[site]/dashboard/ads/layout.tsx` | **[BARU]** Shared layout ads — header + sub-nav + children |
+| `apps/web/app/[site]/dashboard/ads/page.tsx` | Overview — stats, quick actions, recent bookings |
+| `apps/web/app/[site]/dashboard/ads/slots/page.tsx` | **[BARU]** Slot Iklan — leaderboard manager + slot cards |
+| `apps/web/app/[site]/dashboard/ads/packages/page.tsx` | **[BARU]** Paket — CRUD paket iklan + filter slot |
+| `apps/web/app/[site]/dashboard/ads/bookings/page.tsx` | **[BARU]** Booking — approval queue + filter + pagination |
+| `apps/web/app/[site]/dashboard/ads/history/page.tsx` | **[BARU]** Riwayat — tabel booking advertiser |
+| `apps/web/app/[site]/dashboard/ads/order/page.tsx` | Wizard pemesanan 4-step (pilih paket → materi → bayar → selesai) |
+| `apps/web/components/dashboard/ads/AdsSubNav.tsx` | **[BARU]** Sub-navigation horizontal (role-based) |
 | `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Card detail informasi slot iklan |
-| `apps/web/components/dashboard/ads/SuperadminAdsView.tsx` | View manajemen iklan untuk superadmin |
-| `apps/web/components/dashboard/ads/AdvertiserAdsView.tsx` | View manajemen iklan untuk advertiser |
+| `apps/web/components/dashboard/ads/SuperadminAdsView.tsx` | View manajemen iklan untuk superadmin (tab system sudah dipecah) |
+| `apps/web/components/dashboard/ads/AdvertiserAdsView.tsx` | View overview advertiser — stats + CTA + mini chart |
 | `apps/web/components/dashboard/ads/LeaderboardManager.tsx` | Komponen manager leaderboard ads |
 | `apps/web/components/dashboard/ads/LeaderboardBannerRow.tsx` | Baris banner pada leaderboard |
 | `apps/web/components/dashboard/ads/types.ts` | TypeScript types/interface untuk modul ads |
-| `apps/web/components/dashboard/AdvertiserDashboardOverview.tsx` | Overview dashboard role advertiser |
+| `apps/web/components/dashboard/AdvertiserDashboardOverview.tsx` | Overview dashboard role advertiser (beranda) |
+| `apps/web/components/ui/AdImageCropper.tsx` | Crop gambar sesuai aspect ratio slot |
 
 ### Backend API
 
@@ -50,11 +58,114 @@
 
 | File | Keterangan |
 |---|---|
-| `apps/web/lib/constants.ts` | Konstanta terkait tipe/slot iklan |
+| `apps/web/lib/constants.ts` | Konstanta terkait tipe/slot iklan (AD_SLOT_DEFINITIONS) |
 | `apps/web/lib/siteSettings.ts` | Pengaturan site termasuk konfigurasi slot iklan |
 | `packages/types/src/user.ts` | User types (role advertiser) |
 | `packages/config/src/roles.ts` | Role permissions (akses advertiser) |
 | `packages/config/src/site.ts` | Konfigurasi site termasuk pengaturan ads |
+
+---
+
+## Arsitektur Dashboard Ads (Juni 2026)
+
+### Struktur Routing
+
+```
+/dashboard/ads                → Overview (stats + quick actions + chart)
+/dashboard/ads/slots          → Slot Iklan (superadmin/wapimred)
+/dashboard/ads/packages       → Paket CRUD (superadmin)
+/dashboard/ads/bookings       → Booking Approval (superadmin)
+/dashboard/ads/history        → Riwayat Booking (advertiser)
+/dashboard/ads/order          → Order Wizard 4-step (semua role ads)
+```
+
+### Sub-Navigation Pattern
+
+Horizontal sub-nav bar di dalam content area ads (bukan nested sidebar):
+- Component: `AdsSubNav.tsx`
+- Link-based (bukan tab state), active state dari `usePathname()`
+- Role-based visibility: setiap item punya `roles[]` filter
+- Scrollable di mobile
+
+### Sidebar Navigation per Role
+
+**Superadmin/Wapimred:**
+```
+Editorial:
+└── Iklan & Banner → /dashboard/ads
+```
+
+**Advertiser:**
+```
+Portal Pengiklan:
+├── Beranda          → /dashboard (AdvertiserDashboardOverview)
+└── Iklan & Banner   → /dashboard/ads (masuk ke sub-nav)
+```
+
+### Data Fetching Pattern
+
+Setiap page fetch data sendiri (independent, tidak shared context):
+- Overview: fetch bookings + packages
+- Slots: fetch ads only
+- Packages: fetch packages only
+- Bookings: fetch all bookings only
+- History: fetch user bookings only
+- Order: fetch packages only
+
+### Role Visibility
+
+| Page | Superadmin | Wapimred | Advertiser |
+|------|-----------|----------|------------|
+| Overview | ✅ | ✅ | ✅ |
+| Slot Iklan | ✅ | ✅ | ❌ |
+| Paket | ✅ | ❌ | ❌ |
+| Booking | ✅ | ❌ | ❌ |
+| Riwayat | ❌ | ❌ | ✅ |
+| Pesan Baru | ✅ | ✅ | ✅ |
+
+---
+
+## Alur Pengiklan (Advertiser Experience)
+
+### Beranda (`/dashboard`)
+- `AdvertiserDashboardOverview` component
+- Greeting + role badge + date
+- 2 action cards: "Pasang Iklan Baru" + "Lihat Paket & Riwayat"
+- Readiness checklist (3 langkah)
+- Tips "Sebelum Mulai"
+- "Butuh Bantuan?" → WhatsApp link
+
+### Overview (`/dashboard/ads`)
+- `AdvertiserAdsView` component
+- Stats cards: Total Kampanye, Iklan Aktif, Total Impresi, Total Klik
+- CTA card → link ke order page
+- Analytics mini-chart (bar chart per booking)
+
+### Riwayat (`/dashboard/ads/history`)
+- Tabel booking dengan kolom: Paket, Slot, Tanggal, Status, Impresi, Klik, CTR
+- Empty state + CTA "Pesan Iklan Pertama"
+
+### Pesan Baru (`/dashboard/ads/order`)
+- Wizard 4-step:
+  1. Pilih Paket & Format
+  2. Materi & Target Kampanye (file upload)
+  3. Unggah Resi Bukti Pembayaran (file upload)
+  4. Selesai (invoice summary)
+
+---
+
+## UI/UX Improvements — Completed (Juni 2026)
+
+| # | Perbaikan | File | Status |
+|---|-----------|------|--------|
+| 1 | `alert()` → toast notification | page.tsx, SuperadminAdsView, AdvertiserAdsView | ✅ |
+| 2 | Unified booking wizard (hapus duplikasi) | AdvertiserAdsView → CTA ke order page | ✅ |
+| 3 | File upload di booking | Via order page (sudah ada) | ✅ |
+| 4 | Responsive booking card (mobile) | SuperadminAdsView | ✅ |
+| 5 | Filter & sort tab Booking/Paket | SuperadminAdsView (sekarang di page terpisah) | ✅ |
+| 6 | Better empty states + CTA | Semua page ads | ✅ |
+| 7 | Pagination booking list | bookings/page.tsx | ✅ |
+| 8 | Analytics mini-chart | AdvertiserAdsView | ✅ |
 
 ---
 
@@ -83,7 +194,7 @@
 |---|-------|--------|--------|--------|
 | 1 | Smart Resize + Letterbox Server-Side | Sedang | Tinggi | 🔲 Belum |
 | 2 | Template Download per Slot (PSD/Figma) | Kecil | Sedang | 🔲 Belum |
-| 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | 🔲 Belum |
+| 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | ⚠️ Sebagian (mini chart sudah ada) |
 | 4 | Multi-Size IAB per Slot | Besar | Tinggi | 🔲 Belum |
 
 ### Detail Fitur
@@ -367,21 +478,20 @@ Iklan sticky di mobile tidak boleh menutupi > 30% area layar:
 
 ## Rencana Fitur Tambahan (Dari Review)
 
-### Analytics Dashboard untuk Pengiklan (Prioritas Tinggi)
+### Analytics Dashboard untuk Pengiklan (Prioritas Tinggi) — ⚠️ Sebagian Selesai
 
 Pengiklan perlu melihat performa iklannya untuk memutuskan apakah akan memperpanjang. Tanpa ini, retensi rendah.
 
-**Fitur yang dibutuhkan:**
-- Real-time impression dan click tracking di dashboard advertiser
-- Grafik performa per hari/minggu/bulan
-- Hitung CTR (click-through rate) otomatis
-- Export laporan (PDF/CSV) untuk pengiklan
-- Perbandingan performa antar slot
+**Sudah ada:**
+- ✅ Stats cards (Total Kampanye, Iklan Aktif, Total Impresi, Total Klik)
+- ✅ Mini bar chart per booking (impressions + clicks)
+- ✅ Overall CTR rata-rata
+- ✅ History tabel dengan CTR per booking
 
-**File terkait:**
-- `apps/web/components/dashboard/ads/AdvertiserAdsView.tsx` — tambah tab analytics
-- `apps/api/src/modules/ad/ad.controller.ts` — tambah endpoint analytics
-- `apps/api/src/modules/ad/ad.service.ts` — tambah logic aggregasi data
+**Belum ada:**
+- 🔲 Grafik performa per hari/minggu/bulan (time-series)
+- 🔲 Export laporan (PDF/CSV)
+- 🔲 Perbandingan performa antar slot
 
 ### Rate Limiting Upload (Prioritas Sedang)
 
@@ -415,8 +525,9 @@ Pengiklan upload 2 versi banner, sistem split test otomatis.
 
 ## Revisi Roadmap (Update dari Review)
 
-| Fase | Isi | Effort | Impact |
-|------|-----|--------|--------|
-| **Fase 1** | Sticky mobile leaderboard + CSS animation + CLS fix + tombol close | Rendah | Sangat Tinggi |
-| **Fase 2** | `sharp` resize + letterbox + template download + basic analytics dashboard | Sedang | Tinggi |
-| **Fase 3** | Multi-size IAB + A/B testing (opsional) | Tinggi | Sedang-Tinggi |
+| Fase | Isi | Effort | Impact | Status |
+|------|-----|--------|--------|--------|
+| **Fase 0** | UI/UX improvements (toast, responsive, filter, pagination, chart, sidebar refactor) | Sedang | Tinggi | ✅ Selesai |
+| **Fase 1** | Sticky mobile leaderboard + CSS animation + CLS fix + tombol close | Rendah | Sangat Tinggi | 🔲 Belum |
+| **Fase 2** | `sharp` resize + letterbox + template download + analytics time-series | Sedang | Tinggi | 🔲 Belum |
+| **Fase 3** | Multi-size IAB + A/B testing (opsional) | Tinggi | Sedang-Tinggi | 🔲 Belum |
