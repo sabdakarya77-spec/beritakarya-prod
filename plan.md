@@ -1,7 +1,7 @@
 ## Mapping File Sistem Iklan (Ads)
 
 > Referensi untuk pembahasan periklanan BeritaKarya.
-> **Terakhir di-update:** 23 Juni 2026 — setelah refactor sidebar sub-navigation
+> **Terakhir di-update:** 23 Juni 2026 — CSS animation + AdSlotCard onSave fix
 
 ### Komponen Frontend (Tampilan Iklan)
 
@@ -192,8 +192,8 @@ Setiap page fetch data sendiri (independent, tidak shared context):
 
 | # | Fitur | Effort | Impact | Status |
 |---|-------|--------|--------|--------|
-| 1 | Smart Resize + Letterbox Server-Side | Sedang | Tinggi | 🔲 Belum |
-| 2 | Template Download per Slot (PSD/Figma) | Kecil | Sedang | 🔲 Belum |
+| 1 | Smart Resize + Letterbox Server-Side | Sedang | Tinggi | ✅ Selesai (`processAdImage` + letterbox di `media.controller.ts`) |
+| 2 | Template Download per Slot (PSD/Figma) | Kecil | Sedang | ✅ Selesai (SVG templates di `public/templates/`) |
 | 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | ⚠️ Sebagian (mini chart sudah ada) |
 | 4 | Multi-Size IAB per Slot | Besar | Tinggi | 🔲 Belum |
 
@@ -320,7 +320,7 @@ Ini standar industri (Google AdSense melakukan ini). Implementasi butuh perubaha
 
 | # | Solusi | Effort | Impact | Status |
 |---|--------|--------|--------|--------|
-| 1 | Sticky Leaderboard Mobile | Kecil | Tinggi | 🔲 Belum |
+| 1 | Sticky Leaderboard Mobile | Kecil | Tinggi | ✅ Selesai (sticky + close button + sessionStorage di `AdSpace.tsx`) |
 | 2 | Full-Width Auto-Adapt | Sedang | Sedang | 🔲 Belum |
 
 ### Detail Solusi
@@ -368,6 +368,8 @@ Konversi gambar statis yang di-upload pengiklan menjadi video dengan efek animas
 3. Server convert gambar ke video (MP4/WebP animasi) dengan efek terpilih
 4. Hasilnya tampil sebagai video di slot leaderboard
 
+> **Update 23 Juni 2026:** Implementasi menggunakan **Opsi B (CSS Animasi)** — bukan FFmpeg server-side. Alasan: infra CT 102 (2 core, 4GB RAM) tidak cukup untuk FFmpeg tanpa mengganggu API. CSS animations = 0 beban server, instan, scalable.
+
 **Pilihan efek animasi:**
 
 | Efek | Deskripsi |
@@ -388,12 +390,23 @@ Konversi gambar statis yang di-upload pengiklan menjadi video dengan efek animas
 - Di `AdSpace.tsx`, tambah class CSS sesuai efek pada tag `<img>`
 - Contoh Ken Burns: `transform: scale(1.0) → scale(1.1)` dalam 7 detik dengan CSS `@keyframes`
 
+**Status:** ✅ Selesai (23 Juni 2026)
+
+**Yang sudah diimplementasikan:**
+- Schema: field `animationEffect` di `AdBooking` + `Advertisement`
+- Backend: accept & pass `animationEffect` di booking create & approve
+- Frontend: UI selector 4 efek di order page Step 2 (image only)
+- AdSpace: dynamic CSS class dari `ad.animationEffect` (bukan hardcoded)
+- CSS: 4 keyframes (`ad-ken-burns`, `ad-fade-slide`, `ad-parallax`, `ad-pulse-scale`)
+
 **File terkait:**
-- `apps/web/components/ui/AdSpace.tsx` — tambah CSS animation classes
-- `apps/web/lib/constants.ts` — tambah definisi efek animasi
-- `apps/web/components/dashboard/ads/AdSlotCard.tsx` — tambah pilihan efek animasi saat upload gambar
-- `apps/web/components/dashboard/ads/LeaderboardBannerRow.tsx` — tambah preview efek animasi
-- `apps/api/prisma/schema.prisma` — tambah field `animationEffect` di model Advertisement
+- `apps/web/components/ui/AdSpace.tsx` — ANIM_CLASS_MAP + dynamic class
+- `apps/web/app/globals.css` — 4 keyframes animations
+- `apps/web/app/[site]/dashboard/ads/order/page.tsx` — UI selector efek animasi
+- `apps/api/prisma/schema.prisma` — field `animationEffect` di AdBooking & Advertisement
+- `apps/api/prisma/migrations/20260623000000_add_animation_effect/` — migration
+- `apps/api/src/modules/ad/ad.controller.ts` — accept & pass animationEffect
+- `apps/api/src/modules/ad/ad.repository.ts` — type signature update
 
 ---
 
@@ -413,14 +426,18 @@ Iklan yang dimuat secara dinamis sering menyebabkan layout "melompat" yang merus
 - Desktop leaderboard: `min-h-[250px]`
 - Rectangle/in-feed: `min-h-[250px]`
 
+**Status:** ✅ Selesai (sudah ada di `AdSpace.tsx` styles object dengan `min-h-[120px]` mobile, `min-h-[250px]` desktop)
+
 **File terkait:**
-- `apps/web/components/ui/AdSpace.tsx` — tambah min-height pada semua slot
+- `apps/web/components/ui/AdSpace.tsx` — min-height sudah diterapkan di semua slot
 
 #### 2. Sticky Position & UX
 
 - Gunakan `position: fixed; bottom: 0;` (di bawah layar) atau `position: sticky; top: 0;` (di atas layar)
 - Pastikan z-index tidak menutupi navigasi mobile (burger menu/header)
 - Tombol close (×) harus simpan flag di `sessionStorage` agar iklan tidak muncul lagi di halaman berikutnya selama sesi yang sama
+
+**Status:** ✅ Selesai (sudah diimplementasikan di `AdSpace.tsx` — sticky bottom mobile, close button muncul setelah 5 detik, sessionStorage flag)
 
 #### 3. Smart Resize: `sharp` Library
 
@@ -528,6 +545,6 @@ Pengiklan upload 2 versi banner, sistem split test otomatis.
 | Fase | Isi | Effort | Impact | Status |
 |------|-----|--------|--------|--------|
 | **Fase 0** | UI/UX improvements (toast, responsive, filter, pagination, chart, sidebar refactor) | Sedang | Tinggi | ✅ Selesai |
-| **Fase 1** | Sticky mobile leaderboard + CSS animation + CLS fix + tombol close | Rendah | Sangat Tinggi | 🔲 Belum |
-| **Fase 2** | `sharp` resize + letterbox + template download + analytics time-series | Sedang | Tinggi | 🔲 Belum |
+| **Fase 1** | Sticky mobile leaderboard + CSS animation + CLS fix + tombol close | Rendah | Sangat Tinggi | ✅ Selesai |
+| **Fase 2** | `sharp` resize + letterbox + template download + analytics time-series | Sedang | Tinggi | ⚠️ Sebagian (resize + letterbox + template selesai, analytics time-series belum) |
 | **Fase 3** | Multi-size IAB + A/B testing (opsional) | Tinggi | Sedang-Tinggi | 🔲 Belum |
