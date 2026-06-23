@@ -1,118 +1,55 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
-import { useToastStore } from '../../../../store/toastStore';
-import { useParams } from 'next/navigation';
 import {
-  Layout,
-  AlertCircle,
+  Wallet,
+  CheckCircle2,
+  BarChart3,
+  Eye,
+  ArrowRight,
   RefreshCw,
+  Target,
+  Package,
+  ClipboardList,
+  AlertCircle,
 } from 'lucide-react';
-import { type AdSlotId } from '../../../../lib/constants';
-import AdImageCropper from '../../../../components/ui/AdImageCropper';
-import type { Ad, AdPackage, AdBooking } from '../../../../components/dashboard/ads/types';
+import { cn } from '../../../../lib/utils';
+import type { AdBooking, AdPackage } from '../../../../components/dashboard/ads/types';
 import { AdvertiserAdsView } from '../../../../components/dashboard/ads/AdvertiserAdsView';
-import { SuperadminAdsView } from '../../../../components/dashboard/ads/SuperadminAdsView';
 
-function getApiErrorMessage(error: unknown, fallback: string): string {
-  const err = error as {
-    response?: { data?: { error?: { message?: string }; message?: string } }
-    message?: string
-  }
-  return err?.response?.data?.error?.message || err?.response?.data?.message || err?.message || fallback
-}
-
-export default function AdsDashboard() {
+export default function AdsOverviewPage() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
-  const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
-
-  // Shared States
-  const [ads, setAds] = useState<Ad[]>([]);
-  const [packages, setPackages] = useState<AdPackage[]>([]);
   const [bookings, setBookings] = useState<AdBooking[]>([]);
-  const [savingAdId, setSavingAdId] = useState<string | null>(null);
+  const [packages, setPackages] = useState<AdPackage[]>([]);
 
-  // Cropper state
-  const [cropperFile, setCropperFile] = useState<File | null>(null);
-  const [cropperAspect, setCropperAspect] = useState(970 / 250);
-  const cropperCallbackRef = useRef<((blob: Blob) => void) | null>(null);
-  const cropperCancelRef = useRef<(() => void) | null>(null);
-
-  // Aspect ratio per slot type
-  const SLOT_ASPECT_RATIOS: Record<AdSlotId, number> = {
-    leaderboard: 970 / 250,
-    rectangle: 300 / 250,
-    rectangle_secondary: 300 / 250,
-    in_feed: 300 / 250,
-  };
-
-  // Upload file with optional crop
-  const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
-    const typedSlotId = slotId as AdSlotId | undefined;
-    if (typedSlotId && SLOT_ASPECT_RATIOS[typedSlotId]) {
-      const croppedBlob = await new Promise<Blob>((resolve, reject) => {
-        setCropperAspect(SLOT_ASPECT_RATIOS[typedSlotId]);
-        setCropperFile(file);
-        cropperCallbackRef.current = resolve;
-        cropperCancelRef.current = reject;
-      });
-      const croppedFile = new File([croppedBlob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
-      return doUpload(croppedFile);
-    }
-    return doUpload(file);
-  };
-
-  const doUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('siteId', site || 'pusat');
-    const res = await api.post('/media/upload?purpose=ad', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return res.data?.data?.url || res.data?.url || res.data?.filePath || '';
-  };
-
-  const handleCropperComplete = (blob: Blob) => {
-    setCropperFile(null);
-    cropperCallbackRef.current?.(blob);
-    cropperCallbackRef.current = null;
-  };
-
-  const handleCropperCancel = () => {
-    setCropperFile(null);
-    cropperCancelRef.current?.();
-    cropperCancelRef.current = null;
-  };
-
-  // Data Fetching
   const fetchData = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       if (user?.role === 'superadmin' || user?.role === 'wapimred') {
-        const [adsRes, pkgsRes, bookingsRes] = await Promise.all([
-          api.get('/ads', { signal }),
+        const [bookingsRes, pkgsRes] = await Promise.all([
+          api.get('/ads/bookings/all', { signal }).catch(() => ({ data: { data: [] } })),
           api.get('/ads/packages', { signal }),
-          api.get('/ads/bookings/all', { signal }).catch(() => ({ data: { data: [] } }))
         ]);
         if (signal?.aborted) return;
-        setAds(adsRes.data.data || []);
-        setPackages(pkgsRes.data.data || []);
         setBookings(bookingsRes.data.data || []);
+        setPackages(pkgsRes.data.data || []);
       } else if (user?.role === 'advertiser') {
-        const [pkgsRes, bookingsRes] = await Promise.all([
+        const [bookingsRes, pkgsRes] = await Promise.all([
+          api.get('/ads/bookings/my', { signal }).catch(() => ({ data: { data: [] } })),
           api.get('/ads/packages', { signal }),
-          api.get('/ads/bookings/my', { signal }).catch(() => ({ data: { data: [] } }))
         ]);
         if (signal?.aborted) return;
-        setPackages(pkgsRes.data.data || []);
         setBookings(bookingsRes.data.data || []);
+        setPackages(pkgsRes.data.data || []);
       }
     } catch (error: unknown) {
-      if ((error as { name?: string })?.name !== 'CanceledError') console.error('Gagal mengambil data dashboard iklan', error);
+      if ((error as { name?: string })?.name !== 'CanceledError') console.error('Gagal mengambil data', error);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
@@ -122,82 +59,9 @@ export default function AdsDashboard() {
     const controller = new AbortController();
     fetchData(controller.signal);
     return () => { controller.abort(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchData deps (site, user) already tracked; stable state setters excluded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site, user]);
 
-  // Ad Management Handlers
-  const handleAddLeaderboardBanner = async () => {
-    try {
-      await api.post('/ads', { slot: 'leaderboard', isActive: true });
-      await fetchData();
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal menambah banner'), 'error');
-    }
-  };
-
-  const handleUpdateAd = async (adId: string, payload: Partial<Ad>) => {
-    setSavingAdId(adId);
-    try {
-      await api.patch(`/ads/${adId}`, payload);
-      await fetchData();
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal menyimpan iklan'), 'error');
-    } finally {
-      setSavingAdId(null);
-    }
-  };
-
-  const handleDeleteAd = async (adId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus banner iklan ini?')) return;
-    try {
-      await api.delete(`/ads/${adId}`);
-      await fetchData();
-      addToast('Banner iklan berhasil dihapus', 'success');
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal menghapus iklan'), 'error');
-    }
-  };
-
-  const handleReorderAds = async (slotId: string, direction: 'up' | 'down', adIndex: number) => {
-    const slotAds = ads.filter(a => a.slot === slotId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const targetIndex = direction === 'up' ? adIndex - 1 : adIndex + 1;
-    if (targetIndex < 0 || targetIndex >= slotAds.length) return;
-
-    const items = [...slotAds];
-    [items[adIndex], items[targetIndex]] = [items[targetIndex], items[adIndex]];
-    const reorderPayload = items.map((item, idx) => ({ id: item.id, order: idx }));
-
-    try {
-      await api.patch('/ads/reorder', { items: reorderPayload });
-      await fetchData();
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal mengurutkan iklan'), 'error');
-    }
-  };
-
-  // Booking Handlers
-  const handleApproveBooking = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menyetujui iklan ini dan meluncurkannya ke website tujuan?')) return;
-    try {
-      await api.post(`/ads/bookings/${id}/approve`);
-      await fetchData();
-      addToast('Iklan disetujui & aktif di website cabang!', 'success');
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal menyetujui iklan'), 'error');
-    }
-  };
-
-  const handleRejectBooking = async (bookingId: string, notes: string) => {
-    try {
-      await api.post(`/ads/bookings/${bookingId}/reject`, { rejectionNotes: notes });
-      await fetchData();
-      addToast('Pengajuan iklan ditolak', 'info');
-    } catch (error: unknown) {
-      addToast(getApiErrorMessage(error, 'Gagal menolak iklan'), 'error');
-    }
-  };
-
-  // Role Check
   if (user?.role !== 'superadmin' && user?.role !== 'wapimred' && user?.role !== 'advertiser') {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -208,63 +72,154 @@ export default function AdsDashboard() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <RefreshCw size={32} className="animate-spin text-brand-red" />
+      </div>
+    );
+  }
+
+  // Advertiser view: stats + CTA + chart + history
+  if (user?.role === 'advertiser') {
+    return (
+      <AdvertiserAdsView
+        site={site}
+        bookings={bookings}
+        onRefresh={() => fetchData()}
+      />
+    );
+  }
+
+  // Superadmin/Wapimred view: stats overview
+  const totalImpressions = bookings.reduce((acc, b) => acc + b.impressions, 0);
+  const totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
+  const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
+  const verifyingBookings = bookings.filter(b => b.paymentStatus === 'VERIFYING');
+
   return (
-    <div className="max-w-6xl mx-auto space-y-10 animate-fade-in pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-brand-red text-white flex items-center justify-center shadow-lg shadow-brand-red/20">
-            <Layout size={28} />
-          </div>
+    <div className="space-y-8">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-brand-red">
+          <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Wallet size={20} /></div>
           <div>
-            <h1 className="text-2xl font-black text-brand-black dark:text-white tracking-tight uppercase">Portal Iklan & Monetisasi</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-              Cabang Regional: <strong className="text-brand-red">{site}</strong>
-              {user?.role && <span className="ml-2 px-2.5 py-0.5 bg-brand-black dark:bg-white/10 text-brand-red rounded-full font-black text-[9px] uppercase tracking-wider">{user.role}</span>}
-            </p>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Booking</p>
+            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.length}</p>
           </div>
         </div>
-        <button onClick={() => fetchData()} className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-brand-black dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
-          <RefreshCw size={14} /> Refresh Data
-        </button>
+        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-emerald-500">
+          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl"><CheckCircle2 size={20} /></div>
+          <div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Iklan Aktif</p>
+            <p className="text-xl font-black text-brand-black dark:text-white">{activeBookings.length}</p>
+          </div>
+        </div>
+        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-blue-500">
+          <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl"><BarChart3 size={20} /></div>
+          <div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Impresi</p>
+            <p className="text-xl font-black text-brand-black dark:text-white">{totalImpressions.toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-amber-500">
+          <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl"><Eye size={20} /></div>
+          <div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Menunggu Verifikasi</p>
+            <p className="text-xl font-black text-brand-black dark:text-white">{verifyingBookings.length}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-32">
-          <RefreshCw size={32} className="animate-spin text-brand-red" />
-        </div>
-      ) : (
-        <>
-          {/* ADVERTISER VIEW */}
-          {user?.role === 'advertiser' && (
-            <AdvertiserAdsView
-              site={site}
-              bookings={bookings}
-              onRefresh={() => fetchData()}
-            />
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link
+          href={`/${site}/dashboard/ads/slots`}
+          className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
+        >
+          <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Target size={20} /></div>
+          <div className="flex-1">
+            <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Kelola Slot Iklan</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Leaderboard, banner, dan slot aktif</p>
+          </div>
+          <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
+        </Link>
+        <Link
+          href={`/${site}/dashboard/ads/packages`}
+          className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
+        >
+          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl"><Package size={20} /></div>
+          <div className="flex-1">
+            <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Katalog Paket</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">{packages.length} paket aktif</p>
+          </div>
+          <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
+        </Link>
+        <Link
+          href={`/${site}/dashboard/ads/bookings`}
+          className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
+        >
+          <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl"><ClipboardList size={20} /></div>
+          <div className="flex-1">
+            <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Validasi Booking</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              {verifyingBookings.length > 0
+                ? `${verifyingBookings.length} menunggu verifikasi`
+                : 'Semua sudah diproses'
+              }
+            </p>
+          </div>
+          {verifyingBookings.length > 0 && (
+            <span className="px-2 py-0.5 bg-blue-500 text-white text-[8px] font-black rounded-full animate-pulse">{verifyingBookings.length}</span>
           )}
+          <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
+        </Link>
+      </div>
 
-          {/* SUPERADMIN / WAPIMRED VIEW */}
-          {(user?.role === 'superadmin' || user?.role === 'wapimred') && (
-            <SuperadminAdsView
-              site={site}
-              role={user.role}
-              ads={ads}
-              packages={packages}
-              bookings={bookings}
-              savingAdId={savingAdId}
-              onRefresh={() => fetchData()}
-              onAddLeaderboardBanner={handleAddLeaderboardBanner}
-              onUpdateAd={handleUpdateAd}
-              onDeleteAd={handleDeleteAd}
-              onReorderAds={handleReorderAds}
-              onUpload={uploadAdFile}
-              onApproveBooking={handleApproveBooking}
-              onRejectBooking={handleRejectBooking}
-            />
-          )}
-        </>
+      {/* Recent Bookings */}
+      {bookings.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Booking Terbaru</h3>
+            <Link href={`/${site}/dashboard/ads/bookings`} className="text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+              Lihat Semua →
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-white/5">
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Pemesan</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Paket</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Site</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Status</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Impresi</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Klik</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.slice(0, 5).map((b) => (
+                  <tr key={b.id} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                    <td className="py-3 px-4 font-semibold text-brand-black dark:text-white">{b.user?.name || '-'}</td>
+                    <td className="py-3 px-4 text-gray-500">{b.package?.name || '-'}</td>
+                    <td className="py-3 px-4 text-gray-500">{b.siteId}</td>
+                    <td className="py-3 px-4">
+                      <span className={cn(
+                        "px-2 py-1 rounded-full text-[9px] font-bold uppercase",
+                        b.paymentStatus === 'PAID' ? "bg-emerald-100 text-emerald-700" :
+                        b.paymentStatus === 'VERIFYING' ? "bg-blue-100 text-blue-700" :
+                        b.paymentStatus === 'REJECTED' ? "bg-red-100 text-red-700" :
+                        "bg-amber-100 text-amber-700"
+                      )}>{b.paymentStatus}</span>
+                    </td>
+                    <td className="py-3 px-4 font-mono">{b.impressions.toLocaleString()}</td>
+                    <td className="py-3 px-4 font-mono">{b.clicks.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
       {/* Guidelines */}
@@ -272,25 +227,15 @@ export default function AdsDashboard() {
         <div className="flex items-start gap-4">
           <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600"><AlertCircle size={22} /></div>
           <div>
-            <h4 className="text-[11px] font-black text-blue-950 dark:text-blue-300 uppercase tracking-widest mb-1.5">Ketentuan & Panduan Portal Iklan BeritaKarya</h4>
+            <h4 className="text-[11px] font-black text-blue-950 dark:text-blue-300 uppercase tracking-widest mb-1.5">Ketentuan Portal Iklan BeritaKarya</h4>
             <ul className="text-[10px] text-blue-800/80 dark:text-blue-400/80 space-y-2 list-disc pl-4 leading-relaxed font-bold uppercase tracking-wider">
-              <li>Penyelarasan iklan regional berjalan otomatis seketika setelah Superadmin Pusat menyetujui pengajuan kampanye pengiklan.</li>
-              <li>Untuk mengoptimalkan kecepatan muat halaman portal wilayah, semua file spanduk iklan disarankan dikompresi ke format **WebP** dengan batas maksimum ukuran file sebesar **200 KB**.</li>
-              <li>Administrasi keuangan di portal wilayah dikendalikan sepenuhnya melalui sistem transfer satu pintu rekening terpusat.</li>
+              <li>Penyelarasan iklan regional berjalan otomatis setelah Superadmin Pusat menyetujui pengajuan kampanye pengiklan.</li>
+              <li>Semua file spanduk iklan disarankan dikompresi ke format **WebP** dengan batas maksimum **200 KB**.</li>
+              <li>Administrasi keuangan dikendalikan melalui sistem transfer satu pintu rekening terpusat.</li>
             </ul>
           </div>
         </div>
       </div>
-
-      {/* Image Cropper Modal */}
-      {cropperFile && (
-        <AdImageCropper
-          file={cropperFile}
-          aspectRatio={cropperAspect}
-          onComplete={handleCropperComplete}
-          onCancel={handleCropperCancel}
-        />
-      )}
     </div>
   );
 }
