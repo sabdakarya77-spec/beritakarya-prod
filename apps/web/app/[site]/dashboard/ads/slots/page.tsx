@@ -115,6 +115,24 @@ export default function AdsSlotsPage() {
     }
   };
 
+  const handleSaveSlot = async (slotId: string, existingAd: Ad | undefined, payload: Partial<Ad>) => {
+    setSavingAdId(slotId);
+    try {
+      if (existingAd) {
+        await api.patch(`/ads/${existingAd.id}`, payload);
+      } else {
+        await api.post('/ads', { slot: slotId, ...payload });
+      }
+      await fetchAds();
+      addToast('Pengaturan iklan berhasil disimpan', 'success');
+    } catch (error: unknown) {
+      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      addToast(msg || 'Gagal menyimpan iklan', 'error');
+    } finally {
+      setSavingAdId(null);
+    }
+  };
+
   const handleDeleteAd = async (adId: string) => {
     if (!confirm('Apakah Anda yakin ingin menghapus banner iklan ini?')) return;
     try {
@@ -173,16 +191,19 @@ export default function AdsSlotsPage() {
             onUpload={uploadAdFile}
             savingId={savingAdId}
           />
-          {AD_SLOT_DEFINITIONS.filter(s => s.id !== 'leaderboard').map(slot => (
-            <AdSlotCard
-              key={slot.id}
-              slot={slot}
-              data={ads.find(a => a.slot === slot.id)}
-              onSave={(_p) => {/* handled by parent */}}
-              onUpload={uploadAdFile}
-              isSaving={savingAdId === slot.id}
-            />
-          ))}
+          {AD_SLOT_DEFINITIONS.filter(s => s.id !== 'leaderboard').map(slot => {
+            const existingAd = ads.find(a => a.slot === slot.id);
+            return (
+              <AdSlotCard
+                key={slot.id}
+                slot={slot}
+                data={existingAd}
+                onSave={(payload) => handleSaveSlot(slot.id, existingAd, payload)}
+                onUpload={uploadAdFile}
+                isSaving={savingAdId === slot.id}
+              />
+            );
+          })}
         </div>
       )}
 
