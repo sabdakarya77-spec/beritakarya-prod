@@ -20,7 +20,7 @@ export default function FontSizeControl() {
 
     const applyFontSize = (el: HTMLElement | null) => {
       if (el) {
-        el.style.fontSize = `${fontSize * 100}%`;
+        el.style.setProperty('--article-font-scale', String(fontSize));
         contentElRef.current = el;
       }
     };
@@ -51,7 +51,7 @@ export default function FontSizeControl() {
 
   useEffect(() => {
     if (contentElRef.current) {
-      contentElRef.current.style.fontSize = `${fontSize * 100}%`;
+      contentElRef.current.style.setProperty('--article-font-scale', String(fontSize));
     }
   }, [fontSize]);
 

@@ -314,7 +314,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div className="min-w-0">
                   <FadeInOnScroll>
                     <div className="space-y-8">
-                      <div className="article-content max-w-[40rem] space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
+                      <div className="article-content max-w-content space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
                         {(() => {
                           const blocks = (Array.isArray(article.blocks) ? article.blocks : []) as Block[];
                           let paragraphCount = 0;
@@ -688,7 +688,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       return (
         <Tag
           className={cn(
-            'mt-10 mb-5 font-sans font-extrabold leading-tight tracking-tight text-balance text-brand-black dark:text-white md:mt-12 md:mb-6',
+            'mt-10 mb-5 font-serif font-extrabold leading-tight tracking-tight text-balance text-brand-black dark:text-white md:mt-12 md:mb-6',
             headingSizeClass
           )}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
