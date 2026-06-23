@@ -241,7 +241,7 @@ export function AdsMarketingPage({
           content={termsContent}
           siteName={siteConfig.name}
           eyebrow="Dokumen Portal"
-          proseSize="compact"
+          proseSize="default"
           emptyMessage={`Ketentuan umum periklanan tertulis belum diunggah oleh redaksi regional ${siteConfig.name}. Hubungi admin kami untuk detail syarat lengkap.`}
         />
       </div>
