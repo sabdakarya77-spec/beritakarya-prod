@@ -260,8 +260,8 @@ async function processImage(
         },
       ])
     } catch (err: unknown) {
-      logger.error('[Media] Failed to add watermark:', err)
-      throw new AppError('Gagal menambahkan watermark', 500, 'WATERMARK_FAILED')
+      // Watermark is optional - log warning but don't fail the upload
+      logger.warn('[Media] Watermark skipped (asset not found or processing failed):', err)
     }
   }
 
