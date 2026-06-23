@@ -308,7 +308,7 @@ export function SuperadminAdsView({
             <div className="space-y-6">
               {bookings.map(b => (
                 <div key={b.id} className="dash-card overflow-hidden border-t-4 border-t-brand-red">
-                  <div className="p-6 bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="p-4 md:p-6 bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                     <div>
                       <div className="flex items-center gap-3">
                         <h4 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">{b.package?.name}</h4>
@@ -316,9 +316,9 @@ export function SuperadminAdsView({
                       </div>
                       <p className="text-[10px] text-gray-400 mt-1">Pemesan: <strong className="text-brand-black dark:text-white">{b.user?.name}</strong> ({b.user?.email})</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={cn(
-                        "px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest",
+                        "px-2.5 py-1 rounded-full font-black text-[8px] md:text-[9px] uppercase tracking-widest",
                         b.paymentStatus === 'PAID' ? "bg-emerald-500/10 text-emerald-500" :
                         b.paymentStatus === 'VERIFYING' ? "bg-blue-500/10 text-blue-500 animate-pulse" :
                         b.paymentStatus === 'REJECTED' ? "bg-red-500/10 text-red-500" :
@@ -338,8 +338,8 @@ export function SuperadminAdsView({
                     </div>
                   </div>
 
-                  <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-4 text-[11px] border-r border-gray-50 dark:border-white/5 pr-6">
+                  <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="space-y-4 text-[11px] md:border-r border-gray-50 dark:border-white/5 md:pr-6 pb-4 md:pb-0 border-b md:border-b-0">
                       <div className="space-y-1">
                         <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Tanggal Mulai - Selesai</span>
                         <div className="font-bold">{new Date(b.startDate).toLocaleDateString('id-ID')} s.d {new Date(b.endDate).toLocaleDateString('id-ID')}</div>
@@ -361,7 +361,7 @@ export function SuperadminAdsView({
                       )}
                     </div>
 
-                    <div className="space-y-2 border-r border-gray-50 dark:border-white/5 pr-6">
+                    <div className="space-y-2 md:border-r border-gray-50 dark:border-white/5 md:pr-6 pb-4 md:pb-0 border-b md:border-b-0">
                       <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Materi Kreatif Banner / Video</span>
                       <div className="h-[120px] bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
                         {b.imageUrl ? (
@@ -394,7 +394,7 @@ export function SuperadminAdsView({
                   </div>
 
                   {b.paymentStatus === 'VERIFYING' && (
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5 flex justify-end gap-3">
+                    <div className="px-4 md:px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                       <button
                         onClick={() => setShowRejectModal(b.id)}
                         className="px-6 py-2.5 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-red-500/10"
