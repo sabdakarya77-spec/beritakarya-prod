@@ -131,6 +131,8 @@ export async function updateSiteSettings(req: Request, res: Response) {
       'socialLinks',          // Saluran Media Sosial Resmi
       'footerText',           // Teks Footer Hak Cipta
       'googleIndexingConfig', // Google Search API
+      'ga4PropertyId',        // Google Analytics 4
+      'gscSiteUrl',           // Google Search Console
       'aboutUs',              // Halaman Legal
       'codeOfEthics',
       'editorial',

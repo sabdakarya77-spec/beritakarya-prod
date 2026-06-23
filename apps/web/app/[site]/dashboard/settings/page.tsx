@@ -13,6 +13,7 @@ import {
   Loader2,
   Mail,
   ShieldAlert,
+  BarChart3,
   BookOpen,
   Flame,
   Eye,
@@ -86,7 +87,9 @@ export default function SettingsPage() {
       clientEmail: '',
       privateKey: '',
       isActive: false
-    }
+    },
+    ga4PropertyId: '',
+    gscSiteUrl: ''
   })
   
   const [originalSettings, setOriginalSettings] = useState<typeof settings | null>(null)
@@ -205,7 +208,9 @@ export default function SettingsPage() {
             editorialPdfUrl: data.data.appearance?.editorialPdfUrl || ''
           },
           trendingTopics: data.data.trendingTopics || [],
-          googleIndexingConfig: data.data.googleIndexingConfig || { clientEmail: '', privateKey: '', isActive: false }
+          googleIndexingConfig: data.data.googleIndexingConfig || { clientEmail: '', privateKey: '', isActive: false },
+          ga4PropertyId: data.data.ga4PropertyId || '',
+          gscSiteUrl: data.data.gscSiteUrl || ''
         }
         setSettings(mappedSettings)
         setOriginalSettings(JSON.parse(JSON.stringify(mappedSettings)))
@@ -890,6 +895,55 @@ export default function SettingsPage() {
                         <span className="text-brand-red font-bold">WAJIB:</span> Tambahkan Service Account Email sebagai <strong>Owner</strong> di Google Search Console.
                       </li>
                     </ol>
+                  </div>
+                </div>
+
+                {/* Google Analytics (GA4) & Search Console Configuration */}
+                <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <BarChart3 size={18} className="text-brand-red" /> Google Analytics & Search Console
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Hubungkan GA4 dan GSC untuk menampilkan data analytics langsung di dashboard.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Property ID</label>
+                      <input
+                        type="text"
+                        value={settings.ga4PropertyId}
+                        onChange={(e) => setSettings({ ...settings, ga4PropertyId: e.target.value })}
+                        placeholder="properties/123456789"
+                        className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Ditemukan di Google Analytics → Admin → Property Settings → Property ID (format: properties/XXXXXXXXX)
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Search Console Site URL</label>
+                      <input
+                        type="text"
+                        value={settings.gscSiteUrl}
+                        onChange={(e) => setSettings({ ...settings, gscSiteUrl: e.target.value })}
+                        placeholder="sc-domain:beritakarya.co atau https://beritakarya.co/"
+                        className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Format: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">sc-domain:domain.com</code> untuk domain property, atau URL lengkap untuk URL prefix property.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl dark:bg-blue-900/20 dark:border-blue-800">
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      <strong>Catatan:</strong> Service Account yang sama digunakan untuk Google Indexing, GA4, dan GSC.
+                      Pastikan Service Account sudah ditambahkan sebagai <strong>Viewer</strong> di Google Analytics dan <strong>Owner</strong> di Google Search Console.
+                    </p>
                   </div>
                 </div>
               </div>

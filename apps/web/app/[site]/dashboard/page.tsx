@@ -3,6 +3,12 @@
 import { BarChart3, TrendingUp, FileText, ArrowRight, Clock3, CheckCircle2, Users, PenSquare } from 'lucide-react';
 import Link from 'next/link';
 import TrafficChart from '../../../components/dashboard/TrafficChart';
+import { GA4TrafficChart } from '../../../components/dashboard/GA4TrafficChart';
+import { GA4AudienceCards } from '../../../components/dashboard/GA4AudienceCards';
+import { GA4SourceTable } from '../../../components/dashboard/GA4SourceTable';
+import { GSCPerformanceChart } from '../../../components/dashboard/GSCPerformanceChart';
+import { GSCTopQueries } from '../../../components/dashboard/GSCTopQueries';
+import { GSCTopPages } from '../../../components/dashboard/GSCTopPages';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Skeleton from '../../../components/ui/Skeleton';
@@ -103,6 +109,13 @@ export default function DashboardOverview() {
   const [engagementStats, setEngagementStats] = useState<EngagementStats | null>(null);
   const [kycRequests, setKycRequests] = useState<KYCRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [ga4Traffic, setGa4Traffic] = useState<{ date: string; sessions: number; pageviews: number }[]>([]);
+  const [ga4Audience, setGa4Audience] = useState<{ totalUsers: number; totalSessions: number; avgSessionDuration: number; bounceRate: number; realtimeUsers?: number; sources: { source: string; sessions: number; percentage: number }[] } | null>(null);
+  const [ga4Realtime, setGa4Realtime] = useState<{ activeUsers: number } | null>(null);
+  const [gscPerformance, setGscPerformance] = useState<{ totalImpressions: number; totalClicks: number; avgCtr: number; avgPosition: number; overTime: { date: string; impressions: number; clicks: number; ctr: number; position: number }[] } | null>(null);
+  const [gscQueries, setGscQueries] = useState<{ query: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
+  const [gscPages, setGscPages] = useState<{ page: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
+  const [analyticsTab, setAnalyticsTab] = useState<'internal' | 'ga4' | 'gsc'>('internal');
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('Selamat');
   const [currentDate, setCurrentDate] = useState('');
@@ -135,6 +148,24 @@ export default function DashboardOverview() {
         setTrafficData(Array.isArray(trafficRes.data.data) ? trafficRes.data.data : []);
         setTopContent(topRes.data.data);
         setEngagementStats(engRes.data.data);
+
+        // Load GA4 and GSC data (fire-and-forget, don't block dashboard)
+        Promise.allSettled([
+          api.get('/analytics/ga4/traffic', { params: { days: 7 }, signal: controller.signal }),
+          api.get('/analytics/ga4/audience', { params: { days: 7 }, signal: controller.signal }),
+          api.get('/analytics/ga4/realtime', { signal: controller.signal }),
+          api.get('/analytics/gsc/performance', { params: { days: 28 }, signal: controller.signal }),
+          api.get('/analytics/gsc/queries', { params: { limit: 10 }, signal: controller.signal }),
+          api.get('/analytics/gsc/pages', { params: { limit: 10 }, signal: controller.signal }),
+        ]).then(([ga4TrafficRes, ga4AudienceRes, ga4RealtimeRes, gscPerfRes, gscQueriesRes, gscPagesRes]) => {
+          if (controller.signal.aborted) return;
+          if (ga4TrafficRes.status === 'fulfilled' && ga4TrafficRes.value.data.success) setGa4Traffic(ga4TrafficRes.value.data.data || []);
+          if (ga4AudienceRes.status === 'fulfilled' && ga4AudienceRes.value.data.success) setGa4Audience(ga4AudienceRes.value.data.data);
+          if (ga4RealtimeRes.status === 'fulfilled' && ga4RealtimeRes.value.data.success) setGa4Realtime(ga4RealtimeRes.value.data.data);
+          if (gscPerfRes.status === 'fulfilled' && gscPerfRes.value.data.success) setGscPerformance(gscPerfRes.value.data.data);
+          if (gscQueriesRes.status === 'fulfilled' && gscQueriesRes.value.data.success) setGscQueries(gscQueriesRes.value.data.data || []);
+          if (gscPagesRes.status === 'fulfilled' && gscPagesRes.value.data.success) setGscPages(gscPagesRes.value.data.data || []);
+        }).catch(() => { /* GA4/GSC not configured — silent fail */ });
 
         if (user?.role === 'superadmin') {
           try {
@@ -532,6 +563,57 @@ export default function DashboardOverview() {
           <TrafficChart data={trafficData} />
         </div>
       </div>
+
+      {/* ── Google Analytics & Search Console ─────────────────────────── */}
+      {(ga4Traffic.length > 0 || ga4Audience || gscPerformance || gscQueries.length > 0) && (
+        <div className="rounded-2xl border border-gray-100 bg-white dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-1 border-b border-gray-100 px-2 pt-2 dark:border-white/5">
+            {([
+              { key: 'internal', label: 'Internal' },
+              { key: 'ga4', label: 'Google Analytics' },
+              { key: 'gsc', label: 'Search Console' },
+            ] as const).map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setAnalyticsTab(tab.key)}
+                className={`rounded-t-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                  analyticsTab === tab.key
+                    ? 'bg-brand-red/10 text-brand-red'
+                    : 'text-brand-text-muted hover:text-brand-black dark:hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="p-6">
+            {analyticsTab === 'ga4' && (
+              <div className="space-y-6">
+                {ga4Audience && <GA4AudienceCards data={{ ...ga4Audience, realtimeUsers: ga4Realtime?.activeUsers }} />}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <GA4TrafficChart data={ga4Traffic} />
+                  </div>
+                  {ga4Audience?.sources && <GA4SourceTable sources={ga4Audience.sources} />}
+                </div>
+              </div>
+            )}
+            {analyticsTab === 'gsc' && (
+              <div className="space-y-6">
+                {gscPerformance && <GSCPerformanceChart data={gscPerformance} />}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <GSCTopQueries data={gscQueries} />
+                  <GSCTopPages data={gscPages} />
+                </div>
+              </div>
+            )}
+            {analyticsTab === 'internal' && (
+              <p className="text-sm text-brand-text-muted">Data internal (PageView) ditampilkan di bagian atas.</p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
