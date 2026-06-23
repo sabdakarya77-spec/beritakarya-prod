@@ -10,9 +10,16 @@ interface FadeInOnScrollProps {
 
 export default function FadeInOnScroll({ children, className = '', delay = 0 }: FadeInOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [jsReady, setJsReady] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
+  // Mark JS as hydrated — only then apply fade animation
   useEffect(() => {
+    setJsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!jsReady) return
     const el = ref.current
     if (!el) return
 
@@ -32,15 +39,19 @@ export default function FadeInOnScroll({ children, className = '', delay = 0 }: 
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [delay])
+  }, [jsReady, delay])
 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-500 ease-out ${
-        isVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-4'
+      className={`${
+        jsReady
+          ? `transition-all duration-500 ease-out ${
+              isVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4'
+            }`
+          : ''
       } ${className}`}
     >
       {children}
