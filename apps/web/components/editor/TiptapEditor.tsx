@@ -136,7 +136,7 @@ export function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'tiptap-editor-content prose prose-lg max-w-none focus:outline-none min-h-[200px] py-4',
+        class: 'tiptap-editor-content max-w-none focus:outline-none min-h-[200px] py-4',
       },
     },
   })

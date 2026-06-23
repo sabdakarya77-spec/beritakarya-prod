@@ -1,5 +1,5 @@
 import { prepareLegalDocumentContent } from '../../lib/legalPages'
-import { legalProseClassName } from './legalStyles'
+import { legalProseClassName, legalCompactClassName } from './legalStyles'
 import { sanitizeHtml } from '../../lib/sanitize'
 
 type LegalDocumentBodyProps = {
@@ -29,7 +29,7 @@ export function LegalDocumentBody({
 }: LegalDocumentBodyProps) {
   const proseClass =
     proseSize === 'compact'
-      ? 'prose prose-sm md:prose-base dark:prose-invert max-w-none'
+      ? legalCompactClassName
       : legalProseClassName
 
   const preparedHtml = prepareLegalDocumentContent(content, {

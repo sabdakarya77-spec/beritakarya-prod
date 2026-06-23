@@ -49,7 +49,7 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
   const textOrderClass = layout === 'left' ? 'order-2' : 'order-1'
 
   return (
-    <NodeViewWrapper className="not-prose my-4">
+    <NodeViewWrapper className="my-4">
       <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-800/50">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
@@ -180,7 +180,7 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
             textOrderClass
           )}>
             <NodeViewContent
-              className="prose prose-sm dark:prose-invert max-w-none break-words focus:outline-none min-h-[100px]"
+              className="max-w-none break-words focus:outline-none min-h-[100px] text-sm leading-relaxed text-gray-800 dark:text-gray-200"
             />
           </div>
         </div>

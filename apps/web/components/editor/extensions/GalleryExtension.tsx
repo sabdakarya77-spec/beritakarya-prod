@@ -69,7 +69,7 @@ const GalleryComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps)
 
   if (images.length === 0) {
     return (
-      <NodeViewWrapper className="not-prose my-4">
+      <NodeViewWrapper className="my-4">
         <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-800/50 p-8">
           <div className="flex flex-col items-center justify-center gap-4 text-center">
             <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">

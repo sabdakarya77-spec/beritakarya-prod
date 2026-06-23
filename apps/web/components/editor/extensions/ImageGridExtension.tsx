@@ -63,7 +63,7 @@ const ImageGridComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
   const gridColsClass = cols === 2 ? 'grid-cols-2' : 'grid-cols-3'
 
   return (
-    <NodeViewWrapper className="not-prose my-4">
+    <NodeViewWrapper className="my-4">
       <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-800/50">
         <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
