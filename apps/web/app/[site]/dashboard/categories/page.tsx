@@ -20,7 +20,6 @@ export default function CategoriesDashboard() {
   const [isGlobalView, setIsGlobalView] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
-  const [migrating, setMigrating] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [showForm, setShowForm] = useState(false);
@@ -62,37 +61,6 @@ export default function CategoriesDashboard() {
     } catch (error: unknown) {
       console.error('Gagal mengambil kategori', error);
       showToast('Gagal memuat kategori', 'error');
-    }
-  };
-
-  const handleMigrateToLocal = async () => {
-    const confirmed = window.confirm(
-      'Ini akan copy semua kategori global ke lokal untuk setiap site dan re-map artikel.\n\n' +
-      'Proses ini hanya bisa dijalankan sekali per site.\n\n' +
-      'Lanjutkan?'
-    );
-    if (!confirmed) return;
-
-    setMigrating(true);
-    try {
-      const { data } = await api.post('/categories/migrate-to-local');
-      if (data.success) {
-        const { summary } = data.data;
-        const errorCount = summary.errors;
-        let msg = `Migrasi selesai: ${summary.totalCategoriesCreated} kategori dibuat, ${summary.totalArticlesRemapped} artikel di-remap dari ${summary.sitesProcessed} site.`;
-        if (errorCount > 0) {
-          msg += ` (${errorCount} error)`;
-        }
-        showToast(msg, errorCount > 0 ? 'error' : 'success');
-        fetchCategories(); // Refresh tampilan
-      }
-    } catch (error: unknown) {
-      const msg = axios.isAxiosError(error)
-        ? error.response?.data?.error?.message
-        : undefined;
-      showToast(msg || 'Gagal migrasi kategori', 'error');
-    } finally {
-      setMigrating(false);
     }
   };
 
@@ -441,22 +409,6 @@ export default function CategoriesDashboard() {
             </button>
           )}
 
-          {/* Migrate (Global View only) */}
-          {isGlobalView && (
-            <>
-              <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-900/30 hidden lg:inline">
-                Superadmin Mode
-              </span>
-              <button
-                type="button"
-                onClick={handleMigrateToLocal}
-                disabled={migrating}
-                className="px-3 py-2 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all disabled:opacity-50"
-              >
-                {migrating ? 'Migrasi...' : '📦 Migrasi ke Lokal'}
-              </button>
-            </>
-          )}
         </div>
       </div>
 
