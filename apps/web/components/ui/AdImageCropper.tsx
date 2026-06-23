@@ -107,7 +107,7 @@ export default function AdImageCropper({ file, aspectRatio, minWidth, minHeight,
         'image/webp',
         0.9
       );
-    } catch (err) {
+    } catch {
       setError('Gagal memproses gambar. Coba gunakan format JPG atau PNG.');
       setProcessing(false);
     }

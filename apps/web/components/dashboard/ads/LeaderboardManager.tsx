@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Plus, Eye } from 'lucide-react';
+import { Plus, Eye } from 'lucide-react';
 import type { Ad } from './types';
 import type { AdSlotDefinition } from '../../../lib/constants';
 import { LeaderboardBannerRow } from './LeaderboardBannerRow';

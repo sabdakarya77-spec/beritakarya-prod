@@ -41,6 +41,24 @@ const PERIODS = [
   { label: '30H', days: 30 },
 ];
 
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-brand-black dark:bg-slate-900 border border-white/10 rounded-xl p-3 shadow-xl">
+      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-2">
+        {label ? format(parseISO(label), 'EEEE, dd MMM yyyy', { locale: id }) : label}
+      </p>
+      {payload.map((entry) => (
+        <div key={entry.dataKey} className="flex items-center gap-2 text-xs font-bold">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span className="text-gray-400">{entry.dataKey === 'impressions' ? 'Impresi' : 'Klik'}:</span>
+          <span className="text-white">{entry.value.toLocaleString()}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function AdPerformanceChart({ stats, bookingName }: AdPerformanceChartProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -62,24 +80,6 @@ export function AdPerformanceChart({ stats, bookingName }: AdPerformanceChartPro
     impressions: imp.value,
     clicks: stats.clicks[i]?.value ?? 0,
   }));
-
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="bg-brand-black dark:bg-slate-900 border border-white/10 rounded-xl p-3 shadow-xl">
-        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-2">
-          {label ? format(parseISO(label), 'EEEE, dd MMM yyyy', { locale: id }) : label}
-        </p>
-        {payload.map((entry) => (
-          <div key={entry.dataKey} className="flex items-center gap-2 text-xs font-bold">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-gray-400">{entry.dataKey === 'impressions' ? 'Impresi' : 'Klik'}:</span>
-            <span className="text-white">{entry.value.toLocaleString()}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-4">
