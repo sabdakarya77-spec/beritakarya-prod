@@ -421,7 +421,9 @@ export class SiteService {
       socialLinks: site.socialLinks,
       appearance: site.appearance,
       trendingTopics: site.trendingTopics,
-      googleIndexingConfig: site.googleIndexingConfig
+      googleIndexingConfig: site.googleIndexingConfig,
+      ga4PropertyId: site.ga4PropertyId,
+      gscSiteUrl: site.gscSiteUrl
     }
   }
 
@@ -455,7 +457,7 @@ export class SiteService {
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
       'socialLinks', 'appearance', 'trendingTopics',
-      'googleIndexingConfig'
+      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl'
     ]
 
     for (const field of allowedFields) {
