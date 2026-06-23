@@ -386,75 +386,78 @@ export default function CategoriesDashboard() {
         </p>
       </div>
 
-      {/* Action Bar — compact controls always visible */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2 overflow-x-auto scrollbar-hide">
-        {/* Primary: Add Category */}
-        <button
-          type="button"
-          onClick={() => { setShowForm(!showForm); if (showForm) cancelEdit(); }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
-            showForm
-              ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
-          }`}
-        >
-          {showForm ? '✕' : '+'} {showForm ? 'Tutup Form' : 'Tambah Kategori'}
-        </button>
-
-        <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block" />
-
-        {/* Seed defaults */}
-        <button
-          onClick={handleSeedDefaults}
-          disabled={loading}
-          className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-          title="Muat kategori standar homepage ke database"
-        >
-          <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
-        </button>
-
-        {/* Sync from Global (Site View only) */}
-        {!isGlobalView && (
+      {/* Action Bar — two rows on mobile, single row on desktop */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm space-y-2 md:space-y-0">
+        {/* Row 1 (mobile): Primary action + View toggle */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={handleSyncFromGlobal}
-            disabled={syncing || loading}
-            className="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-            title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
+            type="button"
+            onClick={() => { setShowForm(!showForm); if (showForm) cancelEdit(); }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
+              showForm
+                ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
+            }`}
           >
-            <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
+            {showForm ? '✕' : '+'} {showForm ? 'Tutup Form' : 'Tambah Kategori'}
           </button>
-        )}
 
-        <div className="flex-1" />
+          <div className="flex-1" />
 
-        {/* View toggle */}
-        <button
-          onClick={() => setIsGlobalView(!isGlobalView)}
-          className={`px-3 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 border ${
-            isGlobalView
-              ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20'
-              : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100'
-          }`}
-        >
-          {isGlobalView ? '🌐 Global View ON' : '📍 Site View'}
-        </button>
+          {/* View toggle */}
+          <button
+            onClick={() => setIsGlobalView(!isGlobalView)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 border ${
+              isGlobalView
+                ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20'
+                : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100'
+            }`}
+          >
+            {isGlobalView ? '🌐 Global View ON' : '📍 Site View'}
+          </button>
+        </div>
 
-        {/* Migrate (Global View only) */}
-        {isGlobalView && (
-          <>
-            <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-900/30 hidden lg:inline">
-              Superadmin Mode
-            </span>
+        {/* Row 2 (mobile) / continued (desktop): Secondary actions */}
+        <div className="flex items-center gap-2">
+          {/* Seed defaults */}
+          <button
+            onClick={handleSeedDefaults}
+            disabled={loading}
+            className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+            title="Muat kategori standar homepage ke database"
+          >
+            <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
+          </button>
+
+          {/* Sync from Global (Site View only) */}
+          {!isGlobalView && (
             <button
-              type="button"
-              onClick={handleMigrateToLocal}
-              disabled={migrating}
-              className="px-3 py-2 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all disabled:opacity-50"
+              onClick={handleSyncFromGlobal}
+              disabled={syncing || loading}
+              className="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
             >
-              {migrating ? 'Migrasi...' : '📦 Migrasi ke Lokal'}
+              <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
             </button>
-          </>
-        )}
+          )}
+
+          {/* Migrate (Global View only) */}
+          {isGlobalView && (
+            <>
+              <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-900/30 hidden lg:inline">
+                Superadmin Mode
+              </span>
+              <button
+                type="button"
+                onClick={handleMigrateToLocal}
+                disabled={migrating}
+                className="px-3 py-2 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all disabled:opacity-50"
+              >
+                {migrating ? 'Migrasi...' : '📦 Migrasi ke Lokal'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* FAB — mobile only, visible when form is hidden */}
