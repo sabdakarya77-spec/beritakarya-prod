@@ -1,7 +1,7 @@
 ## Mapping File Sistem Iklan (Ads)
 
 > Referensi untuk pembahasan periklanan BeritaKarya.
-> **Terakhir di-update:** 23 Juni 2026 — CSS animation + AdSlotCard onSave fix
+> **Terakhir di-update:** 23 Juni 2026 — Video upload + smart resize fix di Slot Iklan
 
 ### Komponen Frontend (Tampilan Iklan)
 
@@ -166,6 +166,10 @@ Setiap page fetch data sendiri (independent, tidak shared context):
 | 6 | Better empty states + CTA | Semua page ads | ✅ |
 | 7 | Pagination booking list | bookings/page.tsx | ✅ |
 | 8 | Analytics mini-chart | AdvertiserAdsView | ✅ |
+| 9 | AdSlotCard onSave — hubungkan tombol Simpan | slots/page.tsx | ✅ |
+| 10 | Video upload di Slot Iklan (superadmin) | media.controller.ts + slots/page.tsx | ✅ |
+| 11 | Analytics time-series (impressions + clicks per hari) | AdPerformanceChart + AdEventLog | ✅ |
+| 12 | Backend video MIME support (MP4/WebM) + limit 20MB | media.controller.ts | ✅ |
 
 ---
 
@@ -194,7 +198,7 @@ Setiap page fetch data sendiri (independent, tidak shared context):
 |---|-------|--------|--------|--------|
 | 1 | Smart Resize + Letterbox Server-Side | Sedang | Tinggi | ✅ Selesai (`processAdImage` + letterbox di `media.controller.ts`) |
 | 2 | Template Download per Slot (PSD/Figma) | Kecil | Sedang | ✅ Selesai (SVG templates di `public/templates/`) |
-| 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | ⚠️ Sebagian (mini chart sudah ada) |
+| 3 | Preview Sesuai Tampilan Aktual di Dashboard | Sedang | Sedang | ⚠️ Sebagian (mini chart sudah ada, video preview di Slot Iklan sudah jalan) |
 | 4 | Multi-Size IAB per Slot | Besar | Tinggi | 🔲 Belum |
 
 ### Detail Fitur
@@ -210,9 +214,14 @@ Saat upload banner, server otomatis detect dimensi asli dan proses:
 
 **Mengapa letterbox, bukan crop?** Crop memotong materi kreatif (teks, logo, CTA). Letterbox mempertahankan 100% konten dengan menambahkan padding estetis di sisi yang kosong.
 
+**Status:** ✅ Selesai — Berfungsi di dua jalur:
+- **Advertiser order page:** upload gambar langsung → backend smart resize + letterbox
+- **Superadmin Slot Iklan:** cropper manual → backend proses; video upload → simpan as-is
+
 **File terkait:**
-- `apps/api/src/modules/ad/` — tambah service resize server-side (sharp / jimp)
-- `apps/web/components/ui/AdImageCropper.tsx` — ubah dari crop-only ke smart resize
+- `apps/api/src/modules/media/media.controller.ts` — `processAdImage()` + video handling
+- `apps/web/components/ui/AdImageCropper.tsx` — cropper manual untuk superadmin
+- `apps/web/app/[site]/dashboard/ads/slots/page.tsx` — skip cropper untuk video
 
 #### 2. Template Download per Slot
 
