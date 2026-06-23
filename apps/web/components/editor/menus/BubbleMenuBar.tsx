@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import type { Editor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
 import {
@@ -20,8 +21,25 @@ interface BubbleMenuBarProps {
 
 /**
  * Bubble Menu - appears on text selection using Tiptap React BubbleMenu component
+ *
+ * On mobile devices, this menu is hidden to avoid overlapping with the native
+ * context menu (cut/copy/paste). The TiptapEditorToolbar provides the same
+ * formatting tools and is always visible.
  */
 export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024) // lg breakpoint
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Hide on mobile to prevent overlap with native context menu (cut/copy/paste)
+  if (isMobile) return null
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href
     const url = window.prompt('Enter URL', previousUrl)
