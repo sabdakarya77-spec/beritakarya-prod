@@ -45,6 +45,7 @@ export default function OrderAdPage() {
   const [campaignName, setCampaignName] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [animationEffect, setAnimationEffect] = useState('ken_burns');
   
   const [adFile, setAdFile] = useState<File | null>(null);
   const [adFileName, setAdFileName] = useState('');
@@ -158,6 +159,7 @@ export default function OrderAdPage() {
         siteId: site || 'pusat',
         imageUrl: uploadedAdUrl,
         linkUrl: linkUrl || '#',
+        animationEffect: mediaType === 'image' ? animationEffect : null,
         startDate: start.toISOString(),
         endDate: end.toISOString()
       });
@@ -533,6 +535,49 @@ export default function OrderAdPage() {
                 </div>
               </div>
 
+              {/* Animation Effect Selector — only for static images */}
+              {mediaType === 'image' && (
+                <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300 block">
+                    Efek Animasi Billboard
+                  </label>
+                  <p className="text-[9px] text-gray-400 leading-relaxed">
+                    Pilih efek gerak otomatis yang akan ditampilkan pada banner gambar statis Anda di slot leaderboard. Efek ini membuat iklan terlihat lebih dinamis tanpa perlu video.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: 'ken_burns', label: 'Ken Burns', desc: 'Zoom perlahan masuk-keluar', icon: '🔍' },
+                      { value: 'fade_slide', label: 'Fade Slide', desc: 'Geser perlahan kiri-kanan', icon: '↔️' },
+                      { value: 'parallax', label: 'Parallax', desc: 'Efek kedalaman vertikal', icon: '📐' },
+                      { value: 'pulse_scale', label: 'Pulse', desc: 'Membesar-mengecil perlahan', icon: '💓' },
+                    ].map((effect) => (
+                      <button
+                        key={effect.value}
+                        type="button"
+                        onClick={() => setAnimationEffect(effect.value)}
+                        className={cn(
+                          "p-3 border rounded-sm flex items-start gap-3 text-left transition-all",
+                          animationEffect === effect.value
+                            ? 'border-brand-red bg-brand-red/[0.03] shadow-sm'
+                            : 'border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/40'
+                        )}
+                      >
+                        <span className="text-lg mt-0.5">{effect.icon}</span>
+                        <div>
+                          <span className={cn(
+                            "text-[10px] font-black uppercase tracking-wider block",
+                            animationEffect === effect.value ? 'text-brand-red' : 'text-brand-black dark:text-white'
+                          )}>
+                            {effect.label}
+                          </span>
+                          <span className="text-[8px] text-gray-400 mt-0.5 block">{effect.desc}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-4 flex justify-between">
                 <button
                   type="button"
@@ -738,6 +783,18 @@ export default function OrderAdPage() {
                 <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Format Banner</p>
                 <p className="text-xs font-black uppercase tracking-tight mt-0.5">{mediaType === 'video' ? '🎥 Video MP4 (Autoplay)' : '📸 Gambar Banner'}</p>
               </div>
+
+              {mediaType === 'image' && (
+                <div className="border-b border-white/10 pb-3">
+                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Efek Animasi</p>
+                  <p className="text-xs font-black uppercase tracking-tight mt-0.5">
+                    {animationEffect === 'ken_burns' ? '🔍 Ken Burns' :
+                     animationEffect === 'fade_slide' ? '↔️ Fade Slide' :
+                     animationEffect === 'parallax' ? '📐 Parallax' :
+                     animationEffect === 'pulse_scale' ? '💓 Pulse' : animationEffect}
+                  </p>
+                </div>
+              )}
 
               <div className="pt-2 flex justify-between items-baseline">
                 <span className="text-[10px] font-black uppercase tracking-wider">Total Biaya:</span>

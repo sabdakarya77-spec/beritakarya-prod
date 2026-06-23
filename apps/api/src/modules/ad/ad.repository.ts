@@ -36,13 +36,14 @@ export async function createAd(data: {
   code?: string | null
   imageUrl?: string | null
   linkUrl?: string | null
+  animationEffect?: string | null
   isActive?: boolean
   order?: number
   bookingId?: string | null
 }) {
   return prisma.advertisement.create({
     data,
-    select: { id: true, slot: true, code: true, imageUrl: true, linkUrl: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
+    select: { id: true, slot: true, code: true, imageUrl: true, linkUrl: true, animationEffect: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
   })
 }
 
@@ -143,6 +144,7 @@ export async function createBooking(data: {
   packageId: string
   imageUrl?: string | null
   linkUrl?: string | null
+  animationEffect?: string | null
   startDate: Date
   endDate: Date
   paymentStatus?: PaymentStatus

@@ -19,6 +19,7 @@ interface AdItem {
   code: string | null;
   imageUrl: string | null;
   linkUrl: string | null;
+  animationEffect?: string | null;
   isActive: boolean;
   order: number;
 }
@@ -299,6 +300,13 @@ export default function AdSpace({
 
 // ─── Ad Slide Sub-Component ───────────────────────────────────────────────
 
+const ANIM_CLASS_MAP: Record<string, string> = {
+  ken_burns: 'ad-anim-ken-burns',
+  fade_slide: 'ad-anim-fade-slide',
+  parallax: 'ad-anim-parallax',
+  pulse_scale: 'ad-anim-pulse-scale',
+};
+
 function AdSlide({
   ad,
   type: _type,
@@ -360,8 +368,8 @@ function AdSlide({
             alt={label}
             className={cn(
               "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-              // Ken Burns animation for static images on leaderboard
-              _type === 'leaderboard' && 'ad-anim-ken-burns'
+              // Apply selected animation effect for static images on leaderboard
+              _type === 'leaderboard' && ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
             )}
           />
         )}

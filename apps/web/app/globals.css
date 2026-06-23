@@ -441,6 +441,11 @@
   50% { transform: scale(1.05); }
   100% { transform: scale(1.0); }
 }
+@keyframes ad-parallax {
+  0% { transform: scale(1.05) translateY(0); }
+  50% { transform: scale(1.08) translateY(-3%); }
+  100% { transform: scale(1.05) translateY(0); }
+}
 
 .ad-anim-ken-burns {
   animation: ad-ken-burns 8s ease-in-out infinite alternate;
@@ -450,6 +455,9 @@
 }
 .ad-anim-pulse-scale {
   animation: ad-pulse-scale 6s ease-in-out infinite;
+}
+.ad-anim-parallax {
+  animation: ad-parallax 12s ease-in-out infinite;
 }
 
 .no-scrollbar::-webkit-scrollbar {

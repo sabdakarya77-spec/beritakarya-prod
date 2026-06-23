@@ -214,9 +214,10 @@ model Advertisement {
   linkUrl     String? // Where the banner clicks to
   isActive    Boolean  @default(true)
   order       Int      @default(0) // Rotation order for carousel (leaderboard)
-  impressions Int      @default(0) // Tracker for views
-  clicks      Int      @default(0) // Tracker for clicks
-  bookingId   String?  // Link ke AdBooking yang membuat slot ini
+  impressions     Int      @default(0) // Tracker for views
+  clicks          Int      @default(0) // Tracker for clicks
+  animationEffect String?  // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
+  bookingId       String?  // Link ke AdBooking yang membuat slot ini
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -539,9 +540,10 @@ model AdBooking {
   userId         String
   siteId         String
   packageId      String
-  imageUrl       String? // File banner gambar WebP
-  linkUrl        String? // Tautan target ketika diklik
-  startDate      DateTime
+  imageUrl        String? // File banner gambar WebP
+  linkUrl         String? // Tautan target ketika diklik
+  animationEffect String? // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
+  startDate       DateTime
   endDate        DateTime
   paymentStatus  PaymentStatus @default(PENDING)
   paymentProof   String? // Bukti transfer bank/QRIS
