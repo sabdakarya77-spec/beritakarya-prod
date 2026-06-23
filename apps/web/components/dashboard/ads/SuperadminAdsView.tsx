@@ -61,9 +61,24 @@ export function SuperadminAdsView({
   const [pkgDesc, setPkgDesc] = useState('');
   const [showRejectModal, setShowRejectModal] = useState<string | null>(null);
   const [rejectionNotes, setRejectionNotes] = useState('');
+  // Filters
+  const [bookingFilter, setBookingFilter] = useState<'ALL' | 'VERIFYING' | 'PAID' | 'PENDING' | 'REJECTED'>('ALL');
+  const [bookingSort, setBookingSort] = useState<'newest' | 'oldest'>('newest');
+  const [pkgSlotFilter, setPkgSlotFilter] = useState<string>('ALL');
 
   const isSuperadmin = role === 'superadmin';
   const { addToast } = useToastStore();
+
+  // Filtered & sorted bookings
+  const filteredBookings = bookings
+    .filter(b => bookingFilter === 'ALL' || b.paymentStatus === bookingFilter)
+    .sort((a, b) => bookingSort === 'newest'
+      ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+  // Filtered packages
+  const filteredPackages = packages.filter(p => pkgSlotFilter === 'ALL' || p.slot === pkgSlotFilter);
 
   const handleCreateOrUpdatePackage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,8 +201,20 @@ export function SuperadminAdsView({
       {/* Tab: Packages */}
       {isSuperadmin && activeTab === 'packages' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Katalog Paket Tarif Iklan Dinamis</h3>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Katalog Paket Tarif Iklan Dinamis</h3>
+              <select
+                value={pkgSlotFilter}
+                onChange={e => setPkgSlotFilter(e.target.value)}
+                className="px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-wider text-gray-500 outline-none"
+              >
+                <option value="ALL">Semua Slot</option>
+                {AD_SLOT_DEFINITIONS.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
             <button
               onClick={() => {
                 setEditingPkgId(null);
@@ -250,7 +277,7 @@ export function SuperadminAdsView({
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {packages.map(pkg => (
+            {filteredPackages.map(pkg => (
               <div key={pkg.id} className="dash-card p-6 flex flex-col justify-between group hover:border-brand-red/30 transition-all">
                 <div>
                   <div className="flex justify-between items-start">
@@ -292,21 +319,58 @@ export function SuperadminAdsView({
               </div>
             ))}
           </div>
+          {filteredPackages.length === 0 && (
+            <div className="p-12 text-center dash-card">
+              <AlertCircle size={24} className="mx-auto text-gray-300 mb-2" />
+              <p className="text-xs text-gray-400">Tidak ada paket untuk slot "{pkgSlotFilter}".</p>
+            </div>
+          )}
         </div>
       )}
-
-      {/* Tab: Booking Approvals */}
       {isSuperadmin && activeTab === 'bookings' && (
         <div className="space-y-6">
-          <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Antrean Validasi Pemesanan & Pembayaran Iklan Terpusat</h3>
-          {bookings.length === 0 ? (
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Antrean Validasi Pemesanan & Pembayaran Iklan Terpusat</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {(['ALL', 'VERIFYING', 'PAID', 'PENDING', 'REJECTED'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setBookingFilter(f)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                    bookingFilter === f
+                      ? f === 'VERIFYING' ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400"
+                      : f === 'PAID' ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                      : f === 'REJECTED' ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
+                      : "bg-brand-red/10 border-brand-red/30 text-brand-red"
+                      : "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400 hover:text-gray-600"
+                  )}
+                >
+                  {f === 'ALL' ? 'Semua' : f}
+                  {f === 'VERIFYING' && bookings.filter(b => b.paymentStatus === 'VERIFYING').length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-[7px] rounded-full">{bookings.filter(b => b.paymentStatus === 'VERIFYING').length}</span>
+                  )}
+                </button>
+              ))}
+              <div className="h-4 w-px bg-gray-200 dark:bg-white/10 mx-1" />
+              <select
+                value={bookingSort}
+                onChange={e => setBookingSort(e.target.value as 'newest' | 'oldest')}
+                className="px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-wider text-gray-500 outline-none"
+              >
+                <option value="newest">Terbaru</option>
+                <option value="oldest">Terlama</option>
+              </select>
+            </div>
+          </div>
+          {filteredBookings.length === 0 ? (
             <div className="p-20 text-center dash-card">
               <AlertCircle size={32} className="mx-auto text-gray-300 mb-3" />
-              <p className="text-xs text-gray-400">Antrean validasi kosong.</p>
+              <p className="text-xs text-gray-400">{bookingFilter === 'ALL' ? 'Antrean validasi kosong.' : `Tidak ada booking dengan status "${bookingFilter}".`}</p>
             </div>
           ) : (
             <div className="space-y-6">
-              {bookings.map(b => (
+              {filteredBookings.map(b => (
                 <div key={b.id} className="dash-card overflow-hidden border-t-4 border-t-brand-red">
                   <div className="p-4 md:p-6 bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                     <div>
