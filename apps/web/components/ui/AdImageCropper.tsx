@@ -3,20 +3,24 @@
 import { useState, useRef, useCallback } from 'react';
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { X, Check, ZoomIn } from 'lucide-react';
+import { X, Check, ZoomIn, AlertCircle } from 'lucide-react';
 
 interface AdImageCropperProps {
   file: File;
   aspectRatio: number; // width / height, e.g. 970/250 = 3.88
+  minWidth?: number;
+  minHeight?: number;
   onComplete: (blob: Blob) => void;
   onCancel: () => void;
 }
 
-export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel }: AdImageCropperProps) {
+export default function AdImageCropper({ file, aspectRatio, minWidth, minHeight, onComplete, onCancel }: AdImageCropperProps) {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<Crop | null>(null);
   const [scale, setScale] = useState(1);
   const [imgSrc, setImgSrc] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -41,10 +45,20 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
   const generateCroppedImage = useCallback(() => {
     const image = imgRef.current;
     const canvas = canvasRef.current;
-    if (!image || !canvas || !completedCrop) return;
+    if (!image || !canvas || !completedCrop) {
+      setError('Area crop belum ditentukan. Silakan atur area gambar terlebih dahulu.');
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      setError('Gagal memproses gambar. Browser tidak mendukung canvas.');
+      setProcessing(false);
+      return;
+    }
 
     const pixelCrop = {
       x: (completedCrop.x / 100) * image.naturalWidth,
@@ -52,6 +66,18 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
       width: (completedCrop.width / 100) * image.naturalWidth,
       height: (completedCrop.height / 100) * image.naturalHeight,
     };
+
+    // Validate minimum dimensions
+    if (minWidth && pixelCrop.width < minWidth) {
+      setError(`Lebar gambar terlalu kecil (${Math.round(pixelCrop.width)}px). Minimum ${minWidth}px. Perbesar area crop atau gunakan gambar yang lebih besar.`);
+      setProcessing(false);
+      return;
+    }
+    if (minHeight && pixelCrop.height < minHeight) {
+      setError(`Tinggi gambar terlalu kecil (${Math.round(pixelCrop.height)}px). Minimum ${minHeight}px. Perbesar area crop atau gunakan gambar yang lebih besar.`);
+      setProcessing(false);
+      return;
+    }
 
     canvas.width = pixelCrop.width;
     canvas.height = pixelCrop.height;
@@ -68,14 +94,24 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
       pixelCrop.height
     );
 
-    canvas.toBlob(
-      (blob) => {
-        if (blob) onComplete(blob);
-      },
-      'image/webp',
-      0.9
-    );
-  }, [completedCrop, onComplete]);
+    try {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            onComplete(blob);
+          } else {
+            setError('Gagal menghasilkan gambar. Format gambar mungkin tidak didukung oleh browser. Coba gunakan format JPG atau PNG.');
+            setProcessing(false);
+          }
+        },
+        'image/webp',
+        0.9
+      );
+    } catch (err) {
+      setError('Gagal memproses gambar. Coba gunakan format JPG atau PNG.');
+      setProcessing(false);
+    }
+  }, [completedCrop, onComplete, minWidth, minHeight]);
 
   return (
     <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -132,6 +168,14 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
           </div>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="mx-5 mt-3 p-3 bg-brand-red/10 border border-brand-red/20 rounded-xl flex items-start gap-2">
+            <AlertCircle size={14} className="text-brand-red shrink-0 mt-0.5" />
+            <p className="text-[10px] text-brand-red font-semibold leading-relaxed">{error}</p>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]">
           <button
@@ -142,9 +186,18 @@ export default function AdImageCropper({ file, aspectRatio, onComplete, onCancel
           </button>
           <button
             onClick={generateCroppedImage}
-            className="px-6 py-2.5 bg-brand-red text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand-red/20 hover:opacity-90 transition-all flex items-center gap-2"
+            disabled={processing}
+            className="px-6 py-2.5 bg-brand-red text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-brand-red/20 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <Check size={14} /> Gunakan Gambar
+            {processing ? (
+              <>
+                <span className="animate-spin">⏳</span> Memproses...
+              </>
+            ) : (
+              <>
+                <Check size={14} /> Gunakan Gambar
+              </>
+            )}
           </button>
         </div>
       </div>

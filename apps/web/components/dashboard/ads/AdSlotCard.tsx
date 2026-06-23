@@ -40,8 +40,10 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
     try {
       const url = await onUpload(file, slot.id);
       if (url) setImageUrl(url);
-    } catch {
-      // User cancelled crop or upload failed
+    } catch (err) {
+      // Show error to user
+      const message = err instanceof Error ? err.message : 'Upload gagal';
+      alert(message); // TODO: replace with toast notification
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';

@@ -124,12 +124,16 @@ export default function OrderAdPage() {
     formData.append('siteId', site || 'pusat');
     const slotParam = selectedPackage?.slot ? `&slot=${selectedPackage.slot}` : '';
 
-    const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-
-    // Consistent with dashboard ads page response parsing
-    return res.data?.data?.url || res.data?.url || res.data?.filePath || res.data || '';
+    try {
+      const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return res.data?.data?.url || res.data?.url || res.data?.filePath || res.data || '';
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
+      const serverMsg = axiosErr?.response?.data?.error?.message;
+      throw new Error(serverMsg || 'Gagal mengupload file. Periksa format dan ukuran file.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

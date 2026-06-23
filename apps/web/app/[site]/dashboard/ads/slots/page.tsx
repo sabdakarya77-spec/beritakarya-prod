@@ -24,6 +24,8 @@ export default function AdsSlotsPage() {
   // Cropper state
   const [cropperFile, setCropperFile] = useState<File | null>(null);
   const [cropperAspect, setCropperAspect] = useState(970 / 250);
+  const [cropperMinWidth, setCropperMinWidth] = useState<number | undefined>(undefined);
+  const [cropperMinHeight, setCropperMinHeight] = useState<number | undefined>(undefined);
   const cropperCallbackRef = useRef<((blob: Blob) => void) | null>(null);
   const cropperCancelRef = useRef<(() => void) | null>(null);
 
@@ -32,6 +34,14 @@ export default function AdsSlotsPage() {
     rectangle: 300 / 250,
     rectangle_secondary: 300 / 250,
     in_feed: 300 / 250,
+  };
+
+  // Minimum dimensions matching backend validation (media.controller.ts)
+  const SLOT_MIN_DIMENSIONS: Record<AdSlotId, { width: number; height: number }> = {
+    leaderboard: { width: 600, height: 150 },
+    rectangle: { width: 200, height: 180 },
+    rectangle_secondary: { width: 200, height: 180 },
+    in_feed: { width: 200, height: 180 },
   };
 
   const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
@@ -43,14 +53,24 @@ export default function AdsSlotsPage() {
     // Image: open cropper for manual adjustment, then upload
     const typedSlotId = slotId as AdSlotId | undefined;
     if (typedSlotId && SLOT_ASPECT_RATIOS[typedSlotId]) {
-      const croppedBlob = await new Promise<Blob>((resolve, reject) => {
-        setCropperAspect(SLOT_ASPECT_RATIOS[typedSlotId]);
-        setCropperFile(file);
-        cropperCallbackRef.current = resolve;
-        cropperCancelRef.current = reject;
-      });
-      const croppedFile = new File([croppedBlob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
-      return doUpload(croppedFile, slotId);
+      try {
+        const minDims = SLOT_MIN_DIMENSIONS[typedSlotId];
+        const croppedBlob = await new Promise<Blob>((resolve, reject) => {
+          setCropperAspect(SLOT_ASPECT_RATIOS[typedSlotId]);
+          setCropperMinWidth(minDims?.width);
+          setCropperMinHeight(minDims?.height);
+          setCropperFile(file);
+          cropperCallbackRef.current = resolve;
+          cropperCancelRef.current = reject;
+        });
+        const croppedFile = new File([croppedBlob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
+        return doUpload(croppedFile, slotId);
+      } catch {
+        // Cropper cancelled or failed — fallback: upload original file
+        // Backend will handle resize/letterbox automatically
+        addToast('Crop dibatalkan. Mengupload gambar asli — sistem akan menyesuaikan otomatis.', 'info');
+        return doUpload(file, slotId);
+      }
     }
     return doUpload(file, slotId);
   };
@@ -60,10 +80,16 @@ export default function AdsSlotsPage() {
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
     const slotParam = slotId ? `&slot=${slotId}` : '';
-    const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return res.data?.data?.url || res.data?.url || res.data?.filePath || '';
+    try {
+      const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return res.data?.data?.url || res.data?.url || res.data?.filePath || '';
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
+      const serverMsg = axiosErr?.response?.data?.error?.message;
+      throw new Error(serverMsg || 'Gagal mengupload file. Periksa format dan ukuran file.');
+    }
   };
 
   const handleCropperComplete = (blob: Blob) => {
@@ -218,6 +244,8 @@ export default function AdsSlotsPage() {
         <AdImageCropper
           file={cropperFile}
           aspectRatio={cropperAspect}
+          minWidth={cropperMinWidth}
+          minHeight={cropperMinHeight}
           onComplete={handleCropperComplete}
           onCancel={handleCropperCancel}
         />
