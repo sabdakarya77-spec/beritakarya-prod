@@ -255,6 +255,7 @@ async function processImage(
         {
           input: resizedWatermarkBuffer,
           gravity: 'southeast',
+          top: -40,
           blend: 'over',
         },
       ])
