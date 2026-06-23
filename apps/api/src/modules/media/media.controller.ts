@@ -21,11 +21,14 @@ export const mediaRouter: Router = Router()
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB (video butuh lebih besar)
   fileFilter: (_, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']
+    const allowed = [
+      'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf',
+      'video/mp4', 'video/webm', 'video/quicktime',
+    ]
     if (allowed.includes(file.mimetype)) cb(null, true)
-    else cb(new AppError('Tipe file tidak didukung. Gunakan JPG, PNG, WebP, GIF, atau PDF', 400, 'INVALID_FILE_TYPE'))
+    else cb(new AppError('Tipe file tidak didukung. Gunakan JPG, PNG, WebP, GIF, MP4, atau WebM', 400, 'INVALID_FILE_TYPE'))
   },
 })
 
@@ -385,18 +388,32 @@ mediaRouter.post(
       thumbUrl = url
       originalFormat = 'pdf'
     } else if (isAd) {
-      // ── Ad image: smart resize + letterbox + compress to max 200KB ──
       const adSlot = req.query.slot as string | undefined
-      const adResult = await processAdImage(req.file.buffer, adSlot)
-      const adKey = `ads/${id}.webp`
-      await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
-        isPublic: true,
-      })
-      url = StorageService.getPublicUrl(mediaBucket, adKey)
-      thumbUrl = url
-      width = adResult.width
-      height = adResult.height
-      originalFormat = 'ad-webp'
+      const isVideo = req.file.mimetype.startsWith('video/')
+
+      if (isVideo) {
+        // ── Ad video: upload directly, no image processing ──
+        const ext = req.file.mimetype === 'video/webm' ? 'webm' : 'mp4'
+        const adKey = `ads/${id}.${ext}`
+        await StorageService.uploadBuffer(req.file.buffer, adKey, req.file.mimetype, mediaBucket, {
+          isPublic: true,
+        })
+        url = StorageService.getPublicUrl(mediaBucket, adKey)
+        thumbUrl = url
+        originalFormat = `ad-${ext}`
+      } else {
+        // ── Ad image: smart resize + letterbox + compress to max 200KB ──
+        const adResult = await processAdImage(req.file.buffer, adSlot)
+        const adKey = `ads/${id}.webp`
+        await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
+          isPublic: true,
+        })
+        url = StorageService.getPublicUrl(mediaBucket, adKey)
+        thumbUrl = url
+        width = adResult.width
+        height = adResult.height
+        originalFormat = 'ad-webp'
+      }
     } else {
       // ── Image: process then upload two versions ──
       const processed: ProcessResult = await processImage(req.file.buffer, { skipWatermark })

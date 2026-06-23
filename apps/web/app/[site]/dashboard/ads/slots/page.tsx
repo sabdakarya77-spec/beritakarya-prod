@@ -35,6 +35,12 @@ export default function AdsSlotsPage() {
   };
 
   const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
+    const isVideo = file.type.startsWith('video/');
+    // Video: skip cropper, upload directly (backend stores as-is)
+    if (isVideo) {
+      return doUpload(file, slotId);
+    }
+    // Image: open cropper for manual adjustment, then upload
     const typedSlotId = slotId as AdSlotId | undefined;
     if (typedSlotId && SLOT_ASPECT_RATIOS[typedSlotId]) {
       const croppedBlob = await new Promise<Blob>((resolve, reject) => {
