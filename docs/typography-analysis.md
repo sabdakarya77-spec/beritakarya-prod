@@ -283,10 +283,10 @@ Dokumen ini mencatat semua lokasi tipografi di codebase dan inkonsistensi yang h
 
 | ID | Selector | Line | Properti |
 |---|---|---|---|
-| B1 | `.article-content p` | 221–223 | `leading-[1.8]`/`[1.9]`, `text-brand-text/90` |
+| B1 | `.article-content p` | 221–223 | `leading-[1.75]`/`[1.85]`, `text-brand-text/90` |
 | B2 | `.article-content p:first-of-type::first-letter` | 225–229 | Playfair Display, `text-7xl`/`text-8xl`, `font-black`, `initial-letter: 3` |
-| B3 | `.article-content h2, h3` | 231–233 | `font-serif font-black`, `mt-16 mb-6`, `tracking-tighter` |
-| B4 | `.pull-quote` | 236–243 | `my-12 py-10 px-12`, `border-y-2` |
+| B3 | `.article-content h2, h3` | 231–233 | `font-serif font-black`, `mt-10 mb-5 md:mt-12 md:mb-6`, `tracking-tighter` |
+| B4 | `.pull-quote` | 236–243 | `my-10 py-8 px-8 md:px-12`, `border-y-2` |
 | B5 | `p[data-drop-cap="true"]::first-letter` | 507–531 | Georgia serif, `4.5em`/`3.5em` mobile, `font-weight: 800` |
 
 #### Kategori C: TipTap Editor
@@ -295,12 +295,12 @@ Dokumen ini mencatat semua lokasi tipografi di codebase dan inkonsistensi yang h
 
 | ID | Elemen | Line | Properti |
 |---|---|---|---|
-| C1 | Root container | 292–293 | `font-sans`, `1.05rem` × scale, `leading-relaxed` |
-| C2 | Paragraph | 298 | `mb-4 leading-relaxed` |
-| C3 | H1 | 302 | `text-3xl font-bold mb-4 mt-6` |
-| C4 | H2 | 306 | `text-2xl font-bold mb-3 mt-5` |
-| C5 | H3 | 310 | `text-xl font-semibold mb-2 mt-4` |
-| C6 | H4–H6 | 316 | `text-lg font-semibold mb-2 mt-3` |
+| C1 | Root container | 292–293 | `font-sans`, `1rem` × scale, `line-height: 1.75rem × scale` |
+| C2 | Paragraph | 298 | `mb-4`, `line-height: 1.75rem × scale` |
+| C3 | H1 | 302 | `font-serif font-extrabold`, `1.5rem` × scale, `mb-5 mt-10 md:mt-12 md:mb-6` |
+| C4 | H2 | 306 | `font-serif font-extrabold`, `1.35rem` × scale, `mb-5 mt-10 md:mt-12 md:mb-6` |
+| C5 | H3 | 310 | `font-serif font-extrabold`, `1.15rem` × scale, `mb-5 mt-10 md:mt-12 md:mb-6` |
+| C6 | H4–H6 | 316 | `font-serif font-extrabold`, `1rem` × scale, `mb-5 mt-10 md:mt-12 md:mb-6` |
 | C7 | Lists | 320–333 | `mb-4 pl-6`, `list-disc`/`list-decimal`, `li mb-1` |
 | C8 | Blockquote | 337 | `border-l-4 border-brand-red pl-4 my-4 italic` |
 | C9 | Code | 341 | `font-mono text-sm` |
@@ -316,7 +316,7 @@ Dokumen ini mencatat semua lokasi tipografi di codebase dan inkonsistensi yang h
 | D3 | `page.tsx` PublicBlock | 666–803 | Semua pakai `calc(... * var(--article-font-scale))` |
 | D4 | ArticleFloatingTools | 34, 65 | `setProperty('--article-font-scale', ...)` ✅ |
 | D5 | MobileArticleTools | 97, 128 | `setProperty('--article-font-scale', ...)` ✅ |
-| D6 | **FontSizeControl** | 23, 54 | `el.style.fontSize = ${value*100}%` ❌ **BEDA** |
+| D6 | FontSizeControl | 23, 54 | `setProperty('--article-font-scale', ...)` ✅ |
 
 Preset yang tersedia: `0.85` (A-), `1` (Normal), `1.15` (A+), `1.3` (A++)
 
@@ -326,7 +326,7 @@ Preset yang tersedia: `0.85` (A-), `1` (Normal), `1.15` (A+), `1.3` (A++)
 
 | ID | Selector | Line | Properti |
 |---|---|---|---|
-| E1 | `.article-content` | 467–500 | `font-size: 12pt !important`, `line-height: 1.6 !important` |
+| E1 | `.article-content` | 467–500 | `font-size: 12pt !important`, `line-height: 1.75 !important` |
 | E2 | `p[data-drop-cap]::first-letter` | 534–539 | `color: #000 !important` |
 
 #### Kategori F: Legal Pages
@@ -335,8 +335,8 @@ Preset yang tersedia: `0.85` (A-), `1` (Normal), `1.15` (A+), `1.3` (A++)
 
 | ID | Class | Properti |
 |---|---|---|
-| F1 | `legalProseClassName` | `text-[15px]`/`text-base`/`text-[17px]`, `leading-relaxed`, heading: `font-serif font-black` |
-| F2 | `legalCompactClassName` | `text-sm`/`text-base`, `leading-relaxed` |
+| F1 | `legalProseClassName` | `text-base`/`text-[17px]`, `leading-[1.75]`, heading: `font-serif font-extrabold`, `mt-10 mb-5 md:mt-12 md:mb-6` |
+| F2 | `legalCompactClassName` | `text-sm`/`text-base`, `leading-[1.75]` |
 
 **File:** `apps/web/components/legal/LegalPageHeader.tsx`
 
@@ -363,133 +363,124 @@ Preset yang tersedia: `0.85` (A-), `1` (Normal), `1.15` (A+), `1.3` (A++)
 | H2 | `font-serif` | Playfair Display → Georgia → serif |
 | H3 | `font-jakarta` | Plus Jakarta Sans → system-ui → sans-serif |
 | H4 | `--container-max-width` | 72.5rem (1160px) |
-| H5 | `--content-max-width` | 47.5rem (760px) |
+| H5 | `--content-max-width` | 42.5rem (680px) |
 | H6 | Plugins | `[]` — **TANPA** `@tailwindcss/typography` |
 
 ---
 
-### ⚠️ Inkonsistensi yang Ditemukan
+### ✅ Inkonsistensi yang Ditemukan — SEMUA SUDAH DIPERBAIKI
 
-#### 1. Font Heading: `font-sans` vs `font-serif`
+> Commit: `669610e` (Tier 1) + `910398e` (Tier 2)
+> Tanggal: 2026-06-24
 
-| Lokasi | Font |
-|---|---|
-| `page.tsx` heading (A4, line 691) | `font-sans` → **Plus Jakarta Sans** |
-| `globals.css` `.article-content h2, h3` (B3, line 231) | `font-serif` → **Playfair Display** |
+#### 1. ~~Font Heading: `font-sans` vs `font-serif`~~ ✅ FIXED
 
-**Dampak:** Tailwind inline class di page.tsx menang (specificity lebih tinggi). CSS di globals.css menjadi **dead code**. Heading render pakai Plus Jakarta Sans, bukan Playfair Display.
-
-#### 2. Line-Height Paragraf: Tidak Cocok
-
-| Lokasi | Line-Height |
-|---|---|
-| `globals.css` `.article-content p` (B1) | `leading-[1.8]` / `md:leading-[1.9]` |
-| `page.tsx` bodyTextClass (A2) | `leading-[calc(1.75rem*...)]` / `md:leading-[calc(1.85rem*...)]` |
-
-**Dampak:** page.tsx menang. globals.css dead code. Perubahan di satu tempat tidak sinkron ke tempat lain.
-
-#### 3. Margin Heading: CSS vs Component
-
-| Lokasi | Margin Top | Margin Bottom |
+| Lokasi | Sebelum | Sesudah |
 |---|---|---|
-| `page.tsx` heading (A4) | `mt-10` / `md:mt-12` (40/48px) | `mb-5` / `md:mb-6` (20/24px) |
-| `globals.css` `.article-content h2, h3` (B3) | `mt-16` (64px) | `mb-6` (24px) |
+| `page.tsx` heading (A4) | `font-sans` | `font-serif` |
+| `globals.css` `.article-content h2, h3` (B3) | `font-serif` | `font-serif` (tidak berubah) |
 
-**Dampak:** Nilai berbeda. page.tsx menang.
+#### 2. ~~Line-Height Paragraf: Tidak Cocok~~ ✅ FIXED
 
-#### 4. Spacing Pull-Quote: CSS vs Component
-
-| Lokasi | Margin | Padding |
+| Lokasi | Sebelum | Sesudah |
 |---|---|---|
-| `page.tsx` pull-quote (A6) | `my-10` (40px) | `py-8` (32px) |
-| `globals.css` `.pull-quote` (B4) | `my-12` (48px) | `py-10` (40px) |
+| `globals.css` `.article-content p` (B1) | `leading-[1.8]` / `md:leading-[1.9]` | `leading-[1.75]` / `md:leading-[1.85]` |
+| `page.tsx` bodyTextClass (A2) | `leading-[1.75rem]` / `md:leading-[1.85rem]` | Tidak berubah (source of truth) |
 
-**Dampak:** Jika class `.pull-quote` dipakai bersamaan dengan inline Tailwind, hasilnya tidak konsisten.
+#### 3. ~~Margin Heading: CSS vs Component~~ ✅ FIXED
 
-#### 5. FontSizeControl: Mekanisme Berbeda
-
-| Komponen | Mekanisme |
-|---|---|
-| ArticleFloatingTools (D4) | `setProperty('--article-font-scale', value)` ✅ |
-| MobileArticleTools (D5) | `setProperty('--article-font-scale', value)` ✅ |
-| **FontSizeControl (D6)** | `el.style.fontSize = ${value*100}%` ❌ |
-
-**Dampak:** FontSizeControl tidak mengubah `--article-font-scale`. Ekspresi `calc()` di page.tsx **tidak terpengaruh**. Hasil scaling tidak konsisten antar kontrol.
-
-#### 6. Max-Width: Dua Nilai Berbeda
-
-| Lokasi | Nilai |
-|---|---|
-| `page.tsx` article wrapper (A1) | `max-w-[40rem]` = **640px** |
-| `globals.css` `--content-max-width` (H5) | `47.5rem` = **760px** |
-
-**Dampak:** Perubahan di satu tempat tidak otomatis sinkron ke tempat lain.
-
-#### 7. `@tailwindcss/typography` Plugin Tidak Terpasang
-
-| File | Class yang Dipakai | Status |
+| Lokasi | Sebelum | Sesudah |
 |---|---|---|
-| `TiptapEditor.tsx` | `prose prose-lg` | ❌ Tidak berefek |
-| `MediaTextExtension.tsx` | `prose prose-sm dark:prose-invert` | ❌ Tidak berefek |
-| `LegalDocumentBody.tsx` | `prose prose-sm md:prose-base dark:prose-invert` | ❌ Tidak berefek |
+| `globals.css` `.article-content h2, h3` (B3) | `mt-16 mb-6` | `mt-10 mb-5 md:mt-12 md:mb-6` |
 
-**Dampak:** Class `prose` tidak menghasilkan styling apa pun. Plugin tidak ada di `package.json` maupun `tailwind.config.ts`.
+#### 4. ~~Spacing Pull-Quote: CSS vs Component~~ ✅ FIXED
+
+| Lokasi | Sebelum | Sesudah |
+|---|---|---|
+| `globals.css` `.pull-quote` (B4) | `my-12 py-10 px-12` | `my-10 py-8 px-8 md:px-12` |
+
+#### 5. ~~FontSizeControl: Mekanisme Berbeda~~ ✅ FIXED
+
+| Komponen | Sebelum | Sesudah |
+|---|---|---|
+| FontSizeControl (D6) | `el.style.fontSize = ${value*100}%` | `setProperty('--article-font-scale', value)` |
+
+#### 6. ~~Max-Width: Dua Nilai Berbeda~~ ✅ FIXED
+
+| Lokasi | Sebelum | Sesudah |
+|---|---|---|
+| `page.tsx` article wrapper (A1) | `max-w-[40rem]` (640px) | `max-w-content` (CSS variable) |
+| `globals.css` `--content-max-width` (H5) | `47.5rem` (760px) | `42.5rem` (680px) |
+
+#### 7. ~~`@tailwindcss/typography` Plugin Tidak Terpasang~~ ✅ FIXED
+
+| File | Sebelum | Sesudah |
+|---|---|---|
+| `TiptapEditor.tsx` | `prose prose-lg` (dead code) | Dihapus |
+| `MediaTextExtension.tsx` | `not-prose` + `prose prose-sm` (dead code) | Dihapus, diganti classes aktual |
+| `ImageGridExtension.tsx` | `not-prose` (dead code) | Dihapus |
+| `GalleryExtension.tsx` | `not-prose` (dead code) | Dihapus |
+| `LegalDocumentBody.tsx` compact | `prose prose-sm md:prose-base` (dead code) | `legalCompactClassName` |
 
 ---
 
-### ✅ Checklist File yang Harus Diubah
+### ✅ Checklist File — SEMUA TIER SELESAI
 
-#### Tier 1 — Wajib (Langsung Berpengaruh ke Tampilan Artikel)
+> Total: 9 file diubah, 0 file perlu diubah lagi.
 
-| # | File | Yang Harus Disamakan |
-|---|---|---|
-| 1 | `apps/web/app/[site]/artikel/[slug]/page.tsx` | Body font-size, line-height, heading font-family/size/spacing, content max-width |
-| 2 | `apps/web/app/globals.css` (§ `.article-content`) | Line-height paragraf, heading margin, drop-cap, pull-quote — harus match page.tsx |
-| 3 | `apps/web/app/globals.css` (§ `.tiptap-editor-content`) | Editor harus preview yang sama dengan output public |
-| 4 | `apps/web/components/ui/FontSizeControl.tsx` | Ganti ke `setProperty('--article-font-scale', ...)` agar konsisten |
-| 5 | `apps/web/app/globals.css` (`@media print`) | Sesuaikan font-size & line-height dengan nilai baru |
-| 6 | `apps/web/app/globals.css` (`:root` variables) | `--content-max-width` harus match `max-w-*` di page.tsx |
+#### ~~Tier 1 — Wajib~~ ✅ SELESAI (Commit `669610e`)
 
-#### Tier 2 — Harus Dicek (Konsistensi Elemen Terkait)
+| # | File | Status | Perubahan |
+|---|---|---|---|
+| 1 | `apps/web/app/[site]/artikel/[slug]/page.tsx` | ✅ Fixed | `font-sans` → `font-serif` heading, `max-w-[40rem]` → `max-w-content` |
+| 2 | `apps/web/app/globals.css` (§ `.article-content`) | ✅ Fixed | `leading-[1.8]` → `[1.75]`, heading margin, pull-quote spacing |
+| 3 | `apps/web/app/globals.css` (§ `.tiptap-editor-content`) | ✅ Fixed | Editor font-size/line-height/headings match public page |
+| 4 | `apps/web/components/ui/FontSizeControl.tsx` | ✅ Fixed | `el.style.fontSize` → `setProperty('--article-font-scale')` |
+| 5 | `apps/web/app/globals.css` (`@media print`) | ✅ Fixed | `line-height: 1.6` → `1.75` |
+| 6 | `apps/web/app/globals.css` (`:root` variables) | ✅ Fixed | `--content-max-width: 47.5rem` → `42.5rem` |
 
-| # | File | Yang Harus Disamakan |
-|---|---|---|
-| 7 | `apps/web/components/legal/legalStyles.ts` | Body font-size, heading font-family/size, spacing |
-| 8 | `apps/web/components/legal/LegalPageHeader.tsx` | Heading font-family, size |
-| 9 | `apps/web/components/legal/LegalDocumentBody.tsx` | Hapus atau install `prose` class |
-| 10 | `apps/web/components/editor/TiptapEditor.tsx` | Hapus atau install `prose prose-lg` |
-| 11 | `apps/web/components/editor/extensions/MediaTextExtension.tsx` | Hapus atau install `prose` class |
-| 12 | `apps/web/components/ui/ArticleFloatingTools.tsx` | Scale values harus match FontSizeControl |
-| 13 | `apps/web/components/ui/MobileArticleTools.tsx` | Scale values harus match FontSizeControl |
+#### ~~Tier 2 — Harus Dicek~~ ✅ SELESAI (Commit `910398e`)
 
-#### Tier 3 — Opsional (Komponen UI/Marketing)
+| # | File | Status | Perubahan |
+|---|---|---|---|
+| 7 | `apps/web/components/legal/legalStyles.ts` | ✅ Fixed | `text-[15px]` → `text-base`, `font-black` → `font-extrabold`, heading margin aligned |
+| 8 | `apps/web/components/legal/LegalPageHeader.tsx` | ✅ Sudah konsisten | Sudah `font-serif font-black` |
+| 9 | `apps/web/components/legal/LegalDocumentBody.tsx` | ✅ Fixed | Import `legalCompactClassName`, ganti dead `prose` classes |
+| 10 | `apps/web/components/editor/TiptapEditor.tsx` | ✅ Fixed | Hapus `prose prose-lg` (dead code) |
+| 11 | `apps/web/components/editor/extensions/MediaTextExtension.tsx` | ✅ Fixed | Hapus `not-prose` + `prose prose-sm`, ganti classes aktual |
+| 12 | `apps/web/components/ui/ArticleFloatingTools.tsx` | ✅ Sudah konsisten | Sudah pakai `setProperty` |
+| 13 | `apps/web/components/ui/MobileArticleTools.tsx` | ✅ Sudah konsisten | Sudah pakai `setProperty` |
 
-| # | File | Yang Harus Dicek |
-|---|---|---|
-| 14 | `apps/web/components/ui/NewsCard.tsx` | Font-weight, letter-spacing consistency |
-| 15 | `apps/web/components/berita/PremiumHero.tsx` | Heading font-family consistency |
-| 16 | `apps/web/components/ui/VideoWidget.tsx` | Heading font-family consistency |
-| 17 | `apps/web/components/marketing/AdsMarketingPage.tsx` | Hapus atau install `prose` class |
-| 18 | `apps/web/tailwind.config.ts` | Font family definitions, tambah plugin jika perlu |
-| 19 | `apps/web/app/layout.tsx` | Google Fonts loading (kalau ganti font) |
-| 20 | `apps/web/app/globals.css` (line 1) | Weight yang dimuat dari Google Fonts |
+**Bonus:** Juga membersihkan `not-prose` dari `ImageGridExtension.tsx` dan `GalleryExtension.tsx`.
+
+#### ~~Tier 3 — Opsional~~ ✅ SELESAI (Tidak perlu ubah)
+
+| # | File | Status | Alasan |
+|---|---|---|---|
+| 14 | `apps/web/components/ui/NewsCard.tsx` | ✅ Sudah konsisten | Card title `font-sans` — benar untuk UI element |
+| 15 | `apps/web/components/berita/PremiumHero.tsx` | ✅ Sudah konsisten | H1 sudah `font-serif font-black` |
+| 16 | `apps/web/components/ui/VideoWidget.tsx` | ✅ Sudah konsisten | Title sudah `font-serif font-black` |
+| 17 | `apps/web/components/marketing/AdsMarketingPage.tsx` | ✅ Sudah konsisten | Sudah pakai `legalCompactClassName` (fix Tier 2) |
+| 18 | `apps/web/tailwind.config.ts` | ✅ Sudah konsisten | Font family `sans`/`serif` terdefinisi benar |
+| 19 | `apps/web/app/layout.tsx` | ✅ Sudah konsisten | 3 Google Fonts dimuat, CSS variable terpasang |
+| 20 | `apps/web/app/globals.css` (line 1) | ✅ Sudah konsisten | Weight lengkap (300–900 sans, 400–900 serif) |
 
 ---
 
-### Properti yang Harus "Satu Suara" di Semua Lokasi
+### ✅ Properti yang Sudah "Satu Suara" di Semua Lokasi
 
-| Properti | Lokasi yang Harus Sama |
-|---|---|
-| **Body font-size** | page.tsx + globals.css + editor + print + legal |
-| **Body line-height** | page.tsx + globals.css + editor + print |
-| **Body font-family** | tailwind.config + globals.css body + page.tsx bodyTextClass |
-| **Heading font-family** | page.tsx + globals.css + legal + editor |
-| **Heading font-size per level** | page.tsx + globals.css + editor |
-| **Heading margin** | page.tsx + globals.css |
-| **Paragraph spacing** | page.tsx container `space-y-*` + editor `mb-*` |
-| **Content max-width** | page.tsx + globals.css `--content-max-width` |
-| **Font scale mechanism** | FontSizeControl + ArticleFloatingTools + MobileArticleTools |
-| **Font scale presets** | Ketiga komponen kontrol harus pakai nilai identik |
+| Properti | Nilai Final | Lokasi yang Sudah Sinkron |
+|---|---|---|
+| **Body font-size** | `1rem` (mobile) / `1.05rem` (desktop) × scale | page.tsx + globals.css + editor + print + legal |
+| **Body line-height** | `1.75` (mobile) / `1.85` (desktop) | page.tsx + globals.css + editor + print + legal |
+| **Body font-family** | Plus Jakarta Sans → Inter → system-ui | tailwind.config + globals.css body + page.tsx |
+| **Heading font-family** | Playfair Display → Georgia → serif | page.tsx + globals.css + legal + editor |
+| **Heading font-weight** | `font-extrabold` (800) | page.tsx + globals.css + legal + editor |
+| **Heading margin** | `mt-10 mb-5` / `md:mt-12 md:mb-6` | page.tsx + globals.css + editor |
+| **Paragraph spacing** | `space-y-8` (32px) / editor `mb-4` | page.tsx container + editor |
+| **Content max-width** | `42.5rem` (680px) via `--content-max-width` | page.tsx (`max-w-content`) + globals.css |
+| **Font scale mechanism** | `setProperty('--article-font-scale', value)` | FontSizeControl + ArticleFloatingTools + MobileArticleTools |
+| **Font scale presets** | `0.85, 1, 1.15, 1.3` | Ketiga komponen kontrol |
 
 ---
 
