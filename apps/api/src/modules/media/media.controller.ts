@@ -26,9 +26,18 @@ const upload = multer({
     const allowed = [
       'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf',
       'video/mp4', 'video/webm', 'video/quicktime',
+      'video/x-m4v', 'video/mpeg', 'video/3gpp', 'video/ogg',
     ]
-    if (allowed.includes(file.mimetype)) cb(null, true)
-    else cb(new AppError('Tipe file tidak didukung. Gunakan JPG, PNG, WebP, GIF, MP4, atau WebM', 400, 'INVALID_FILE_TYPE'))
+    // Also accept by extension as fallback (some browsers send different mimetypes)
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf', '.mp4', '.webm', '.mov', '.m4v', '.mpeg', '.mpg', '.3gp']
+    const ext = file.originalname.toLowerCase().match(/\.[^.]+$/)?.[0]
+    const extAllowed = ext ? allowedExtensions.includes(ext) : false
+
+    if (allowed.includes(file.mimetype) || (file.mimetype.startsWith('video/') && extAllowed)) {
+      cb(null, true)
+    } else {
+      cb(new AppError('Tipe file tidak didukung. Gunakan JPG, PNG, WebP, GIF, MP4, WebM, atau MOV', 400, 'INVALID_FILE_TYPE'))
+    }
   },
 })
 
@@ -346,7 +355,7 @@ mediaRouter.post(
       !isGallery && (isLogo || req.query.skipWatermark === 'true' || req.query.purpose === 'editorial')
 
     logger.info(
-      `[Media] Uploading: ${req.file.originalname} (${req.file.size} bytes), type=${req.query.type || 'standard'}`
+      `[Media] Uploading: ${req.file.originalname} (${req.file.size} bytes, mime=${req.file.mimetype}), type=${req.query.type || 'standard'}, purpose=${req.query.purpose || 'none'}`
     )
 
     const id = uuidv4()
