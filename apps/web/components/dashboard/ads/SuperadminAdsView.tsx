@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToastStore } from '../../../store/toastStore';
 import {
   Plus,
   Trash2,
@@ -62,6 +63,7 @@ export function SuperadminAdsView({
   const [rejectionNotes, setRejectionNotes] = useState('');
 
   const isSuperadmin = role === 'superadmin';
+  const { addToast } = useToastStore();
 
   const handleCreateOrUpdatePackage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +82,7 @@ export function SuperadminAdsView({
       } else {
         await api.post('/ads/packages', payload);
       }
+      addToast(editingPkgId ? 'Paket iklan diperbarui' : 'Paket iklan dibuat', 'success');
       setShowPkgForm(false);
       setEditingPkgId(null);
       setPkgName('');
@@ -88,7 +91,7 @@ export function SuperadminAdsView({
       onRefresh();
     } catch (err) {
       console.error('Gagal menyimpan paket:', err);
-      alert('Gagal menyimpan paket iklan.');
+      addToast('Gagal menyimpan paket iklan', 'error');
     }
   };
 
@@ -96,9 +99,11 @@ export function SuperadminAdsView({
     if (!confirm('Hapus paket ini?')) return;
     try {
       await api.delete(`/ads/packages/${id}`);
+      addToast('Paket iklan dihapus', 'success');
       onRefresh();
     } catch (err) {
       console.error('Gagal menghapus paket:', err);
+      addToast('Gagal menghapus paket iklan', 'error');
     }
   };
 

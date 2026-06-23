@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
+import { useToastStore } from '../../../../store/toastStore';
 import { useParams } from 'next/navigation';
 import {
   Layout,
@@ -26,6 +27,7 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
 export default function AdsDashboard() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
+  const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
 
   // Shared States
@@ -129,7 +131,7 @@ export default function AdsDashboard() {
       await api.post('/ads', { slot: 'leaderboard', isActive: true });
       await fetchData();
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal menambah banner'));
+      addToast(getApiErrorMessage(error, 'Gagal menambah banner'), 'error');
     }
   };
 
@@ -139,7 +141,7 @@ export default function AdsDashboard() {
       await api.patch(`/ads/${adId}`, payload);
       await fetchData();
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal menyimpan iklan'));
+      addToast(getApiErrorMessage(error, 'Gagal menyimpan iklan'), 'error');
     } finally {
       setSavingAdId(null);
     }
@@ -150,8 +152,9 @@ export default function AdsDashboard() {
     try {
       await api.delete(`/ads/${adId}`);
       await fetchData();
+      addToast('Banner iklan berhasil dihapus', 'success');
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal menghapus iklan'));
+      addToast(getApiErrorMessage(error, 'Gagal menghapus iklan'), 'error');
     }
   };
 
@@ -168,7 +171,7 @@ export default function AdsDashboard() {
       await api.patch('/ads/reorder', { items: reorderPayload });
       await fetchData();
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal mengurutkan iklan'));
+      addToast(getApiErrorMessage(error, 'Gagal mengurutkan iklan'), 'error');
     }
   };
 
@@ -178,9 +181,9 @@ export default function AdsDashboard() {
     try {
       await api.post(`/ads/bookings/${id}/approve`);
       await fetchData();
-      alert('Sukses menyetujui iklan! Iklan kini telah disinkronkan dan aktif di website cabang.');
+      addToast('Iklan disetujui & aktif di website cabang!', 'success');
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal menyetujui iklan'));
+      addToast(getApiErrorMessage(error, 'Gagal menyetujui iklan'), 'error');
     }
   };
 
@@ -188,9 +191,9 @@ export default function AdsDashboard() {
     try {
       await api.post(`/ads/bookings/${bookingId}/reject`, { rejectionNotes: notes });
       await fetchData();
-      alert('Sukses menolak pengajuan iklan.');
+      addToast('Pengajuan iklan ditolak', 'info');
     } catch (error: unknown) {
-      alert(getApiErrorMessage(error, 'Gagal menolak iklan'));
+      addToast(getApiErrorMessage(error, 'Gagal menolak iklan'), 'error');
     }
   };
 

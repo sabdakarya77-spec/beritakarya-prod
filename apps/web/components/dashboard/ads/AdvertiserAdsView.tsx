@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToastStore } from '../../../store/toastStore';
 import {
   Wallet,
   CheckCircle2,
@@ -31,6 +32,7 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
   const [advPaymentProof, setAdvPaymentProof] = useState('');
   const [bookingStep, setBookingStep] = useState(1);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+  const { addToast } = useToastStore();
 
   const formatRupiah = (val: string | number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
@@ -38,7 +40,7 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
   const handleSubmitBooking = async () => {
     const selectedPkg = packages.find(p => p.id === selectedPkgId);
     if (!selectedPkg || !advImageUrl || !advLinkUrl || !advStartDate || !advEndDate) {
-      alert('Lengkapi semua kolom yang wajib diisi.');
+      addToast('Lengkapi semua kolom yang wajib diisi', 'warning');
       return;
     }
     setIsSubmittingBooking(true);
@@ -55,7 +57,7 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
       if (bookingId && advPaymentProof) {
         await api.post(`/ads/bookings/${bookingId}/pay`, { paymentProof: advPaymentProof });
       }
-      alert('Booking berhasil diajukan! Menunggu verifikasi Superadmin.');
+      addToast('Booking diajukan! Menunggu verifikasi Superadmin', 'success');
       setBookingStep(1);
       setSelectedPkgId('');
       setAdvImageUrl('');
@@ -68,7 +70,7 @@ export function AdvertiserAdsView({ site, packages, bookings, onRefresh }: Props
       const message = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
         : undefined;
-      alert(message || 'Gagal mengajukan booking');
+      addToast(message || 'Gagal mengajukan booking', 'error');
     } finally {
       setIsSubmittingBooking(false);
     }
