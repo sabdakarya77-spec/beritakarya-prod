@@ -22,6 +22,10 @@ categoryRouter.post('/migrate-to-local',
 categoryRouter.post('/sync-from-global',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(syncFromGlobal))
+categoryRouter.post('/reset-to-default',
+  requireAuth, requireRole(['superadmin']),
+  siteMiddleware, requireSiteAccess,
+  asyncHandler(resetToDefault))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin']),
@@ -394,6 +398,51 @@ export async function syncFromGlobal(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'CATEGORY_SYNC_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * POST /api/v1/categories/reset-to-default
+ * Factory Reset: Hapus semua kategori lokal site, ganti dengan salinan persis
+ * dari database global. Re-map artikel berdasarkan slug.
+ * Superadmin only.
+ */
+export async function resetToDefault(req: Request, res: Response) {
+  try {
+    const siteId = req.site || (req.body?.siteId as string)
+    const user = req.user
+
+    if (!user || user.role !== 'superadmin') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Superadmin access required' }
+      })
+    }
+
+    if (!siteId || typeof siteId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'siteId diperlukan' }
+      })
+    }
+
+    const result = await categoryService.resetToDefault(siteId)
+
+    res.json({
+      success: true,
+      data: {
+        siteId,
+        categoriesCreated: result.categoriesCreated,
+        articlesRemapped: result.articlesRemapped,
+        message: `Reset berhasil: ${result.categoriesCreated} kategori dibuat, ${result.articlesRemapped} artikel di-remap.`
+      }
+    })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'CATEGORY_RESET_FAILED', message: getErrorMessage(error) }
     })
   }
 }

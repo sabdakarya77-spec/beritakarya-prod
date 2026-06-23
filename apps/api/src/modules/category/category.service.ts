@@ -784,6 +784,147 @@ export class CategoryService {
   }
 
   /**
+   * Factory Reset: Hapus semua kategori lokal site, ganti dengan salinan persis
+   * dari database global. Re-map artikel berdasarkan slug.
+   *
+   * Konsep: global = single source of truth, lokal = mirror.
+   * Setiap kali dijalankan, hasilnya selalu sama (idempotent).
+   */
+  async resetToDefault(siteId: string): Promise<{
+    categoriesCreated: number
+    articlesRemapped: number
+  }> {
+    // 1. Validasi global categories ada
+    const globalCategories = await prisma.category.findMany({
+      where: { isGlobal: true, deletedAt: null },
+      orderBy: { order: 'asc' }
+    })
+
+    if (globalCategories.length === 0) {
+      throw Object.assign(
+        new Error('Tidak ada kategori global. Jalankan seed-global terlebih dahulu.'),
+        { statusCode: 400 }
+      )
+    }
+
+    // 2. Simpan mapping artikel → kategori lokal (slug) sebelum dihapus
+    const localCategories = await prisma.category.findMany({
+      where: { siteId, isGlobal: false, deletedAt: null },
+      select: { id: true, slug: true }
+    })
+
+    const localIdToSlug = new Map<string, string>()
+    for (const cat of localCategories) {
+      localIdToSlug.set(cat.id, cat.slug)
+    }
+
+    // Ambil semua ArticleCategory yang artikelnya milik site ini
+    const localIds = [...localIdToSlug.keys()]
+    const articleCategoryMap: Array<{ articleId: string; categorySlug: string }> = []
+
+    if (localIds.length > 0) {
+      const articleCategories = await prisma.articleCategory.findMany({
+        where: {
+          categoryId: { in: localIds },
+          article: { siteId }
+        },
+        select: { articleId: true, categoryId: true }
+      })
+
+      for (const ac of articleCategories) {
+        const slug = localIdToSlug.get(ac.categoryId)
+        if (slug) {
+          articleCategoryMap.push({ articleId: ac.articleId, categorySlug: slug })
+        }
+      }
+    }
+
+    // 3. Transaction: hapus lokal lama → copy dari global → re-map artikel
+    const result = await prisma.$transaction(async (tx) => {
+      // 3a. Hapus semua kategori lokal site (ArticleCategory cascade)
+      await tx.category.deleteMany({
+        where: { siteId, isGlobal: false }
+      })
+
+      // 3b. Copy global → lokal dengan topological sort (parent before child)
+      const idMap = new Map<string, string>() // globalId → localId
+
+      // Sort topological: hitung depth, lalu sort by depth + order
+      const getDepth = (cat: typeof globalCategories[0]): number => {
+        let depth = 0
+        let current = cat
+        while (current.parentId) {
+          depth++
+          current = globalCategories.find(g => g.id === current.parentId) || current
+          if (depth > 10) break // safety guard
+        }
+        return depth
+      }
+
+      const sorted = [...globalCategories].sort((a, b) => {
+        const depthA = getDepth(a)
+        const depthB = getDepth(b)
+        if (depthA !== depthB) return depthA - depthB
+        return (a.order || 0) - (b.order || 0)
+      })
+
+      let created = 0
+      for (const cat of sorted) {
+        let localParentId: string | null = null
+        if (cat.parentId) {
+          localParentId = idMap.get(cat.parentId) || null
+          if (!localParentId) continue // parent tidak ter-map, skip
+        }
+
+        const localCat = await tx.category.create({
+          data: {
+            name: cat.name,
+            slug: cat.slug,
+            siteId,
+            isGlobal: false,
+            parentId: localParentId,
+            description: cat.description,
+            order: cat.order,
+            color: cat.color
+          }
+        })
+
+        idMap.set(cat.id, localCat.id)
+        created++
+      }
+
+      // 3c. Re-map artikel: slug → new local categoryId
+      // Build slug → localId mapping
+      const slugToLocalId = new Map<string, string>()
+      for (const [globalId, localId] of idMap) {
+        const globalCat = globalCategories.find(g => g.id === globalId)
+        if (globalCat) {
+          slugToLocalId.set(globalCat.slug, localId)
+        }
+      }
+
+      let remapped = 0
+      for (const { articleId, categorySlug } of articleCategoryMap) {
+        const newCategoryId = slugToLocalId.get(categorySlug)
+        if (!newCategoryId) continue // slug tidak ada di global, skip
+
+        try {
+          await tx.articleCategory.create({
+            data: { articleId, categoryId: newCategoryId }
+          })
+          remapped++
+        } catch {
+          // Skip if already exists (duplicate)
+        }
+      }
+
+      return { categoriesCreated: created, articlesRemapped: remapped }
+    })
+
+    return result
+  }
+
+  /**
    * Force-sync global categories from CATEGORY_TREE_CONFIG template.
    * Unlike seedGlobalCategories(), this runs even when categories already exist —
    * it updates names/orders and creates any missing categories.

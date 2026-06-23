@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import type { Category } from '@beritakarya/types';
-import { getCategoryColor, CATEGORIES_CONFIG } from '../../../../lib/constants';
+import { getCategoryColor } from '../../../../lib/constants';
 import { useRequireRole } from '../../../../hooks/useRequireRole';
 import axios from 'axios';
 
@@ -61,29 +61,6 @@ export default function CategoriesDashboard() {
     } catch (error: unknown) {
       console.error('Gagal mengambil kategori', error);
       showToast('Gagal memuat kategori', 'error');
-    }
-  };
-
-  const handleSyncFromGlobal = async () => {
-    const confirmed = window.confirm(
-      'Tambah kategori baru dari global?\n\nKategori yang sudah ada di lokal tidak akan diubah. Hanya kategori baru yang belum ada yang akan ditambahkan.'
-    );
-    if (!confirmed) return;
-
-    setSyncing(true);
-    try {
-      const { data } = await api.post('/categories/sync-from-global', { siteId });
-      if (data.success) {
-        showToast(data.data.message);
-        fetchCategories(); // Refresh tampilan
-      }
-    } catch (error: unknown) {
-      const msg = axios.isAxiosError(error)
-        ? error.response?.data?.error?.message
-        : undefined;
-      showToast(msg || 'Gagal sync kategori dari global', 'error');
-    } finally {
-      setSyncing(false);
     }
   };
 
@@ -208,92 +185,50 @@ export default function CategoriesDashboard() {
   };
 
   const handleSeedDefaults = async () => {
+    const confirmed = window.confirm(
+      'Ini akan MENGHAPUS semua kategori lokal dan menggantinya dengan kategori global.\n\n' +
+      'Artikel yang menggunakan kategori lokal akan di-remap otomatis.\n\n' +
+      'Lanjutkan?'
+    );
+    if (!confirmed) return;
+
     setLoading(true);
     try {
-      // 1. Get existing categories slugs to prevent duplicate insertions
-      const existingSlugs = new Map<string, string>(); // slug lowercase -> id
-      const flatten = (items: Category[]) => {
-        for (const item of items) {
-          existingSlugs.set(item.slug.toLowerCase(), item.id);
-          if (item.subCategories) {
-            flatten(item.subCategories);
-          }
-        }
-      };
-      flatten(categories);
-
-      // 2. Filter categories to insert (skipping system/dynamic filters like Terbaru and Tersimpan)
-      const defaultCats = CATEGORIES_CONFIG.filter(
-        cat => cat.slug !== 'Terbaru' && cat.slug !== 'Tersimpan'
-      );
-
-      let createdParentCount = 0;
-      let createdSubCount = 0;
-
-      // 3. Insert parent categories first
-      for (const cat of defaultCats) {
-        const parentSlugNormalized = cat.slug.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-        let parentIdToUse = existingSlugs.get(parentSlugNormalized);
-
-        // If parent category does not exist, create it
-        if (!parentIdToUse) {
-          try {
-            const payload = {
-              name: cat.name,
-              slug: parentSlugNormalized,
-              parentId: null,
-              order: defaultCats.indexOf(cat) + 1,
-              siteId: isGlobalView ? null : siteId
-            };
-            const { data } = await api.post('/categories', payload);
-            if (data.success && data.data?.id) {
-              parentIdToUse = data.data.id;
-              existingSlugs.set(parentSlugNormalized, parentIdToUse!);
-              createdParentCount++;
-            }
-          } catch (err: unknown) {
-            console.error(`Gagal membuat parent ${cat.name}`, err);
-          }
-        }
-
-        // 4. Insert subcategories under the parent category
-        if (parentIdToUse && cat.subCategories) {
-          for (const sub of cat.subCategories) {
-            const subSlugNormalized = sub.slug.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            const subExists = existingSlugs.has(subSlugNormalized);
-
-            if (!subExists) {
-              try {
-                const subPayload = {
-                  name: sub.name,
-                  slug: subSlugNormalized,
-                  parentId: parentIdToUse,
-                  order: cat.subCategories.indexOf(sub) + 1,
-                  siteId: isGlobalView ? null : siteId
-                };
-                await api.post('/categories', subPayload);
-                existingSlugs.set(subSlugNormalized, 'created');
-                createdSubCount++;
-              } catch (err: unknown) {
-                console.error(`Gagal membuat subkategori ${sub.name}`, err);
-              }
-            }
-          }
-        }
+      const { data } = await api.post('/categories/reset-to-default', { siteId });
+      if (data.success) {
+        showToast(data.data.message);
+        fetchCategories();
       }
-
-      if (createdParentCount > 0 || createdSubCount > 0) {
-        showToast(`Berhasil memuat ${createdParentCount} Kategori Utama dan ${createdSubCount} Sub-Kategori!`);
-      } else {
-        showToast('Semua kategori default sudah ada di database.', 'success');
-      }
-      
-      fetchCategories();
     } catch (error: unknown) {
-      console.error('Gagal memuat kategori default', error);
-      showToast('Gagal memuat kategori default', 'error');
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.error?.message
+        : undefined;
+      showToast(msg || 'Gagal memuat kategori default', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSyncFromGlobal = async () => {
+    const confirmed = window.confirm(
+      'Tambah kategori baru dari global?\n\nKategori yang sudah ada di lokal tidak akan diubah. Hanya kategori baru yang belum ada yang akan ditambahkan.'
+    );
+    if (!confirmed) return;
+
+    setSyncing(true);
+    try {
+      const { data } = await api.post('/categories/sync-from-global', { siteId });
+      if (data.success) {
+        showToast(data.data.message);
+        fetchCategories();
+      }
+    } catch (error: unknown) {
+      const msg = axios.isAxiosError(error)
+        ? error.response?.data?.error?.message
+        : undefined;
+      showToast(msg || 'Gagal sync kategori dari global', 'error');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -392,7 +327,7 @@ export default function CategoriesDashboard() {
             onClick={handleSeedDefaults}
             disabled={loading}
             className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-            title="Muat kategori standar homepage ke database"
+            title="Reset kategori lokal ke setelan pabrik dari global"
           >
             <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
           </button>
@@ -582,7 +517,7 @@ export default function CategoriesDashboard() {
                 <span className="text-5xl">📂</span>
                 <span className="text-sm font-bold uppercase tracking-widest text-gray-550 dark:text-gray-300">Belum ada kategori</span>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Mulai dengan menambahkan kategori baru melalui tombol &ldquo;+ Tambah Kategori&rdquo; di atas, atau langsung muat seluruh kategori bawaan (default) yang sesuai dengan tampilan homepage.
+                  Mulai dengan menambahkan kategori baru melalui tombol &ldquo;+ Tambah Kategori&rdquo; di atas, atau muat kategori default dari database global.
                 </p>
                 <button
                   onClick={handleSeedDefaults}
