@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToastStore } from '../../../store/toastStore';
 import {
   Plus,
@@ -65,9 +65,16 @@ export function SuperadminAdsView({
   const [bookingFilter, setBookingFilter] = useState<'ALL' | 'VERIFYING' | 'PAID' | 'PENDING' | 'REJECTED'>('ALL');
   const [bookingSort, setBookingSort] = useState<'newest' | 'oldest'>('newest');
   const [pkgSlotFilter, setPkgSlotFilter] = useState<string>('ALL');
+  const BOOKING_PAGE_SIZE = 10;
+  const [visibleBookingCount, setVisibleBookingCount] = useState(BOOKING_PAGE_SIZE);
 
   const isSuperadmin = role === 'superadmin';
   const { addToast } = useToastStore();
+
+  // Reset visible count when filter changes
+  useEffect(() => {
+    setVisibleBookingCount(BOOKING_PAGE_SIZE);
+  }, [bookingFilter, bookingSort]);
 
   // Filtered & sorted bookings
   const filteredBookings = bookings
@@ -76,6 +83,8 @@ export function SuperadminAdsView({
       ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
+  const visibleBookings = filteredBookings.slice(0, visibleBookingCount);
+  const hasMoreBookings = visibleBookingCount < filteredBookings.length;
 
   // Filtered packages
   const filteredPackages = packages.filter(p => pkgSlotFilter === 'ALL' || p.slot === pkgSlotFilter);
@@ -398,7 +407,7 @@ export function SuperadminAdsView({
             </div>
           ) : (
             <div className="space-y-6">
-              {filteredBookings.map(b => (
+              {visibleBookings.map(b => (
                 <div key={b.id} className="dash-card overflow-hidden border-t-4 border-t-brand-red">
                   <div className="p-4 md:p-6 bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                     <div>
@@ -503,6 +512,23 @@ export function SuperadminAdsView({
                   )}
                 </div>
               ))}
+
+              {/* Pagination info & Load More */}
+              {filteredBookings.length > BOOKING_PAGE_SIZE && (
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                    Menampilkan {visibleBookings.length} dari {filteredBookings.length} booking
+                  </p>
+                  {hasMoreBookings && (
+                    <button
+                      onClick={() => setVisibleBookingCount(prev => prev + BOOKING_PAGE_SIZE)}
+                      className="px-6 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
+                    >
+                      Muat Lebih Banyak
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
