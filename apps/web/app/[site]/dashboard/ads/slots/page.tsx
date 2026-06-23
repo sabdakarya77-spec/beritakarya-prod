@@ -44,16 +44,17 @@ export default function AdsSlotsPage() {
         cropperCancelRef.current = reject;
       });
       const croppedFile = new File([croppedBlob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' });
-      return doUpload(croppedFile);
+      return doUpload(croppedFile, slotId);
     }
-    return doUpload(file);
+    return doUpload(file, slotId);
   };
 
-  const doUpload = async (file: File): Promise<string> => {
+  const doUpload = async (file: File, slotId?: string): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
-    const res = await api.post('/media/upload?purpose=ad', formData, {
+    const slotParam = slotId ? `&slot=${slotId}` : '';
+    const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return res.data?.data?.url || res.data?.url || res.data?.filePath || '';

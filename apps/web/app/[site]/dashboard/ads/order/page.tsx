@@ -121,8 +121,9 @@ export default function OrderAdPage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
+    const slotParam = selectedPackage?.slot ? `&slot=${selectedPackage.slot}` : '';
 
-    const res = await api.post('/media/upload?purpose=ad', formData, {
+    const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 
@@ -465,9 +466,25 @@ export default function OrderAdPage() {
 
                 {/* File Upload with Smart Local Preview */}
                 <div className="space-y-3 pt-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300 block">
-                    Unggah Kreatif Iklan ({selectedPackage ? getSlotDimensions(selectedPackage.slot) : 'Responsive'})
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300">
+                      Unggah Kreatif Iklan ({selectedPackage ? getSlotDimensions(selectedPackage.slot) : 'Responsive'})
+                    </label>
+                    {selectedPackage?.slot && (() => {
+                      const templateMap: Record<string, string> = {
+                        leaderboard: '/templates/leaderboard-970x250.svg',
+                        rectangle: '/templates/rectangle-300x250.svg',
+                        rectangle_secondary: '/templates/rectangle-300x250.svg',
+                        in_feed: '/templates/rectangle-300x250.svg',
+                      };
+                      const href = templateMap[selectedPackage.slot];
+                      return href ? (
+                        <a href={href} download className="text-[9px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+                          📐 Download Template
+                        </a>
+                      ) : null;
+                    })()}
+                  </div>
                   
                   <div className="relative border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-brand-red/50 transition-colors p-8 text-center rounded-sm bg-gray-50/50 dark:bg-slate-800/10">
                     <input

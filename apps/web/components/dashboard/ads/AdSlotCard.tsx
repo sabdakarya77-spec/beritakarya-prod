@@ -70,6 +70,20 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">{slot.name}</h3>
             <span className="text-[9px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">{slot.size}</span>
+            {(() => {
+              const templateMap: Record<string, string> = {
+                leaderboard: '/templates/leaderboard-970x250.svg',
+                rectangle: '/templates/rectangle-300x250.svg',
+                rectangle_secondary: '/templates/rectangle-300x250.svg',
+                in_feed: '/templates/rectangle-300x250.svg',
+              };
+              const href = templateMap[slot.id];
+              return href ? (
+                <a href={href} download className="text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-brand-red/5 text-brand-red border border-brand-red/10 hover:bg-brand-red/10 transition-colors">
+                  📐 Template
+                </a>
+              ) : null;
+            })()}
             {slot.placementPages?.map(page => (
               <span
                 key={page}

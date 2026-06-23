@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="970" height="250" viewBox="0 0 970 250">
+  <rect width="970" height="250" fill="#f0f0f0" stroke="#ccc" stroke-width="2"/>
+  <!-- Safe zone -->
+  <rect x="20" y="20" width="930" height="210" fill="none" stroke="#e74c3c" stroke-width="1" stroke-dasharray="8,4"/>
+  <text x="485" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#999">SAFE ZONE: 930 × 210 px</text>
+  <!-- Center guide -->
+  <line x1="485" y1="0" x2="485" y2="250" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="0" y1="125" x2="970" y2="125" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+  <!-- Labels -->
+  <text x="485" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">LEADERBOARD</text>
+  <text x="485" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">970 × 250 px</text>
+  <text x="485" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#999">Safe zone: 20px padding dari tepi</text>
+  <!-- Corner marks -->
+  <text x="10" y="245" font-family="Arial, sans-serif" font-size="9" fill="#bbb">0,0</text>
+  <text x="930" y="245" font-family="Arial, sans-serif" font-size="9" fill="#bbb">970,250</text>
+</svg>
