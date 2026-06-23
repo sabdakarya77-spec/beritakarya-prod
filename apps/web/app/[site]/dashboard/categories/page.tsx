@@ -622,7 +622,7 @@ export default function CategoriesDashboard() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className={`grid grid-cols-1 gap-5 ${showForm ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
                 {categories.map((parent, parentIdx) => {
                   const borderClass = getCategoryColor(parent.name);
                   // In Site View: use sequential position (1-based index) as display number
@@ -638,7 +638,7 @@ export default function CategoriesDashboard() {
                       <button
                         type="button"
                         onClick={() => toggleExpand(parent.id)}
-                        className="w-full p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/50 text-left cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-750/30 transition-colors duration-150"
+                        className="w-full p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/50 text-left cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-750/30 transition-colors duration-150"
                       >
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -702,7 +702,7 @@ export default function CategoriesDashboard() {
                       {expandedIds.has(parent.id) && (
                         <>
                           {/* Card Body (Subcategories Chips) */}
-                          <div className="p-4 sm:p-5 flex-1">
+                          <div className="p-3 sm:p-4 flex-1">
                             <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sub Kategori</h4>
 
                             {parent.subCategories && parent.subCategories.length > 0 ? (
