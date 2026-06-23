@@ -23,6 +23,28 @@ export default function FadeInOnScroll({ children, className = '', delay = 0 }: 
     const el = ref.current
     if (!el) return
 
+    // Fallback: check if element is already in viewport
+    const checkAlreadyVisible = () => {
+      const rect = el.getBoundingClientRect()
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight
+      // Consider visible if element is within viewport (with some tolerance)
+      const isVisible = rect.top < windowHeight && rect.bottom > 0
+      if (isVisible) {
+        if (delay > 0) {
+          setTimeout(() => setIsVisible(true), delay)
+        } else {
+          setIsVisible(true)
+        }
+        return true
+      }
+      return false
+    }
+
+    // If already visible on mount, show immediately
+    if (checkAlreadyVisible()) {
+      return
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
