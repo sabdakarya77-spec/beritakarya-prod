@@ -504,9 +504,9 @@ Pengiklan perlu melihat performa iklannya untuk memutuskan apakah akan memperpan
 - ✅ Mini bar chart per booking (impressions + clicks)
 - ✅ Overall CTR rata-rata
 - ✅ History tabel dengan CTR per booking
+- ✅ Grafik performa per hari (time-series) — `AdPerformanceChart` + `AdEventLog`
 
 **Belum ada:**
-- 🔲 Grafik performa per hari/minggu/bulan (time-series)
 - 🔲 Export laporan (PDF/CSV)
 - 🔲 Perbandingan performa antar slot
 
@@ -546,5 +546,5 @@ Pengiklan upload 2 versi banner, sistem split test otomatis.
 |------|-----|--------|--------|--------|
 | **Fase 0** | UI/UX improvements (toast, responsive, filter, pagination, chart, sidebar refactor) | Sedang | Tinggi | ✅ Selesai |
 | **Fase 1** | Sticky mobile leaderboard + CSS animation + CLS fix + tombol close | Rendah | Sangat Tinggi | ✅ Selesai |
-| **Fase 2** | `sharp` resize + letterbox + template download + analytics time-series | Sedang | Tinggi | ⚠️ Sebagian (resize + letterbox + template selesai, analytics time-series belum) |
+| **Fase 2** | `sharp` resize + letterbox + template download + analytics time-series | Sedang | Tinggi | ✅ Selesai |
 | **Fase 3** | Multi-size IAB + A/B testing (opsional) | Tinggi | Sedang-Tinggi | 🔲 Belum |
