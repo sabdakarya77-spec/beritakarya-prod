@@ -240,7 +240,6 @@ export default function AdsDashboard() {
           {user?.role === 'advertiser' && (
             <AdvertiserAdsView
               site={site}
-              packages={packages}
               bookings={bookings}
               onRefresh={() => fetchData()}
             />
