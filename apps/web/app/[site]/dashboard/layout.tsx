@@ -25,7 +25,8 @@ import {
   MessageSquare,
   Mail,
   Lock,
-  User
+  User,
+  Megaphone
 } from 'lucide-react'
 import BackButton from '../../../components/ui/BackButton'
 import { ROLE_LABELS } from '../../../lib/constants'
@@ -115,9 +116,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     {
       label: 'Portal Pengiklan',
       items: [
-        { name: 'Statistik Iklan', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['advertiser'] },
-        { name: 'Riwayat Iklan', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['advertiser'] },
-        { name: 'Pasang Iklan Baru', href: `/${site}/dashboard/ads/order`, icon: ImageIcon, roles: ['advertiser'] },
+        { name: 'Beranda', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['advertiser'] },
+        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: Megaphone, roles: ['advertiser'] },
       ]
     }
   ] : [

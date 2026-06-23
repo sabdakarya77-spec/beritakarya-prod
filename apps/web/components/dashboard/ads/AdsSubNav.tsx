@@ -7,6 +7,8 @@ import {
   Target,
   Package,
   ClipboardList,
+  History,
+  Megaphone,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -18,10 +20,15 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  // Shared
   { name: 'Overview', href: '/dashboard/ads', icon: LayoutDashboard },
+  // Superadmin/Wapimred only
   { name: 'Slot Iklan', href: '/dashboard/ads/slots', icon: Target, roles: ['superadmin', 'wapimred'] },
   { name: 'Paket', href: '/dashboard/ads/packages', icon: Package, roles: ['superadmin'] },
   { name: 'Booking', href: '/dashboard/ads/bookings', icon: ClipboardList, roles: ['superadmin'] },
+  // Advertiser only
+  { name: 'Riwayat', href: '/dashboard/ads/history', icon: History, roles: ['advertiser'] },
+  { name: 'Pesan Baru', href: '/dashboard/ads/order', icon: Megaphone, roles: ['advertiser'] },
 ];
 
 interface AdsSubNavProps {

@@ -86,7 +86,6 @@ export default function AdsOverviewPage() {
       <AdvertiserAdsView
         site={site}
         bookings={bookings}
-        onRefresh={() => fetchData()}
       />
     );
   }
