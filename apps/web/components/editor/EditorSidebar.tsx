@@ -1,11 +1,12 @@
 'use client'
 
 import { cn } from '../../lib/utils'
-import { PanelRightClose, FileText, Settings, Search, History, Sparkles, Save, Clock } from 'lucide-react'
+import { PanelRightClose, FileText, Settings, Search, History, Sparkles } from 'lucide-react'
 import { SEOPanel } from './seo/SEOPanel'
 import { TabSettings } from './tabs/TabSettings'
 import { TabContent } from './tabs/TabContent'
 import { AIPanel } from './ai/AIPanel'
+import { HistoryPanel } from './tabs/HistoryPanel'
 import { useEditorStore } from '../../store/editorStore'
 import { getStatusConfig } from '@beritakarya/config'
 
@@ -141,65 +142,7 @@ export function EditorSidebar({ isOpen, onToggle }: EditorSidebarProps) {
         {activeTab === 'content' && <TabContent />}
         {activeTab === 'settings' && <TabSettings />}
         {activeTab === 'seo' && <SEOPanel />}
-        {activeTab === 'history' && (
-          <div className="p-4 space-y-4 animate-fade-in">
-            {/* Banner Info */}
-            <div className="p-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl">
-              <div className="flex items-start gap-2.5">
-                <div className="p-1.5 bg-accent-purple/20 rounded-lg shrink-0">
-                  <Clock size={14} className="text-accent-purple" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-accent-purple">Versi Akan Segera Hadir</p>
-                  <p className="text-[10px] text-panel-text-secondary leading-relaxed">
-                    Riwayat versi akan tersedia setelah fitur ini diluncurkan. Artikel Anda tetap aman.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline Skeleton Placeholder */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">Timeline</span>
-                <div className="w-full h-px bg-panel-border" />
-              </div>
-              
-              {/* Skeleton Items - Fake History */}
-              {[
-                { time: 'Baru saja', title: 'Versi saat ini' },
-                { time: '5 menit lalu', title: 'Auto-saved draft' },
-                { time: '12 menit lalu', title: 'Revisi heading' },
-              ].map((item, i) => (
-                <div key={i} className="relative pl-6">
-                  {/* Timeline line */}
-                  <div className="absolute left-[7px] top-0 bottom-0 w-px bg-panel-border" />
-                  
-                  {/* Timeline dot */}
-                  <div className={cn(
-                    "absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2",
-                    i === 0 ? "bg-panel-elevated border-accent-purple" : "bg-panel-bg border-panel-border"
-                  )} />
-                  
-                  {/* Content */}
-                  <div className="pb-3 last:pb-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="h-3 w-16 bg-panel-elevated rounded animate-pulse" />
-                      <span className="text-[9px] text-panel-text-muted">{item.time}</span>
-                    </div>
-                    <div className="h-3.5 w-3/4 bg-panel-elevated rounded animate-pulse opacity-60" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-panel-surface border border-panel-border rounded-xl text-[11px] font-semibold text-panel-text-primary hover:bg-panel-elevated hover:border-accent-purple/40 transition-all">
-              <Save size={14} className="text-accent-purple" />
-              Aktifkan Auto-Save
-            </button>
-          </div>
-        )}
+        {activeTab === 'history' && <HistoryPanel />}
         {activeTab === 'assist' && <AIPanel />}
       </div>
     </aside>
