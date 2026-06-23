@@ -36,6 +36,11 @@ export default function AdSpace({
   const [fallbackAds, setFallbackAds] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showCloseBtn, setShowCloseBtn] = useState(false);
+  const [isStickyClosed, setIsStickyClosed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(`ad-sticky-closed-${type}`) === '1';
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const trackedRef = useRef<Set<string>>(new Set());
@@ -124,6 +129,18 @@ export default function AdSpace({
     }).catch(() => {});
   }, [ads, currentIndex]);
 
+  // Show close button after 5s for sticky leaderboard
+  useEffect(() => {
+    if (type !== 'leaderboard' || ads.length === 0 || isStickyClosed) return;
+    const timer = setTimeout(() => setShowCloseBtn(true), 5000);
+    return () => clearTimeout(timer);
+  }, [type, ads.length, isStickyClosed]);
+
+  const handleStickyClose = () => {
+    setIsStickyClosed(true);
+    sessionStorage.setItem(`ad-sticky-closed-${type}`, '1');
+  };
+
   const handleAdClick = (ad: AdItem) => {
     const url = `${API_URL}/api/v1/ads/track/${ad.id}?action=click`;
     if (navigator.sendBeacon) {
@@ -134,11 +151,11 @@ export default function AdSpace({
   };
 
   const styles = {
-    // Responsive height: 120px on mobile, 250px on desktop
-    leaderboard: "w-full h-[120px] md:h-[250px] mb-6",
-    rectangle: "w-full h-[250px] mb-8",
-    rectangle_secondary: "w-full h-[250px] mb-8",
-    'in-feed': "w-full h-40 mb-12"
+    // Responsive height with min-height for CLS protection
+    leaderboard: "w-full h-[120px] min-h-[120px] md:h-[250px] md:min-h-[250px] mb-6",
+    rectangle: "w-full h-[250px] min-h-[250px] mb-8",
+    rectangle_secondary: "w-full h-[250px] min-h-[250px] mb-8",
+    'in-feed': "w-full h-40 min-h-[160px] mb-12"
   };
 
   // Loading state
@@ -161,7 +178,7 @@ export default function AdSpace({
       const ad = fallbackAds[0];
       return (
         <div className={cn(
-          "relative w-full h-[120px] md:h-[250px] overflow-hidden rounded-xl",
+          "relative w-full h-[120px] min-h-[120px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
           className
         )}>
           {/* Media (image or video) */}
@@ -214,41 +231,70 @@ export default function AdSpace({
     );
   }
 
-  // Single ad — render directly (no carousel)
-  if (!isCarousel) {
+  // Sticky + close button wrapper for leaderboard on mobile
+  const isSticky = type === 'leaderboard' && ads.length > 0 && !isStickyClosed;
+  const stickyClasses = isSticky ? 'md:relative fixed bottom-0 left-0 right-0 z-30 md:z-auto' : '';
+  const stickyBg = isSticky ? 'bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:border-0 md:shadow-none md:bg-transparent' : '';
+
+  const adContent = (
+    <>
+      {/* Single ad — render directly (no carousel) */}
+      {!isCarousel ? (
+        <div
+          ref={containerRef}
+          className={cn("relative overflow-hidden", styles[type], isSticky && 'mb-0', className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          <AdSlide ad={ads[0]} type={type} label={label} onAdClick={handleAdClick} />
+        </div>
+      ) : (
+        /* Multiple ads — carousel */
+        <div
+          ref={containerRef}
+          className={cn("relative overflow-hidden", styles[type], isSticky && 'mb-0', className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          {ads.map((ad, index) => (
+            <div
+              key={ad.id}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              )}
+            >
+              <AdSlide ad={ad} type={type} label={label} onAdClick={handleAdClick} />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  // Wrap with sticky container for mobile leaderboard
+  if (isSticky) {
     return (
-      <div
-        ref={containerRef}
-        className={cn("relative overflow-hidden", styles[type], className)}
-        onMouseEnter={stopRotation}
-        onMouseLeave={startRotation}
-      >
-        <AdSlide ad={ads[0]} type={type} label={label} onAdClick={handleAdClick} />
+      <div className={cn(stickyClasses, stickyBg)}>
+        <div className="relative">
+          {adContent}
+          {/* Close button — appears after 5s */}
+          {showCloseBtn && (
+            <button
+              type="button"
+              onClick={handleStickyClose}
+              className="absolute top-1 right-1 z-20 md:hidden w-6 h-6 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+              aria-label="Tutup iklan"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
-  // Multiple ads — carousel
-  return (
-    <div
-      ref={containerRef}
-      className={cn("relative overflow-hidden", styles[type], className)}
-      onMouseEnter={stopRotation}
-      onMouseLeave={startRotation}
-    >
-      {ads.map((ad, index) => (
-        <div
-          key={ad.id}
-          className={cn(
-            "absolute inset-0 transition-opacity duration-700 ease-in-out",
-            index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-          )}
-        >
-          <AdSlide ad={ad} type={type} label={label} onAdClick={handleAdClick} />
-        </div>
-      ))}
-    </div>
-  );
+  return adContent;
 }
 
 // ─── Ad Slide Sub-Component ───────────────────────────────────────────────
@@ -312,7 +358,11 @@ function AdSlide({
           <img
             src={ad.imageUrl}
             alt={label}
-            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            className={cn(
+              "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
+              // Ken Burns animation for static images on leaderboard
+              _type === 'leaderboard' && 'ad-anim-ken-burns'
+            )}
           />
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
