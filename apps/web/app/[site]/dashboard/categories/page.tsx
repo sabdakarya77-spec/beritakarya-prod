@@ -22,12 +22,25 @@ export default function CategoriesDashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState<Category | null>(null);
   const [migrating, setMigrating] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const fetchCategories = async () => {
@@ -187,6 +200,11 @@ export default function CategoriesDashboard() {
     setSlug(cat.slug);
     setParentId(cat.parentId || '');
     setOrder(String(cat.order || 0));
+    // Auto-expand the parent card so user can see the category being edited
+    const rootParentId = cat.parentId
+      ? categories.find(c => c.id === cat.parentId || c.subCategories?.some(s => s.id === cat.parentId))?.id || cat.parentId
+      : cat.id;
+    setExpandedIds(prev => new Set(prev).add(rootParentId));
   };
 
   const cancelEdit = () => {
@@ -591,8 +609,12 @@ export default function CategoriesDashboard() {
                       key={parent.id} 
                       className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-200"
                     >
-                      {/* Card Header */}
-                      <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/50">
+                      {/* Card Header — clickable to expand/collapse */}
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(parent.id)}
+                        className="w-full p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/50 text-left cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-750/30 transition-colors duration-150"
+                      >
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-md font-extrabold text-gray-900 dark:text-white tracking-tight">
@@ -608,29 +630,39 @@ export default function CategoriesDashboard() {
                                 {siteId.toUpperCase()}
                               </span>
                             )}
+                            {/* Sub count badge — visible in collapsed state */}
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
+                              {parent.subCategories?.length || 0} Sub
+                            </span>
                           </div>
-                          
-                          {/* Parent Action Buttons */}
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => startEdit(parent)}
-                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20"
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            {/* Parent Action Buttons */}
+                            <span
+                              role="button"
+                              tabIndex={-1}
+                              onClick={(e) => { e.stopPropagation(); startEdit(parent); }}
+                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 cursor-pointer"
                               title="Edit Kategori"
                             >
                               ✏️
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteRequest(parent)}
-                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20"
+                            </span>
+                            <span
+                              role="button"
+                              tabIndex={-1}
+                              onClick={(e) => { e.stopPropagation(); handleDeleteRequest(parent); }}
+                              className="p-1.5 rounded-lg transition-all text-gray-450 hover:text-rose-600 hover:bg-rose-500/10 dark:hover:bg-rose-500/20 cursor-pointer"
                               title="Hapus Kategori"
                             >
                               🗑️
-                            </button>
+                            </span>
+                            {/* Expand/Collapse indicator */}
+                            <span className="ml-1 text-xs text-gray-400 dark:text-gray-500 transition-transform duration-200">
+                              {expandedIds.has(parent.id) ? '▼' : '▶'}
+                            </span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black border uppercase tracking-wider ${borderClass}`}>
                             [{parentDisplayNum}] {parent.name}
@@ -639,122 +671,122 @@ export default function CategoriesDashboard() {
                             Urutan: {parentDisplayNum}
                           </span>
                         </div>
-                      </div>
+                      </button>
 
-                      {/* Card Body (Subcategories Chips) */}
-                      <div className="p-4 sm:p-5 flex-1">
-                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sub Kategori</h4>
-                        
-                        {parent.subCategories && parent.subCategories.length > 0 ? (
-                          <div className="space-y-2">
-                            {parent.subCategories.map((sub, subIdx) => {
-                              const subDisplayNum = isGlobalView ? (sub.order || 0) : (subIdx + 1);
-                              return (
-                              <div key={sub.id} className="space-y-1">
-                                <div
-                                  className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-700/80 rounded-xl text-xs text-gray-750 dark:text-gray-300 font-semibold hover:border-rose-500/30 dark:hover:border-rose-500/30 transition-all"
-                                >
-                                  <span className="text-[10px] text-gray-400 font-mono">
-                                    {parentDisplayNum}.{subDisplayNum}
-                                  </span>
-                                  <span>{sub.name}</span>
-                                  <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity ml-1 border-l border-gray-200 dark:border-gray-700 pl-1.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setParentId(sub.id);
-                                        const inputEl = document.querySelector('input[placeholder*="Misal: Olahraga"]') as HTMLInputElement;
-                                        inputEl?.focus();
-                                        showToast(`Parent diatur ke "${sub.name}". Silakan ketik nama sub-subkategori baru.`);
-                                      }}
-                                      className="text-[10px] hover:text-emerald-600 p-0.5"
-                                      title="Tambah Sub-Sub"
+                      {/* Card Body + Footer — only visible when expanded */}
+                      {expandedIds.has(parent.id) && (
+                        <>
+                          {/* Card Body (Subcategories Chips) */}
+                          <div className="p-4 sm:p-5 flex-1">
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Sub Kategori</h4>
+
+                            {parent.subCategories && parent.subCategories.length > 0 ? (
+                              <div className="space-y-2">
+                                {parent.subCategories.map((sub, subIdx) => {
+                                  const subDisplayNum = isGlobalView ? (sub.order || 0) : (subIdx + 1);
+                                  return (
+                                  <div key={sub.id} className="space-y-1">
+                                    <div
+                                      className="group inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-700/80 rounded-xl text-xs text-gray-750 dark:text-gray-300 font-semibold hover:border-rose-500/30 dark:hover:border-rose-500/30 transition-all"
                                     >
-                                      ➕
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => startEdit(sub)}
-                                      className="text-[10px] hover:text-rose-600 p-0.5"
-                                      title="Edit Sub"
-                                    >
-                                      ✏️
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteRequest(sub)}
-                                      className="text-[10px] hover:text-rose-600 p-0.5"
-                                      title="Hapus Sub"
-                                    >
-                                      🗑️
-                                    </button>
-                                  </div>
-                                </div>
-                                {/* Sub-subcategories */}
-                                {sub.subCategories && sub.subCategories.length > 0 && (
-                                  <div className="ml-4 flex flex-wrap gap-1.5">
-                                    {sub.subCategories.map((subsub, subsubIdx) => {
-                                      const subsubDisplayNum = isGlobalView ? (subsub.order || 0) : (subsubIdx + 1);
-                                      return (
-                                      <div
-                                        key={subsub.id}
-                                        className="group inline-flex items-center gap-1 px-2 py-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-250/50 dark:border-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 font-medium hover:border-rose-500/30 transition-all"
-                                      >
-                                        <span className="text-gray-400 dark:text-gray-600">↳</span>
-                                        <span className="text-[9px] text-gray-400 font-mono">
-                                          {parentDisplayNum}.{subDisplayNum}.{subsubDisplayNum}
-                                        </span>
-                                        <span>{subsub.name}</span>
-                                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
-                                          <button
-                                            type="button"
-                                            onClick={() => startEdit(subsub)}
-                                            className="text-[9px] hover:text-rose-600 p-0.5"
-                                            title="Edit"
-                                          >
-                                            ✏️
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleDeleteRequest(subsub)}
-                                            className="text-[9px] hover:text-rose-600 p-0.5"
-                                            title="Hapus"
-                                          >
-                                            🗑️
-                                          </button>
-                                        </div>
+                                      <span className="text-[10px] text-gray-400 font-mono">
+                                        {parentDisplayNum}.{subDisplayNum}
+                                      </span>
+                                      <span>{sub.name}</span>
+                                      <div className="flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity ml-1 border-l border-gray-200 dark:border-gray-700 pl-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setParentId(sub.id);
+                                            const inputEl = document.querySelector('input[placeholder*="Misal: Olahraga"]') as HTMLInputElement;
+                                            inputEl?.focus();
+                                            showToast(`Parent diatur ke "${sub.name}". Silakan ketik nama sub-subkategori baru.`);
+                                          }}
+                                          className="text-[10px] hover:text-emerald-600 p-0.5"
+                                          title="Tambah Sub-Sub"
+                                        >
+                                          ➕
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => startEdit(sub)}
+                                          className="text-[10px] hover:text-rose-600 p-0.5"
+                                          title="Edit Sub"
+                                        >
+                                          ✏️
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRequest(sub)}
+                                          className="text-[10px] hover:text-rose-600 p-0.5"
+                                          title="Hapus Sub"
+                                        >
+                                          🗑️
+                                        </button>
                                       </div>
-                                    )})}
+                                    </div>
+                                    {/* Sub-subcategories */}
+                                    {sub.subCategories && sub.subCategories.length > 0 && (
+                                      <div className="ml-4 flex flex-wrap gap-1.5">
+                                        {sub.subCategories.map((subsub, subsubIdx) => {
+                                          const subsubDisplayNum = isGlobalView ? (subsub.order || 0) : (subsubIdx + 1);
+                                          return (
+                                          <div
+                                            key={subsub.id}
+                                            className="group inline-flex items-center gap-1 px-2 py-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-250/50 dark:border-gray-700/50 rounded-lg text-[11px] text-gray-600 dark:text-gray-400 font-medium hover:border-rose-500/30 transition-all"
+                                          >
+                                            <span className="text-gray-400 dark:text-gray-600">↳</span>
+                                            <span className="text-[9px] text-gray-400 font-mono">
+                                              {parentDisplayNum}.{subDisplayNum}.{subsubDisplayNum}
+                                            </span>
+                                            <span>{subsub.name}</span>
+                                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                                              <button
+                                                type="button"
+                                                onClick={() => startEdit(subsub)}
+                                                className="text-[9px] hover:text-rose-600 p-0.5"
+                                                title="Edit"
+                                              >
+                                                ✏️
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() => handleDeleteRequest(subsub)}
+                                                className="text-[9px] hover:text-rose-600 p-0.5"
+                                                title="Hapus"
+                                              >
+                                                🗑️
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )})}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                );})}
                               </div>
-                            );})}
+                            ) : (
+                              <p className="text-xs text-gray-400 dark:text-gray-500 italic">Belum ada sub-kategori.</p>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-xs text-gray-400 dark:text-gray-500 italic">Belum ada sub-kategori.</p>
-                        )}
-                      </div>
 
-                      {/* Card Footer (Add Sub Quick Action) */}
-                      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700/50 flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 font-mono">
-                          {parent.subCategories?.length || 0} Sub
-                        </span>
-                        
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setParentId(parent.id);
-                            // Fokus ke input nama kategori untuk entri cepat
-                            const inputEl = document.querySelector('input[placeholder*="Misal: Olahraga"]') as HTMLInputElement;
-                            inputEl?.focus();
-                            showToast(`Parent diatur ke "${parent.name}". Silakan ketik nama subkategori baru.`);
-                          }}
-                          className="text-[10px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
-                        >
-                          <span>+</span> Tambah Sub
-                        </button>
-                      </div>
+                          {/* Card Footer (Add Sub Quick Action) */}
+                          <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700/50 flex justify-end items-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setParentId(parent.id);
+                                const inputEl = document.querySelector('input[placeholder*="Misal: Olahraga"]') as HTMLInputElement;
+                                inputEl?.focus();
+                                showToast(`Parent diatur ke "${parent.name}". Silakan ketik nama subkategori baru.`);
+                              }}
+                              className="text-[10px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 flex items-center gap-1 transition-colors"
+                            >
+                              <span>+</span> Tambah Sub
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
