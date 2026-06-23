@@ -23,6 +23,7 @@ export default function CategoriesDashboard() {
   const [migrating, setMigrating] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [showForm, setShowForm] = useState(false);
   const params = useParams();
   const siteId = (params.site as string) || 'pusat';
 
@@ -186,6 +187,7 @@ export default function CategoriesDashboard() {
       setParentId('');
       setOrder('0');
       setEditingCategory(null);
+      if (!editingCategory) setShowForm(false); // Close form after creating new
       fetchCategories();
     } catch (error: unknown) {
       showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || (editingCategory ? 'Gagal memperbarui kategori' : 'Gagal membuat kategori'), 'error');
@@ -200,6 +202,7 @@ export default function CategoriesDashboard() {
     setSlug(cat.slug);
     setParentId(cat.parentId || '');
     setOrder(String(cat.order || 0));
+    setShowForm(true); // Auto-expand form when editing
     // Auto-expand the parent card so user can see the category being edited
     const rootParentId = cat.parentId
       ? categories.find(c => c.id === cat.parentId || c.subCategories?.some(s => s.id === cat.parentId))?.id || cat.parentId
@@ -213,6 +216,7 @@ export default function CategoriesDashboard() {
     setSlug('');
     setParentId('');
     setOrder('0');
+    setShowForm(false);
   };
 
   const handleDeleteRequest = (cat: Category) => {
@@ -372,77 +376,97 @@ export default function CategoriesDashboard() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-            Menu Kategori & Rubrikasi
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Kelola struktur menu navigasi hierarkis (Parent & Sub-menu)
-            {!isGlobalView && <span className="text-rose-600 font-bold dark:text-rose-400"> untuk {siteId}</span>}
-          </p>
-        </div>
-
-        {/* Superadmin Toggle */}
-        <div className="flex items-center gap-3 self-stretch md:self-auto justify-between">
-          <button
-            onClick={handleSeedDefaults}
-            disabled={loading}
-            className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-105 dark:hover:bg-gray-800 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-            title="Muat kategori standar homepage ke database"
-          >
-            <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
-          </button>
-
-          {!isGlobalView && (
-            <button
-              onClick={handleSyncFromGlobal}
-              disabled={syncing || loading}
-              className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
-              title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
-            >
-              <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
-            </button>
-          )}
-
-          <button
-            onClick={() => setIsGlobalView(!isGlobalView)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 border ${
-              isGlobalView 
-                ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20' 
-                : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100'
-            }`}
-          >
-            {isGlobalView ? '🌐 Global View ON' : '📍 Site View'}
-          </button>
-          
-          {isGlobalView && (
-            <>
-              <div className="text-[11px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-900/30 hidden md:block">
-                Superadmin Mode: Mengelola kategori global / lintas situs.
-              </div>
-              <button
-                type="button"
-                onClick={handleMigrateToLocal}
-                disabled={migrating}
-                className="px-3 py-2 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all disabled:opacity-50"
-              >
-                {migrating ? 'Migrasi...' : '📦 Migrasi ke Lokal'}
-              </button>
-            </>
-          )}
-        </div>
+      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
+        <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+          Menu Kategori & Rubrikasi
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Kelola struktur menu navigasi hierarkis (Parent & Sub-menu)
+          {!isGlobalView && <span className="text-rose-600 font-bold dark:text-rose-400"> untuk {siteId}</span>}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Form Add / Edit */}
+      {/* Action Bar — compact controls always visible */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm flex flex-wrap items-center gap-2">
+        {/* Primary: Add Category */}
+        <button
+          type="button"
+          onClick={() => { setShowForm(!showForm); if (showForm) cancelEdit(); }}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
+            showForm
+              ? 'bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              : 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20'
+          }`}
+        >
+          {showForm ? '✕' : '+'} {showForm ? 'Tutup Form' : 'Tambah Kategori'}
+        </button>
+
+        <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1 hidden sm:block" />
+
+        {/* Seed defaults */}
+        <button
+          onClick={handleSeedDefaults}
+          disabled={loading}
+          className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+          title="Muat kategori standar homepage ke database"
+        >
+          <span>✨</span> {loading ? 'Memuat...' : 'Muat Default'}
+        </button>
+
+        {/* Sync from Global (Site View only) */}
+        {!isGlobalView && (
+          <button
+            onClick={handleSyncFromGlobal}
+            disabled={syncing || loading}
+            className="px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 rounded-xl text-xs font-bold transition-all duration-200 disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+            title="Tambah kategori baru dari global (tidak mengubah yang sudah ada)"
+          >
+            <span>🔄</span> {syncing ? 'Sync...' : 'Sync dari Global'}
+          </button>
+        )}
+
+        <div className="flex-1" />
+
+        {/* View toggle */}
+        <button
+          onClick={() => setIsGlobalView(!isGlobalView)}
+          className={`px-3 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 border ${
+            isGlobalView
+              ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20'
+              : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100'
+          }`}
+        >
+          {isGlobalView ? '🌐 Global View ON' : '📍 Site View'}
+        </button>
+
+        {/* Migrate (Global View only) */}
+        {isGlobalView && (
+          <>
+            <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-xl border border-purple-100 dark:border-purple-900/30 hidden lg:inline">
+              Superadmin Mode
+            </span>
+            <button
+              type="button"
+              onClick={handleMigrateToLocal}
+              disabled={migrating}
+              className="px-3 py-2 text-xs font-bold rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all disabled:opacity-50"
+            >
+              {migrating ? 'Migrasi...' : '📦 Migrasi ke Lokal'}
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className={showForm ? "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" : ""}>
+        {/* Form Add / Edit — conditional */}
+        {showForm && (
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-6 shadow-sm">
             <h2 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center justify-between">
               <span>{editingCategory ? 'Edit Kategori' : 'Tambah Baru'}</span>
               {editingCategory && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={cancelEdit}
                   className="text-[10px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 px-2.5 py-1.5 rounded-lg font-bold transition-all"
                 >
@@ -463,7 +487,7 @@ export default function CategoriesDashboard() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="category-slug" className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Slug URL / Identifier</label>
                 <div className="relative">
@@ -554,8 +578,8 @@ export default function CategoriesDashboard() {
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-rose-600/20 shadow-rose-600/10 hover:shadow-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
               >
@@ -575,16 +599,17 @@ export default function CategoriesDashboard() {
             </div>
           </div>
         </div>
+        )}
 
         {/* List Bento Grid Hierarchy */}
-        <div className="lg:col-span-8">
+        <div className={showForm ? "lg:col-span-8" : ""}>
           {categories.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl p-16 text-center shadow-sm">
               <div className="flex flex-col items-center gap-4 max-w-sm mx-auto text-gray-400">
                 <span className="text-5xl">📂</span>
                 <span className="text-sm font-bold uppercase tracking-widest text-gray-550 dark:text-gray-300">Belum ada kategori</span>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Mulai dengan menambahkan kategori baru melalui form di samping, atau langsung muat seluruh kategori bawaan (default) yang sesuai dengan tampilan homepage.
+                  Mulai dengan menambahkan kategori baru melalui tombol &ldquo;+ Tambah Kategori&rdquo; di atas, atau langsung muat seluruh kategori bawaan (default) yang sesuai dengan tampilan homepage.
                 </p>
                 <button
                   onClick={handleSeedDefaults}
