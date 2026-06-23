@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Wallet,
@@ -8,9 +9,27 @@ import {
   Eye,
   ArrowRight,
   Megaphone,
+  RefreshCw,
 } from 'lucide-react';
+import { api } from '../../../lib/api';
 import { cn } from '../../../lib/utils';
 import type { AdBooking } from './types';
+import { AdPerformanceChart } from './AdPerformanceChart';
+
+interface DataPoint {
+  date: string;
+  value: number;
+}
+
+interface AdStats {
+  impressions: DataPoint[];
+  clicks: DataPoint[];
+  total: {
+    impressions: number;
+    clicks: number;
+    ctr: number;
+  };
+}
 
 interface Props {
   site: string;
@@ -18,6 +37,55 @@ interface Props {
 }
 
 export function AdvertiserAdsView({ site, bookings }: Props) {
+  const [statsMap, setStatsMap] = useState<Record<string, AdStats>>({});
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState(14);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+
+  const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
+
+  // Fetch stats for active bookings
+  useEffect(() => {
+    if (activeBookings.length === 0) return;
+
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      try {
+        const results: Record<string, AdStats> = {};
+        await Promise.all(
+          activeBookings.map(async (b) => {
+            try {
+              const res = await api.get(`/ads/bookings/${b.id}/stats`, {
+                params: { days: selectedPeriod },
+              });
+              if (res.data?.success && res.data?.data) {
+                results[b.id] = res.data.data;
+              }
+            } catch {
+              // skip failed bookings
+            }
+          })
+        );
+        setStatsMap(results);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod, activeBookings.length]);
+
+  // Auto-select first active booking
+  useEffect(() => {
+    if (activeBookings.length > 0 && !selectedBookingId) {
+      setSelectedBookingId(activeBookings[0].id);
+    }
+  }, [activeBookings, selectedBookingId]);
+
+  const selectedStats = selectedBookingId ? statsMap[selectedBookingId] : null;
+  const selectedBooking = selectedBookingId ? bookings.find(b => b.id === selectedBookingId) : null;
+
   return (
     <div className="space-y-8">
       {/* Stats Cards */}
@@ -71,24 +139,89 @@ export function AdvertiserAdsView({ site, bookings }: Props) {
         </div>
       </Link>
 
-      {/* Analytics Mini Chart */}
+      {/* Time-Series Performance Chart */}
+      {activeBookings.length > 0 && (
+        <div className="dash-card overflow-hidden">
+          <div className="p-4 md:p-6 border-b border-gray-50 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 size={16} className="text-brand-red" />
+              <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Performa Kampanye</h3>
+              {loadingStats && <RefreshCw size={12} className="animate-spin text-gray-400" />}
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Period selector */}
+              {[7, 14, 30].map((days) => (
+                <button
+                  key={days}
+                  onClick={() => setSelectedPeriod(days)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                    selectedPeriod === days
+                      ? "bg-brand-red text-white"
+                      : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-black dark:hover:text-white"
+                  )}
+                >
+                  {days} Hari
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Booking selector (if multiple active) */}
+          {activeBookings.length > 1 && (
+            <div className="px-4 md:px-6 pt-4 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {activeBookings.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => setSelectedBookingId(b.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                    selectedBookingId === b.id
+                      ? "bg-brand-black dark:bg-white text-white dark:text-brand-black"
+                      : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-black dark:hover:text-white"
+                  )}
+                >
+                  {b.package?.name || 'Untitled'}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="p-4 md:p-6">
+            {selectedStats ? (
+              <AdPerformanceChart
+                stats={selectedStats}
+                bookingName={selectedBooking?.package?.name}
+              />
+            ) : loadingStats ? (
+              <div className="h-[250px] flex items-center justify-center">
+                <RefreshCw size={24} className="animate-spin text-gray-300" />
+              </div>
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest font-bold">
+                Data tidak tersedia
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Existing Analytics Mini Chart (aggregate bar chart) */}
       {bookings.length > 0 && (() => {
         const totalImpressions = bookings.reduce((acc, b) => acc + b.impressions, 0);
         const totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
         const overallCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
         const maxImpressions = Math.max(...bookings.map(b => b.impressions), 1);
-        const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
 
         return (
           <div className="dash-card overflow-hidden">
             <div className="p-4 md:p-6 border-b border-gray-50 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <BarChart3 size={16} className="text-brand-red" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Performa Kampanye</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Perbandingan Kampanye</h3>
               </div>
               <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">
                 <span>CTR Rata-rata: <strong className="text-brand-black dark:text-white">{overallCtr.toFixed(2)}%</strong></span>
-                <span>Kampanye Aktif: <strong className="text-emerald-600 dark:text-emerald-400">{activeBookings.length}</strong></span>
               </div>
             </div>
 

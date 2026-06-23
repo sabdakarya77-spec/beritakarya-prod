@@ -184,3 +184,68 @@ export async function createOrUpdateAdForSlot(siteId: string, slot: string, data
   }
   return prisma.advertisement.create({ data: { siteId, slot, ...data } as Prisma.AdvertisementCreateInput })
 }
+
+// ─── Ad Event Logs (Time-Series Analytics) ───────────────────────────────────
+
+export async function getAdStatsByBooking(bookingId: string, days: number = 30) {
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+  startDate.setHours(0, 0, 0, 0)
+
+  // Raw SQL: group by date + action, fill missing days with zeros
+  const rows = await prisma.$queryRaw<{ date: string; action: string; count: bigint }[]>`
+    SELECT
+      TO_CHAR("createdAt", 'YYYY-MM-DD') as date,
+      "action",
+      COUNT(*) as count
+    FROM "AdEventLog"
+    WHERE "bookingId" = ${bookingId}
+      AND "createdAt" >= ${startDate}
+    GROUP BY date, "action"
+    ORDER BY date ASC
+  `
+
+  // Build date map with zero-fill
+  const impressionsMap: Record<string, number> = {}
+  const clicksMap: Record<string, number> = {}
+
+  const now = new Date()
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startDate)
+    d.setDate(d.getDate() + i)
+    const key = d.toISOString().split('T')[0]
+    impressionsMap[key] = 0
+    clicksMap[key] = 0
+  }
+
+  for (const row of rows) {
+    const count = Number(row.count)
+    if (row.action === 'impression') {
+      impressionsMap[row.date] = count
+    } else if (row.action === 'click') {
+      clicksMap[row.date] = count
+    }
+  }
+
+  const impressions = Object.entries(impressionsMap).map(([date, value]) => ({ date, value }))
+  const clicks = Object.entries(clicksMap).map(([date, value]) => ({ date, value }))
+
+  // Get totals from booking
+  const booking = await prisma.adBooking.findUnique({
+    where: { id: bookingId },
+    select: { impressions: true, clicks: true },
+  })
+
+  const totalImpressions = booking?.impressions ?? impressions.reduce((s, d) => s + d.value, 0)
+  const totalClicks = booking?.clicks ?? clicks.reduce((s, d) => s + d.value, 0)
+
+  return {
+    impressions,
+    clicks,
+    total: {
+      impressions: totalImpressions,
+      clicks: totalClicks,
+      ctr: totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0,
+    },
+  }
+}

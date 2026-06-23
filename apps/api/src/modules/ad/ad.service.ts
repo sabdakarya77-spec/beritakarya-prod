@@ -31,7 +31,8 @@ export async function syncTrackingToBooking(
   siteId: string,
   slot: string,
   action: 'impression' | 'click',
-  bookingId?: string | null
+  bookingId?: string | null,
+  adId?: string
 ) {
   try {
     const field = action === 'impression' ? 'impressions' : 'clicks'
@@ -42,6 +43,12 @@ export async function syncTrackingToBooking(
         where: { id: bookingId },
         data: { [field]: { increment: 1 } },
       })
+      // Log event untuk time-series analytics
+      if (adId) {
+        await prisma.adEventLog.create({
+          data: { adId, bookingId, siteId, action },
+        }).catch(() => {}) // non-critical
+      }
       return
     }
 
@@ -63,6 +70,12 @@ export async function syncTrackingToBooking(
         where: { id: booking.id },
         data: { [field]: { increment: 1 } },
       })
+      // Log event untuk time-series analytics
+      if (adId) {
+        await prisma.adEventLog.create({
+          data: { adId, bookingId: booking.id, siteId, action },
+        }).catch(() => {})
+      }
     }
   } catch (err) {
     // Non-critical: jangan ganggu tracking utama jika ini gagal

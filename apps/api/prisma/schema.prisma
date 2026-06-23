@@ -74,6 +74,7 @@ model Site {
   articles              Article[]
   categories            Category[]
   advertisements        Advertisement[]
+  adEventLogs           AdEventLog[]
   newsletterSubscribers NewsletterSubscriber[]
   comments              Comment[]
   pageViews             PageView[]
@@ -221,11 +222,29 @@ model Advertisement {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  site    Site      @relation(fields: [siteId], references: [id])
-  booking AdBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  site         Site          @relation(fields: [siteId], references: [id])
+  booking      AdBooking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  adEventLogs  AdEventLog[]
 
   @@index([siteId, slot])
   @@index([bookingId])
+}
+
+model AdEventLog {
+  id        String   @id @default(uuid())
+  adId      String
+  bookingId String?
+  siteId    String
+  action    String   // 'impression' | 'click'
+  createdAt DateTime @default(now())
+
+  ad      Advertisement @relation(fields: [adId], references: [id], onDelete: Cascade)
+  booking AdBooking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  site    Site          @relation(fields: [siteId], references: [id])
+
+  @@index([adId, createdAt])
+  @@index([bookingId, createdAt])
+  @@index([siteId, createdAt])
 }
 
 model Article {
@@ -558,6 +577,7 @@ model AdBooking {
   site         Site          @relation(fields: [siteId], references: [id])
   package      AdPackage     @relation(fields: [packageId], references: [id])
   advertisements Advertisement[]
+  adEventLogs  AdEventLog[]
 
   @@index([userId])
   @@index([siteId])

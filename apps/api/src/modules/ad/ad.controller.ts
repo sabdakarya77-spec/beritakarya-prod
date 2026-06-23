@@ -24,11 +24,11 @@ adRouter.post('/track/:id',
         const isDup = await isDuplicateImpression(id, ip)
         if (!isDup) {
           await repo.incrementAdMetric(id, 'impressions')
-          await syncTrackingToBooking(ad.siteId, ad.slot, 'impression', ad.bookingId)
+          await syncTrackingToBooking(ad.siteId, ad.slot, 'impression', ad.bookingId, id)
         }
       } else if (action === 'click') {
         await repo.incrementAdMetric(id, 'clicks')
-        await syncTrackingToBooking(ad.siteId, ad.slot, 'click', ad.bookingId)
+        await syncTrackingToBooking(ad.siteId, ad.slot, 'click', ad.bookingId, id)
       }
     } catch (_e) {
       // Ignore if ad not found
@@ -232,6 +232,29 @@ adRouter.get('/bookings/my',
   asyncHandler(async (req: Request, res: Response) => {
     const bookings = await repo.findBookingsByUser(req.user!.userId)
     res.json({ success: true, data: bookings })
+  })
+)
+
+// 3b. GET /bookings/:id/stats — Time-series analytics for a booking
+adRouter.get('/bookings/:id/stats',
+  requireAuth,
+  requireRole(['advertiser', 'superadmin', 'wapimred']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const days = parseInt(req.query.days as string) || 30
+
+    const booking = await repo.findBookingById(id)
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' })
+    }
+
+    // Advertiser hanya bisa lihat stats booking sendiri
+    if (req.user!.role === 'advertiser' && booking.userId !== req.user!.userId) {
+      return res.status(403).json({ success: false, message: 'Akses ditolak' })
+    }
+
+    const stats = await repo.getAdStatsByBooking(id, Math.min(days, 90))
+    res.json({ success: true, data: stats })
   })
 )
 
