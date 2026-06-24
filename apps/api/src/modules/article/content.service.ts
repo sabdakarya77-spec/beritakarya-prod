@@ -164,10 +164,7 @@ export function validateArticleContentLimits(
 export function applySeoDefaults<T extends { title: string; blocks?: ArticleBlock[]; excerpt?: string; metaDescription?: string }>(
   input: T
 ): T & { metaDescription?: string } {
-  if (input.metaDescription?.trim()) return input
-  const excerptFromField = trimExcerpt(input.excerpt)
-  if (excerptFromField) return { ...input, metaDescription: excerptFromField }
-  const excerptFromBlocks = buildMetaDescriptionExcerpt(input.blocks)
-  if (!excerptFromBlocks) return input
-  return { ...input, metaDescription: excerptFromBlocks }
+  // Manual only — no auto-sync from excerpt or blocks.
+  // If metaDescription is not set, it stays empty (user must fill it in the SEO panel).
+  return input
 }

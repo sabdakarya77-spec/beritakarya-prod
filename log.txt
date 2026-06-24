@@ -1,0 +1,34 @@
+beritakarya=# SELECT column_name FROM information_schema.columns WHERE table_name = 'Advertisement' AND column_name LIKE 'imageUrl%';
+  column_name
+----------------
+ imageUrl
+ imageUrlMobile
+ imageUrlTablet
+(3 rows)
+
+beritakarya=# exit
+root@LXC-1-DB:~# exit
+exit
+root@proxmox:~# pct enter 102
+root@LXC-2-API:~# cd /var/www/beritakarya-prod/apps/api
+root@LXC-2-API:/var/www/beritakarya-prod/apps/api# npx prisma migrate resolve --applied 20260624000000_add_multi_size_iab_leaderboard
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "beritakarya", schema "public" at "10.0.0.11:5432"
+Error: P3008
+
+The migration `20260624000000_add_multi_size_iab_leaderboard` is already recorded as applied in the database.
+
+root@LXC-2-API:/var/www/beritakarya-prod/apps/api# cd /var/www/beritakarya-prod
+root@LXC-2-API:/var/www/beritakarya-prod# pm2 restart beritakarya-api
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [beritakarya-api](ids: [ 0, 1 ])
+[PM2] [beritakarya-api](0) ✓
+[PM2] [beritakarya-api](1) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ beritakarya-api    │ cluster  │ 51   │ online    │ 0%       │ 71.0mb   │
+│ 1  │ beritakarya-api    │ cluster  │ 51   │ online    │ 0%       │ 39.2mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@LXC-2-API:/var/www/beritakarya-prod#

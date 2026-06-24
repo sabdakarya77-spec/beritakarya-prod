@@ -17,10 +17,10 @@ export function SEOPanel() {
   const [localDesc, setLocalDesc] = useState(metaDescription)
   const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile')
 
-  // Sync dengan store
+  // Sync dengan store (manual only — no fallback to article title)
   useEffect(() => {
-    setLocalTitle(metaTitle || title)
-  }, [metaTitle, title])
+    setLocalTitle(metaTitle)
+  }, [metaTitle])
 
   useEffect(() => {
     setLocalDesc(metaDescription)
@@ -56,7 +56,7 @@ export function SEOPanel() {
     if (descLength >= 120 && descLength <= 160) score += 40
     else if (descLength > 0) score += 20
     
-    if (localTitle !== title && titleLength > 0) score += 15
+    if (titleLength > 0) score += 15
     if (descLength > 0 && descLength < 200) score += 15
     
     return score
@@ -231,7 +231,7 @@ export function SEOPanel() {
             </div>
             {/* Meta Title */}
             <div className="text-[#1a0dab] dark:text-[#8ab4f8] text-[15px] font-medium leading-tight hover:underline cursor-pointer break-words line-clamp-2">
-              {localTitle || title || 'Silakan Isi Meta Title Artikel...'}
+              {localTitle || 'Silakan Isi Meta Title Artikel...'}
             </div>
             {/* Snippet Description */}
             <div className="text-[#4d5156] dark:text-[#bdc1c6] text-[12px] leading-snug break-words line-clamp-3">
@@ -264,11 +264,11 @@ export function SEOPanel() {
             </span>
           </li>
           <li className="flex items-center gap-2">
-            <span className={cn("text-[12px] font-bold", (localTitle !== title && titleLength > 0) ? "text-emerald-500" : "text-panel-text-muted")}>
-              {(localTitle !== title && titleLength > 0) ? '✓' : '○'}
+            <span className={cn("text-[12px] font-bold", titleLength > 0 ? "text-emerald-500" : "text-panel-text-muted")}>
+              {titleLength > 0 ? '✓' : '○'}
             </span>
-            <span className={(localTitle !== title && titleLength > 0) ? "opacity-60 line-through" : "text-panel-text-primary"}>
-              Gunakan Judul SEO kustom khusus search engine
+            <span className={titleLength > 0 ? "opacity-60 line-through" : "text-panel-text-primary"}>
+              Isi Meta Title khusus search engine
             </span>
           </li>
         </ul>
