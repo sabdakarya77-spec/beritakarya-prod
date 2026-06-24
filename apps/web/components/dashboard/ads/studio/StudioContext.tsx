@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
-import type { AdPackage, StudioData } from './types';
+import type { AdPackage, StudioData, SectionId } from './types';
 
 const initialData: StudioData = {
   selectedPackage: null,
@@ -36,6 +36,8 @@ interface StudioContextValue {
   error: string;
   isSuccess: boolean;
   handleSubmit: (e: React.FormEvent) => void;
+  activeStep: SectionId;
+  setActiveStep: Dispatch<SetStateAction<SectionId>>;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -54,6 +56,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [activeStep, setActiveStep] = useState<SectionId>('package');
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -134,7 +137,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit }}>
+    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep }}>
       {children}
     </StudioContext.Provider>
   );

@@ -1,7 +1,7 @@
 'use client';
 
-import { StudioPreview } from './StudioPreview';
+import { StudioCanvas } from './StudioCanvas';
 
 export function AdStudio() {
-  return <StudioPreview />;
+  return <StudioCanvas />;
 }

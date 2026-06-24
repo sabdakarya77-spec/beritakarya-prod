@@ -40,7 +40,7 @@ import NotificationBell from '../../../components/dashboard/NotificationBell'
 import { AIConsentModal } from '../../../components/editor/AIConsentModal'
 import { SiteSwitcher } from '../../../components/dashboard/SiteSwitcher'
 import { StudioProvider } from '../../../components/dashboard/ads/studio/StudioContext'
-import { StudioControls } from '../../../components/dashboard/ads/studio/StudioControls'
+import { StudioSidebar } from '../../../components/dashboard/ads/studio/StudioSidebar'
 
 function StudioConditionalWrapper({ isAdStudio, children }: { isAdStudio: boolean; children: React.ReactNode }) {
   return isAdStudio ? <StudioProvider>{children}</StudioProvider> : <>{children}</>
@@ -428,10 +428,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Studio Controls — only on ad order page */}
+        {/* Studio Nav — only on ad order page */}
         {isAdStudioRoute && (
           <div className="flex-1 overflow-y-auto border-t border-white/5 px-3 py-3">
-            <StudioControls />
+            <StudioSidebar />
           </div>
         )}
 
