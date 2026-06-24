@@ -42,6 +42,10 @@ import { SiteSwitcher } from '../../../components/dashboard/SiteSwitcher'
 import { StudioProvider } from '../../../components/dashboard/ads/studio/StudioContext'
 import { StudioControls } from '../../../components/dashboard/ads/studio/StudioControls'
 
+function StudioConditionalWrapper({ isAdStudio, children }: { isAdStudio: boolean; children: React.ReactNode }) {
+  return isAdStudio ? <StudioProvider>{children}</StudioProvider> : <>{children}</>
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { site } = useParams() as { site: string }
@@ -311,8 +315,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </>
       ) : (
-        <>
-      
+        <StudioConditionalWrapper isAdStudio={isAdStudioRoute}>
+
       {/* Sidebar Desktop */}
       <aside className={cn(
         "bg-slate-900 dark:bg-[#050a15] text-white flex-shrink-0 flex-col hidden md:flex border-r border-white/5 transition-all duration-300 sticky top-0 h-screen",
@@ -598,13 +602,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Content */}
         <div className={cn("flex-1 overflow-y-auto", isAdStudioRoute ? "p-0" : "p-6 md:p-8")}>
           <div className={cn(isAdStudioRoute ? "h-full" : "max-w-7xl mx-auto animate-fade-in")}>
-            {isAdStudioRoute ? (
-              <StudioProvider>{children}</StudioProvider>
-            ) : children}
+            {children}
           </div>
         </div>
       </main>
-        </>
+        </StudioConditionalWrapper>
       )}
       
       <AIConsentModal />
