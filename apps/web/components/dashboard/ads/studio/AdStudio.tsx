@@ -127,24 +127,24 @@ export function AdStudio() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
+    <div className="flex flex-col h-[calc(100vh-6rem)]">
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <BackButton
           fallbackHref={`/${site}/dashboard`}
           label="Kembali"
-          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-brand-red uppercase tracking-widest transition-colors"
+          className="inline-flex items-center gap-2 text-[10px] font-bold text-gray-400 hover:text-brand-red uppercase tracking-widest transition-colors"
         />
-        <h1 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">
-          {isSuccess ? 'Pesanan Terkirim' : 'Buat Iklan Baru'}
+        <h1 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">
+          {isSuccess ? '✓ Pesanan Terkirim' : 'Ad Studio'}
         </h1>
-        <div className="w-20" /> {/* spacer */}
+        <div className="w-16" />
       </div>
 
-      {/* Split pane */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
-        {/* Left: Controls */}
-        <div className="lg:w-[420px] flex-shrink-0 overflow-y-auto pr-1">
+      {/* Main layout: sidebar + canvas */}
+      <div className="flex-1 flex flex-row gap-0 min-h-0 rounded-xl overflow-hidden border border-gray-200 dark:border-white/5">
+        {/* Sidebar — controls */}
+        <div className="w-[320px] flex-shrink-0 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-white/5 overflow-y-auto">
           <StudioControls
             data={data}
             setData={setData}
@@ -158,8 +158,8 @@ export function AdStudio() {
           />
         </div>
 
-        {/* Right: Preview */}
-        <div className="flex-1 bg-white dark:bg-slate-900 border border-gray-100 dark:border-white/5 rounded-lg overflow-hidden lg:sticky lg:top-0 lg:h-[calc(100vh-10rem)]">
+        {/* Canvas — preview */}
+        <div className="flex-1 bg-gray-50 dark:bg-[#0a0f1a] overflow-hidden">
           <StudioPreview
             data={data}
             site={site}

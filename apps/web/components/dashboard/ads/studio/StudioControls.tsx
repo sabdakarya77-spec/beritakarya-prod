@@ -30,11 +30,10 @@ interface StudioControlsProps {
 }
 
 export function StudioControls({
-  data, setData, packages, loadingPackages, site, submitting, error, onSubmit, isSuccess
+  data, setData, packages, loadingPackages, submitting, error, onSubmit, isSuccess
 }: StudioControlsProps) {
   const [expandedSection, setExpandedSection] = useState<SectionId>('package');
 
-  // Auto-advance sections
   useEffect(() => {
     if (isSuccess) return;
     if (!data.selectedPackage) setExpandedSection('package');
@@ -81,21 +80,37 @@ export function StudioControls({
   };
 
   if (isSuccess) {
-    return null; // Hide controls on success
+    return (
+      <div className="p-6 flex flex-col items-center justify-center h-full text-center space-y-4">
+        <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
+          <CheckCircle2 size={28} />
+        </div>
+        <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">Terkirim!</h3>
+        <p className="text-[10px] text-gray-500 leading-relaxed">
+          Menunggu verifikasi Superadmin (5-15 menit).
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-3">
-      {/* Error */}
-      {error && (
-        <div className="p-3 bg-brand-red/10 border border-brand-red/20 text-brand-red rounded-lg flex items-start gap-2 text-xs">
-          <AlertCircle size={14} className="shrink-0 mt-0.5" />
-          <span className="font-semibold">{error}</span>
-        </div>
-      )}
+    <div className="flex flex-col h-full">
+      {/* Sidebar Header */}
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Pengaturan Iklan</p>
+      </div>
 
-      {/* Section 1: Package */}
-      <div>
+      {/* Scrollable sections */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {/* Error */}
+        {error && (
+          <div className="p-2.5 bg-brand-red/10 border border-brand-red/20 text-brand-red rounded-lg flex items-start gap-2 text-[10px]">
+            <AlertCircle size={12} className="shrink-0 mt-0.5" />
+            <span className="font-semibold">{error}</span>
+          </div>
+        )}
+
+        {/* Section 1: Package */}
         <SectionHeader
           step={1}
           label="Pilih Paket"
@@ -106,25 +121,24 @@ export function StudioControls({
           onToggle={() => toggleSection('package')}
         />
         {expandedSection === 'package' && (
-          <div className="mt-2 px-1 space-y-3">
+          <div className="space-y-2 pl-2">
             {loadingPackages ? (
-              <div className="py-8 text-center">
-                <RefreshCw size={20} className="animate-spin text-brand-red mx-auto" />
-                <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-wider">Memuat paket...</p>
+              <div className="py-6 text-center">
+                <RefreshCw size={16} className="animate-spin text-brand-red mx-auto" />
+                <p className="text-[9px] text-gray-400 mt-2 uppercase tracking-wider">Memuat...</p>
               </div>
             ) : packages.length === 0 ? (
-              <div className="py-8 text-center">
-                <AlertCircle size={20} className="text-gray-300 mx-auto" />
-                <p className="text-xs text-gray-400 mt-2">Belum ada paket tersedia</p>
+              <div className="py-6 text-center">
+                <p className="text-[10px] text-gray-400">Belum ada paket</p>
               </div>
             ) : (
               <>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {packages.map((pkg) => (
                     <label
                       key={pkg.id}
                       className={cn(
-                        "flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all",
+                        "flex items-start gap-2.5 p-2.5 border rounded-lg cursor-pointer transition-all",
                         data.selectedPackage?.id === pkg.id
                           ? 'border-brand-red bg-brand-red/[0.03]'
                           : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
@@ -133,7 +147,6 @@ export function StudioControls({
                       <input
                         type="radio"
                         name="ad_package"
-                        value={pkg.id}
                         checked={data.selectedPackage?.id === pkg.id}
                         onChange={() => {
                           setData(prev => ({ ...prev, selectedPackage: pkg }));
@@ -144,43 +157,36 @@ export function StudioControls({
                         className="mt-1 accent-brand-red"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start gap-2">
-                          <div>
-                            <span className="text-xs font-black text-brand-black dark:text-white block">{pkg.name}</span>
-                            <span className="text-[9px] text-brand-red font-black uppercase tracking-wider">
-                              {getSlotLabel(pkg.slot)} • {pkg.durationDays} hari
-                            </span>
-                          </div>
-                          <span className="text-xs font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
+                        <div className="flex justify-between items-start gap-1">
+                          <span className="text-[11px] font-black text-brand-black dark:text-white truncate">{pkg.name}</span>
+                          <span className="text-[10px] font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
                         </div>
-                        {pkg.description && (
-                          <p className="text-[10px] text-gray-400 mt-1 leading-relaxed line-clamp-2">{pkg.description}</p>
-                        )}
+                        <span className="text-[8px] text-gray-400 uppercase tracking-wider">
+                          {getSlotLabel(pkg.slot)} • {pkg.durationDays}h
+                        </span>
                       </div>
                     </label>
                   ))}
                 </div>
 
-                {/* Format selector */}
-                <div className="pt-2 border-t border-gray-100 dark:border-white/5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Format</label>
-                  <div className="grid grid-cols-2 gap-2">
+                {/* Format */}
+                <div className="pt-1.5 border-t border-gray-100 dark:border-white/5">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Format</label>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {(['image', 'video'] as const).map((type) => (
                       <button
                         key={type}
                         type="button"
                         onClick={() => setData(prev => ({ ...prev, mediaType: type }))}
                         className={cn(
-                          "p-2.5 border rounded-lg flex items-center gap-2 transition-all text-left",
+                          "p-2 border rounded-lg flex items-center gap-1.5 transition-all",
                           data.mediaType === type
                             ? 'border-brand-red bg-brand-red/[0.03]'
                             : 'border-gray-100 dark:border-white/5 text-gray-400'
                         )}
                       >
-                        {type === 'image' ? <ImageIcon size={14} /> : <VideoIcon size={14} />}
-                        <span className="text-[10px] font-black uppercase tracking-wider">
-                          {type === 'image' ? 'Gambar' : 'Video'}
-                        </span>
+                        {type === 'image' ? <ImageIcon size={12} /> : <VideoIcon size={12} />}
+                        <span className="text-[9px] font-black uppercase tracking-wider">{type === 'image' ? 'Gambar' : 'Video'}</span>
                       </button>
                     ))}
                   </div>
@@ -189,13 +195,11 @@ export function StudioControls({
             )}
           </div>
         )}
-      </div>
 
-      {/* Section 2: Campaign */}
-      <div>
+        {/* Section 2: Campaign */}
         <SectionHeader
           step={2}
-          label="Detail Kampanye"
+          label="Detail Iklan"
           isComplete={isCampaignComplete}
           isActive={isPackageComplete && !isCampaignComplete}
           isExpanded={expandedSection === 'campaign'}
@@ -203,55 +207,53 @@ export function StudioControls({
           onToggle={() => toggleSection('campaign')}
         />
         {expandedSection === 'campaign' && (
-          <div className="mt-2 px-1 space-y-3">
+          <div className="space-y-2.5 pl-2">
             <div>
-              <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Nama Kampanye</label>
+              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Kampanye</label>
               <input
                 type="text"
                 value={data.campaignName}
                 onChange={(e) => setData(prev => ({ ...prev, campaignName: e.target.value }))}
-                placeholder="Promo Kemerdekaan Brand XYZ"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+                placeholder="Promo Kemerdekaan"
+                className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
               />
             </div>
             <div>
-              <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">URL Tujuan</label>
+              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">URL Tujuan</label>
               <input
                 type="url"
                 value={data.linkUrl}
                 onChange={(e) => setData(prev => ({ ...prev, linkUrl: e.target.value }))}
-                placeholder="https://brand-anda.com/promo"
-                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+                placeholder="https://brand.com/promo"
+                className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Mulai</label>
+                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Mulai</label>
                 <input
                   type="date"
                   value={data.startDate}
                   onChange={(e) => setData(prev => ({ ...prev, startDate: e.target.value }))}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+                  className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
                 />
               </div>
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Berakhir</label>
+                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Berakhir</label>
                 <input
                   type="date"
                   value={data.endDate}
                   onChange={(e) => setData(prev => ({ ...prev, endDate: e.target.value }))}
                   min={data.startDate}
-                  className="w-full px-3 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+                  className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
                 />
               </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Section 3: Creative */}
-      <div>
+        {/* Section 3: Creative */}
         <SectionHeader
           step={3}
           label="Upload Materi"
@@ -262,59 +264,54 @@ export function StudioControls({
           onToggle={() => toggleSection('creative')}
         />
         {expandedSection === 'creative' && (
-          <div className="mt-2 px-1 space-y-3">
+          <div className="space-y-2.5 pl-2">
             <div>
-              <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">
-                Materi Iklan ({data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive'})
+              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">
+                Materi ({data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive'})
               </label>
-              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-6 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
                 <input
                   type="file"
                   accept={data.mediaType === 'image' ? 'image/*,image/gif' : 'video/mp4,video/webm'}
                   onChange={(e) => handleAdFileChange(e)}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <Upload size={18} className="text-gray-400 mx-auto mb-2" />
+                <Upload size={14} className="text-gray-400 mx-auto mb-1.5" />
                 <p className="text-[10px] font-bold text-brand-black dark:text-white">
-                  {data.adFileName || `Pilih file ${data.mediaType === 'image' ? 'gambar' : 'video'}`}
+                  {data.adFileName || `Pilih file`}
                 </p>
-                <p className="text-[8px] text-gray-400 mt-1">
-                  {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Maks 10MB
+                <p className="text-[8px] text-gray-400 mt-0.5">
+                  {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Max 10MB
                 </p>
               </div>
             </div>
 
-            {/* Multi-size for leaderboard */}
+            {/* Multi-size leaderboard */}
             {data.selectedPackage?.slot === 'leaderboard' && data.mediaType === 'image' && (
-              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-white/5">
-                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block">
-                  📱 Versi Tambahan (Opsional)
-                </label>
+              <div className="space-y-1.5 pt-1.5 border-t border-gray-100 dark:border-white/5">
+                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400">📱 Versi Tambahan</label>
                 {[
-                  { variant: 'tablet' as const, label: 'Tablet (728×90)', file: data.adFileTablet, name: data.adFileNameTablet },
-                  { variant: 'mobile' as const, label: 'Mobile (320×50)', file: data.adFileMobile, name: data.adFileNameMobile },
-                ].map(({ variant, label, file, name }) => (
-                  <div key={variant} className="relative border border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/30 transition-colors p-3 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+                  { variant: 'tablet' as const, label: 'Tablet 728×90', name: data.adFileNameTablet },
+                  { variant: 'mobile' as const, label: 'Mobile 320×50', name: data.adFileNameMobile },
+                ].map(({ variant, label, name }) => (
+                  <div key={variant} className="relative border border-dashed border-gray-200 dark:border-white/10 p-2.5 text-center rounded-lg">
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => handleAdFileChange(e, variant)}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
-                    <p className="text-[10px] font-bold text-brand-black dark:text-white">
-                      {name || label}
-                    </p>
-                    {file && <CheckCircle2 size={12} className="text-emerald-500 mx-auto mt-1" />}
+                    <p className="text-[9px] font-bold text-brand-black dark:text-white">{name || label}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Animation effect for images */}
+            {/* Animation */}
             {data.mediaType === 'image' && (
-              <div className="pt-2 border-t border-gray-100 dark:border-white/5">
-                <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-2">Efek Animasi</label>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="pt-1.5 border-t border-gray-100 dark:border-white/5">
+                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Efek Animasi</label>
+                <div className="grid grid-cols-2 gap-1.5">
                   {[
                     { value: 'ken_burns', label: 'Ken Burns', icon: '🔍' },
                     { value: 'fade_slide', label: 'Fade Slide', icon: '↔️' },
@@ -326,14 +323,14 @@ export function StudioControls({
                       type="button"
                       onClick={() => setData(prev => ({ ...prev, animationEffect: effect.value }))}
                       className={cn(
-                        "p-2 border rounded-lg flex items-center gap-2 transition-all text-left",
+                        "p-1.5 border rounded-lg flex items-center gap-1.5 transition-all text-left",
                         data.animationEffect === effect.value
                           ? 'border-brand-red bg-brand-red/[0.03]'
                           : 'border-gray-100 dark:border-white/5 text-gray-400'
                       )}
                     >
-                      <span>{effect.icon}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{effect.label}</span>
+                      <span className="text-xs">{effect.icon}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">{effect.label}</span>
                     </button>
                   ))}
                 </div>
@@ -341,10 +338,8 @@ export function StudioControls({
             )}
           </div>
         )}
-      </div>
 
-      {/* Section 4: Payment */}
-      <div>
+        {/* Section 4: Payment */}
         <SectionHeader
           step={4}
           label="Pembayaran"
@@ -355,47 +350,46 @@ export function StudioControls({
           onToggle={() => toggleSection('payment')}
         />
         {expandedSection === 'payment' && (
-          <div className="mt-2 px-1 space-y-3">
+          <div className="space-y-2.5 pl-2">
             {/* Bank accounts */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {[
                 { bank: 'BCA', number: '829-0123-456' },
                 { bank: 'Mandiri', number: '137-00-1234567-8' },
               ].map(({ bank, number }) => (
-                <div key={bank} className="p-3 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Building2 size={12} className="text-brand-red" />
-                    <span className="text-[10px] font-black text-brand-black dark:text-white uppercase">{bank}</span>
+                <div key={bank} className="p-2.5 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-lg">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Building2 size={10} className="text-brand-red" />
+                    <span className="text-[9px] font-black text-brand-black dark:text-white uppercase">{bank}</span>
                   </div>
-                  <p className="text-sm font-black text-brand-red tracking-wider">{number}</p>
-                  <p className="text-[8px] text-gray-400 uppercase tracking-wider mt-0.5">a/n PT Berita Karya Nusantara</p>
+                  <p className="text-[12px] font-black text-brand-red tracking-wider">{number}</p>
+                  <p className="text-[7px] text-gray-400 uppercase tracking-wider">a/n PT Berita Karya Nusantara</p>
                 </div>
               ))}
-              <div className="p-2.5 bg-emerald-500/5 border border-emerald-500/10 rounded-lg flex items-center gap-2">
-                <QrCode size={14} className="text-emerald-500" />
-                <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">QRIS tersedia</span>
+              <div className="p-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg flex items-center gap-1.5">
+                <QrCode size={12} className="text-emerald-500" />
+                <span className="text-[8px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">QRIS tersedia</span>
               </div>
             </div>
 
-            {/* Receipt upload */}
+            {/* Receipt */}
             <div>
-              <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Bukti Transfer</label>
-              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-6 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Bukti Transfer</label>
+              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleReceiptChange}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <Upload size={18} className="text-gray-400 mx-auto mb-2" />
+                <Upload size={14} className="text-gray-400 mx-auto mb-1.5" />
                 <p className="text-[10px] font-bold text-brand-black dark:text-white">
-                  {data.receiptFileName || 'Upload bukti transfer'}
+                  {data.receiptFileName || 'Upload bukti'}
                 </p>
-                <p className="text-[8px] text-gray-400 mt-1">PNG, JPG • Maks 10MB</p>
               </div>
               {data.receiptPreviewUrl && (
-                <div className="mt-2 p-2 border border-gray-100 dark:border-white/5 rounded-lg bg-gray-50 dark:bg-black/20 flex justify-center">
-                  <img src={data.receiptPreviewUrl} alt="Bukti transfer" className="max-h-32 object-contain rounded" />
+                <div className="mt-1.5 p-1.5 border border-gray-100 dark:border-white/5 rounded-lg bg-gray-50 dark:bg-black/20 flex justify-center">
+                  <img src={data.receiptPreviewUrl} alt="Bukti" className="max-h-24 object-contain rounded" />
                 </div>
               )}
             </div>
@@ -403,22 +397,22 @@ export function StudioControls({
         )}
       </div>
 
-      {/* Submit Button */}
-      <div className="pt-3">
+      {/* Fixed submit button at bottom */}
+      <div className="p-3 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
         <button
           type="button"
           onClick={(e) => onSubmit(e as unknown as React.FormEvent)}
           disabled={submitting || !isPaymentComplete}
-          className="w-full px-6 py-3.5 bg-brand-red hover:bg-red-700 text-white text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20"
+          className="w-full px-4 py-3 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20"
         >
           {submitting ? (
             <>
-              <RefreshCw size={14} className="animate-spin" />
+              <RefreshCw size={12} className="animate-spin" />
               Memproses...
             </>
           ) : (
             <>
-              <Sparkles size={14} />
+              <Sparkles size={12} />
               Kirim Pesanan
             </>
           )}
