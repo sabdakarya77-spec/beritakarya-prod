@@ -255,11 +255,10 @@ async function processImage(
         {
           input: resizedWatermarkBuffer,
           gravity: 'southeast',
-          left: 0,
-          top: -40,
           blend: 'over',
         },
       ])
+      logger.info(`[Media] Watermark applied (w=${targetWatermarkWidth}px)`)
     } catch (err: unknown) {
       // Watermark is optional - log warning but don't fail the upload
       // EXIF copyright metadata is always embedded regardless
