@@ -64,4 +64,4 @@ node_modules/
 
 # Test artifacts
 playwright-report/
-test-results/
+test-results/log.txt
