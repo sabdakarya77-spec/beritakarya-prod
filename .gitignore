@@ -65,3 +65,4 @@ node_modules/
 # Test artifacts
 playwright-report/
 test-results/log.txt
+apps/web/test-results/
