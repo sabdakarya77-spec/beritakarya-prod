@@ -486,9 +486,14 @@ export function StudioCanvas() {
           {/* Preview Section */}
           {selectedPackage && (
             <div className="pt-4 border-t border-gray-100 dark:border-white/5">
-              <div className="flex items-center gap-2 mb-3">
-                <Monitor size={12} className="text-gray-400" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Preview Iklan</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Monitor size={12} className="text-gray-400" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Preview Penempatan</span>
+                </div>
+                <span className="px-2 py-0.5 bg-brand-red/10 border border-brand-red/20 rounded-full text-[8px] font-black uppercase tracking-widest text-brand-red">
+                  {slotDef?.publicMockup || slotSize}
+                </span>
               </div>
 
               {/* Browser Frame */}
@@ -507,53 +512,91 @@ export function StudioCanvas() {
                   </div>
                 </div>
 
-                {/* Page Mockup */}
-                <div className="p-3 space-y-3">
-                  {/* Header */}
+                {/* Page Layout — matches actual site structure */}
+                <div className="p-4 space-y-3">
+                  {/* Site Header */}
                   <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-white/5">
-                    <div className="w-5 h-5 bg-brand-red rounded text-white text-[6px] font-black flex items-center justify-center">BK</div>
-                    <div className="flex-1 flex gap-3">
-                      {['Beranda', 'Nasional', 'Daerah'].map(t => (
-                        <div key={t} className="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full" style={{ width: `${t.length * 5 + 12}px` }} />
+                    <div className="w-6 h-6 bg-brand-red rounded-md text-white text-[7px] font-black flex items-center justify-center">BK</div>
+                    <div className="flex-1 flex gap-4">
+                      {['Beranda', 'Nasional', 'Daerah', 'Ekonomi', 'Olahraga'].map(t => (
+                        <div key={t} className="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full" style={{ width: `${t.length * 5 + 14}px` }} />
                       ))}
                     </div>
                   </div>
 
-                  {/* Content with ad slot */}
-                  <div className="flex gap-3">
+                  {/* Leaderboard — top of page, full width */}
+                  {selectedPackage.slot === 'leaderboard' && (
+                    <AdSlotPreview
+                      slot="leaderboard"
+                      previewSrc={previewSrc}
+                      mediaType={data.mediaType}
+                      aspectRatio={970 / 250}
+                      label="Leaderboard Atas"
+                    />
+                  )}
+
+                  {/* Content + Sidebar layout */}
+                  <div className="flex gap-4">
+                    {/* Main Content */}
                     <div className="flex-1 space-y-2">
-                      <div className="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-4/5" />
-                      <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
-                      <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
-
-                      {selectedPackage.slot === 'in_feed' && (
-                        <AdSlotPreview slot="in_feed" previewSrc={previewSrc} mediaType={data.mediaType} />
-                      )}
-
+                      {/* Article title */}
+                      <div className="h-3 bg-gray-200 dark:bg-white/10 rounded w-4/5" />
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-5/6" />
-                    </div>
 
-                    <div className="w-24 flex-shrink-0 space-y-2">
-                      {(selectedPackage.slot === 'rectangle' || selectedPackage.slot === 'rectangle_secondary') && (
-                        <AdSlotPreview slot={selectedPackage.slot} previewSrc={previewSrc} mediaType={data.mediaType} />
+                      {/* In-Feed slot — between content blocks */}
+                      {selectedPackage.slot === 'in_feed' && (
+                        <AdSlotPreview
+                          slot="in_feed"
+                          previewSrc={previewSrc}
+                          mediaType={data.mediaType}
+                          aspectRatio={300 / 250}
+                          label="In-Feed"
+                        />
                       )}
+
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
+
+                      {/* Article cards */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        {[1, 2].map(i => (
+                          <div key={i} className="space-y-1">
+                            <div className="h-12 bg-gray-100 dark:bg-white/5 rounded-lg" />
+                            <div className="h-1.5 bg-gray-200 dark:bg-white/10 rounded w-4/5" />
+                            <div className="h-1 bg-gray-100 dark:bg-white/5 rounded w-3/5" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="w-32 flex-shrink-0 space-y-2">
+                      {/* Rectangle slot — sidebar utama */}
+                      {(selectedPackage.slot === 'rectangle' || selectedPackage.slot === 'rectangle_secondary') && (
+                        <AdSlotPreview
+                          slot={selectedPackage.slot}
+                          previewSrc={previewSrc}
+                          mediaType={data.mediaType}
+                          aspectRatio={300 / 250}
+                          label={selectedPackage.slot === 'rectangle' ? 'Sidebar Utama' : 'Sidebar Sekunder'}
+                        />
+                      )}
+
+                      <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
+                      <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
+                      <div className="h-8 bg-gray-100 dark:bg-white/5 rounded w-full" />
+                      <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
                     </div>
                   </div>
-
-                  {isLeaderboard && (
-                    <AdSlotPreview slot="leaderboard" previewSrc={previewSrc} mediaType={data.mediaType} />
-                  )}
                 </div>
               </div>
 
               {/* Info bar */}
               <div className="flex items-center justify-center gap-2 flex-wrap mt-3">
-                <span className="px-2 py-0.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-gray-400">{slotName}</span>
-                <span className="px-2 py-0.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[8px] font-bold uppercase tracking-widest text-gray-400">{slotSize}</span>
-                <span className="px-2 py-0.5 bg-brand-red/10 border border-brand-red/20 rounded-full text-[8px] font-black uppercase tracking-widest text-brand-red">{formatRupiah(selectedPackage.price)}</span>
+                <span className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">{slotName}</span>
+                <span className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">{slotDef?.publicMockup || slotSize}</span>
+                <span className="px-2.5 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[9px] font-black uppercase tracking-widest text-brand-red">{formatRupiah(selectedPackage.price)}</span>
               </div>
             </div>
           )}
@@ -564,37 +607,45 @@ export function StudioCanvas() {
   );
 }
 
-function AdSlotPreview({ slot, previewSrc, mediaType }: {
-  slot: string; previewSrc: string | null; mediaType: 'image' | 'video';
+function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
+  slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
-  const dimensions: Record<string, { h: string; label: string }> = {
-    leaderboard: { h: 'h-16 md:h-20', label: '970 × 250' },
-    rectangle: { h: 'h-24', label: '300 × 250' },
-    rectangle_secondary: { h: 'h-24', label: '300 × 250' },
-    in_feed: { h: 'h-20', label: '300 × 250' },
+  const sizeLabels: Record<string, string> = {
+    leaderboard: '970 × 250 px',
+    rectangle: '300 × 250 px',
+    rectangle_secondary: '300 × 250 px',
+    in_feed: '300 × 250 px',
   };
-  const dim = dimensions[slot] || dimensions.rectangle;
+  const sizeLabel = sizeLabels[slot] || '300 × 250 px';
 
   return (
-    <div className={cn(
-      "relative w-full rounded-lg overflow-hidden border-2 border-dashed transition-all",
-      dim.h,
-      !previewSrc
-        ? 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]'
-        : 'border-brand-red/30 bg-black shadow-md shadow-brand-red/10'
-    )}>
-      {previewSrc ? (
-        mediaType === 'video' ? (
-          <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">{label}</span>
+        <span className="text-[7px] font-mono text-gray-300 dark:text-gray-600">{sizeLabel}</span>
+      </div>
+      <div
+        className={cn(
+          "relative w-full rounded-lg overflow-hidden border-2 transition-all",
+          !previewSrc
+            ? 'border-dashed border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]'
+            : 'border-brand-red/30 bg-black shadow-md shadow-brand-red/10'
+        )}
+        style={{ aspectRatio: `${aspectRatio}` }}
+      >
+        {previewSrc ? (
+          mediaType === 'video' ? (
+            <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+          ) : (
+            <img src={previewSrc} alt="Preview" className="w-full h-full object-contain" />
+          )
         ) : (
-          <img src={previewSrc} alt="Preview" className="w-full h-full object-contain" />
-        )
-      ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-          <div className="text-gray-300 dark:text-white/20 text-[10px] font-black uppercase tracking-wider">{dim.label}</div>
-          <div className="text-gray-200 dark:text-white/10 text-[8px] uppercase tracking-wider">Upload materi</div>
-        </div>
-      )}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <div className="text-gray-300 dark:text-white/20 text-[10px] font-black uppercase tracking-wider">{sizeLabel}</div>
+            <div className="text-gray-200 dark:text-white/10 text-[8px] uppercase tracking-wider">Upload materi iklan</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
