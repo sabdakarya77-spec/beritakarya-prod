@@ -3,6 +3,8 @@ export interface Ad {
   slot: string;
   code: string | null;
   imageUrl: string | null;
+  imageUrlTablet?: string | null;
+  imageUrlMobile?: string | null;
   linkUrl: string | null;
   isActive: boolean;
   order?: number;
@@ -27,6 +29,8 @@ export interface AdBooking {
   siteId: string;
   packageId: string;
   imageUrl: string | null;
+  imageUrlTablet?: string | null;
+  imageUrlMobile?: string | null;
   linkUrl: string | null;
   startDate: string;
   endDate: string;

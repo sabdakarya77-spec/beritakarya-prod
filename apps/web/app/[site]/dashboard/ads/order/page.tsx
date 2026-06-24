@@ -50,7 +50,15 @@ export default function OrderAdPage() {
   const [adFile, setAdFile] = useState<File | null>(null);
   const [adFileName, setAdFileName] = useState('');
   const [adPreviewUrl, setAdPreviewUrl] = useState<string>('');
-  
+
+  // Multi-size IAB: tablet & mobile variants (leaderboard only)
+  const [adFileTablet, setAdFileTablet] = useState<File | null>(null);
+  const [adFileNameTablet, setAdFileNameTablet] = useState('');
+  const [adPreviewUrlTablet, setAdPreviewUrlTablet] = useState<string>('');
+  const [adFileMobile, setAdFileMobile] = useState<File | null>(null);
+  const [adFileNameMobile, setAdFileNameMobile] = useState('');
+  const [adPreviewUrlMobile, setAdPreviewUrlMobile] = useState<string>('');
+
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptFileName, setReceiptFileName] = useState('');
   const [receiptPreviewUrl, setReceiptPreviewUrl] = useState<string>('');
@@ -100,10 +108,30 @@ export default function OrderAdPage() {
       const file = e.target.files[0];
       setAdFile(file);
       setAdFileName(file.name);
-      
+
       // Release old object URL if exists to avoid memory leak
       if (adPreviewUrl) URL.revokeObjectURL(adPreviewUrl);
       setAdPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAdFileChangeTablet = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAdFileTablet(file);
+      setAdFileNameTablet(file.name);
+      if (adPreviewUrlTablet) URL.revokeObjectURL(adPreviewUrlTablet);
+      setAdPreviewUrlTablet(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAdFileChangeMobile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setAdFileMobile(file);
+      setAdFileNameMobile(file.name);
+      if (adPreviewUrlMobile) URL.revokeObjectURL(adPreviewUrlMobile);
+      setAdPreviewUrlMobile(URL.createObjectURL(file));
     }
   };
 
@@ -118,14 +146,15 @@ export default function OrderAdPage() {
     }
   };
 
-  const uploadFile = async (file: File): Promise<string> => {
+  const uploadFile = async (file: File, variant?: string): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
     const slotParam = selectedPackage?.slot ? `&slot=${selectedPackage.slot}` : '';
+    const variantParam = variant ? `&variant=${variant}` : '';
 
     try {
-      const res = await api.post(`/media/upload?purpose=ad${slotParam}`, formData, {
+      const res = await api.post(`/media/upload?purpose=ad${slotParam}${variantParam}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return res.data?.data?.url || res.data?.url || res.data?.filePath || res.data || '';
@@ -148,9 +177,22 @@ export default function OrderAdPage() {
 
     try {
       // 1. Upload creative banner file (image or video)
-      const uploadedAdUrl = await uploadFile(adFile);
+      const isLeaderboard = selectedPackage.slot === 'leaderboard' && mediaType === 'image';
+      const uploadedAdUrl = await uploadFile(adFile, 'desktop');
       if (!uploadedAdUrl) {
         throw new Error('Gagal mengunggah materi kreatif iklan. Silakan coba kembali.');
+      }
+
+      // 1b. Upload tablet & mobile variants for leaderboard
+      let uploadedTabletUrl: string | null = null;
+      let uploadedMobileUrl: string | null = null;
+      if (isLeaderboard) {
+        if (adFileTablet) {
+          uploadedTabletUrl = await uploadFile(adFileTablet, 'tablet');
+        }
+        if (adFileMobile) {
+          uploadedMobileUrl = await uploadFile(adFileMobile, 'mobile');
+        }
       }
 
       // 2. Use user-selected date range
@@ -162,6 +204,8 @@ export default function OrderAdPage() {
         packageId: selectedPackage.id,
         siteId: site || 'pusat',
         imageUrl: uploadedAdUrl,
+        imageUrlTablet: uploadedTabletUrl,
+        imageUrlMobile: uploadedMobileUrl,
         linkUrl: linkUrl || '#',
         animationEffect: mediaType === 'image' ? animationEffect : null,
         startDate: start.toISOString(),
@@ -537,6 +581,68 @@ export default function OrderAdPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Multi-Size IAB: Tablet & Mobile uploads for leaderboard */}
+                {selectedPackage?.slot === 'leaderboard' && mediaType === 'image' && (
+                  <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+                    <div>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-black dark:text-gray-300 block">
+                        📱 Ukuran Tambahan (Opsional)
+                      </label>
+                      <p className="text-[9px] text-gray-400 mt-1 leading-relaxed">
+                        Upload versi tablet dan mobile agar iklan tampil optimal di semua perangkat. Jika tidak di-upload, gambar desktop akan di-scale otomatis.
+                      </p>
+                    </div>
+
+                    {/* Tablet 728×90 */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black dark:text-gray-300">
+                        Tablet (728 × 90 px)
+                      </label>
+                      <div className="relative border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-brand-red/50 transition-colors p-4 text-center rounded-sm bg-gray-50/50 dark:bg-slate-800/10">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAdFileChangeTablet}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <Upload size={16} className="text-gray-400 mx-auto mb-2" />
+                        <p className="text-[10px] font-bold text-brand-black dark:text-white">
+                          {adFileNameTablet || 'Pilih gambar tablet (728×90)'}
+                        </p>
+                      </div>
+                      {adPreviewUrlTablet && (
+                        <div className="p-2 border border-gray-100 dark:border-slate-800 rounded-sm bg-gray-50 dark:bg-black/20">
+                          <img src={adPreviewUrlTablet} alt="Pratinjau Tablet" className="w-full max-h-20 object-contain" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mobile 320×50 */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-brand-black dark:text-gray-300">
+                        Mobile (320 × 50 px)
+                      </label>
+                      <div className="relative border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-brand-red/50 transition-colors p-4 text-center rounded-sm bg-gray-50/50 dark:bg-slate-800/10">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAdFileChangeMobile}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        <Upload size={16} className="text-gray-400 mx-auto mb-2" />
+                        <p className="text-[10px] font-bold text-brand-black dark:text-white">
+                          {adFileNameMobile || 'Pilih gambar mobile (320×50)'}
+                        </p>
+                      </div>
+                      {adPreviewUrlMobile && (
+                        <div className="p-2 border border-gray-100 dark:border-slate-800 rounded-sm bg-gray-50 dark:bg-black/20">
+                          <img src={adPreviewUrlMobile} alt="Pratinjau Mobile" className="w-full max-h-14 object-contain" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Animation Effect Selector — only for static images */}

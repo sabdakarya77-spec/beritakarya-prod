@@ -213,7 +213,9 @@ model Advertisement {
   siteId      String
   slot        String // 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed'
   code        String? // HTML/JS snippet like Google AdSense
-  imageUrl    String? // If they just want to upload an image banner
+  imageUrl    String? // If they just want to upload an image banner (desktop 970×250)
+  imageUrlTablet String? // Tablet variant (728×90) — leaderboard only
+  imageUrlMobile String? // Mobile variant (320×50) — leaderboard only
   linkUrl     String? // Where the banner clicks to
   isActive    Boolean  @default(true)
   order       Int      @default(0) // Rotation order for carousel (leaderboard)
@@ -561,7 +563,9 @@ model AdBooking {
   userId         String
   siteId         String
   packageId      String
-  imageUrl        String? // File banner gambar WebP
+  imageUrl        String? // File banner gambar WebP (desktop)
+  imageUrlTablet  String? // Tablet variant (728×90) — leaderboard only
+  imageUrlMobile  String? // Mobile variant (320×50) — leaderboard only
   linkUrl         String? // Tautan target ketika diklik
   animationEffect String? // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
   startDate       DateTime

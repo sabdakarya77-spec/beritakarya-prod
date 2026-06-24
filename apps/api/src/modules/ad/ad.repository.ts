@@ -35,6 +35,8 @@ export async function createAd(data: {
   slot: string
   code?: string | null
   imageUrl?: string | null
+  imageUrlTablet?: string | null
+  imageUrlMobile?: string | null
   linkUrl?: string | null
   animationEffect?: string | null
   isActive?: boolean
@@ -43,7 +45,7 @@ export async function createAd(data: {
 }) {
   return prisma.advertisement.create({
     data,
-    select: { id: true, slot: true, code: true, imageUrl: true, linkUrl: true, animationEffect: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
+    select: { id: true, slot: true, code: true, imageUrl: true, imageUrlTablet: true, imageUrlMobile: true, linkUrl: true, animationEffect: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
   })
 }
 
@@ -51,7 +53,7 @@ export async function updateAd(id: string, data: Prisma.AdvertisementUpdateInput
   return prisma.advertisement.update({
     where: { id },
     data,
-    select: { id: true, slot: true, code: true, imageUrl: true, linkUrl: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
+    select: { id: true, slot: true, code: true, imageUrl: true, imageUrlTablet: true, imageUrlMobile: true, linkUrl: true, isActive: true, order: true, impressions: true, clicks: true, createdAt: true },
   })
 }
 
@@ -143,6 +145,8 @@ export async function createBooking(data: {
   siteId: string
   packageId: string
   imageUrl?: string | null
+  imageUrlTablet?: string | null
+  imageUrlMobile?: string | null
   linkUrl?: string | null
   animationEffect?: string | null
   startDate: Date

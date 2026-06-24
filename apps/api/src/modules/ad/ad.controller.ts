@@ -91,7 +91,7 @@ adRouter.post('/',
   requireRole(['superadmin', 'wapimred']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
-    const { slot, code, imageUrl, linkUrl, isActive } = req.body
+    const { slot, code, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, isActive } = req.body
 
     let sanitizedCode = code || null
     if (code) {
@@ -109,6 +109,8 @@ adRouter.post('/',
       slot,
       code: sanitizedCode,
       imageUrl: imageUrl || null,
+      imageUrlTablet: imageUrlTablet || null,
+      imageUrlMobile: imageUrlMobile || null,
       linkUrl: linkUrl || null,
       isActive: isActive ?? true,
       order: nextOrder,
@@ -124,7 +126,7 @@ adRouter.patch('/:id',
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
-    const { slot, code, imageUrl, linkUrl, isActive, order } = req.body
+    const { slot, code, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, isActive, order } = req.body
 
     let sanitizedCode = code || null
     if (code) {
@@ -139,6 +141,8 @@ adRouter.patch('/:id',
       slot,
       code: sanitizedCode,
       imageUrl: imageUrl || null,
+      imageUrlTablet: imageUrlTablet || null,
+      imageUrlMobile: imageUrlMobile || null,
       linkUrl: linkUrl || null,
       isActive,
       order,
@@ -194,7 +198,7 @@ adRouter.post('/bookings',
   requireAuth,
   requireRole(['advertiser']),
   asyncHandler(async (req: Request, res: Response) => {
-    const { packageId, siteId, imageUrl, linkUrl, startDate, animationEffect } = req.body
+    const { packageId, siteId, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, startDate, animationEffect } = req.body
 
     const pkg = await repo.findPackageById(packageId)
     if (!pkg || !pkg.isActive) {
@@ -216,6 +220,8 @@ adRouter.post('/bookings',
       siteId,
       packageId,
       imageUrl: imageUrl || null,
+      imageUrlTablet: imageUrlTablet || null,
+      imageUrlMobile: imageUrlMobile || null,
       linkUrl: linkUrl || null,
       animationEffect: animationEffect || null,
       startDate: start,
@@ -356,7 +362,7 @@ adRouter.post('/bookings/:id/approve',
     }
     const booking = _booking as unknown as {
       id: string; siteId: string; userId: string; status: string; paymentStatus: string;
-      startDate: Date; endDate: Date; imageUrl: string | null; linkUrl: string | null;
+      startDate: Date; endDate: Date; imageUrl: string | null; imageUrlTablet: string | null; imageUrlMobile: string | null; linkUrl: string | null;
       animationEffect: string | null;
       package: { slot: string };
     }
@@ -391,6 +397,8 @@ adRouter.post('/bookings/:id/approve',
     // AUTO-INTEGRATION: Sync to active Advertisement table
     const adData = {
       imageUrl: booking.imageUrl,
+      imageUrlTablet: booking.imageUrlTablet || null,
+      imageUrlMobile: booking.imageUrlMobile || null,
       linkUrl: booking.linkUrl,
       animationEffect: booking.animationEffect || null,
       code: null,

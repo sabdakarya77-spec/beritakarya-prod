@@ -18,6 +18,8 @@ interface AdItem {
   slot: string;
   code: string | null;
   imageUrl: string | null;
+  imageUrlTablet?: string | null;
+  imageUrlMobile?: string | null;
   linkUrl: string | null;
   animationEffect?: string | null;
   isActive: boolean;
@@ -152,8 +154,8 @@ export default function AdSpace({
   };
 
   const styles = {
-    // Responsive height with min-height for CLS protection
-    leaderboard: "w-full h-[120px] min-h-[120px] md:h-[250px] md:min-h-[250px] mb-6",
+    // Multi-size IAB: mobile 320×50, tablet 728×90, desktop 970×250
+    leaderboard: "w-full h-[50px] min-h-[50px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] mb-6",
     rectangle: "w-full h-[250px] min-h-[250px] mb-8",
     rectangle_secondary: "w-full h-[250px] min-h-[250px] mb-8",
     'in-feed': "w-full h-40 min-h-[160px] mb-12"
@@ -179,7 +181,7 @@ export default function AdSpace({
       const ad = fallbackAds[0];
       return (
         <div className={cn(
-          "relative w-full h-[120px] min-h-[120px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
+          "relative w-full h-[50px] min-h-[50px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
           className
         )}>
           {/* Media (image or video) */}
@@ -362,6 +364,24 @@ function AdSlide({
             playsInline
             className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
           />
+        ) : _type === 'leaderboard' && (ad.imageUrlMobile || ad.imageUrlTablet) ? (
+          // Multi-size IAB: browser selects best image per viewport
+          <picture>
+            {ad.imageUrlMobile && (
+              <source media="(max-width: 639px)" srcSet={ad.imageUrlMobile} />
+            )}
+            {ad.imageUrlTablet && (
+              <source media="(max-width: 767px)" srcSet={ad.imageUrlTablet} />
+            )}
+            <img
+              src={ad.imageUrl}
+              alt={label}
+              className={cn(
+                "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
+                ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
+              )}
+            />
+          </picture>
         ) : (
           <img
             src={ad.imageUrl}

@@ -68,6 +68,15 @@ const AD_SLOT_SIZES: Record<string, SlotDimensions> = {
   in_feed: { width: 300, height: 250, minWidth: 200, minHeight: 180 },
 }
 
+// Multi-size IAB variants for leaderboard
+const AD_SLOT_VARIANTS: Record<string, Record<string, SlotDimensions>> = {
+  leaderboard: {
+    desktop: { width: 970, height: 250, minWidth: 600, minHeight: 150 },
+    tablet:  { width: 728, height: 90,  minWidth: 500, minHeight: 60 },
+    mobile:  { width: 320, height: 50,  minWidth: 280, minHeight: 40 },
+  },
+}
+
 const AD_MAX_SIZE_BYTES = 200 * 1024 // 200 KB
 const ASPECT_RATIO_TOLERANCE = 0.15 // 15% tolerance for aspect ratio matching
 
@@ -142,6 +151,64 @@ async function processAdImage(
     } else {
       processed = await sharp(buffer)
         .resize(1200, undefined, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality })
+        .toBuffer()
+    }
+  }
+
+  const meta = await sharp(processed).metadata()
+  return { buffer: processed, width: meta.width || 0, height: meta.height || 0, letterboxed }
+}
+
+// ─── Process ad image with explicit dimensions (for multi-size IAB variants) ──
+
+async function processAdImageWithDims(
+  buffer: Buffer,
+  dims: SlotDimensions
+): Promise<{ buffer: Buffer; width: number; height: number; letterboxed: boolean }> {
+  const sharp = await loadSharp()
+
+  const origMeta = await sharp(buffer).metadata()
+  const origW = origMeta.width || 0
+  const origH = origMeta.height || 0
+
+  if (origW === 0 || origH === 0) {
+    throw new AppError('Gambar tidak memiliki dimensi yang valid', 400, 'INVALID_IMAGE_DIMENSIONS')
+  }
+
+  if (origW < dims.minWidth || origH < dims.minHeight) {
+    throw new AppError(
+      `Gambar terlalu kecil. Minimum ${dims.minWidth}×${dims.minHeight}px. Ukuran Anda: ${origW}×${origH}px.`,
+      400,
+      'IMAGE_TOO_SMALL'
+    )
+  }
+
+  let letterboxed = false
+  let processed: Buffer
+
+  const targetRatio = dims.width / dims.height
+  const origRatio = origW / origH
+  const ratioDiff = Math.abs(origRatio - targetRatio) / targetRatio
+
+  if (ratioDiff > ASPECT_RATIO_TOLERANCE) {
+    letterboxed = true
+    processed = await createLetterbox(buffer, dims.width, dims.height)
+  } else {
+    processed = await sharp(buffer)
+      .resize(dims.width, dims.height, { fit: 'cover', position: 'attention' })
+      .webp({ quality: 80 })
+      .toBuffer()
+  }
+
+  let quality = 80
+  while (processed.length > AD_MAX_SIZE_BYTES && quality > 30) {
+    quality -= 10
+    if (letterboxed) {
+      processed = await createLetterbox(buffer, dims.width, dims.height, quality)
+    } else {
+      processed = await sharp(buffer)
+        .resize(dims.width, dims.height, { fit: 'cover', position: 'attention' })
         .webp({ quality })
         .toBuffer()
     }
@@ -400,6 +467,7 @@ mediaRouter.post(
       originalFormat = 'pdf'
     } else if (isAd) {
       const adSlot = req.query.slot as string | undefined
+      const adVariant = req.query.variant as string | undefined // 'desktop' | 'tablet' | 'mobile'
       const isVideo = req.file.mimetype.startsWith('video/')
 
       if (isVideo) {
@@ -414,16 +482,34 @@ mediaRouter.post(
         originalFormat = `ad-${ext}`
       } else {
         // ── Ad image: smart resize + letterbox + compress to max 200KB ──
-        const adResult = await processAdImage(req.file.buffer, adSlot)
-        const adKey = `ads/${id}.webp`
-        await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
-          isPublic: true,
-        })
-        url = StorageService.getPublicUrl(mediaBucket, adKey)
-        thumbUrl = url
-        width = adResult.width
-        height = adResult.height
-        originalFormat = 'ad-webp'
+        // Resolve target dimensions: variant-specific > slot default
+        let targetSlot = adSlot
+        if (adSlot && adVariant && AD_SLOT_VARIANTS[adSlot]?.[adVariant]) {
+          // Use variant-specific dimensions — pass as custom slot
+          const variantDims = AD_SLOT_VARIANTS[adSlot][adVariant]
+          const adResult = await processAdImageWithDims(req.file.buffer, variantDims)
+          const suffix = adVariant !== 'desktop' ? `-${adVariant}` : ''
+          const adKey = `ads/${id}${suffix}.webp`
+          await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
+            isPublic: true,
+          })
+          url = StorageService.getPublicUrl(mediaBucket, adKey)
+          thumbUrl = url
+          width = adResult.width
+          height = adResult.height
+          originalFormat = 'ad-webp'
+        } else {
+          const adResult = await processAdImage(req.file.buffer, targetSlot)
+          const adKey = `ads/${id}.webp`
+          await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
+            isPublic: true,
+          })
+          url = StorageService.getPublicUrl(mediaBucket, adKey)
+          thumbUrl = url
+          width = adResult.width
+          height = adResult.height
+          originalFormat = 'ad-webp'
+        }
       }
     } else {
       // ── Image: process then upload two versions ──
