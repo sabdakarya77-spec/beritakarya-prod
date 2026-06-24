@@ -152,6 +152,7 @@ export default async function ArticlePage({ params }: Props) {
 
   // Primary category: categories[0] (baru) atau category (legacy)
   const primaryCategoryName = article.categories?.[0]?.category?.name || article.category?.name || null
+  const primaryCategorySlug = article.categories?.[0]?.category?.slug || article.category?.slug || null
 
   const [relatedArticles, popularArticles] = await Promise.all([
     getRelatedArticles(siteParam, slugParam, primaryCategoryName || undefined),
@@ -199,7 +200,7 @@ export default async function ArticlePage({ params }: Props) {
   const sidebarLabelClass = 'flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted'
 
   return (
-    <PublicSiteLayout siteConfig={siteConfig}>
+    <PublicSiteLayout siteConfig={siteConfig} initialCategory={primaryCategorySlug || 'terbaru'}>
       <JsonLd id="ld-article" data={articleSchema} />
       <JsonLd id="ld-breadcrumb" data={breadcrumbSchema} />
       <ReadingProgress />
