@@ -25,12 +25,21 @@ describe('content.service', () => {
     expect(excerpt.endsWith('...')).toBe(true)
   })
 
-  it('applySeoDefaults fills empty metaDescription', () => {
+  it('applySeoDefaults does not auto-fill metaDescription (manual only)', () => {
     const result = applySeoDefaults({
       title: 'Judul',
       blocks: [{ type: 'paragraph', content: 'Isi artikel untuk SEO.' }]
     })
-    expect(result.metaDescription).toBe('Isi artikel untuk SEO.')
+    expect(result.metaDescription).toBeUndefined()
+  })
+
+  it('applySeoDefaults preserves metaDescription when provided', () => {
+    const result = applySeoDefaults({
+      title: 'Judul',
+      metaDescription: 'Deskripsi manual dari user',
+      blocks: [{ type: 'paragraph', content: 'Isi artikel.' }]
+    })
+    expect(result.metaDescription).toBe('Deskripsi manual dari user')
   })
 
   it('validateArticleContentLimits rejects too many blocks', () => {
