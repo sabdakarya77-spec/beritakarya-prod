@@ -187,55 +187,67 @@ Komponen: `AdvertiserAdsView`
 
 ## Halaman 3 — Ad Studio (`/{site}/dashboard/ads/order`)
 
-Layout studio: **sidebar kiri** untuk kontrol, **canvas utama** untuk preview.
+Layout: **sidebar gabungan** (nav + kontrol studio) di kiri, **canvas** di kanan.
 
-Komponen: `AdStudio` → `StudioControls` + `StudioPreview`
+Komponen: `StudioProvider` + `StudioControls` + `StudioPreview`
 
 ```
-┌────────────┬───────────────────────────────────────────────────┐
-│            │                                                   │
-│  SIDEBAR   │              CANVAS (full-width)                  │
-│  320px     │                                                   │
-│            │     ┌─────────────────────────────────────────┐  │
-│  Pengaturan│     │ 🌐 beritakarya.co/pusat                 │  │
-│  Iklan     │     │ ─────────────────────────────────────── │  │
-│  ────────  │     │ ┌───────────────────────────────────┐   │  │
-│            │     │ │                                   │   │  │
-│  ① Pilih   │     │ │   [YOUR AD HERE]                  │   │  │
-│     Paket  │     │ │   970 × 250 px                    │   │  │
-│     ▼      │     │ │                                   │   │  │
-│  ┌───────┐ │     │ └───────────────────────────────────┘   │  │
-│  │🏆 Lead │ │     │  BK  Beranda Nasional Daerah Ekonomi   │  │
-│  │Rp 2.5jt│ │     │  ─────────────────────────────────────  │  │
-│  └───────┘ │     │  Headline berita utama...                │  │
-│  ┌───────┐ │     │  Isi konten paragraf berita...           │  │
-│  │🖼️ Rect│ │     │  ┌────────┐ ┌────────┐                  │  │
-│  │Rp 1.2jt│ │     │  │ card  │ │ card  │                  │  │
-│  └───────┘ │     │  └────────┘ └────────┘                  │  │
-│            │     └─────────────────────────────────────────┘  │
-│  ────────  │                                                   │
-│  ② Detail  │     Leaderboard • 970×250 • 30 hari • Rp 2.5jt  │
-│     Iklan  │                                                   │
-│     (ringkasan)                                                │
-│  ────────  │                                                   │
-│  ③ Upload  │                                                   │
-│     Materi │                                                   │
-│     ▼      │                                                   │
-│  [📁 area] │                                                   │
-│  ────────  │                                                   │
-│  ④ Bayar   │                                                   │
-│  BCA 829-x │                                                   │
-│  [📁 resi] │                                                   │
-│            │                                                   │
-│  ┌───────┐ │                                                   │
-│  │ Kirim │ │                                                   │
-│  └───────┘ │                                                   │
-└────────────┴───────────────────────────────────────────────────┘
+┌──────────────────────┬──────────────────────────────────────────┐
+│                      │                                          │
+│  SIDEBAR (320px)     │         CANVAS (flex-1)                  │
+│  Nav + Studio Controls│                                        │
+│                      │     ┌────────────────────────────────┐  │
+│  🏠 Beranda          │     │ 🌐 beritakarya.co/pusat        │  │
+│  📢 Iklan Saya       │     │ ┌──────────────────────────┐  │  │
+│  📋 Riwayat          │     │ │                          │  │  │
+│  ❓ Bantuan           │     │ │   [YOUR AD HERE]         │  │  │
+│  ──────────────────── │     │ │   970 × 250 px           │  │  │
+│                      │     │ │                          │  │  │
+│  Pengaturan Iklan    │     │ └──────────────────────────┘  │  │
+│  ──────────────────── │     │  BK  Beranda Nasional Daerah  │  │
+│  ① Pilih Paket ▼     │     │  Headline berita...           │  │
+│  ┌─────────────────┐ │     │  ┌────────┐ ┌────────┐       │  │
+│  │🏆 Leaderboard   │ │     │  │ card  │ │ card  │       │  │
+│  │  Rp 2.500.000   │ │     │  └────────┘ └────────┘       │  │
+│  └─────────────────┘ │     └────────────────────────────────┘  │
+│  ┌─────────────────┐ │                                          │
+│  │🖼️ Sidebar Rect  │ │     Leaderboard • 970×250 • 30hari      │
+│  │  Rp 1.200.000   │ │     • Rp 2.500.000                      │
+│  └─────────────────┘ │                                          │
+│  Format: ○ Gambar    │                                          │
+│           ○ Video    │                                          │
+│  ──────────────────── │                                          │
+│  ② Detail Iklan      │                                          │
+│  (ringkasan)         │                                          │
+│  ──────────────────── │                                          │
+│  ③ Upload Materi     │                                          │
+│  [📁 drag & drop]    │                                          │
+│  ──────────────────── │                                          │
+│  ④ Pembayaran        │                                          │
+│  BCA 829-0123-456    │                                          │
+│  [📁 upload resi]    │                                          │
+│                      │                                          │
+│  ┌─────────────────┐ │                                          │
+│  │  Kirim Pesanan  │ │                                          │
+│  └─────────────────┘ │                                          │
+│                      │                                          │
+│  [👤] Nama User      │                                          │
+│  [⏻ Keluar]         │                                          │
+└──────────────────────┴──────────────────────────────────────────┘
 ```
 
-### Sidebar (320px)
+### Sidebar (320px, gabungan)
 
-4 section collapsible + tombol kirim:
+Nav items di atas, studio controls di bawah, user footer di paling bawah:
+
+| Bagian | Isi |
+|--------|-----|
+| Nav | Beranda, Iklan Saya, Riwayat, Bantuan |
+| Divider | Garis pemisah |
+| Studio Controls | 4 collapsible sections (Paket, Detail, Upload, Bayar) + tombol Kirim |
+| User Footer | Avatar, nama, role, tombol Keluar |
+
+**Studio Controls — 4 collapsible sections:**
 
 | Section | Fungsi | Behavior |
 |---------|--------|----------|
@@ -246,16 +258,16 @@ Komponen: `AdStudio` → `StudioControls` + `StudioPreview`
 
 **Auto-collapse:** Section yang sudah diisi otomatis collapse, menampilkan ringkasan satu baris.
 **Auto-advance:** Section berikutnya otomatis expand setelah section sebelumnya selesai.
-**Submit:** Tombol "Kirim Pesanan" fixed di bawah sidebar.
+**Submit:** Tombol "Kirim Pesanan" di bawah section pembayaran.
 
-### Canvas (full-width)
+### Canvas (flex-1)
 
 Preview mockup website dengan slot iklan:
 
 | Slot | Posisi di Mockup |
 |------|-----------------|
 | Leaderboard (970×250) | Di atas konten (homepage) |
-| Rectangle (300×250) | Di sidebar kanan |
+| Rectangle (300×250) | Di sidebar kanan mockup |
 | In-Feed (300×250) | Di antara konten feed |
 
 **Canvas elements:**
@@ -265,12 +277,12 @@ Preview mockup website dengan slot iklan:
 - Info bar di bawah mockup (nama slot, dimensi, durasi, harga)
 - Status indicator (Draft / Siap)
 
-### Responsive
+### Layout Behavior
 
-| Breakpoint | Layout |
-|------------|--------|
-| < 1024px | Stacked: sidebar di atas, canvas di bawah |
-| ≥ 1024px | Side-by-side: sidebar 320px, canvas flex-1 |
+- Sidebar **selalu 320px** di halaman ini (tidak bisa collapse)
+- Header bar desktop **disembunyikan** (tidak perlu, navigasi ada di sidebar)
+- Content area **tanpa padding** (canvas full-bleed)
+- Responsive: di mobile, sidebar di atas, canvas di bawah
 
 ### Behavior
 

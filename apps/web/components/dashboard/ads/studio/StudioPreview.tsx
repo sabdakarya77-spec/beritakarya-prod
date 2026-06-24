@@ -3,17 +3,12 @@
 import { Monitor, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
-import type { StudioData } from './types';
+import { useStudio } from './StudioContext';
 
-interface StudioPreviewProps {
-  data: StudioData;
-  site: string;
-  submitting: boolean;
-  isSuccess: boolean;
-}
-
-export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
+export function StudioPreview() {
+  const { data, isSuccess } = useStudio();
   const { selectedPackage, adPreviewUrl, mediaType } = data;
+  const site = (typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : 'pusat');
   const slotDef = selectedPackage ? getAdSlotDefinition(selectedPackage.slot) : null;
   const slotName = slotDef?.name || 'Slot Iklan';
   const slotSize = slotDef?.publicSize || 'Responsive';
@@ -21,7 +16,6 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
   const formatRupiah = (val: string | number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
 
-  // Success state
   if (isSuccess) {
     return (
       <div className="h-full flex items-center justify-center p-8">
@@ -49,7 +43,6 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
     );
   }
 
-  // Empty state
   if (!selectedPackage) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -77,24 +70,20 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
           <Monitor size={12} className="text-gray-400" />
           <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Preview</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={cn(
-            "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider",
-            data.adFile
-              ? 'bg-emerald-500/10 text-emerald-600'
-              : 'bg-gray-100 dark:bg-white/5 text-gray-400'
-          )}>
-            {data.adFile ? '● Siap' : '○ Draft'}
-          </span>
-        </div>
+        <span className={cn(
+          "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider",
+          data.adFile ? 'bg-emerald-500/10 text-emerald-600' : 'bg-gray-100 dark:bg-white/5 text-gray-400'
+        )}>
+          {data.adFile ? '● Siap' : '○ Draft'}
+        </span>
       </div>
 
-      {/* Canvas body — centered mockup */}
+      {/* Canvas body */}
       <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
         <div className="w-full max-w-2xl space-y-4">
           {/* Browser Frame */}
           <div className="border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl shadow-black/10">
-            {/* Browser Chrome */}
+            {/* Chrome */}
             <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gray-50 dark:bg-white/[0.03] border-b border-gray-100 dark:border-white/5">
               <div className="flex gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
@@ -110,19 +99,12 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
 
             {/* Page Content */}
             <div className="relative">
-              {/* Leaderboard — top */}
               {isLeaderboard && (
                 <div className="p-3 bg-gray-50/80 dark:bg-white/[0.02]">
-                  <AdSlotMockup
-                    slot="leaderboard"
-                    previewSrc={previewSrc}
-                    mediaType={mediaType}
-                    isEmpty={!adPreviewUrl}
-                  />
+                  <AdSlotMockup slot="leaderboard" previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                 </div>
               )}
 
-              {/* Content area */}
               <div className="p-4 space-y-4">
                 {/* Header */}
                 <div className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-white/5">
@@ -135,33 +117,23 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
                 </div>
 
                 <div className="flex gap-4">
-                  {/* Main column */}
                   <div className="flex-1 space-y-3">
-                    {/* Headline */}
                     <div className="space-y-2">
                       <div className="h-3.5 bg-gray-200 dark:bg-white/10 rounded w-4/5" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
                     </div>
 
-                    {/* In-Feed slot */}
                     {selectedPackage?.slot === 'in_feed' && (
-                      <AdSlotMockup
-                        slot="in_feed"
-                        previewSrc={previewSrc}
-                        mediaType={mediaType}
-                        isEmpty={!adPreviewUrl}
-                      />
+                      <AdSlotMockup slot="in_feed" previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                     )}
 
-                    {/* More content */}
                     <div className="space-y-2">
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-5/6" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-2/3" />
                     </div>
 
-                    {/* Article cards mockup */}
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       {[1, 2].map(i => (
                         <div key={i} className="space-y-1.5">
@@ -173,23 +145,15 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
                     </div>
                   </div>
 
-                  {/* Sidebar */}
                   <div className="w-36 flex-shrink-0 space-y-3">
                     {(selectedPackage?.slot === 'rectangle' || selectedPackage?.slot === 'rectangle_secondary') && (
-                      <AdSlotMockup
-                        slot={selectedPackage.slot}
-                        previewSrc={previewSrc}
-                        mediaType={mediaType}
-                        isEmpty={!adPreviewUrl}
-                      />
+                      <AdSlotMockup slot={selectedPackage.slot} previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                     )}
-                    {/* Sidebar widgets */}
                     <div className="space-y-2">
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
                       <div className="h-8 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-full" />
-                      <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-2/3" />
                     </div>
                   </div>
                 </div>
@@ -210,17 +174,8 @@ export function StudioPreview({ data, site, isSuccess }: StudioPreviewProps) {
   );
 }
 
-// Ad Slot Mockup
-function AdSlotMockup({
-  slot,
-  previewSrc,
-  mediaType,
-  isEmpty,
-}: {
-  slot: string;
-  previewSrc: string | null;
-  mediaType: 'image' | 'video';
-  isEmpty: boolean;
+function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
+  slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; isEmpty: boolean;
 }) {
   const dimensions: Record<string, { h: string; label: string }> = {
     leaderboard: { h: 'h-24 md:h-32', label: '970 × 250' },
@@ -228,16 +183,13 @@ function AdSlotMockup({
     rectangle_secondary: { h: 'h-36', label: '300 × 250' },
     in_feed: { h: 'h-28', label: '300 × 250' },
   };
-
   const dim = dimensions[slot] || dimensions.rectangle;
 
   return (
     <div className={cn(
       "relative w-full rounded-lg overflow-hidden border-2 border-dashed transition-all",
       dim.h,
-      isEmpty
-        ? 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]'
-        : 'border-brand-red/30 bg-black shadow-lg shadow-brand-red/10'
+      isEmpty ? 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]' : 'border-brand-red/30 bg-black shadow-lg shadow-brand-red/10'
     )}>
       {previewSrc ? (
         mediaType === 'video' ? (

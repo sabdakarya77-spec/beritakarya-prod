@@ -39,6 +39,8 @@ import { useRouter } from 'next/navigation'
 import NotificationBell from '../../../components/dashboard/NotificationBell'
 import { AIConsentModal } from '../../../components/editor/AIConsentModal'
 import { SiteSwitcher } from '../../../components/dashboard/SiteSwitcher'
+import { StudioProvider } from '../../../components/dashboard/ads/studio/StudioContext'
+import { StudioControls } from '../../../components/dashboard/ads/studio/StudioControls'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -200,6 +202,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ? pathname.slice(articleEditorPrefix.length)
     : ''
   const isArticleEditorRoute = articleEditorSegment === 'new' || Boolean(articleEditorSegment && !articleEditorSegment.includes('/'))
+  const isAdStudioRoute = user?.role === 'advertiser' && pathname === `/${site}/dashboard/ads/order`
   const editorTitle = articleEditorSegment === 'new' ? 'Tulis Post' : 'Editor Post'
 
   return (
@@ -313,7 +316,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Sidebar Desktop */}
       <aside className={cn(
         "bg-slate-900 dark:bg-[#050a15] text-white flex-shrink-0 flex-col hidden md:flex border-r border-white/5 transition-all duration-300 sticky top-0 h-screen",
-        isSidebarCollapsed ? "w-[72px]" : "w-64"
+        isAdStudioRoute ? "w-[320px]" : isSidebarCollapsed ? "w-[72px]" : "w-64"
       )}>
         {/* Logo Section */}
         <div className="p-6 border-b border-white/5">
@@ -420,6 +423,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )
           })}
         </nav>
+
+        {/* Studio Controls — only on ad order page */}
+        {isAdStudioRoute && (
+          <div className="flex-1 overflow-y-auto border-t border-white/5 px-3 py-3">
+            <StudioControls />
+          </div>
+        )}
 
         {/* User Footer */}
         <div className="p-4 border-t border-white/5 bg-black/40 backdrop-blur-md">
@@ -532,8 +542,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Top Header Bar */}
-        <header className="hidden md:flex h-16 bg-white dark:bg-slate-900/50 border-b border-gray-100 dark:border-white/5 items-center justify-between px-6 flex-shrink-0 backdrop-blur-sm relative z-40">
+        {/* Top Header Bar — hidden on ad studio */}
+        <header className={cn(
+          "hidden md:flex h-16 bg-white dark:bg-slate-900/50 border-b border-gray-100 dark:border-white/5 items-center justify-between px-6 flex-shrink-0 backdrop-blur-sm relative z-40",
+          isAdStudioRoute && "!hidden"
+        )}>
           <div className="flex items-center gap-4">
             {user?.role !== 'advertiser' && (
               <button
@@ -583,9 +596,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto animate-fade-in">
-            {children}
+        <div className={cn("flex-1 overflow-y-auto", isAdStudioRoute ? "p-0" : "p-6 md:p-8")}>
+          <div className={cn(isAdStudioRoute ? "h-full" : "max-w-7xl mx-auto animate-fade-in")}>
+            {isAdStudioRoute ? (
+              <StudioProvider>{children}</StudioProvider>
+            ) : children}
           </div>
         </div>
       </main>

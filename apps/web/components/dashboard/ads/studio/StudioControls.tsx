@@ -15,23 +15,11 @@ import {
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
 import { SectionHeader } from './SectionHeader';
-import type { AdPackage, StudioData, SectionId } from './types';
+import { useStudio } from './StudioContext';
+import type { SectionId } from './types';
 
-interface StudioControlsProps {
-  data: StudioData;
-  setData: React.Dispatch<React.SetStateAction<StudioData>>;
-  packages: AdPackage[];
-  loadingPackages: boolean;
-  site: string;
-  submitting: boolean;
-  error: string;
-  onSubmit: (e: React.FormEvent) => void;
-  isSuccess: boolean;
-}
-
-export function StudioControls({
-  data, setData, packages, loadingPackages, submitting, error, onSubmit, isSuccess
-}: StudioControlsProps) {
+export function StudioControls() {
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit } = useStudio();
   const [expandedSection, setExpandedSection] = useState<SectionId>('package');
 
   useEffect(() => {
@@ -59,7 +47,6 @@ export function StudioControls({
   const handleAdFileChange = (e: React.ChangeEvent<HTMLInputElement>, variant?: 'tablet' | 'mobile') => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
-
     if (variant === 'tablet') {
       if (data.adPreviewUrlTablet) URL.revokeObjectURL(data.adPreviewUrlTablet);
       setData(prev => ({ ...prev, adFileTablet: file, adFileNameTablet: file.name, adPreviewUrlTablet: URL.createObjectURL(file) }));
@@ -81,338 +68,326 @@ export function StudioControls({
 
   if (isSuccess) {
     return (
-      <div className="p-6 flex flex-col items-center justify-center h-full text-center space-y-4">
-        <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
-          <CheckCircle2 size={28} />
+      <div className="p-4 flex flex-col items-center justify-center text-center space-y-3">
+        <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center">
+          <CheckCircle2 size={24} />
         </div>
-        <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">Terkirim!</h3>
-        <p className="text-[10px] text-gray-500 leading-relaxed">
-          Menunggu verifikasi Superadmin (5-15 menit).
-        </p>
+        <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Terkirim!</h3>
+        <p className="text-[9px] text-gray-500 leading-relaxed">Menunggu verifikasi Superadmin.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Sidebar Header */}
-      <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5 flex-shrink-0">
-        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Pengaturan Iklan</p>
-      </div>
+    <div className="space-y-2">
+      {/* Error */}
+      {error && (
+        <div className="p-2 bg-brand-red/10 border border-brand-red/20 text-brand-red rounded-lg flex items-start gap-1.5 text-[9px]">
+          <AlertCircle size={11} className="shrink-0 mt-0.5" />
+          <span className="font-semibold">{error}</span>
+        </div>
+      )}
 
-      {/* Scrollable sections */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {/* Error */}
-        {error && (
-          <div className="p-2.5 bg-brand-red/10 border border-brand-red/20 text-brand-red rounded-lg flex items-start gap-2 text-[10px]">
-            <AlertCircle size={12} className="shrink-0 mt-0.5" />
-            <span className="font-semibold">{error}</span>
-          </div>
-        )}
-
-        {/* Section 1: Package */}
-        <SectionHeader
-          step={1}
-          label="Pilih Paket"
-          isComplete={isPackageComplete}
-          isActive={!isPackageComplete}
-          isExpanded={expandedSection === 'package'}
-          summary={data.selectedPackage ? `${data.selectedPackage.name} • ${formatRupiah(data.selectedPackage.price)}` : undefined}
-          onToggle={() => toggleSection('package')}
-        />
-        {expandedSection === 'package' && (
-          <div className="space-y-2 pl-2">
-            {loadingPackages ? (
-              <div className="py-6 text-center">
-                <RefreshCw size={16} className="animate-spin text-brand-red mx-auto" />
-                <p className="text-[9px] text-gray-400 mt-2 uppercase tracking-wider">Memuat...</p>
-              </div>
-            ) : packages.length === 0 ? (
-              <div className="py-6 text-center">
-                <p className="text-[10px] text-gray-400">Belum ada paket</p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1.5">
-                  {packages.map((pkg) => (
-                    <label
-                      key={pkg.id}
-                      className={cn(
-                        "flex items-start gap-2.5 p-2.5 border rounded-lg cursor-pointer transition-all",
-                        data.selectedPackage?.id === pkg.id
-                          ? 'border-brand-red bg-brand-red/[0.03]'
-                          : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="ad_package"
-                        checked={data.selectedPackage?.id === pkg.id}
-                        onChange={() => {
-                          setData(prev => ({ ...prev, selectedPackage: pkg }));
-                          const end = new Date();
-                          end.setDate(end.getDate() + pkg.durationDays);
-                          setData(prev => ({ ...prev, endDate: end.toISOString().split('T')[0] }));
-                        }}
-                        className="mt-1 accent-brand-red"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start gap-1">
-                          <span className="text-[11px] font-black text-brand-black dark:text-white truncate">{pkg.name}</span>
-                          <span className="text-[10px] font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
-                        </div>
-                        <span className="text-[8px] text-gray-400 uppercase tracking-wider">
-                          {getSlotLabel(pkg.slot)} • {pkg.durationDays}h
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Format */}
-                <div className="pt-1.5 border-t border-gray-100 dark:border-white/5">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Format</label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(['image', 'video'] as const).map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setData(prev => ({ ...prev, mediaType: type }))}
-                        className={cn(
-                          "p-2 border rounded-lg flex items-center gap-1.5 transition-all",
-                          data.mediaType === type
-                            ? 'border-brand-red bg-brand-red/[0.03]'
-                            : 'border-gray-100 dark:border-white/5 text-gray-400'
-                        )}
-                      >
-                        {type === 'image' ? <ImageIcon size={12} /> : <VideoIcon size={12} />}
-                        <span className="text-[9px] font-black uppercase tracking-wider">{type === 'image' ? 'Gambar' : 'Video'}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Section 2: Campaign */}
-        <SectionHeader
-          step={2}
-          label="Detail Iklan"
-          isComplete={isCampaignComplete}
-          isActive={isPackageComplete && !isCampaignComplete}
-          isExpanded={expandedSection === 'campaign'}
-          summary={data.campaignName || undefined}
-          onToggle={() => toggleSection('campaign')}
-        />
-        {expandedSection === 'campaign' && (
-          <div className="space-y-2.5 pl-2">
-            <div>
-              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Nama Kampanye</label>
-              <input
-                type="text"
-                value={data.campaignName}
-                onChange={(e) => setData(prev => ({ ...prev, campaignName: e.target.value }))}
-                placeholder="Promo Kemerdekaan"
-                className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
-              />
+      {/* Section 1: Package */}
+      <SectionHeader
+        step={1}
+        label="Pilih Paket"
+        isComplete={isPackageComplete}
+        isActive={!isPackageComplete}
+        isExpanded={expandedSection === 'package'}
+        summary={data.selectedPackage ? `${data.selectedPackage.name} • ${formatRupiah(data.selectedPackage.price)}` : undefined}
+        onToggle={() => toggleSection('package')}
+      />
+      {expandedSection === 'package' && (
+        <div className="space-y-1.5 pl-1">
+          {loadingPackages ? (
+            <div className="py-4 text-center">
+              <RefreshCw size={14} className="animate-spin text-brand-red mx-auto" />
+              <p className="text-[8px] text-gray-400 mt-1.5 uppercase tracking-wider">Memuat...</p>
             </div>
-            <div>
-              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">URL Tujuan</label>
-              <input
-                type="url"
-                value={data.linkUrl}
-                onChange={(e) => setData(prev => ({ ...prev, linkUrl: e.target.value }))}
-                placeholder="https://brand.com/promo"
-                className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
-              />
+          ) : packages.length === 0 ? (
+            <div className="py-4 text-center">
+              <p className="text-[9px] text-gray-400">Belum ada paket</p>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <div>
-                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Mulai</label>
-                <input
-                  type="date"
-                  value={data.startDate}
-                  onChange={(e) => setData(prev => ({ ...prev, startDate: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
-                />
-              </div>
-              <div>
-                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Berakhir</label>
-                <input
-                  type="date"
-                  value={data.endDate}
-                  onChange={(e) => setData(prev => ({ ...prev, endDate: e.target.value }))}
-                  min={data.startDate}
-                  className="w-full px-2.5 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[11px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Section 3: Creative */}
-        <SectionHeader
-          step={3}
-          label="Upload Materi"
-          isComplete={isCreativeComplete}
-          isActive={isCampaignComplete && !isCreativeComplete}
-          isExpanded={expandedSection === 'creative'}
-          summary={data.adFileName || undefined}
-          onToggle={() => toggleSection('creative')}
-        />
-        {expandedSection === 'creative' && (
-          <div className="space-y-2.5 pl-2">
-            <div>
-              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">
-                Materi ({data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive'})
-              </label>
-              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
-                <input
-                  type="file"
-                  accept={data.mediaType === 'image' ? 'image/*,image/gif' : 'video/mp4,video/webm'}
-                  onChange={(e) => handleAdFileChange(e)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <Upload size={14} className="text-gray-400 mx-auto mb-1.5" />
-                <p className="text-[10px] font-bold text-brand-black dark:text-white">
-                  {data.adFileName || `Pilih file`}
-                </p>
-                <p className="text-[8px] text-gray-400 mt-0.5">
-                  {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Max 10MB
-                </p>
-              </div>
-            </div>
-
-            {/* Multi-size leaderboard */}
-            {data.selectedPackage?.slot === 'leaderboard' && data.mediaType === 'image' && (
-              <div className="space-y-1.5 pt-1.5 border-t border-gray-100 dark:border-white/5">
-                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400">📱 Versi Tambahan</label>
-                {[
-                  { variant: 'tablet' as const, label: 'Tablet 728×90', name: data.adFileNameTablet },
-                  { variant: 'mobile' as const, label: 'Mobile 320×50', name: data.adFileNameMobile },
-                ].map(({ variant, label, name }) => (
-                  <div key={variant} className="relative border border-dashed border-gray-200 dark:border-white/10 p-2.5 text-center rounded-lg">
+          ) : (
+            <>
+              <div className="space-y-1">
+                {packages.map((pkg) => (
+                  <label
+                    key={pkg.id}
+                    className={cn(
+                      "flex items-start gap-2 p-2 border rounded-lg cursor-pointer transition-all",
+                      data.selectedPackage?.id === pkg.id
+                        ? 'border-brand-red bg-brand-red/[0.03]'
+                        : 'border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                    )}
+                  >
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleAdFileChange(e, variant)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      type="radio"
+                      name="ad_package"
+                      checked={data.selectedPackage?.id === pkg.id}
+                      onChange={() => {
+                        setData(prev => ({ ...prev, selectedPackage: pkg }));
+                        const end = new Date();
+                        end.setDate(end.getDate() + pkg.durationDays);
+                        setData(prev => ({ ...prev, endDate: end.toISOString().split('T')[0] }));
+                      }}
+                      className="mt-1 accent-brand-red"
                     />
-                    <p className="text-[9px] font-bold text-brand-black dark:text-white">{name || label}</p>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start gap-1">
+                        <span className="text-[10px] font-black text-brand-black dark:text-white truncate">{pkg.name}</span>
+                        <span className="text-[9px] font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
+                      </div>
+                      <span className="text-[7px] text-gray-400 uppercase tracking-wider">
+                        {getSlotLabel(pkg.slot)} • {pkg.durationDays}h
+                      </span>
+                    </div>
+                  </label>
                 ))}
               </div>
-            )}
 
-            {/* Animation */}
-            {data.mediaType === 'image' && (
-              <div className="pt-1.5 border-t border-gray-100 dark:border-white/5">
-                <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1.5">Efek Animasi</label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {[
-                    { value: 'ken_burns', label: 'Ken Burns', icon: '🔍' },
-                    { value: 'fade_slide', label: 'Fade Slide', icon: '↔️' },
-                    { value: 'parallax', label: 'Parallax', icon: '📐' },
-                    { value: 'pulse_scale', label: 'Pulse', icon: '💓' },
-                  ].map((effect) => (
+              {/* Format */}
+              <div className="pt-1 border-t border-gray-100 dark:border-white/5">
+                <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-1">Format</label>
+                <div className="grid grid-cols-2 gap-1">
+                  {(['image', 'video'] as const).map((type) => (
                     <button
-                      key={effect.value}
+                      key={type}
                       type="button"
-                      onClick={() => setData(prev => ({ ...prev, animationEffect: effect.value }))}
+                      onClick={() => setData(prev => ({ ...prev, mediaType: type }))}
                       className={cn(
-                        "p-1.5 border rounded-lg flex items-center gap-1.5 transition-all text-left",
-                        data.animationEffect === effect.value
+                        "p-1.5 border rounded-lg flex items-center gap-1 transition-all",
+                        data.mediaType === type
                           ? 'border-brand-red bg-brand-red/[0.03]'
                           : 'border-gray-100 dark:border-white/5 text-gray-400'
                       )}
                     >
-                      <span className="text-xs">{effect.icon}</span>
-                      <span className="text-[9px] font-bold uppercase tracking-wider">{effect.label}</span>
+                      {type === 'image' ? <ImageIcon size={10} /> : <VideoIcon size={10} />}
+                      <span className="text-[8px] font-black uppercase tracking-wider">{type === 'image' ? 'Gambar' : 'Video'}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
+      )}
 
-        {/* Section 4: Payment */}
-        <SectionHeader
-          step={4}
-          label="Pembayaran"
-          isComplete={isPaymentComplete}
-          isActive={isCreativeComplete && !isPaymentComplete}
-          isExpanded={expandedSection === 'payment'}
-          summary={data.receiptFileName || undefined}
-          onToggle={() => toggleSection('payment')}
-        />
-        {expandedSection === 'payment' && (
-          <div className="space-y-2.5 pl-2">
-            {/* Bank accounts */}
-            <div className="space-y-1.5">
+      {/* Section 2: Campaign */}
+      <SectionHeader
+        step={2}
+        label="Detail Iklan"
+        isComplete={isCampaignComplete}
+        isActive={isPackageComplete && !isCampaignComplete}
+        isExpanded={expandedSection === 'campaign'}
+        summary={data.campaignName || undefined}
+        onToggle={() => toggleSection('campaign')}
+      />
+      {expandedSection === 'campaign' && (
+        <div className="space-y-2 pl-1">
+          <div>
+            <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Nama Kampanye</label>
+            <input
+              type="text"
+              value={data.campaignName}
+              onChange={(e) => setData(prev => ({ ...prev, campaignName: e.target.value }))}
+              placeholder="Promo Kemerdekaan"
+              className="w-full px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[10px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+            />
+          </div>
+          <div>
+            <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">URL Tujuan</label>
+            <input
+              type="url"
+              value={data.linkUrl}
+              onChange={(e) => setData(prev => ({ ...prev, linkUrl: e.target.value }))}
+              placeholder="https://brand.com/promo"
+              className="w-full px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[10px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-1">
+            <div>
+              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Mulai</label>
+              <input
+                type="date"
+                value={data.startDate}
+                onChange={(e) => setData(prev => ({ ...prev, startDate: e.target.value }))}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[10px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Berakhir</label>
+              <input
+                type="date"
+                value={data.endDate}
+                onChange={(e) => setData(prev => ({ ...prev, endDate: e.target.value }))}
+                min={data.startDate}
+                className="w-full px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[10px] text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section 3: Creative */}
+      <SectionHeader
+        step={3}
+        label="Upload Materi"
+        isComplete={isCreativeComplete}
+        isActive={isCampaignComplete && !isCreativeComplete}
+        isExpanded={expandedSection === 'creative'}
+        summary={data.adFileName || undefined}
+        onToggle={() => toggleSection('creative')}
+      />
+      {expandedSection === 'creative' && (
+        <div className="space-y-2 pl-1">
+          <div>
+            <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">
+              Materi ({data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive'})
+            </label>
+            <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-3 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+              <input
+                type="file"
+                accept={data.mediaType === 'image' ? 'image/*,image/gif' : 'video/mp4,video/webm'}
+                onChange={(e) => handleAdFileChange(e)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <Upload size={12} className="text-gray-400 mx-auto mb-1" />
+              <p className="text-[9px] font-bold text-brand-black dark:text-white">
+                {data.adFileName || 'Pilih file'}
+              </p>
+              <p className="text-[7px] text-gray-400 mt-0.5">
+                {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Max 10MB
+              </p>
+            </div>
+          </div>
+
+          {/* Multi-size leaderboard */}
+          {data.selectedPackage?.slot === 'leaderboard' && data.mediaType === 'image' && (
+            <div className="space-y-1 pt-1 border-t border-gray-100 dark:border-white/5">
+              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400">📱 Versi Tambahan</label>
               {[
-                { bank: 'BCA', number: '829-0123-456' },
-                { bank: 'Mandiri', number: '137-00-1234567-8' },
-              ].map(({ bank, number }) => (
-                <div key={bank} className="p-2.5 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-lg">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <Building2 size={10} className="text-brand-red" />
-                    <span className="text-[9px] font-black text-brand-black dark:text-white uppercase">{bank}</span>
-                  </div>
-                  <p className="text-[12px] font-black text-brand-red tracking-wider">{number}</p>
-                  <p className="text-[7px] text-gray-400 uppercase tracking-wider">a/n PT Berita Karya Nusantara</p>
+                { variant: 'tablet' as const, label: 'Tablet 728×90', name: data.adFileNameTablet },
+                { variant: 'mobile' as const, label: 'Mobile 320×50', name: data.adFileNameMobile },
+              ].map(({ variant, label, name }) => (
+                <div key={variant} className="relative border border-dashed border-gray-200 dark:border-white/10 p-2 text-center rounded-lg">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleAdFileChange(e, variant)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <p className="text-[8px] font-bold text-brand-black dark:text-white">{name || label}</p>
                 </div>
               ))}
-              <div className="p-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg flex items-center gap-1.5">
-                <QrCode size={12} className="text-emerald-500" />
-                <span className="text-[8px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">QRIS tersedia</span>
+            </div>
+          )}
+
+          {/* Animation */}
+          {data.mediaType === 'image' && (
+            <div className="pt-1 border-t border-gray-100 dark:border-white/5">
+              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-1">Efek Animasi</label>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { value: 'ken_burns', label: 'Ken Burns', icon: '🔍' },
+                  { value: 'fade_slide', label: 'Fade Slide', icon: '↔️' },
+                  { value: 'parallax', label: 'Parallax', icon: '📐' },
+                  { value: 'pulse_scale', label: 'Pulse', icon: '💓' },
+                ].map((effect) => (
+                  <button
+                    key={effect.value}
+                    type="button"
+                    onClick={() => setData(prev => ({ ...prev, animationEffect: effect.value }))}
+                    className={cn(
+                      "p-1.5 border rounded-lg flex items-center gap-1 transition-all text-left",
+                      data.animationEffect === effect.value
+                        ? 'border-brand-red bg-brand-red/[0.03]'
+                        : 'border-gray-100 dark:border-white/5 text-gray-400'
+                    )}
+                  >
+                    <span className="text-[10px]">{effect.icon}</span>
+                    <span className="text-[8px] font-bold uppercase tracking-wider">{effect.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
+          )}
+        </div>
+      )}
 
-            {/* Receipt */}
-            <div>
-              <label className="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-1">Bukti Transfer</label>
-              <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleReceiptChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <Upload size={14} className="text-gray-400 mx-auto mb-1.5" />
-                <p className="text-[10px] font-bold text-brand-black dark:text-white">
-                  {data.receiptFileName || 'Upload bukti'}
-                </p>
-              </div>
-              {data.receiptPreviewUrl && (
-                <div className="mt-1.5 p-1.5 border border-gray-100 dark:border-white/5 rounded-lg bg-gray-50 dark:bg-black/20 flex justify-center">
-                  <img src={data.receiptPreviewUrl} alt="Bukti" className="max-h-24 object-contain rounded" />
+      {/* Section 4: Payment */}
+      <SectionHeader
+        step={4}
+        label="Pembayaran"
+        isComplete={isPaymentComplete}
+        isActive={isCreativeComplete && !isPaymentComplete}
+        isExpanded={expandedSection === 'payment'}
+        summary={data.receiptFileName || undefined}
+        onToggle={() => toggleSection('payment')}
+      />
+      {expandedSection === 'payment' && (
+        <div className="space-y-2 pl-1">
+          <div className="space-y-1">
+            {[
+              { bank: 'BCA', number: '829-0123-456' },
+              { bank: 'Mandiri', number: '137-00-1234567-8' },
+            ].map(({ bank, number }) => (
+              <div key={bank} className="p-2 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-lg">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Building2 size={9} className="text-brand-red" />
+                  <span className="text-[8px] font-black text-brand-black dark:text-white uppercase">{bank}</span>
                 </div>
-              )}
+                <p className="text-[11px] font-black text-brand-red tracking-wider">{number}</p>
+                <p className="text-[6px] text-gray-400 uppercase tracking-wider">a/n PT Berita Karya Nusantara</p>
+              </div>
+            ))}
+            <div className="p-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-lg flex items-center gap-1">
+              <QrCode size={10} className="text-emerald-500" />
+              <span className="text-[7px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">QRIS tersedia</span>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Fixed submit button at bottom */}
-      <div className="p-3 border-t border-gray-100 dark:border-white/5 flex-shrink-0">
+          <div>
+            <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-0.5">Bukti Transfer</label>
+            <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-3 text-center rounded-lg bg-gray-50/50 dark:bg-white/[0.02]">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleReceiptChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <Upload size={12} className="text-gray-400 mx-auto mb-1" />
+              <p className="text-[9px] font-bold text-brand-black dark:text-white">
+                {data.receiptFileName || 'Upload bukti'}
+              </p>
+            </div>
+            {data.receiptPreviewUrl && (
+              <div className="mt-1 p-1 border border-gray-100 dark:border-white/5 rounded-lg bg-gray-50 dark:bg-black/20 flex justify-center">
+                <img src={data.receiptPreviewUrl} alt="Bukti" className="max-h-20 object-contain rounded" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Submit */}
+      <div className="pt-1">
         <button
           type="button"
-          onClick={(e) => onSubmit(e as unknown as React.FormEvent)}
+          onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
           disabled={submitting || !isPaymentComplete}
-          className="w-full px-4 py-3 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20"
+          className="w-full px-3 py-2.5 bg-brand-red hover:bg-red-700 text-white text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed rounded-lg flex items-center justify-center gap-1.5 shadow-lg shadow-brand-red/20"
         >
           {submitting ? (
             <>
-              <RefreshCw size={12} className="animate-spin" />
+              <RefreshCw size={11} className="animate-spin" />
               Memproses...
             </>
           ) : (
             <>
-              <Sparkles size={12} />
+              <Sparkles size={11} />
               Kirim Pesanan
             </>
           )}
