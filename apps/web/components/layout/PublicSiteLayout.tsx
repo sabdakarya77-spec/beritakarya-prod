@@ -27,6 +27,13 @@ interface PublicSiteLayoutProps {
 export default function PublicSiteLayout({ children, siteConfig, initialCategory = 'terbaru' }: PublicSiteLayoutProps) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Sync selectedCategory when initialCategory prop changes
+  // (e.g., user clicks logo to go back to homepage → terbaru)
+  useEffect(() => {
+    setSelectedCategory(initialCategory);
+  }, [initialCategory]);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryItem[]>(CATEGORIES_CONFIG);
 
