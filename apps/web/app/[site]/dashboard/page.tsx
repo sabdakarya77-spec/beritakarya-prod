@@ -422,11 +422,10 @@ export default function DashboardOverview() {
 
   if (user?.role === 'advertiser') {
     return (
-      <AdvertiserDashboardOverview 
+      <AdvertiserDashboardOverview
         greeting={greeting}
         userName={user?.name || 'Mitra Bisnis'}
         site={site}
-        currentDate={currentDate}
       />
     );
   }

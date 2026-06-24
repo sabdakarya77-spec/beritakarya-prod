@@ -26,7 +26,10 @@ import {
   Mail,
   Lock,
   User,
-  Megaphone
+  Megaphone,
+  History,
+  HelpCircle,
+  ChevronLeft,
 } from 'lucide-react'
 import BackButton from '../../../components/ui/BackButton'
 import { ROLE_LABELS } from '../../../lib/constants'
@@ -42,7 +45,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { site } = useParams() as { site: string }
   const { user, logout, lastActiveSite, setLastActiveSite } = useAuthStore()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    if (user?.role === 'advertiser') {
+      const saved = localStorage.getItem('advertiser-sidebar-collapsed')
+      return saved !== null ? saved === 'true' : true // default collapsed
+    }
+    return false
+  })
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [globalSearch, setGlobalSearch] = useState('')
   const router = useRouter()
@@ -111,13 +120,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     document.documentElement.classList.toggle('dark', newTheme === 'dark')
   }
 
+  const toggleSidebar = () => {
+    const next = !isSidebarCollapsed
+    setIsSidebarCollapsed(next)
+    if (user?.role === 'advertiser') {
+      localStorage.setItem('advertiser-sidebar-collapsed', String(next))
+    }
+  }
+
   // Navigation organized by section
   const navSections = user?.role === 'advertiser' ? [
     {
       label: 'Portal Pengiklan',
       items: [
         { name: 'Beranda', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['advertiser'] },
-        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: Megaphone, roles: ['advertiser'] },
+        { name: 'Iklan Saya', href: `/${site}/dashboard/ads`, icon: Megaphone, roles: ['advertiser'] },
+        { name: 'Riwayat', href: `/${site}/dashboard/ads/history`, icon: History, roles: ['advertiser'] },
+        { name: 'Bantuan', href: 'https://wa.me/628123456789', icon: HelpCircle, roles: ['advertiser'] },
       ]
     }
   ] : [
@@ -334,37 +353,65 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     const isActive = item.href === activeHref
                     const isKycRequired = user && ['reporter', 'kontributor', 'wapimred'].includes(user.role)
                     const isLocked = isKycRequired && !user.isVerified && item.href !== `/${site}/dashboard/kyc`
+                    const isExternal = item.href.startsWith('http')
                     const Icon = isLocked ? Lock : item.icon
-                    return (
-                      <Link 
-                        key={item.name} 
-                        href={isLocked ? '#' : item.href}
-                        onClick={(e) => {
-                          if (isLocked) {
-                            e.preventDefault()
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
-                          isActive 
-                            ? 'bg-brand-red text-white shadow-lg shadow-brand-red/30' 
-                            : 'text-gray-400 hover:bg-white/5 hover:text-white',
-                          isLocked && "opacity-40 hover:bg-transparent cursor-not-allowed text-gray-500"
-                        )}
-                      >
+
+                    const navContent = (
+                      <>
                         {/* Active Glow Backdrop */}
                         {isActive && !isLocked && (
                           <div className="absolute inset-0 bg-gradient-to-r from-brand-red via-red-500 to-brand-red opacity-50 animate-pulse" />
                         )}
-                        
-                        <Icon size={17} strokeWidth={isActive ? 2.5 : 1.8} className="relative z-10" />
+                        <Icon size={17} strokeWidth={isActive ? 2.5 : 1.8} className="relative z-10 flex-shrink-0" />
                         {!isSidebarCollapsed && (
                           <>
                             <span className="text-[11px] font-black uppercase tracking-wider relative z-10">{item.name}</span>
-                            {isActive && !isLocked && <ChevronRight size={12} className="ml-auto opacity-60 relative z-10" />}
+                            {isActive && !isLocked && !isExternal && <ChevronRight size={12} className="ml-auto opacity-60 relative z-10" />}
                             {isLocked && <Lock size={12} className="ml-auto text-gray-500 relative z-10" />}
+                            {isExternal && <ExternalLink size={10} className="ml-auto opacity-40 relative z-10" />}
                           </>
                         )}
+                        {/* Tooltip for collapsed state */}
+                        {isSidebarCollapsed && (
+                          <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                            {item.name}
+                            <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800" />
+                          </div>
+                        )}
+                      </>
+                    )
+
+                    const linkClasses = cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
+                      isActive
+                        ? 'bg-brand-red text-white shadow-lg shadow-brand-red/30'
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                      isLocked && "opacity-40 hover:bg-transparent cursor-not-allowed text-gray-500"
+                    )
+
+                    if (isExternal) {
+                      return (
+                        <a
+                          key={item.name}
+                          href={isLocked ? '#' : item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => { if (isLocked) e.preventDefault() }}
+                          className={linkClasses}
+                        >
+                          {navContent}
+                        </a>
+                      )
+                    }
+
+                    return (
+                      <Link
+                        key={item.name}
+                        href={isLocked ? '#' : item.href}
+                        onClick={(e) => { if (isLocked) e.preventDefault() }}
+                        className={linkClasses}
+                      >
+                        {navContent}
                       </Link>
                     )
                   })}
@@ -392,13 +439,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
           </div>
-          <button 
-            onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-3 text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 hover:text-white hover:bg-red-600 transition-all rounded-xl border border-white/5 hover:border-red-500 shadow-sm"
-          >
-            <LogOut size={14} />
-            {!isSidebarCollapsed && 'Keluar Sistem'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={logout}
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-3 text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 hover:text-white hover:bg-red-600 transition-all rounded-xl border border-white/5 hover:border-red-500 shadow-sm"
+            >
+              <LogOut size={14} />
+              {!isSidebarCollapsed && 'Keluar'}
+            </button>
+            <button
+              onClick={toggleSidebar}
+              className="flex items-center justify-center px-3 py-3 text-gray-500 hover:text-white hover:bg-white/5 transition-all rounded-xl border border-white/5 shadow-sm"
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -479,42 +535,50 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Top Header Bar */}
         <header className="hidden md:flex h-16 bg-white dark:bg-slate-900/50 border-b border-gray-100 dark:border-white/5 items-center justify-between px-6 flex-shrink-0 backdrop-blur-sm relative z-40">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="hidden md:flex p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors text-gray-400"
-            >
-              <Menu size={18} />
-            </button>
-            <div className="relative hidden md:block">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
-              <input 
-                type="text" 
-                placeholder="Cari artikel..."
-                value={globalSearch}
-                onChange={(e) => setGlobalSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && globalSearch) {
-                    router.push(`/${site}/dashboard/articles?search=${encodeURIComponent(globalSearch)}`)
-                    setGlobalSearch('')
-                  }
-                }}
-                className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand-red/20 rounded-lg text-xs w-64 outline-none transition-all text-brand-black dark:text-white placeholder:text-gray-300"
-              />
-            </div>
+            {user?.role !== 'advertiser' && (
+              <button
+                onClick={toggleSidebar}
+                className="hidden md:flex p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors text-gray-400"
+              >
+                <Menu size={18} />
+              </button>
+            )}
+            {user?.role !== 'advertiser' && (
+              <div className="relative hidden md:block">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                <input
+                  type="text"
+                  placeholder="Cari artikel..."
+                  value={globalSearch}
+                  onChange={(e) => setGlobalSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && globalSearch) {
+                      router.push(`/${site}/dashboard/articles?search=${encodeURIComponent(globalSearch)}`)
+                      setGlobalSearch('')
+                    }
+                  }}
+                  className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-white/5 border border-transparent focus:border-brand-red/20 rounded-lg text-xs w-64 outline-none transition-all text-brand-black dark:text-white placeholder:text-gray-300"
+                />
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button onClick={toggleTheme} className="hidden md:flex p-2 text-gray-400 hover:text-brand-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
             <NotificationBell />
-            <div className="w-px h-6 bg-gray-100 dark:bg-white/5 mx-1 hidden md:block" />
-            <Link 
-              href={`/${site}`} 
-              target="_blank" 
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-gray-400 hover:text-brand-red"
-            >
-              <ExternalLink size={12} /> <span className="hidden sm:inline">Portal</span>
-            </Link>
+            {user?.role !== 'advertiser' && (
+              <>
+                <div className="w-px h-6 bg-gray-100 dark:bg-white/5 mx-1 hidden md:block" />
+                <Link
+                  href={`/${site}`}
+                  target="_blank"
+                  className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-gray-400 hover:text-brand-red"
+                >
+                  <ExternalLink size={12} /> <span className="hidden sm:inline">Portal</span>
+                </Link>
+              </>
+            )}
           </div>
         </header>
 

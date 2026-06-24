@@ -8,7 +8,6 @@ import {
   Package,
   ClipboardList,
   History,
-  Megaphone,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -28,7 +27,6 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Booking', href: '/dashboard/ads/bookings', icon: ClipboardList, roles: ['superadmin'] },
   // Advertiser only
   { name: 'Riwayat', href: '/dashboard/ads/history', icon: History, roles: ['advertiser'] },
-  { name: 'Pesan Baru', href: '/dashboard/ads/order', icon: Megaphone, roles: ['advertiser'] },
 ];
 
 interface AdsSubNavProps {

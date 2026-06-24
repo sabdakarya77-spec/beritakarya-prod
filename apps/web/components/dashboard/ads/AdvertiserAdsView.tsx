@@ -3,10 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  Wallet,
   CheckCircle2,
   BarChart3,
-  Eye,
   ArrowRight,
   Megaphone,
   RefreshCw,
@@ -88,34 +86,22 @@ export function AdvertiserAdsView({ site, bookings }: Props) {
 
   return (
     <div className="space-y-8">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-brand-red">
-          <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Wallet size={20} /></div>
+      {/* Stats Cards — 2 large */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="dash-card p-6 md:p-8 flex items-center gap-5">
+          <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-xl"><CheckCircle2 size={24} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Kampanye</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.length}</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Iklan Aktif</p>
+            <p className="text-3xl font-black text-brand-black dark:text-white mt-1">{bookings.filter(b => b.status === 'ACTIVE').length}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">kampanye sedang tayang</p>
           </div>
         </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-emerald-500">
-          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl"><CheckCircle2 size={20} /></div>
+        <div className="dash-card p-6 md:p-8 flex items-center gap-5">
+          <div className="p-4 bg-blue-500/10 text-blue-500 rounded-xl"><BarChart3 size={24} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Iklan Aktif</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.filter(b => b.status === 'ACTIVE').length}</p>
-          </div>
-        </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-blue-500">
-          <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl"><BarChart3 size={20} /></div>
-          <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Impresi</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.reduce((acc, b) => acc + b.impressions, 0).toLocaleString()}</p>
-          </div>
-        </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-violet-500">
-          <div className="p-3 bg-violet-500/10 text-violet-500 rounded-xl"><Eye size={20} /></div>
-          <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Klik</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.reduce((acc, b) => acc + b.clicks, 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Total Impresi</p>
+            <p className="text-3xl font-black text-brand-black dark:text-white mt-1">{bookings.reduce((acc, b) => acc + b.impressions, 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">tayangan keseluruhan</p>
           </div>
         </div>
       </div>
