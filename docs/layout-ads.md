@@ -187,51 +187,96 @@ Komponen: `AdvertiserAdsView`
 
 ## Halaman 3 — Ad Studio (`/{site}/dashboard/ads/order`)
 
-Layout studio: split-pane dengan kontrol di kiri dan preview di kanan.
+Layout studio: **sidebar kiri** untuk kontrol, **canvas utama** untuk preview.
 
 Komponen: `AdStudio` → `StudioControls` + `StudioPreview`
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  [← Kembali]                                    Buat Iklan Baru │
-├───────────────────────────┬─────────────────────────────────────┤
-│                           │                                     │
-│  KONTROL (kiri)           │  LIVE PREVIEW (kanan, sticky)       │
-│  420px, scrollable        │                                     │
-│                           │  ┌─ 🌐 beritakarya.co/pusat ──────┐│
-│  ── ① Pilih Paket ────── │  │ ┌───────────────────────────┐  ││
-│  ┌─────────────────────┐  │  │ │                           │  ││
-│  │ 🏆 Leaderboard      │  │  │ │   Preview iklan           │  ││
-│  │ 970×250 • Rp 2.5jt  │  │  │ │   real-time               │  ││
-│  └─────────────────────┘  │  │ │                           │  ││
-│  ┌─────────────────────┐  │  │ └───────────────────────────┘  ││
-│  │ 🖼️ Sidebar Rect     │  │  │  Headline News...              ││
-│  │ 300×250 • Rp 1.2jt  │  │  │  ─────────────────            ││
-│  └─────────────────────┘  │  │  Content area...               ││
-│                           │  └─────────────────────────────────┘│
-│  ── ② Detail Kampanye ── │                                     │
-│  Nama [_____________]     │  Slot: Leaderboard Atas             │
-│  URL  [_____________]     │  Dimensi: 970×250 px                │
-│  Format: ○ Gambar ○ Video │  Durasi: 30 hari • Rp 2.500.000   │
-│                           │                                     │
-│  ── ③ Upload Materi ──── │                                     │
-│  [📁 Drag & drop area]    │                                     │
-│                           │                                     │
-│  ── ④ Bayar ──────────── │                                     │
-│  BCA 829-0123-456         │                                     │
-│  [📁 Upload resi]         │                                     │
-│                           │                                     │
-│  [✅ Kirim Pesanan]       │                                     │
-│                           │                                     │
-└───────────────────────────┴─────────────────────────────────────┘
+┌────────────┬───────────────────────────────────────────────────┐
+│            │                                                   │
+│  SIDEBAR   │              CANVAS (full-width)                  │
+│  320px     │                                                   │
+│            │     ┌─────────────────────────────────────────┐  │
+│  Pengaturan│     │ 🌐 beritakarya.co/pusat                 │  │
+│  Iklan     │     │ ─────────────────────────────────────── │  │
+│  ────────  │     │ ┌───────────────────────────────────┐   │  │
+│            │     │ │                                   │   │  │
+│  ① Pilih   │     │ │   [YOUR AD HERE]                  │   │  │
+│     Paket  │     │ │   970 × 250 px                    │   │  │
+│     ▼      │     │ │                                   │   │  │
+│  ┌───────┐ │     │ └───────────────────────────────────┘   │  │
+│  │🏆 Lead │ │     │  BK  Beranda Nasional Daerah Ekonomi   │  │
+│  │Rp 2.5jt│ │     │  ─────────────────────────────────────  │  │
+│  └───────┘ │     │  Headline berita utama...                │  │
+│  ┌───────┐ │     │  Isi konten paragraf berita...           │  │
+│  │🖼️ Rect│ │     │  ┌────────┐ ┌────────┐                  │  │
+│  │Rp 1.2jt│ │     │  │ card  │ │ card  │                  │  │
+│  └───────┘ │     │  └────────┘ └────────┘                  │  │
+│            │     └─────────────────────────────────────────┘  │
+│  ────────  │                                                   │
+│  ② Detail  │     Leaderboard • 970×250 • 30 hari • Rp 2.5jt  │
+│     Iklan  │                                                   │
+│     (ringkasan)                                                │
+│  ────────  │                                                   │
+│  ③ Upload  │                                                   │
+│     Materi │                                                   │
+│     ▼      │                                                   │
+│  [📁 area] │                                                   │
+│  ────────  │                                                   │
+│  ④ Bayar   │                                                   │
+│  BCA 829-x │                                                   │
+│  [📁 resi] │                                                   │
+│            │                                                   │
+│  ┌───────┐ │                                                   │
+│  │ Kirim │ │                                                   │
+│  └───────┘ │                                                   │
+└────────────┴───────────────────────────────────────────────────┘
 ```
 
-**Behavior:**
-- Setiap section collapsible — yang sudah diisi auto-collapse, menampilkan ringkasan
-- Preview real-time — upload gambar langsung muncul di mockup website
-- Mockup website menunjukkan posisi slot iklan yang sebenarnya
-- Preview panel sticky di desktop, stacked di mobile
-- Setelah submit, preview berubah jadi success card
+### Sidebar (320px)
+
+4 section collapsible + tombol kirim:
+
+| Section | Fungsi | Behavior |
+|---------|--------|----------|
+| ① Pilih Paket | Radio list paket, format (Gambar/Video) | Expand saat belum dipilih |
+| ② Detail Iklan | Nama kampanye, URL, tanggal | Expand saat belum diisi |
+| ③ Upload Materi | Drag & drop file, multi-size, efek animasi | Expand saat belum upload |
+| ④ Pembayaran | Info rekening, upload bukti transfer | Expand saat belum upload |
+
+**Auto-collapse:** Section yang sudah diisi otomatis collapse, menampilkan ringkasan satu baris.
+**Auto-advance:** Section berikutnya otomatis expand setelah section sebelumnya selesai.
+**Submit:** Tombol "Kirim Pesanan" fixed di bawah sidebar.
+
+### Canvas (full-width)
+
+Preview mockup website dengan slot iklan:
+
+| Slot | Posisi di Mockup |
+|------|-----------------|
+| Leaderboard (970×250) | Di atas konten (homepage) |
+| Rectangle (300×250) | Di sidebar kanan |
+| In-Feed (300×250) | Di antara konten feed |
+
+**Canvas elements:**
+- Browser chrome (tombol merah/kuning/hijau, URL bar)
+- Mockup konten berita (header, headline, paragraf, card)
+- Slot iklan di posisi yang benar
+- Info bar di bawah mockup (nama slot, dimensi, durasi, harga)
+- Status indicator (Draft / Siap)
+
+### Responsive
+
+| Breakpoint | Layout |
+|------------|--------|
+| < 1024px | Stacked: sidebar di atas, canvas di bawah |
+| ≥ 1024px | Side-by-side: sidebar 320px, canvas flex-1 |
+
+### Behavior
+
+- **Preview real-time** — upload gambar langsung muncul di slot mockup
+- **Empty state** — canvas tampilkan "Canvas Kosong, pilih paket di sidebar"
+- **Success state** — canvas berubah jadi success card dengan ringkasan pesanan
 
 ---
 
