@@ -125,7 +125,7 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
     : digits.startsWith('8')
       ? `62${digits}`
       : digits
-  const intro = encodeURIComponent(`Halo ${siteName || 'BeritaKarya'}, saya ingin bergabung dengan channel WhatsApp.`)
+  const intro = encodeURIComponent(`Halo ${siteName || 'BeritaKarya'}, saya ingin menghubungi WhatsApp Redaksi.`)
   return `https://wa.me/${normalizedNumber}?text=${intro}`
 }
 
@@ -661,7 +661,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300/90">
                             WhatsApp
                           </span>
-                          <span className="mt-0.5 block text-xs font-bold text-brand-black dark:text-white">Gabung Channel</span>
+                          <span className="mt-0.5 block text-xs font-bold text-brand-black dark:text-white">WhatsApp Redaksi</span>
                         </span>
                       </span>
                       <ArrowRight size={14} className="shrink-0 text-emerald-600 dark:text-emerald-300 transition-transform group-hover:translate-x-0.5" />
