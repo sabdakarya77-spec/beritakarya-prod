@@ -20,10 +20,132 @@ interface AdItem {
   imageUrl: string | null;
   imageUrlTablet?: string | null;
   imageUrlMobile?: string | null;
+  // Multi‑size IAB alternative URLs
+  imageUrlTabletAlt?: string | null;
+  imageUrlMobileAlt?: string | null;
+  // A/B testing URLs
+  variantAUrl?: string | null;
+  variantBUrl?: string | null;
+  winnerVariant?: string | null;
   linkUrl: string | null;
   animationEffect?: string | null;
   isActive: boolean;
   order: number;
+}
+
+// Mapping of animation effect keys to CSS class names (defined in globals.css)
+const ANIM_CLASS_MAP: Record<string, string> = {
+  ken_burns: 'ad-ken-burns',
+  fade_slide: 'ad-fade-slide',
+  parallax: 'ad-parallax',
+  pulse_scale: 'ad-pulse-scale',
+};
+
+/**
+ * Sub‑component rendering a single ad slide.
+ * Handles script ads, image/video, multi‑size IAB sources, and simple A/B testing.
+ */
+function AdSlide({
+  ad,
+  type: _type,
+  label,
+  onAdClick,
+}: {
+  ad: AdItem;
+  type: string;
+  label: string;
+  onAdClick: (ad: AdItem) => void;
+}) {
+  const isVideoFile = (url: string | null) => {
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
+  };
+
+  // A/B testing – use winner if set, otherwise persist a random pick per ad ID
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  useEffect(() => {
+    if (ad.winnerVariant) {
+      setSelectedVariant(ad.winnerVariant);
+    } else if (ad.variantAUrl && ad.variantBUrl) {
+      const storageKey = `ad-ab-${ad.id}`;
+      const stored = sessionStorage.getItem(storageKey);
+      if (stored === 'A' || stored === 'B') {
+        setSelectedVariant(stored);
+      } else {
+        const pick: string = Math.random() < 0.5 ? 'A' : 'B';
+        sessionStorage.setItem(storageKey, pick);
+        setSelectedVariant(pick);
+      }
+    }
+  }, [ad.id, ad.winnerVariant, ad.variantAUrl, ad.variantBUrl]);
+
+  // Resolve the URL to use (variant or primary image)
+  const resolveUrl = () => {
+    if (selectedVariant === 'A' && ad.variantAUrl) return ad.variantAUrl;
+    if (selectedVariant === 'B' && ad.variantBUrl) return ad.variantBUrl;
+    return ad.imageUrl;
+  };
+
+  // Script ad – sandboxed iframe
+  if (ad.code) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-transparent">
+        <iframe
+          srcDoc={`<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;}</style></head><body>${ad.code}</body></html>`}
+          sandbox="allow-scripts allow-popups"
+          className="w-full h-full border-0"
+          title={label}
+          scrolling="no"
+        />
+      </div>
+    );
+  }
+
+  const effectiveUrl = resolveUrl();
+  if (effectiveUrl) {
+    const isVideo = isVideoFile(effectiveUrl);
+    return (
+      <a
+        href={ad.linkUrl || '#'}
+        onClick={() => onAdClick(ad)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
+      >
+        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
+          {label}
+        </span>
+        {isVideo ? (
+          <video src={effectiveUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+        ) : _type === 'leaderboard' && (ad.imageUrlMobile || ad.imageUrlTablet || ad.imageUrlMobileAlt || ad.imageUrlTabletAlt) ? (
+          (() => {
+            // Pick responsive sources: use alt variants when A/B selected 'B', otherwise primary
+            const useAlt = selectedVariant === 'B';
+            const mobileSrc = useAlt ? (ad.imageUrlMobileAlt || ad.imageUrlMobile) : ad.imageUrlMobile;
+            const tabletSrc = useAlt ? (ad.imageUrlTabletAlt || ad.imageUrlTablet) : ad.imageUrlTablet;
+            return (
+              <picture>
+                {mobileSrc && <source media="(max-width: 639px)" srcSet={mobileSrc} />}
+                {tabletSrc && <source media="(max-width: 767px)" srcSet={tabletSrc} />}
+                <img src={effectiveUrl} alt={label} className={cn(
+                  "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
+                  ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
+                )} />
+              </picture>
+            );
+          })()
+        ) : (
+          <img src={effectiveUrl} alt={label} className={cn(
+            "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
+            _type === 'leaderboard' && ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
+          )} />
+        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+      </a>
+    );
+  }
+  return null;
 }
 
 export default function AdSpace({
@@ -296,108 +418,6 @@ export default function AdSpace({
       </div>
     );
   }
-
+  // Non‑sticky rendering
   return adContent;
-}
-
-// ─── Ad Slide Sub-Component ───────────────────────────────────────────────
-
-const ANIM_CLASS_MAP: Record<string, string> = {
-  ken_burns: 'ad-anim-ken-burns',
-  fade_slide: 'ad-anim-fade-slide',
-  parallax: 'ad-anim-parallax',
-  pulse_scale: 'ad-anim-pulse-scale',
-};
-
-function AdSlide({
-  ad,
-  type: _type,
-  label,
-  onAdClick
-}: {
-  ad: AdItem;
-  type: string;
-  label: string;
-  onAdClick: (ad: AdItem) => void;
-}) {
-  const isVideoFile = (url: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
-  };
-
-  // Script ad — render in sandboxed iframe for XSS isolation
-  if (ad.code) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-transparent">
-        <iframe
-          srcDoc={`<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;}</style></head><body>${ad.code}</body></html>`}
-          sandbox="allow-scripts allow-popups"
-          className="w-full h-full border-0"
-          title={label}
-          scrolling="no"
-        />
-      </div>
-    );
-  }
-
-  // Image/video banner
-  if (ad.imageUrl) {
-    const isVideo = isVideoFile(ad.imageUrl);
-    return (
-      <a
-        href={ad.linkUrl || '#'}
-        onClick={() => onAdClick(ad)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
-      >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
-          {label}
-        </span>
-        {isVideo ? (
-          <video
-            src={ad.imageUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : _type === 'leaderboard' && (ad.imageUrlMobile || ad.imageUrlTablet) ? (
-          // Multi-size IAB: browser selects best image per viewport
-          <picture>
-            {ad.imageUrlMobile && (
-              <source media="(max-width: 639px)" srcSet={ad.imageUrlMobile} />
-            )}
-            {ad.imageUrlTablet && (
-              <source media="(max-width: 767px)" srcSet={ad.imageUrlTablet} />
-            )}
-            <img
-              src={ad.imageUrl}
-              alt={label}
-              className={cn(
-                "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-                ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
-              )}
-            />
-          </picture>
-        ) : (
-          <img
-            src={ad.imageUrl}
-            alt={label}
-            className={cn(
-              "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-              // Apply selected animation effect for static images on leaderboard
-              _type === 'leaderboard' && ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
-            )}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-      </a>
-    );
-  }
-
-  // Empty ad (no code, no image)
-  return null;
 }

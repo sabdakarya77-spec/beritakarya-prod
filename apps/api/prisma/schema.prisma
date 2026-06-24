@@ -216,6 +216,13 @@ model Advertisement {
   imageUrl    String? // If they just want to upload an image banner (desktop 970×250)
   imageUrlTablet String? // Tablet variant (728×90) — leaderboard only
   imageUrlMobile String? // Mobile variant (320×50) — leaderboard only
+  // Multi-size IAB support – additional variant URLs for rectangle/in-feed etc.
+  imageUrlTabletAlt String? // Alternative tablet size for non‑leaderboard slots
+  imageUrlMobileAlt String? // Alternative mobile size for non‑leaderboard slots
+  // A/B testing fields – two variants of the same creative
+  variantAUrl String? // URL for variant A (image or video)
+  variantBUrl String? // URL for variant B (image or video)
+  winnerVariant String? // 'A' | 'B' – set after test period (optional)
   linkUrl     String? // Where the banner clicks to
   isActive    Boolean  @default(true)
   order       Int      @default(0) // Rotation order for carousel (leaderboard)
