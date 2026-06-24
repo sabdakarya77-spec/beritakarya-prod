@@ -12,8 +12,9 @@ async function main() {
   // 1. Generate editorial.png
   // "© BERITAKARYA.co" - Semi-transparent white
   // We render a transparent image containing the text
+  // Then add transparent padding at bottom so text doesn't get cut off at image edge
   const editorialText = `<span foreground="#ffffffaa">© BERITAKARYA.co</span>`
-  await sharp({
+  const editorialTextBuffer = await sharp({
     text: {
       text: editorialText,
       font: 'Inter Bold',
@@ -23,8 +24,25 @@ async function main() {
     }
   })
   .png()
+  .toBuffer()
+
+  const editorialMeta = await sharp(editorialTextBuffer).metadata()
+  const editorialPadding = 40 // transparent padding below text (pushes text up from bottom edge)
+  await sharp({
+    create: {
+      width: editorialMeta.width || 155,
+      height: (editorialMeta.height || 12) + editorialPadding,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    }
+  })
+  .composite([{
+    input: editorialTextBuffer,
+    gravity: 'north',
+  }])
+  .png()
   .toFile(path.join(OUT_DIR, 'editorial.png'))
-  console.log('- Generated editorial.png')
+  console.log('- Generated editorial.png (with bottom padding)')
 
   // 2. Generate kyc-tile.png
   // A tile containing "HANYA UNTUK VERIFIKASI BERITAKARYA" rotated -30 degrees
