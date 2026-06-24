@@ -185,42 +185,53 @@ Komponen: `AdvertiserAdsView`
 
 ---
 
-## Halaman 3 — Order Iklan (`/{site}/dashboard/ads/order`)
+## Halaman 3 — Ad Studio (`/{site}/dashboard/ads/order`)
 
-Flow wizard pemesanan 4 langkah.
+Layout studio: split-pane dengan kontrol di kiri dan preview di kanan.
+
+Komponen: `AdStudio` → `StudioControls` + `StudioPreview`
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  [← Kembali]                                        │
-│                                                     │
-│  ① Pilih Paket → ② Detail → ③ Upload → ④ Bayar    │
-│     ● Aktif        ○          ○          ○          │
-│                                                     │
-│  ┌─ Pilih Paket Iklan ────────────────────────────┐ │
-│  │ ┌─────────────────┐ ┌─────────────────┐        │ │
-│  │ │ 🏆 Leaderboard  │ │ 🖼️ Banner        │        │ │
-│  │ │ 728×90 px       │ │ 300×250 px       │        │ │
-│  │ │ 30 hari         │ │ 14 hari          │        │ │
-│  │ │ Rp 2.500.000    │ │ Rp 1.200.000     │        │ │
-│  │ │ [Pilih →]       │ │ [Pilih →]        │        │ │
-│  │ └─────────────────┘ └─────────────────┘        │ │
-│  └─────────────────────────────────────────────────┘ │
-│                                                     │
-│  Step 2: Nama Kampanye [____] URL [____]            │
-│          Tipe: ○ Gambar  ○ Video                    │
-│                                                     │
-│  Step 3: ┌─ Upload Materi ───────────────────────┐  │
-│          │ Desktop  [📁 Upload 728×90]           │  │
-│          │ Tablet   [📁 Upload 768×102]          │  │
-│          │ Mobile   [📁 Upload 320×50]           │  │
-│          └───────────────────────────────────────┘  │
-│                                                     │
-│  Step 4: ┌─ Pembayaran ──────────────────────────┐  │
-│          │ Transfer: BCA 1234567890 a.n. PT BK   │  │
-│          │ [📷 Upload Bukti] [✅ Submit]           │  │
-│          └───────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  [← Kembali]                                    Buat Iklan Baru │
+├───────────────────────────┬─────────────────────────────────────┤
+│                           │                                     │
+│  KONTROL (kiri)           │  LIVE PREVIEW (kanan, sticky)       │
+│  420px, scrollable        │                                     │
+│                           │  ┌─ 🌐 beritakarya.co/pusat ──────┐│
+│  ── ① Pilih Paket ────── │  │ ┌───────────────────────────┐  ││
+│  ┌─────────────────────┐  │  │ │                           │  ││
+│  │ 🏆 Leaderboard      │  │  │ │   Preview iklan           │  ││
+│  │ 970×250 • Rp 2.5jt  │  │  │ │   real-time               │  ││
+│  └─────────────────────┘  │  │ │                           │  ││
+│  ┌─────────────────────┐  │  │ └───────────────────────────┘  ││
+│  │ 🖼️ Sidebar Rect     │  │  │  Headline News...              ││
+│  │ 300×250 • Rp 1.2jt  │  │  │  ─────────────────            ││
+│  └─────────────────────┘  │  │  Content area...               ││
+│                           │  └─────────────────────────────────┘│
+│  ── ② Detail Kampanye ── │                                     │
+│  Nama [_____________]     │  Slot: Leaderboard Atas             │
+│  URL  [_____________]     │  Dimensi: 970×250 px                │
+│  Format: ○ Gambar ○ Video │  Durasi: 30 hari • Rp 2.500.000   │
+│                           │                                     │
+│  ── ③ Upload Materi ──── │                                     │
+│  [📁 Drag & drop area]    │                                     │
+│                           │                                     │
+│  ── ④ Bayar ──────────── │                                     │
+│  BCA 829-0123-456         │                                     │
+│  [📁 Upload resi]         │                                     │
+│                           │                                     │
+│  [✅ Kirim Pesanan]       │                                     │
+│                           │                                     │
+└───────────────────────────┴─────────────────────────────────────┘
 ```
+
+**Behavior:**
+- Setiap section collapsible — yang sudah diisi auto-collapse, menampilkan ringkasan
+- Preview real-time — upload gambar langsung muncul di mockup website
+- Mockup website menunjukkan posisi slot iklan yang sebenarnya
+- Preview panel sticky di desktop, stacked di mobile
+- Setelah submit, preview berubah jadi success card
 
 ---
 
@@ -286,6 +297,11 @@ Tab **Slot Iklan**, **Paket**, dan **Booking** hanya untuk superadmin/wapimred.
 | Dashboard Overview | `apps/web/components/dashboard/AdvertiserDashboardOverview.tsx` |
 | Ads View | `apps/web/components/dashboard/ads/AdvertiserAdsView.tsx` |
 | Performance Chart | `apps/web/components/dashboard/ads/AdPerformanceChart.tsx` |
+| **Ad Studio** | `apps/web/components/dashboard/ads/studio/AdStudio.tsx` |
+| Studio Controls | `apps/web/components/dashboard/ads/studio/StudioControls.tsx` |
+| Studio Preview | `apps/web/components/dashboard/ads/studio/StudioPreview.tsx` |
+| Studio Section Header | `apps/web/components/dashboard/ads/studio/SectionHeader.tsx` |
+| Studio Types | `apps/web/components/dashboard/ads/studio/types.ts` |
 | Order Page | `apps/web/app/[site]/dashboard/ads/order/page.tsx` |
 | History Page | `apps/web/app/[site]/dashboard/ads/history/page.tsx` |
 | Ads Overview Page | `apps/web/app/[site]/dashboard/ads/page.tsx` |
