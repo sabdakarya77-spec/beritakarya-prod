@@ -426,6 +426,10 @@ function extractTextContent(node: JSONNode): string {
         }).join('') || ''
         return `<ul>${items}</ul>`
       }
+      // Recurse into block children (paragraph, heading, etc.) used by mediaText, callout, etc.
+      if (child.content && child.type !== 'text') {
+        return extractTextContent(child)
+      }
       return ''
     })
     .join('')
