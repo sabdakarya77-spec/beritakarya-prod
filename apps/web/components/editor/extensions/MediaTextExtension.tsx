@@ -3,7 +3,7 @@
 import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { useState, useCallback } from 'react'
-import { Trash2, Upload, Image as ImageIcon, X, AlignLeft, AlignRight, AlignCenter } from 'lucide-react'
+import { Trash2, Upload, Image as ImageIcon, X, AlignLeft, AlignRight } from 'lucide-react'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
 import { useImageUpload } from '../../../hooks/useImageUpload'
@@ -73,18 +73,6 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
                 title="Gambar di kiri"
               >
                 <AlignLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => toggleLayout('center')}
-                className={cn(
-                  'p-1.5 transition-colors',
-                  layout === 'center' 
-                    ? 'bg-brand-red text-white' 
-                    : 'hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-400'
-                )}
-                title="Gambar di atas"
-              >
-                <AlignCenter className="w-4 h-4" />
               </button>
               <button
                 onClick={() => toggleLayout('right')}
