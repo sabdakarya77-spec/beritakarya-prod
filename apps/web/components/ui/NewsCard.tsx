@@ -151,10 +151,10 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
                   {primaryCategoryName || 'UMUM'}
                 </span>
               </div>
-              <h2 className="mb-3.5 line-clamp-2 font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
+              <h2 className="mb-3.5 max-w-[75%] line-clamp-2 font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
                 {article.title}
               </h2>
-              <p className="mb-5 max-w-2xl line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
+              <p className="mb-5 max-w-[80%] line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
                 {excerptText}
               </p>
               <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[11px] font-semibold text-white/70">
