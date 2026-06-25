@@ -180,7 +180,7 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, role: true } }
+      author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
 }

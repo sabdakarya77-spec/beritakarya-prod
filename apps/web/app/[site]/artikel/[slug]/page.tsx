@@ -254,8 +254,16 @@ export default async function ArticlePage({ params }: Props) {
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-sm font-sans font-bold text-white">
-                        {article.author?.name?.[0] || 'R'}
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 backdrop-blur-sm text-sm font-sans font-bold text-white">
+                        {article.author?.avatarUrl ? (
+                          <img
+                            src={article.author.avatarUrl}
+                            alt={article.author?.name || 'Author'}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          article.author?.name?.[0] || 'R'
+                        )}
                       </div>
                       <div>
                         <div className="text-[11px] font-bold text-white">{article.author?.name || 'Redaksi'}</div>
@@ -496,8 +504,16 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                     <div className="rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-white/5 dark:bg-white/[0.03]">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-red text-xs font-sans font-bold text-white shadow-md shadow-brand-red/10">
-                          {article.author?.name?.[0] || 'R'}
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-red text-xs font-sans font-bold text-white shadow-md shadow-brand-red/10">
+                          {article.author?.avatarUrl ? (
+                            <img
+                              src={article.author.avatarUrl}
+                              alt={article.author?.name || 'Author'}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            article.author?.name?.[0] || 'R'
+                          )}
                         </div>
                         <div className="min-w-0">
                           <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
