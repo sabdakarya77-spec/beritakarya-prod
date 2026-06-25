@@ -32,9 +32,13 @@ export default function AuthorCard({ author, site, variant = 'card', className }
   if (variant === 'inline') {
     return (
       <div className={cn('flex items-center gap-3', className)}>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-red to-red-800 flex items-center justify-center text-white text-[11px] font-semibold">
-          {initials}
-        </div>
+        {author.avatarUrl ? (
+          <img src={author.avatarUrl} alt={author.name} className="w-8 h-8 rounded-full object-cover" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-red to-red-800 flex items-center justify-center text-white text-[11px] font-semibold">
+            {initials}
+          </div>
+        )}
         <div className="flex flex-col min-w-0">
           <span className="text-xs font-bold text-brand-black dark:text-white truncate">{author.name}</span>
           <span className="text-[10px] text-brand-text-muted font-medium">
@@ -48,9 +52,13 @@ export default function AuthorCard({ author, site, variant = 'card', className }
   return (
     <div className={cn('dash-card p-6', className)}>
       <div className="flex items-start gap-4">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-red to-red-800 flex items-center justify-center text-white text-lg font-black font-serif flex-shrink-0 shadow-lg shadow-brand-red/20">
-          {initials}
-        </div>
+        {author.avatarUrl ? (
+          <img src={author.avatarUrl} alt={author.name} className="w-14 h-14 rounded-full object-cover flex-shrink-0 shadow-lg shadow-brand-red/20" />
+        ) : (
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-red to-red-800 flex items-center justify-center text-white text-lg font-black font-serif flex-shrink-0 shadow-lg shadow-brand-red/20">
+            {initials}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">{author.name}</h4>
           <p className="text-[10px] font-semibold text-brand-red tracking-wide mt-0.5">

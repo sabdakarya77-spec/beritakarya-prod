@@ -15,7 +15,7 @@ interface Comment {
   authorEmail?: string;
   status: string;
   createdAt: string;
-  user?: { name: string };
+  user?: { name: string; avatarUrl?: string | null };
   replies?: Comment[];
 }
 
@@ -103,9 +103,13 @@ export default function CommentSection({ articleId }: { articleId: string }) {
         <div className="mb-8 rounded-[1.75rem] border border-gray-100 bg-gray-50/75 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-white/[0.02] dark:shadow-[0_18px_50px_rgba(0,0,0,0.2)] md:p-5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-text-muted shadow-sm dark:bg-white/5">
-                <span className="font-black text-sm text-brand-red">{user.name[0]}</span>
-              </div>
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm" />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-text-muted shadow-sm dark:bg-white/5">
+                  <span className="font-black text-sm text-brand-red">{user.name[0]}</span>
+                </div>
+              )}
               <div className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm transition-all focus-within:border-brand-red/30 dark:border-white/10 dark:bg-slate-900">
                 <textarea
                   ref={textareaRef}
@@ -197,9 +201,13 @@ export default function CommentSection({ articleId }: { articleId: string }) {
           comments.map((c) => (
             <article key={c.id} className="border-b border-gray-100 pb-6 last:border-b-0 dark:border-white/5">
               <div className="flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-black text-brand-red dark:bg-white/5">
-                  {c.user?.name?.[0] || c.authorName?.[0] || 'P'}
-                </div>
+                {c.user?.avatarUrl ? (
+                  <img src={c.user.avatarUrl} alt={c.user?.name || c.authorName || 'P'} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-black text-brand-red dark:bg-white/5">
+                    {c.user?.name?.[0] || c.authorName?.[0] || 'P'}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <h4 className="text-[11px] font-black uppercase tracking-widest text-brand-black dark:text-white">

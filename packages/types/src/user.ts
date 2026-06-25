@@ -4,6 +4,7 @@ export interface User {
   id: string
   email: string
   name: string
+  avatarUrl: string | null
   role: UserRole
   siteId: string | null  // null = editor pusat (akses semua site)
   isVerified: boolean

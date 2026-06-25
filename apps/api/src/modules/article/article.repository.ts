@@ -75,7 +75,7 @@ export async function findArticlesBySite(
         categories: {
           include: { category: { select: { id: true, name: true, slug: true } } }
         },
-        author: { select: { id: true, name: true, role: true } }
+        author: { select: { id: true, name: true, avatarUrl: true, role: true } }
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -109,7 +109,7 @@ export async function findArticlesByIds(
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, role: true } }
+      author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
 }
@@ -146,7 +146,7 @@ export async function findArticleById(id: string, siteId: string) {
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, email: true, role: true } }
+      author: { select: { id: true, name: true, email: true, avatarUrl: true, role: true } }
     }
   })
 }
@@ -163,7 +163,7 @@ export async function findArticleBySlug(slug: string, siteId: string) {
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, role: true } }
+      author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
 }
@@ -213,7 +213,7 @@ export async function createArticle(data: {
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, role: true } }
+      author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
 }
@@ -243,7 +243,7 @@ export async function updateArticle(
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
       categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-      author: { select: { id: true, name: true, role: true } }
+      author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
 }

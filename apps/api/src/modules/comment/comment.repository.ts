@@ -12,7 +12,7 @@ export async function createComment(data: {
   return prisma.comment.create({
     data,
     include: {
-      user: { select: { name: true } }
+      user: { select: { name: true, avatarUrl: true } }
     }
   })
 }
@@ -25,10 +25,10 @@ export async function findCommentsByArticle(articleId: string, siteId: string) {
       status: 'approved'
     },
     include: {
-      user: { select: { name: true } },
+      user: { select: { name: true, avatarUrl: true } },
       replies: {
         where: { status: 'approved' },
-        include: { user: { select: { name: true } } }
+        include: { user: { select: { name: true, avatarUrl: true } } }
       }
     },
     orderBy: { createdAt: 'desc' }
@@ -40,7 +40,7 @@ export async function findPendingComments(siteId: string) {
     where: { siteId, status: 'pending' },
     include: {
       article: { select: { title: true } },
-      user: { select: { name: true } }
+      user: { select: { name: true, avatarUrl: true } }
     },
     orderBy: { createdAt: 'desc' }
   })
