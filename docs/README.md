@@ -2,12 +2,11 @@
 
 Dokumentasi teknis BeritaKarya — platform CMS media digital multi-situs.
 
-## Arsitektur & Analisis
+## Arsitektur
 
 | Document | Description |
 |----------|-------------|
 | [Architecture](architecture.md) | Arsitektur sistem, multi-tenant, design decisions |
-| [Analisa](Analisa.md) | Analisis mendalam infra + codebase, gap analysis, rekomendasi |
 
 ## Infrastruktur & Produksi
 
@@ -26,7 +25,7 @@ Dokumentasi teknis BeritaKarya — platform CMS media digital multi-situs.
 
 | Document | Description |
 |----------|-------------|
-| [Kategori Dashboard](../plan-ui/ux/katagori.md) | Plan perbaikan UI/UX halaman dashboard categories |
+| [Analisis Tipografi](typography-analysis.md) | Perbandingan tipografi BeritaKarya vs media besar |
 
 ## Quick Links
 
