@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
@@ -10,37 +10,40 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  ExternalLink,
   RefreshCw,
+  Upload,
+  Copy,
+  Building2,
+  QrCode,
+  CreditCard,
+  Clock,
+  ExternalLink,
 } from 'lucide-react';
 import type { AdBooking } from '../../../../components/dashboard/ads/types';
 
-export default function AdsBookingsPage() {
-  const { site: _site } = useParams() as { site: string };
+const BANK_ACCOUNTS = [
+  { bank: 'BCA', number: '829-0123-456', name: 'PT Berita Karya Nusantara' },
+  { bank: 'Mandiri', number: '137-00-1234567-8', name: 'PT Berita Karya Nusantara' },
+];
+
+export default function PaymentsPage() {
+  const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
   const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<AdBooking[]>([]);
-  const [showRejectModal, setShowRejectModal] = useState<string | null>(null);
-  const [rejectionNotes, setRejectionNotes] = useState('');
-  // Filters
-  const [bookingFilter, setBookingFilter] = useState<'ALL' | 'VERIFYING' | 'PAID' | 'PENDING' | 'REJECTED'>('ALL');
-  const [bookingSort, setBookingSort] = useState<'newest' | 'oldest'>('newest');
-  // Pagination
-  const BOOKING_PAGE_SIZE = 10;
-  const [visibleBookingCount, setVisibleBookingCount] = useState(BOOKING_PAGE_SIZE);
-
-  const isAdmin = user?.role === 'superadmin' || user?.role === 'wapimred';
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchBookings = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const endpoint = isAdmin ? '/ads/bookings/all' : '/ads/bookings/my';
-      const res = await api.get(endpoint, { signal });
+      const res = await api.get('/ads/bookings/my', { signal });
       if (signal?.aborted) return;
       setBookings(res.data.data || []);
-    } catch (error: unknown) {
-      if ((error as { name?: string })?.name !== 'CanceledError') console.error('Gagal mengambil booking', error);
+    } catch {
+      // silent
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
@@ -53,256 +56,211 @@ export default function AdsBookingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    setVisibleBookingCount(BOOKING_PAGE_SIZE);
-  }, [bookingFilter, bookingSort]);
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text.replace(/-/g, ''));
+    setCopiedAccount(label);
+    addToast(`Nomor ${label} disalin`, 'success');
+    setTimeout(() => setCopiedAccount(null), 2000);
+  };
 
-  const filteredBookings = bookings
-    .filter(b => bookingFilter === 'ALL' || b.paymentStatus === bookingFilter)
-    .sort((a, b) => bookingSort === 'newest'
-      ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-  const visibleBookings = filteredBookings.slice(0, visibleBookingCount);
-  const hasMoreBookings = visibleBookingCount < filteredBookings.length;
-
-  const handleApproveBooking = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menyetujui iklan ini dan meluncurkannya ke website tujuan?')) return;
+  const handleUploadReceipt = async (bookingId: string, file: File) => {
+    setUploadingId(bookingId);
     try {
-      await api.post(`/ads/bookings/${id}/approve`);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('siteId', site || 'pusat');
+      const uploadRes = await api.post('/media/upload?purpose=ad-receipt', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const receiptUrl = uploadRes.data?.data?.url || uploadRes.data?.url || uploadRes.data?.filePath || '';
+      if (!receiptUrl) throw new Error('Gagal mengunggah file');
+
+      await api.post(`/ads/bookings/${bookingId}/pay`, { paymentProof: receiptUrl });
+      addToast('Bukti pembayaran berhasil diunggah', 'success');
       await fetchBookings();
-      addToast('Iklan disetujui & aktif di website cabang!', 'success');
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal menyetujui iklan', 'error');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
+      addToast(msg || 'Gagal mengunggah bukti pembayaran', 'error');
+    } finally {
+      setUploadingId(null);
     }
   };
 
-  const handleRejectBooking = async () => {
-    if (!showRejectModal || !rejectionNotes.trim()) return;
-    try {
-      await api.post(`/ads/bookings/${showRejectModal}/reject`, { rejectionNotes });
-      await fetchBookings();
-      addToast('Pengajuan iklan ditolak', 'info');
-      setShowRejectModal(null);
-      setRejectionNotes('');
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal menolak iklan', 'error');
+  const formatRupiah = (val: string | number) =>
+    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'PAID': return { label: 'Diverifikasi', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle2 };
+      case 'VERIFYING': return { label: 'Menunggu Verifikasi', color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: Clock };
+      case 'REJECTED': return { label: 'Ditolak', color: 'bg-red-500/10 text-red-600 border-red-500/20', icon: XCircle };
+      default: return { label: 'Menunggu Pembayaran', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: AlertCircle };
     }
   };
+
+  if (!user) return null;
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">
-          {isAdmin ? 'Antrean Validasi Pemesanan' : 'Status Pembayaran'}
-        </h3>
-        <div className="flex flex-wrap items-center gap-2">
-          {(['ALL', 'VERIFYING', 'PAID', 'PENDING', 'REJECTED'] as const).map(f => (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div>
+        <h1 className="text-lg font-black text-brand-black dark:text-white uppercase tracking-tight">Pembayaran</h1>
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Transfer ke rekening di bawah ini, lalu unggah bukti pembayaran</p>
+      </div>
+
+      {/* Bank Accounts & QRIS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {BANK_ACCOUNTS.map(({ bank, number, name }) => (
+          <div key={bank} className="dash-card p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-brand-red/10 flex items-center justify-center">
+                <Building2 size={16} className="text-brand-red" />
+              </div>
+              <span className="text-sm font-black text-brand-black dark:text-white uppercase">{bank}</span>
+            </div>
+            <div>
+              <p className="text-lg font-black text-brand-red tracking-wider">{number}</p>
+              <p className="text-[9px] text-gray-400 uppercase tracking-wider mt-0.5">a/n {name}</p>
+            </div>
             <button
-              key={f}
-              onClick={() => setBookingFilter(f)}
+              onClick={() => copyToClipboard(number, bank)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
-                bookingFilter === f
-                  ? f === 'VERIFYING' ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400"
-                  : f === 'PAID' ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                  : f === 'REJECTED' ? "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400"
-                  : "bg-brand-red/10 border-brand-red/30 text-brand-red"
-                  : "bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-400 hover:text-gray-600"
+                "flex items-center gap-2 px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all w-full justify-center",
+                copiedAccount === bank
+                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                  : "bg-gray-50 dark:bg-white/5 text-gray-500 border border-gray-200 dark:border-white/10 hover:text-brand-red hover:border-brand-red/20"
               )}
             >
-              {f === 'ALL' ? 'Semua' : f}
-              {f === 'VERIFYING' && bookings.filter(b => b.paymentStatus === 'VERIFYING').length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-[7px] rounded-full">{bookings.filter(b => b.paymentStatus === 'VERIFYING').length}</span>
-              )}
+              {copiedAccount === bank ? <CheckCircle2 size={12} /> : <Copy size={12} />}
+              {copiedAccount === bank ? 'Tersalin!' : 'Salin Nomor'}
             </button>
-          ))}
-          <div className="h-4 w-px bg-gray-200 dark:bg-white/10 mx-1" />
-          <select
-            value={bookingSort}
-            onChange={e => setBookingSort(e.target.value as 'newest' | 'oldest')}
-            className="px-2 py-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-wider text-gray-500 outline-none"
-          >
-            <option value="newest">Terbaru</option>
-            <option value="oldest">Terlama</option>
-          </select>
+          </div>
+        ))}
+
+        {/* QRIS */}
+        <div className="dash-card p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <QrCode size={16} className="text-emerald-600" />
+            </div>
+            <span className="text-sm font-black text-brand-black dark:text-white uppercase">QRIS</span>
+          </div>
+          <div className="w-full aspect-square max-w-[160px] bg-white rounded-xl border border-gray-200 flex items-center justify-center mx-auto">
+            <div className="text-center p-4">
+              <QrCode size={64} className="text-gray-300 mx-auto mb-2" />
+              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Scan untuk membayar</p>
+            </div>
+          </div>
+          <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-wider">Semua bank & e-wallet</p>
         </div>
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-32">
-          <RefreshCw size={32} className="animate-spin text-brand-red" />
-        </div>
-      ) : filteredBookings.length === 0 ? (
-        <div className="p-16 text-center dash-card">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center">
-            <CheckCircle2 size={28} className="text-gray-300 dark:text-gray-600" />
-          </div>
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
-            {bookingFilter === 'ALL' ? 'Antrean Validasi Kosong' : `Tidak Ada Booking "${bookingFilter}"`}
-          </p>
-          <p className="text-[10px] text-gray-400 max-w-xs mx-auto">
-            {bookingFilter === 'ALL'
-              ? 'Semua pengajuan iklan sudah diproses. Pengajuan baru dari pengiklan akan muncul di sini.'
-              : `Tidak ada booking dengan status "${bookingFilter}". Coba filter lain.`
-            }
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {visibleBookings.map(b => (
-            <div key={b.id} className="dash-card overflow-hidden border-t-4 border-t-brand-red">
-              <div className="p-4 md:p-6 bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h4 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">{b.package?.name}</h4>
-                    <span className="text-[8px] font-black px-2 py-0.5 bg-brand-red/10 text-brand-red rounded-full uppercase tracking-wider">{b.siteId} (Cabang)</span>
-                  </div>
-                  <p className="text-[10px] text-gray-400 mt-1">Pemesan: <strong className="text-brand-black dark:text-white">{b.user?.name}</strong> ({b.user?.email})</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn(
-                    "px-2.5 py-1 rounded-full font-black text-[8px] md:text-[9px] uppercase tracking-widest",
-                    b.paymentStatus === 'PAID' ? "bg-emerald-500/10 text-emerald-500" :
-                    b.paymentStatus === 'VERIFYING' ? "bg-blue-500/10 text-blue-500 animate-pulse" :
-                    b.paymentStatus === 'REJECTED' ? "bg-red-500/10 text-red-500" :
-                    "bg-amber-500/10 text-amber-500"
-                  )}>
-                    PEMBAYARAN: {b.paymentStatus}
-                  </span>
-                  <span className={cn(
-                    "px-2.5 py-1 rounded-full font-black text-[8px] md:text-[9px] uppercase tracking-widest",
-                    b.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-500" :
-                    b.status === 'COMPLETED' ? "bg-slate-500/10 text-slate-400" :
-                    b.status === 'REJECTED' ? "bg-red-500/10 text-red-500" :
-                    "bg-amber-500/10 text-amber-500"
-                  )}>
-                    PENAYANGAN: {b.status}
-                  </span>
-                </div>
-              </div>
+      {/* Payment History */}
+      <div className="space-y-4">
+        <h2 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Riwayat Pembayaran</h2>
 
-              <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                <div className="space-y-4 text-[11px] md:border-r border-gray-50 dark:border-white/5 md:pr-6 pb-4 md:pb-0 border-b md:border-b-0">
-                  <div className="space-y-1">
-                    <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Tanggal Mulai - Selesai</span>
-                    <div className="font-bold">{new Date(b.startDate).toLocaleDateString('id-ID')} s.d {new Date(b.endDate).toLocaleDateString('id-ID')}</div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <RefreshCw size={24} className="animate-spin text-brand-red" />
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="dash-card p-12 text-center">
+            <CreditCard size={32} className="text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Belum ada pembayaran</p>
+            <p className="text-[10px] text-gray-400 mt-1">Riwayat pembayaran iklan Anda akan muncul di sini</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {bookings.map((b) => {
+              const statusConfig = getStatusConfig(b.paymentStatus);
+              const StatusIcon = statusConfig.icon;
+              const isUploading = uploadingId === b.id;
+
+              return (
+                <div key={b.id} className="dash-card p-4 md:p-5">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    {/* Info */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-brand-red/10 flex items-center justify-center flex-shrink-0">
+                        <CreditCard size={18} className="text-brand-red" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-brand-black dark:text-white truncate">
+                          {b.package?.name || 'Paket Iklan'}
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">
+                          {formatRupiah(b.package?.price || '0')} • {b.siteId}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status + Actions */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                        statusConfig.color
+                      )}>
+                        <StatusIcon size={12} />
+                        {statusConfig.label}
+                      </span>
+
+                      {/* Upload receipt button */}
+                      {(b.paymentStatus === 'PENDING' || b.paymentStatus === 'REJECTED') && (
+                        <label className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all",
+                          isUploading
+                            ? "bg-gray-100 dark:bg-white/5 text-gray-400"
+                            : "bg-brand-red text-white hover:bg-red-700 shadow-lg shadow-brand-red/20"
+                        )}>
+                          {isUploading ? (
+                            <RefreshCw size={12} className="animate-spin" />
+                          ) : (
+                            <Upload size={12} />
+                          )}
+                          {isUploading ? 'Mengunggah...' : b.paymentStatus === 'REJECTED' ? 'Ulangi Bukti' : 'Upload Bukti'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={isUploading}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleUploadReceipt(b.id, file);
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Tautan Target Iklan</span>
-                    <a href={b.linkUrl || '#'} target="_blank" rel="noopener noreferrer" className="font-bold text-brand-red flex items-center gap-1 hover:underline truncate">
-                      {b.linkUrl} <ExternalLink size={10} />
-                    </a>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Nilai Transaksi</span>
-                    <div className="text-sm font-black text-brand-black dark:text-white">Rp {parseFloat(b.package?.price || '0').toLocaleString('id-ID')}</div>
-                  </div>
-                  {b.rejectionNotes && (
-                    <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/20 rounded-xl text-[9px] text-red-500 font-bold uppercase tracking-wider">
-                      Catatan Penolakan: {b.rejectionNotes}
+
+                  {/* Rejection notes */}
+                  {b.paymentStatus === 'REJECTED' && b.rejectionNotes && (
+                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/20 rounded-xl">
+                      <p className="text-[9px] text-red-500 font-bold uppercase tracking-wider">
+                        Alasan ditolak: {b.rejectionNotes}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Receipt preview */}
+                  {b.paymentProof && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <a
+                        href={b.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[9px] font-bold text-brand-red uppercase tracking-wider flex items-center gap-1 hover:underline"
+                      >
+                        Lihat Bukti Transfer <ExternalLink size={10} />
+                      </a>
                     </div>
                   )}
                 </div>
-
-                <div className="space-y-2 md:border-r border-gray-50 dark:border-white/5 md:pr-6 pb-4 md:pb-0 border-b md:border-b-0">
-                  <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Materi Kreatif Banner / Video</span>
-                  <div className="h-[120px] bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
-                    {b.imageUrl ? (
-                      b.imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i) || b.imageUrl.toLowerCase().includes('video') ? (
-                        <video src={b.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
-                      ) : (
-                        <img src={b.imageUrl} alt="Banner" className="w-full h-full object-contain" />
-                      )
-                    ) : (
-                      <span className="text-[9px] text-gray-400">Tidak ada materi</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest block">Bukti Transfer</span>
-                  <div className="h-[120px] bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden relative group">
-                    {b.paymentProof ? (
-                      <>
-                        <img src={b.paymentProof} alt="Bukti Transfer" className="w-full h-full object-contain cursor-zoom-in" />
-                        <a href={b.paymentProof} target="_blank" rel="noopener noreferrer" className="absolute inset-0 bg-black/40 text-white flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-[9px] font-black uppercase tracking-widest">
-                          Lihat Penuh <ExternalLink size={12} />
-                        </a>
-                      </>
-                    ) : (
-                      <span className="text-[9px] text-gray-400 italic">Bukti transfer belum di-upload</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {isAdmin && b.paymentStatus === 'VERIFYING' && (
-                <div className="px-4 md:px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
-                  <button
-                    onClick={() => setShowRejectModal(b.id)}
-                    className="px-6 py-2.5 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-red-500/10"
-                  >
-                    <XCircle size={12} /> Tolak Pengajuan
-                  </button>
-                  <button
-                    onClick={() => handleApproveBooking(b.id)}
-                    className="px-8 py-2.5 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/10"
-                  >
-                    <CheckCircle2 size={12} /> Setujui & Luncurkan!
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Pagination */}
-          {filteredBookings.length > BOOKING_PAGE_SIZE && (
-            <div className="flex flex-col items-center gap-3 pt-2">
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                Menampilkan {visibleBookings.length} dari {filteredBookings.length} booking
-              </p>
-              {hasMoreBookings && (
-                <button
-                  onClick={() => setVisibleBookingCount(prev => prev + BOOKING_PAGE_SIZE)}
-                  className="px-6 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-white/10 transition-all"
-                >
-                  Muat Lebih Banyak
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Rejection Modal — admin only */}
-      {isAdmin && showRejectModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-white/5 w-full max-w-md p-6 space-y-6 shadow-2xl animate-fade-in">
-            <div className="flex items-center gap-2 text-red-500">
-              <AlertCircle size={20} />
-              <h4 className="text-sm font-black uppercase tracking-widest">Catatan Penolakan Kampanye</h4>
-            </div>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Berikan alasan penolakan secara jelas agar Advertiser dapat memahami kesalahan materi iklan atau bukti pembayaran mereka.</p>
-            <textarea
-              value={rejectionNotes}
-              onChange={(e) => setRejectionNotes(e.target.value)}
-              placeholder="Contoh: Bukti transfer tidak terbaca karena buram."
-              rows={4}
-              className="w-full p-4 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-2xl text-xs outline-none focus:border-brand-red transition-all"
-              required
-            />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => { setShowRejectModal(null); setRejectionNotes(''); }} className="px-6 py-2.5 bg-gray-100 dark:bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500">Batal</button>
-              <button onClick={handleRejectBooking} className="px-6 py-2.5 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/10">Kirim Penolakan</button>
-            </div>
+              );
+            })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
