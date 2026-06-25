@@ -20,6 +20,7 @@ export interface AuthUser {
   id: string
   email: string
   name: string
+  avatarUrl: string | null
   role: UserRole
   siteId: string | null
   isVerified: boolean

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
 import jwt from 'jsonwebtoken'
+import multer from 'multer'
 import { prisma } from '../../db/client'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
@@ -9,6 +10,8 @@ import { redis } from '../../lib/redis'
 import { emailService } from '../../services/email.service'
 import { logger } from '../../lib/logger'
 import { env } from '../../lib/env'
+import { StorageService } from '../../services/storage.service'
+import { AppError } from '../../utils/AppError'
 
 export const userRouter = Router()
 
@@ -37,6 +40,7 @@ userRouter.get('/public/:id',
       select: {
         id: true,
         name: true,
+        avatarUrl: true,
         role: true,
         bio: true,
         createdAt: true
@@ -99,7 +103,7 @@ userRouter.get('/public/:id',
           metaTitle: true,
           metaDescription: true,
           categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
-          author: { select: { id: true, name: true, role: true } }
+          author: { select: { id: true, name: true, avatarUrl: true, role: true } }
         },
         orderBy: { publishedAt: 'desc' },
         take: 6
@@ -331,6 +335,7 @@ userRouter.get('/profile',
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
         role: true,
         bio: true,
         siteId: true,
@@ -379,6 +384,7 @@ userRouter.put('/profile',
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
         role: true,
         bio: true,
         isVerified: true,
@@ -386,6 +392,78 @@ userRouter.put('/profile',
       }
     })
 
+    res.json({ success: true, data: user })
+  })
+)
+
+// ─── Avatar Upload ──────────────────────────────────────────────────────────
+
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (_, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(new AppError('Tipe file tidak didukung. Gunakan JPG, PNG, atau WebP', 400, 'INVALID_FILE_TYPE'))
+    }
+  },
+})
+
+async function loadSharp() {
+  try {
+    const mod = await import('sharp')
+    return mod.default
+  } catch {
+    throw new AppError('Image processing tidak tersedia', 500, 'SHARP_UNAVAILABLE')
+  }
+}
+
+// POST /api/v1/users/avatar - Upload avatar
+userRouter.post('/avatar',
+  requireAuth,
+  avatarUpload.single('file'),
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId
+    const file = req.file
+
+    if (!file) {
+      throw new AppError('File tidak ditemukan', 400, 'FILE_REQUIRED')
+    }
+
+    const sharp = await loadSharp()
+
+    // Resize to 256x256, crop to square, convert to WebP
+    const buffer = await sharp(file.buffer)
+      .resize(256, 256, { fit: 'cover', position: 'center' })
+      .webp({ quality: 85 })
+      .toBuffer()
+
+    const key = `avatars/${userId}.webp`
+
+    // Upload to public media bucket
+    await StorageService.uploadBuffer(buffer, key, 'image/webp', StorageService.mediaBucket, { isPublic: true })
+
+    const avatarUrl = StorageService.getPublicUrl(StorageService.mediaBucket, key)
+
+    // Update user record
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        role: true,
+        bio: true,
+        isVerified: true,
+        updatedAt: true
+      }
+    })
+
+    logger.info(`[User] Avatar updated for user ${userId}`)
     res.json({ success: true, data: user })
   })
 )

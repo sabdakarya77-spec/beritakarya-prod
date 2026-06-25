@@ -32,6 +32,7 @@ interface ProfileData {
   email: string;
   role: string;
   bio: string | null;
+  avatarUrl: string | null;
   isVerified: boolean;
 }
 
@@ -44,12 +45,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
   // Profile state
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [_email, setEmail] = useState('');
   const [role, setRole] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
   
   // Password state
@@ -79,6 +83,7 @@ export default function ProfilePage() {
           setBio(profileData.bio || '');
           setEmail(profileData.email || user.email || '');
           setRole(profileData.role || user.role || '');
+          setAvatarUrl(profileData.avatarUrl || user.avatarUrl || null);
           setIsVerified(profileData.isVerified ?? user.isVerified ?? false);
         }
       } catch (_err) {
@@ -163,6 +168,44 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileMessage({ type: 'error', text: 'Ukuran file maksimal 5 MB' });
+      return;
+    }
+
+    // Preview
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await api.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      if (response.data.success) {
+        setAvatarUrl(response.data.data.avatarUrl);
+        setAvatarPreview(null);
+        setProfileMessage({ type: 'success', text: 'Foto profil berhasil diunggah' });
+      }
+    } catch (err: unknown) {
+      setAvatarPreview(null);
+      setProfileMessage({ type: 'error', text: (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) ?? 'Gagal mengunggah foto profil' });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const getInitials = (n: string) => {
+    return n.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -189,6 +232,51 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Profile Info */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Avatar Upload */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm"
+          >
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-6 flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Foto Profil
+            </h2>
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center shadow-lg">
+                  {avatarPreview || avatarUrl ? (
+                    <img
+                      src={avatarPreview || avatarUrl || ''}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-black text-white">{getInitials(name)}</span>
+                  )}
+                </div>
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-300 cursor-pointer transition-all">
+                  <Edit3 className="w-3.5 h-3.5" />
+                  {avatarUrl ? 'Ganti Foto' : 'Unggah Foto'}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                    disabled={uploadingAvatar}
+                  />
+                </label>
+                <p className="text-[10px] text-slate-400">JPG, PNG, atau WebP. Maksimal 5 MB.</p>
+              </div>
+            </div>
+          </motion.div>
           {/* Profile Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

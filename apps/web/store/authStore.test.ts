@@ -51,7 +51,7 @@ describe('authStore', () => {
   })
 
   it('logout menghapus user', async () => {
-    useAuthStore.setState({ user: { id: 'u-1', email: 'x', name: 'x', role: 'reporter', siteId: 'bandung', isVerified: false, kycStatus: 'UNSUBMITTED', kycNotes: null, kycSubmittedAt: null } })
+    useAuthStore.setState({ user: { id: 'u-1', email: 'x', name: 'x', avatarUrl: null, role: 'reporter', siteId: 'bandung', isVerified: false, kycStatus: 'UNSUBMITTED', kycNotes: null, kycSubmittedAt: null } })
     vi.mocked(api.post).mockResolvedValue({ data: {} })
 
     await useAuthStore.getState().logout()

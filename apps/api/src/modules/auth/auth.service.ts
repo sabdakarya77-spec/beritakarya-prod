@@ -221,7 +221,7 @@ export async function resetPassword(email: string, token: string, newPassword: s
   return { success: true, message: 'Password berhasil diubah' }
 }
 
-export async function generateTokenPair(user: { id: string; role: Role; siteId: string | null; email: string; name: string; isVerified: boolean; kycStatus: string; kycNotes?: string | null; kycSubmittedAt?: Date | null }) {
+export async function generateTokenPair(user: { id: string; role: Role; siteId: string | null; email: string; name: string; avatarUrl?: string | null; isVerified: boolean; kycStatus: string; kycNotes?: string | null; kycSubmittedAt?: Date | null }) {
   const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
     userId: user.id,
     role: user.role,
@@ -247,6 +247,7 @@ export async function generateTokenPair(user: { id: string; role: Role; siteId: 
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl || null,
       role: user.role,
       siteId: user.siteId,
       isVerified: user.isVerified,

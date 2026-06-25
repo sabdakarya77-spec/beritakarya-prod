@@ -94,6 +94,7 @@ model User {
   email        String    @unique
   passwordHash String
   name         String
+  avatarUrl    String?
   role         Role      @default(reader)
   siteId       String?
   deletedAt    DateTime?

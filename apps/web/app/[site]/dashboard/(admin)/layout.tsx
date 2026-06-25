@@ -234,8 +234,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="border-t border-gray-100 p-4 dark:border-white/5">
               <div className="mb-4 flex items-center gap-3 rounded-2xl bg-gray-50/80 px-3 py-3 dark:bg-white/5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-red to-red-900 text-xs font-black text-white shadow-lg">
-                  {initials}
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-red to-red-900 text-xs font-black text-white shadow-lg overflow-hidden">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    initials
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-xs font-black text-brand-black dark:text-white">{user?.name}</p>
@@ -383,8 +387,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="p-4 border-t border-white/5 bg-black/40 backdrop-blur-md">
           <div className="flex items-center gap-3 mb-5 px-2">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-xs font-black text-white shadow-lg flex-shrink-0">
-                {initials}
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-xs font-black text-white shadow-lg flex-shrink-0 overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full" />
             </div>

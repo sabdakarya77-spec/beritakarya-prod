@@ -323,8 +323,12 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
           {/* Profile */}
           <div className="flex items-center gap-3 mb-3 px-2">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-xs font-black text-white shadow-lg flex-shrink-0">
-                {initials}
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-xs font-black text-white shadow-lg flex-shrink-0 overflow-hidden">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full" />
             </div>

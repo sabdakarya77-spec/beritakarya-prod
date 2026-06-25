@@ -42,7 +42,7 @@ const getClearCookieOptions = (isProd: boolean): CookieOptions => {
 authRouter.get('/me', requireAuth, asyncHandler(async (req: Request, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.userId },
-    select: { id: true, name: true, email: true, role: true, siteId: true, isVerified: true, kycStatus: true, kycNotes: true, kycSubmittedAt: true }
+    select: { id: true, name: true, email: true, avatarUrl: true, role: true, siteId: true, isVerified: true, kycStatus: true, kycNotes: true, kycSubmittedAt: true }
   })
   res.json({ success: true, data: { user } })
 }))
