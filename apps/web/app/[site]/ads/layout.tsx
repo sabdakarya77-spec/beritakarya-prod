@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useParams } from 'next/navigation'
+import { usePathname, useParams, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '../../../store/authStore'
 import {
   LayoutDashboard,
@@ -46,6 +46,7 @@ interface NavItem {
 
 export default function AdsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { site } = useParams() as { site: string }
   const { user, logout } = useAuthStore()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -75,8 +76,7 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
 
   // Auto-expand "Iklan Saya" if user is on a sub-page
   useEffect(() => {
-    const iklanSayaChildren = [`/${site}/ads/packages`, `/${site}/ads/order`]
-    if (iklanSayaChildren.some(path => pathname.startsWith(path))) {
+    if (pathname === `/${site}/ads/order`) {
       setExpandedDropdown('iklan-saya')
     }
   }, [pathname, site])
@@ -104,9 +104,9 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
       href: `/${site}/ads/order`,
       icon: Megaphone,
       children: [
-        { name: 'Pilih Paket', href: `/${site}/ads/order`, icon: Package },
-        { name: 'Detail Iklan', href: `/${site}/ads/order`, icon: FileText },
-        { name: 'Upload Materi', href: `/${site}/ads/order`, icon: Upload },
+        { name: 'Pilih Paket', href: `/${site}/ads/order?step=package`, icon: Package },
+        { name: 'Detail Iklan', href: `/${site}/ads/order?step=campaign`, icon: FileText },
+        { name: 'Upload Materi', href: `/${site}/ads/order?step=creative`, icon: Upload },
       ],
     },
     { name: 'Riwayat', href: `/${site}/ads/history`, icon: History },
@@ -123,7 +123,14 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
   }
 
   const isChildActive = (href: string): boolean => {
-    return pathname === href || pathname.startsWith(href + '/')
+    const url = new URL(href, 'http://localhost')
+    const hrefPath = url.pathname
+    const hrefStep = url.searchParams.get('step')
+    const currentStep = searchParams.get('step')
+    if (hrefStep) {
+      return pathname === hrefPath && currentStep === hrefStep
+    }
+    return pathname === hrefPath || pathname.startsWith(hrefPath + '/')
   }
 
   const initials = user?.name

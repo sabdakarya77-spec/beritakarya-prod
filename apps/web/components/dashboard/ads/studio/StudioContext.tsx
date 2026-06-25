@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, type ReactNode, type Dispatch, type SetStateAction } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import type { AdPackage, StudioData, SectionId } from './types';
 
@@ -50,13 +50,21 @@ export function useStudio() {
 
 export function StudioProvider({ children }: { children: ReactNode }) {
   const { site } = useParams() as { site: string };
+  const searchParams = useSearchParams();
+
+  const validSteps: SectionId[] = ['package', 'campaign', 'creative', 'payment'];
+  const initialStep = (() => {
+    const step = searchParams.get('step');
+    return step && validSteps.includes(step as SectionId) ? (step as SectionId) : 'package';
+  })();
+
   const [data, setData] = useState<StudioData>(initialData);
   const [packages, setPackages] = useState<AdPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [activeStep, setActiveStep] = useState<SectionId>('package');
+  const [activeStep, setActiveStep] = useState<SectionId>(initialStep);
 
   useEffect(() => {
     const fetchPackages = async () => {
