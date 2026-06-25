@@ -222,6 +222,16 @@ export const MediaTextExtension = Node.create({
     return [
       {
         tag: 'div[data-media-text]',
+        getAttrs: (element) => {
+          if (typeof element === 'string') return {}
+          const dom = element as HTMLElement
+          return {
+            imageUrl: dom.getAttribute('data-image-url') || '',
+            altText: dom.getAttribute('data-alt-text') || '',
+            caption: dom.getAttribute('data-caption') || '',
+            layout: dom.getAttribute('data-layout') || 'left',
+          }
+        },
       },
     ]
   },

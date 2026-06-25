@@ -328,14 +328,15 @@ function convertTiptapToBlocks(editor: Editor, oldBlocks: Block[] = []): Block[]
           images: (node.attrs?.images as ImageItem[]) || [],
         }
       case 'mediaText':
-        // [FIX] Map Tiptap attrs (imageUrl, altText, text, layout, caption)
+        // [FIX] Map Tiptap attrs (imageUrl, altText, layout, caption)
         // to API block schema (url, alt, content, align, caption) per article.validator.ts
+        // Text content is stored as child nodes (content: 'block+'), not as an attribute
         return {
           ...baseBlock,
           type: 'mediaText' as const,
           url: (node.attrs?.imageUrl as string) || '',
           alt: (node.attrs?.altText as string) || '',
-          content: (node.attrs?.text as string) || '',
+          content: extractTextContent(node),
           align: ((node.attrs?.layout as string) || 'left') as 'left' | 'right',
         }
       case 'image':
