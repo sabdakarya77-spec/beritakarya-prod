@@ -13,6 +13,7 @@ interface Author {
   name: string
   role: string
   bio: string | null
+  avatarUrl?: string | null
   createdAt: string
   publishedCount: number
   totalViews: number
@@ -219,10 +220,18 @@ export default function AuthorsPage() {
                       {/* Avatar & Name */}
                       <div className="flex items-center gap-3">
                         <div className={cn(
-                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-black text-white shadow-md",
-                          getRoleRingClass(author.role)
+                          "flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl text-sm font-black text-white shadow-md",
+                          author.avatarUrl ? '' : getRoleRingClass(author.role)
                         )}>
-                          {getInitials(author.name)}
+                          {author.avatarUrl ? (
+                            <img
+                              src={author.avatarUrl}
+                              alt={author.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            getInitials(author.name)
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h3 className="truncate text-xs font-bold text-gray-900 dark:text-white group-hover:text-brand-red dark:group-hover:text-brand-red transition-colors">

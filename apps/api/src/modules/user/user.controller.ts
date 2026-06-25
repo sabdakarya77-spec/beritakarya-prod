@@ -151,6 +151,7 @@ userRouter.get('/authors',
         name: true,
         role: true,
         bio: true,
+        avatarUrl: true,
         createdAt: true,
         _count: {
           select: { articles: { where: { siteId, status: 'published', deletedAt: null } } }
@@ -173,6 +174,7 @@ userRouter.get('/authors',
       name: author.name,
       role: author.role,
       bio: author.bio,
+      avatarUrl: author.avatarUrl,
       createdAt: author.createdAt,
       publishedCount: author._count.articles,
       totalViews: viewsMap.get(author.id) || 0

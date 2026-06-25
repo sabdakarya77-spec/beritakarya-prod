@@ -35,6 +35,7 @@ interface OtherAuthor {
   id: string
   name: string
   role: string
+  avatarUrl?: string | null
   publishedCount?: number
 }
 
@@ -44,6 +45,7 @@ interface AuthorProfileResponse {
     name: string
     role: string
     bio: string | null
+    avatarUrl: string | null
     createdAt: string
   }
   stats: {
@@ -225,10 +227,18 @@ export default async function AuthorProfilePage({ params }: Props) {
                 {/* Avatar — role-based gradient [Point 3] */}
                 <div className="shrink-0 text-center sm:text-left">
                   <div className={cn(
-                    'inline-flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br text-3xl font-serif font-black text-white transition-transform duration-300 hover:scale-105 md:h-28 md:w-28 md:text-4xl',
-                    getRoleGradient(profile.role)
+                    'inline-flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.75rem] bg-gradient-to-br text-3xl font-serif font-black text-white transition-transform duration-300 hover:scale-105 md:h-28 md:w-28 md:text-4xl',
+                    profile.avatarUrl ? '' : getRoleGradient(profile.role)
                   )}>
-                    {initials}
+                    {profile.avatarUrl ? (
+                      <img
+                        src={profile.avatarUrl}
+                        alt={profile.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
                   </div>
                   {/* Role badge — role-based color [Point 3] */}
                   <div className="mt-3">
@@ -472,10 +482,18 @@ export default async function AuthorProfilePage({ params }: Props) {
                             className="group flex items-center gap-3"
                           >
                             <div className={cn(
-                              'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-white transition-transform group-hover:scale-105',
-                              getRoleGradient(author.role)
+                              'flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-xs font-bold text-white transition-transform group-hover:scale-105',
+                              author.avatarUrl ? '' : getRoleGradient(author.role)
                             )}>
-                              {getInitials(author.name)}
+                              {author.avatarUrl ? (
+                                <img
+                                  src={author.avatarUrl}
+                                  alt={author.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                getInitials(author.name)
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-[11px] font-bold text-brand-black dark:text-white transition-colors group-hover:text-brand-red">
