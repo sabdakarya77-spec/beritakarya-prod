@@ -120,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred'] },
         { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred'] },
         { name: 'Kategori', href: `/${site}/dashboard/categories`, icon: Tag, roles: ['superadmin'] },
-        { name: 'Iklan & Banner', href: `/${site}/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred'] },
+        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred'] },
         { name: 'Komentar', href: `/${site}/dashboard/comments`, icon: MessageSquare, roles: ['superadmin', 'wapimred'] },
       ]
     },
