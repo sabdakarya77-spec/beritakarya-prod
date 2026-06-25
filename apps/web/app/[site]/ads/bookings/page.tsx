@@ -30,10 +30,13 @@ export default function AdsBookingsPage() {
   const BOOKING_PAGE_SIZE = 10;
   const [visibleBookingCount, setVisibleBookingCount] = useState(BOOKING_PAGE_SIZE);
 
+  const isAdmin = user?.role === 'superadmin' || user?.role === 'wapimred';
+
   const fetchBookings = async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const res = await api.get('/ads/bookings/all', { signal });
+      const endpoint = isAdmin ? '/ads/bookings/all' : '/ads/bookings/my';
+      const res = await api.get(endpoint, { signal });
       if (signal?.aborted) return;
       setBookings(res.data.data || []);
     } catch (error: unknown) {
@@ -89,21 +92,13 @@ export default function AdsBookingsPage() {
     }
   };
 
-  if (user?.role !== 'superadmin') {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <AlertCircle size={48} className="text-red-400 mb-4" />
-        <h2 className="text-lg font-black text-brand-black dark:text-white uppercase tracking-tight">Akses Terbatas</h2>
-        <p className="text-xs text-gray-400 mt-2">Halaman ini hanya dapat diakses oleh Superadmin.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Antrean Validasi Pemesanan</h3>
+        <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">
+          {isAdmin ? 'Antrean Validasi Pemesanan' : 'Status Pembayaran'}
+        </h3>
         <div className="flex flex-wrap items-center gap-2">
           {(['ALL', 'VERIFYING', 'PAID', 'PENDING', 'REJECTED'] as const).map(f => (
             <button
@@ -246,7 +241,7 @@ export default function AdsBookingsPage() {
                 </div>
               </div>
 
-              {b.paymentStatus === 'VERIFYING' && (
+              {isAdmin && b.paymentStatus === 'VERIFYING' && (
                 <div className="px-4 md:px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/5 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                   <button
                     onClick={() => setShowRejectModal(b.id)}
@@ -284,8 +279,8 @@ export default function AdsBookingsPage() {
         </div>
       )}
 
-      {/* Rejection Modal */}
-      {showRejectModal && (
+      {/* Rejection Modal — admin only */}
+      {isAdmin && showRejectModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-white/5 w-full max-w-md p-6 space-y-6 shadow-2xl animate-fade-in">
             <div className="flex items-center gap-2 text-red-500">
