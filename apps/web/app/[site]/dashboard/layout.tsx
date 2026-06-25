@@ -207,6 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     : ''
   const isArticleEditorRoute = articleEditorSegment === 'new' || Boolean(articleEditorSegment && !articleEditorSegment.includes('/'))
   const isAdStudioRoute = user?.role === 'advertiser' && pathname === `/${site}/dashboard/ads/order`
+  const isAdsRoute = pathname.startsWith(`/${site}/dashboard/ads`)
   const editorTitle = articleEditorSegment === 'new' ? 'Tulis Post' : 'Editor Post'
 
   return (
@@ -333,17 +334,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <h2 className="text-sm font-black tracking-tight uppercase leading-none text-white">
                   Berita<span className="text-brand-red">Karya</span>
                 </h2>
-                <p className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-bold mt-0.5">Admin Center</p>
+                {!isAdsRoute && (
+                  <p className="text-[8px] text-gray-500 uppercase tracking-[0.2em] font-bold mt-0.5">Admin Center</p>
+                )}
               </div>
             )}
           </Link>
         </div>
 
-        {/* Site Switcher (active portal indicator + dropdown) */}
-        <SiteSwitcher
-          activeSiteId={site}
-          isCollapsed={isSidebarCollapsed}
-        />
+        {/* Site Switcher (active portal indicator + dropdown) — hidden on ads pages */}
+        {!isAdsRoute && (
+          <SiteSwitcher
+            activeSiteId={site}
+            isCollapsed={isSidebarCollapsed}
+          />
+        )}
         
         {/* Navigation Sections */}
         <nav className="flex-1 px-3 pt-4 space-y-6 overflow-y-auto">
