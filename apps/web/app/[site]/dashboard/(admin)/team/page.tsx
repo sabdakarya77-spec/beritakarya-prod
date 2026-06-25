@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { 
   Users, FileText, Eye, 
@@ -16,6 +17,7 @@ interface TeamMember {
   name: string;
   email: string;
   role: string;
+  avatarUrl: string | null;
   isOnline: boolean;
   publishedCount: number;
   totalViews: number;
@@ -107,9 +109,13 @@ export default function TeamMonitoring() {
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-lg font-black text-slate-400 dark:text-gray-500">
-                        {member.name[0].toUpperCase()}
-                      </div>
+                      {member.avatarUrl ? (
+                        <img src={member.avatarUrl} alt={member.name} className="w-12 h-12 rounded-2xl object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-white/5 dark:to-white/10 flex items-center justify-center text-lg font-black text-slate-400 dark:text-gray-500">
+                          {member.name[0].toUpperCase()}
+                        </div>
+                      )}
                       {member.isOnline && (
                         <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-4 border-white dark:border-slate-900 rounded-full" />
                       )}
@@ -166,9 +172,9 @@ export default function TeamMonitoring() {
                 <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                   <Calendar size={12} /> Terdaftar {new Date(member.createdAt).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
                 </div>
-                <button className="text-[10px] font-black text-brand-red uppercase tracking-widest hover:underline">
+                <Link href={`/${site}/penulis/${member.id}`} className="text-[10px] font-black text-brand-red uppercase tracking-widest hover:underline">
                   Profil Lengkap
-                </button>
+                </Link>
               </div>
             </motion.div>
           ))
