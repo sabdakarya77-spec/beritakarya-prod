@@ -150,7 +150,7 @@ cp apps/web/.env.example apps/web/.env.local
 
 ## Production Architecture
 
-Hybrid: **Frontend di Vercel**, backend & database self-hosted di Proxmox VE (2 LXC Container, native tanpa Docker):
+Hybrid: **Frontend di Vercel**, backend & database self-hosted di Proxmox VE (3 LXC Container, native tanpa Docker):
 
 | Lokasi | Layanan |
 |--------|---------|
@@ -163,7 +163,7 @@ Hybrid: **Frontend di Vercel**, backend & database self-hosted di Proxmox VE (2 
 - Frontend multi-site routing via Vercel wildcard subdomain
 - Backend API via Cloudflare Tunnel → `api.beritakarya.co`
 - Media storage: MinIO (S3-compatible) di CT 101, bukan Supabase
-- Dokumentasi: `docs/implementasi-infra.md`, `docs/implementasi-codebase.md`, `docs/Analisa.md`
+- Dokumentasi: `docs/architecture.md`, `docs/panduan_produksi_lxc.md`, `docs/ads.md`
 
 ## Design System
 
