@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '../../../../../../lib/api';
 import { useAuthStore } from '../../../../../../store/authStore';
 import { useToastStore } from '../../../../../../store/toastStore';
@@ -12,11 +13,12 @@ import {
   AlertCircle,
   ExternalLink,
   RefreshCw,
+  ArrowLeft,
 } from 'lucide-react';
 import type { AdBooking } from '../../../../../../components/dashboard/ads/types';
 
 export default function AdsBookingsPage() {
-  const { site: _site } = useParams() as { site: string };
+  const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
   const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
@@ -101,6 +103,9 @@ export default function AdsBookingsPage() {
 
   return (
     <div className="space-y-6">
+      <Link href={`/${site}/dashboard/ads`} className="inline-flex items-center gap-2 text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+        <ArrowLeft size={14} /> Kembali ke Iklan & Banner
+      </Link>
       {/* Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Antrean Validasi Pemesanan</h3>

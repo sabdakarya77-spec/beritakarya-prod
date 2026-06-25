@@ -1,15 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
 import { useToastStore } from '../../../../store/toastStore';
 import { cn } from '../../../../lib/utils';
 import { AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
-import { Plus, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import type { AdPackage } from '../types';
 
 export default function AdsPackagesContent() {
+  const { site } = useParams() as { site: string };
+  const pathname = usePathname();
+  const backHref = pathname.includes('/dashboard/') ? `/${site}/dashboard/ads` : `/${site}/ads`;
   const { user } = useAuthStore();
   const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
@@ -101,6 +106,9 @@ export default function AdsPackagesContent() {
 
   return (
     <div className="space-y-6">
+      <Link href={backHref} className="inline-flex items-center gap-2 text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+        <ArrowLeft size={14} /> Kembali ke Iklan & Banner
+      </Link>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <h3 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-widest">Katalog Paket Tarif Iklan</h3>

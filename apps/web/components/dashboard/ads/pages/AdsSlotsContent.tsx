@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
 import { useToastStore } from '../../../../store/toastStore';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { type AdSlotId, AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
 import AdImageCropper from '../../../ui/AdImageCropper';
 import type { Ad } from '../types';
@@ -14,6 +15,8 @@ import { AdSlotCard } from '../AdSlotCard';
 
 export default function AdsSlotsContent() {
   const { site } = useParams() as { site: string };
+  const pathname = usePathname();
+  const backHref = pathname.includes('/dashboard/') ? `/${site}/dashboard/ads` : `/${site}/ads`;
   const { user } = useAuthStore();
   const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
@@ -206,6 +209,9 @@ export default function AdsSlotsContent() {
 
   return (
     <div className="space-y-8">
+      <Link href={backHref} className="inline-flex items-center gap-2 text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+        <ArrowLeft size={14} /> Kembali ke Iklan & Banner
+      </Link>
       {loading ? (
         <div className="flex items-center justify-center py-32">
           <RefreshCw size={32} className="animate-spin text-brand-red" />
