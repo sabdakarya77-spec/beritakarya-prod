@@ -76,14 +76,14 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
 
   // Advertiser nav items
   const navItems = [
-    { name: 'Beranda', href: `/${site}/dashboard`, icon: LayoutDashboard },
+    { name: 'Beranda', href: `/${site}/ads`, icon: LayoutDashboard },
     { name: 'Iklan Saya', href: `/${site}/ads`, icon: Megaphone },
     { name: 'Riwayat', href: `/${site}/ads/history`, icon: History },
     { name: 'Bantuan', href: 'https://wa.me/628123456789', icon: HelpCircle, external: true },
   ]
 
   const activeItem = navItems
-    .filter(item => pathname === item.href || (item.href !== `/${site}/dashboard` && pathname.startsWith(item.href + '/')))
+    .filter(item => pathname === item.href || (item.href !== `/${site}/ads` && pathname.startsWith(item.href + '/')))
     .sort((a, b) => b.href.length - a.href.length)[0]
   const activeHref = activeItem?.href
 
