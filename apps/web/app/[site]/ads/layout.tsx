@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useParams } from 'next/navigation'
-import { useAuthStore } from '../../../../store/authStore'
+import { useAuthStore } from '../../../store/authStore'
 import {
   LayoutDashboard,
   LogOut,
@@ -17,14 +17,14 @@ import {
   HelpCircle,
   ChevronLeft,
 } from 'lucide-react'
-import { ROLE_LABELS } from '../../../../lib/constants'
+import { ROLE_LABELS } from '../../../lib/constants'
 import { useState, useEffect } from 'react'
-import { cn } from '../../../../lib/utils'
+import { cn } from '../../../lib/utils'
 import { useRouter } from 'next/navigation'
-import NotificationBell from '../../../../components/dashboard/NotificationBell'
-import { AIConsentModal } from '../../../../components/editor/AIConsentModal'
-import { StudioProvider } from '../../../../components/dashboard/ads/studio/StudioContext'
-import { StudioSidebar } from '../../../../components/dashboard/ads/studio/StudioSidebar'
+import NotificationBell from '../../../components/dashboard/NotificationBell'
+import { AIConsentModal } from '../../../components/editor/AIConsentModal'
+import { StudioProvider } from '../../../components/dashboard/ads/studio/StudioContext'
+import { StudioSidebar } from '../../../components/dashboard/ads/studio/StudioSidebar'
 
 function StudioConditionalWrapper({ isAdStudio, children }: { isAdStudio: boolean; children: React.ReactNode }) {
   return isAdStudio ? <StudioProvider>{children}</StudioProvider> : <>{children}</>
@@ -72,13 +72,13 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
     localStorage.setItem('advertiser-sidebar-collapsed', String(next))
   }
 
-  const isAdStudioRoute = pathname === `/${site}/dashboard/ads/order`
+  const isAdStudioRoute = pathname === `/${site}/ads/order`
 
   // Advertiser nav items
   const navItems = [
     { name: 'Beranda', href: `/${site}/dashboard`, icon: LayoutDashboard },
-    { name: 'Iklan Saya', href: `/${site}/dashboard/ads`, icon: Megaphone },
-    { name: 'Riwayat', href: `/${site}/dashboard/ads/history`, icon: History },
+    { name: 'Iklan Saya', href: `/${site}/ads`, icon: Megaphone },
+    { name: 'Riwayat', href: `/${site}/ads/history`, icon: History },
     { name: 'Bantuan', href: 'https://wa.me/628123456789', icon: HelpCircle, external: true },
   ]
 
@@ -107,7 +107,7 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
       )}>
         {/* Logo Section — no "Admin Center", no "Portal Aktif" */}
         <div className="p-6 border-b border-white/5">
-          <Link href={`/${site}/dashboard/ads`} className="flex items-center gap-3">
+          <Link href={`/${site}/ads`} className="flex items-center gap-3">
             <div className="w-9 h-9 bg-brand-red rounded-lg flex items-center justify-center shadow-lg shadow-brand-red/30">
               <span className="text-white text-sm font-black">BK</span>
             </div>

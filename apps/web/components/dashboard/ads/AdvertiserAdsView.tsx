@@ -108,7 +108,7 @@ export function AdvertiserAdsView({ site, bookings }: Props) {
 
       {/* CTA: Order Baru */}
       <Link
-        href={`/${site}/dashboard/ads/order`}
+        href={`/${site}/ads/order`}
         className="dash-card p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 group hover:border-brand-red/30 hover:shadow-lg transition-all"
       >
         <div className="p-4 bg-brand-red/10 text-brand-red rounded-2xl">

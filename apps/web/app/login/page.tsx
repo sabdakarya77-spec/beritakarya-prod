@@ -24,6 +24,8 @@ export default function LoginPage() {
 
       if (user.role === 'reader') {
         router.push(`/${targetSite}`);
+      } else if (user.role === 'advertiser') {
+        router.push(`/${targetSite}/ads`);
       } else {
         router.push(`/${targetSite}/dashboard`);
       }

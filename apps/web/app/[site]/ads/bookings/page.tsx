@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { api } from '../../../../../../lib/api';
-import { useAuthStore } from '../../../../../../store/authStore';
-import { useToastStore } from '../../../../../../store/toastStore';
-import { cn } from '../../../../../../lib/utils';
+import { api } from '../../../../lib/api';
+import { useAuthStore } from '../../../../store/authStore';
+import { useToastStore } from '../../../../store/toastStore';
+import { cn } from '../../../../lib/utils';
 import {
   CheckCircle2,
   XCircle,
@@ -13,7 +13,7 @@ import {
   ExternalLink,
   RefreshCw,
 } from 'lucide-react';
-import type { AdBooking } from '../../../../../../components/dashboard/ads/types';
+import type { AdBooking } from '../../../../components/dashboard/ads/types';
 
 export default function AdsBookingsPage() {
   const { site: _site } = useParams() as { site: string };

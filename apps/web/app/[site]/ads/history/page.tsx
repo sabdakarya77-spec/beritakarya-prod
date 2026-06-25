@@ -3,15 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '../../../../../../lib/api';
-import { useAuthStore } from '../../../../../../store/authStore';
-import { cn } from '../../../../../../lib/utils';
+import { api } from '../../../../lib/api';
+import { useAuthStore } from '../../../../store/authStore';
+import { cn } from '../../../../lib/utils';
 import {
   BarChart3,
   Megaphone,
   RefreshCw,
 } from 'lucide-react';
-import type { AdBooking } from '../../../../../../components/dashboard/ads/types';
+import type { AdBooking } from '../../../../components/dashboard/ads/types';
 
 export default function AdsHistoryPage() {
   const { site } = useParams() as { site: string };
@@ -71,7 +71,7 @@ export default function AdsHistoryPage() {
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Belum Ada Riwayat Kampanye</p>
           <p className="text-[10px] text-gray-400 max-w-xs mx-auto mb-4">Mulai pasang iklan regional untuk menjangkau ribuan pembaca di portal BeritaKarya.</p>
           <Link
-            href={`/${site}/dashboard/ads/order`}
+            href={`/${site}/ads/order`}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-black transition-colors"
           >
             <Megaphone size={14} /> Pesan Iklan Pertama

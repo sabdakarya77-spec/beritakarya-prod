@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { api } from '../../../../../../lib/api';
-import { useAuthStore } from '../../../../../../store/authStore';
-import { useToastStore } from '../../../../../../store/toastStore';
+import { api } from '../../../../lib/api';
+import { useAuthStore } from '../../../../store/authStore';
+import { useToastStore } from '../../../../store/toastStore';
 import { RefreshCw, AlertCircle } from 'lucide-react';
-import { type AdSlotId, AD_SLOT_DEFINITIONS } from '../../../../../../lib/constants';
-import AdImageCropper from '../../../../../../components/ui/AdImageCropper';
-import type { Ad } from '../../../../../../components/dashboard/ads/types';
-import { LeaderboardManager } from '../../../../../../components/dashboard/ads/LeaderboardManager';
-import { AdSlotCard } from '../../../../../../components/dashboard/ads/AdSlotCard';
+import { type AdSlotId, AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
+import AdImageCropper from '../../../../components/ui/AdImageCropper';
+import type { Ad } from '../../../../components/dashboard/ads/types';
+import { LeaderboardManager } from '../../../../components/dashboard/ads/LeaderboardManager';
+import { AdSlotCard } from '../../../../components/dashboard/ads/AdSlotCard';
 
 export default function AdsSlotsPage() {
   const { site } = useParams() as { site: string };

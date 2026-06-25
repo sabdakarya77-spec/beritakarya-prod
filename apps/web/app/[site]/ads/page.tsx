@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '../../../../../lib/api';
-import { useAuthStore } from '../../../../../store/authStore';
+import { api } from '../../../lib/api';
+import { useAuthStore } from '../../../store/authStore';
 import {
   Wallet,
   CheckCircle2,
@@ -17,9 +17,9 @@ import {
   ClipboardList,
   AlertCircle,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
-import type { AdBooking, AdPackage } from '../../../../../components/dashboard/ads/types';
-import { AdvertiserAdsView } from '../../../../../components/dashboard/ads/AdvertiserAdsView';
+import { cn } from '../../../lib/utils';
+import type { AdBooking, AdPackage } from '../../../components/dashboard/ads/types';
+import { AdvertiserAdsView } from '../../../components/dashboard/ads/AdvertiserAdsView';
 
 export default function AdsOverviewPage() {
   const { site } = useParams() as { site: string };
@@ -133,7 +133,7 @@ export default function AdsOverviewPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
-          href={`/${site}/dashboard/ads/slots`}
+          href={`/${site}/ads/slots`}
           className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
         >
           <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Target size={20} /></div>
@@ -144,7 +144,7 @@ export default function AdsOverviewPage() {
           <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
         </Link>
         <Link
-          href={`/${site}/dashboard/ads/packages`}
+          href={`/${site}/ads/packages`}
           className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
         >
           <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl"><Package size={20} /></div>
@@ -155,7 +155,7 @@ export default function AdsOverviewPage() {
           <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
         </Link>
         <Link
-          href={`/${site}/dashboard/ads/bookings`}
+          href={`/${site}/ads/bookings`}
           className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
         >
           <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl"><ClipboardList size={20} /></div>
@@ -180,7 +180,7 @@ export default function AdsOverviewPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Booking Terbaru</h3>
-            <Link href={`/${site}/dashboard/ads/bookings`} className="text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
+            <Link href={`/${site}/ads/bookings`} className="text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline">
               Lihat Semua →
             </Link>
           </div>

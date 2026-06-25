@@ -20,13 +20,13 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   // Shared
-  { name: 'Overview', href: '/dashboard/ads', icon: LayoutDashboard },
+  { name: 'Overview', href: '/ads', icon: LayoutDashboard },
   // Superadmin/Wapimred only
-  { name: 'Slot Iklan', href: '/dashboard/ads/slots', icon: Target, roles: ['superadmin', 'wapimred'] },
-  { name: 'Paket', href: '/dashboard/ads/packages', icon: Package, roles: ['superadmin'] },
-  { name: 'Booking', href: '/dashboard/ads/bookings', icon: ClipboardList, roles: ['superadmin'] },
+  { name: 'Slot Iklan', href: '/ads/slots', icon: Target, roles: ['superadmin', 'wapimred'] },
+  { name: 'Paket', href: '/ads/packages', icon: Package, roles: ['superadmin'] },
+  { name: 'Booking', href: '/ads/bookings', icon: ClipboardList, roles: ['superadmin'] },
   // Advertiser only
-  { name: 'Riwayat', href: '/dashboard/ads/history', icon: History, roles: ['advertiser'] },
+  { name: 'Riwayat', href: '/ads/history', icon: History, roles: ['advertiser'] },
 ];
 
 interface AdsSubNavProps {
@@ -43,7 +43,7 @@ export function AdsSubNav({ site, userRole }: AdsSubNavProps) {
 
   const isActive = (href: string) => {
     const fullPath = `/${site}${href}`;
-    if (href === '/dashboard/ads') {
+    if (href === '/ads') {
       return pathname === fullPath;
     }
     return pathname.startsWith(fullPath);

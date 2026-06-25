@@ -219,7 +219,7 @@ export default function BillboardShowcase({ site, className }: BillboardShowcase
 
             {/* CTA — kanan bawah */}
             <Link
-              href={`/${site}/dashboard/ads`}
+              href={`/${site}/ads`}
               className="absolute right-3 md:right-6 bottom-2 md:bottom-4 z-20 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[9px] md:text-xs font-semibold px-2.5 md:px-4 py-1 md:py-1.5 rounded-full transition-colors"
             >
               Pasang Iklan Anda →

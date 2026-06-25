@@ -187,7 +187,7 @@ export function AdsMarketingPage({
                           </p>
                         </div>
                         <Link
-                          href={`/${siteParam}/dashboard/ads/order?package=${pkg.id}`}
+                          href={`/${siteParam}/ads/order?package=${pkg.id}`}
                           className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-[0.14em] rounded-xl hover:bg-brand-red/90 transition-colors shadow-lg shadow-brand-red/20"
                         >
                           Pesan Paket

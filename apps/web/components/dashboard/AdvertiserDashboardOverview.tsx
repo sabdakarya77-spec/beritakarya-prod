@@ -58,7 +58,7 @@ export function AdvertiserDashboardOverview({ greeting, userName, site }: Advert
       {/* 2 CTA Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
-          href={`/${site}/dashboard/ads/order`}
+          href={`/${site}/ads/order`}
           className="dash-card group p-6 bg-brand-red text-white border-brand-red hover:bg-red-700 transition-all"
         >
           <div className="flex items-start justify-between gap-4">
@@ -76,7 +76,7 @@ export function AdvertiserDashboardOverview({ greeting, userName, site }: Advert
         </Link>
 
         <Link
-          href={`/${site}/dashboard/ads`}
+          href={`/${site}/ads`}
           className="dash-card group p-6 hover:border-brand-red/30 transition-all"
         >
           <div className="flex items-start justify-between gap-4">
@@ -105,7 +105,7 @@ export function AdvertiserDashboardOverview({ greeting, userName, site }: Advert
               <h3 className="text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">Kampanye Aktif</h3>
             </div>
             <Link
-              href={`/${site}/dashboard/ads/history`}
+              href={`/${site}/ads/history`}
               className="text-[10px] font-bold text-brand-red uppercase tracking-widest hover:underline"
             >
               Lihat Semua →
