@@ -13,6 +13,7 @@ interface User {
   name: string;
   email: string;
   role: 'superadmin' | 'wapimred' | 'reporter' | 'kontributor' | 'reader' | 'advertiser';
+  avatarUrl?: string | null;
   siteId?: string | null;
   createdAt: string;
 }
@@ -218,9 +219,13 @@ export default function UsersDashboard() {
                 <tr key={user.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-white text-sm font-bold">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
+                      {user.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-red to-red-900 flex items-center justify-center text-white text-sm font-bold">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name}</p>
                         <p className="text-xs text-gray-500">ID: {user.id.slice(0, 8)}...</p>

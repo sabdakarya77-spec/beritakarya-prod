@@ -214,6 +214,7 @@ userRouter.get('/',
           email: true,
           name: true,
           role: true,
+          avatarUrl: true,
           isVerified: true,
           siteId: true,
           createdAt: true
