@@ -66,6 +66,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [activeStep, setActiveStep] = useState<SectionId>(initialStep);
 
+  // Sync activeStep with URL query param on navigation
+  useEffect(() => {
+    const step = searchParams.get('step');
+    if (step && validSteps.includes(step as SectionId)) {
+      setActiveStep(step as SectionId);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchPackages = async () => {
       try {
