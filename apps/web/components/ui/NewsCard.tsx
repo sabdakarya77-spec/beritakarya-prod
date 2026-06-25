@@ -30,7 +30,7 @@ interface NewsCardArticle {
   createdAt?: string | null;
   category?: { name?: string | null } | null; // legacy
   categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null;
-  author?: { name?: string | null } | null;
+  author?: { name?: string | null; avatarUrl?: string | null } | null;
   blocks?: NewsCardBlock[];
   isBreaking?: boolean;
   isExclusive?: boolean;
@@ -105,6 +105,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
   const readTime = article.readingTimeMin ? `${article.readingTimeMin} min baca` : "3 min baca";
   const badgeVariant = resolveArticleBadge(article);
   const authorName = article.author?.name || 'Redaksi';
+  const authorAvatarUrl = article.author?.avatarUrl || null;
   // Primary category: dari categories[0] (baru) atau category (legacy)
   const primaryCategoryName = article.categories?.[0]?.category?.name || article.category?.name || null;
   const categoryLabelClass = cn(
@@ -158,9 +159,13 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               </p>
               <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[11px] font-semibold text-white/70">
                 <div className="flex items-center gap-1.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-[10px] font-black text-white">
-                    {authorName[0] || 'R'}
-                  </div>
+                  {authorAvatarUrl ? (
+                    <img src={authorAvatarUrl} alt={authorName} className="h-7 w-7 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-[10px] font-black text-white">
+                      {authorName[0] || 'R'}
+                    </div>
+                  )}
                   <span>{authorName}</span>
                 </div>
                 <span className="flex items-center gap-1"><Clock size={12}/> {date}</span>
@@ -246,7 +251,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               {excerptText}
             </p>
             <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
-               <span className="flex min-w-0 items-center gap-1"><User size={11}/> <span className="truncate">{authorName}</span></span>
+               <span className="flex min-w-0 items-center gap-1">
+                  {authorAvatarUrl ? (
+                    <img src={authorAvatarUrl} alt={authorName} className="h-4 w-4 rounded-full object-cover" />
+                  ) : (
+                    <User size={11}/>
+                  )}
+                  <span className="truncate">{authorName}</span>
+                </span>
                <span>{date}</span>
             </div>
           </div>
@@ -295,9 +307,13 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               </h3>
               <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] text-brand-text-muted">
                <div className="flex min-w-0 items-center gap-1">
-                  <div className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold dark:bg-white/10">
-                    {authorName[0] || 'R'}
-                  </div>
+                  {authorAvatarUrl ? (
+                    <img src={authorAvatarUrl} alt={authorName} className="h-[18px] w-[18px] rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold dark:bg-white/10">
+                      {authorName[0] || 'R'}
+                    </div>
+                  )}
                  <span className="truncate">{authorName}</span>
                </div>
                <span className="opacity-30">•</span>

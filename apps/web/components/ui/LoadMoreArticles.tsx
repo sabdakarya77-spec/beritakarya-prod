@@ -16,7 +16,7 @@ interface LoadMoreArticleItem {
   publishedAt?: string | null;
   createdAt?: string | null;
   category?: { name?: string | null } | null;
-  author?: { name?: string | null } | null;
+  author?: { name?: string | null; avatarUrl?: string | null } | null;
   blocks?: Array<{ type: string; content?: string; url?: string; embedType?: string; images?: Array<{ url?: string }> }>;
 }
 

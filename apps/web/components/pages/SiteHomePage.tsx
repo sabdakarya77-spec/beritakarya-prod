@@ -40,7 +40,7 @@ interface HomeArticle {
   isExclusive?: boolean
   readingTimeMin?: number
   wordCount?: number
-  author?: { name: string }
+  author?: { name: string; avatarUrl?: string | null }
   category?: { name: string; slug?: string; parentSlug?: string } // legacy
   categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   blocks?: ArticleBlock[]
@@ -871,9 +871,13 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           </p>
                         </div>
                         <div className="mt-3 flex items-center gap-2 border-t border-black/5 pt-3 dark:border-white/5">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red/10 text-[10px] font-black text-brand-red">
-                            {article.author?.name?.charAt(0) || 'S'}
-                          </div>
+                          {article.author?.avatarUrl ? (
+                            <img src={article.author.avatarUrl} alt={article.author?.name || 'Penulis'} className="h-5 w-5 rounded-full object-cover" />
+                          ) : (
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red/10 text-[10px] font-black text-brand-red">
+                              {article.author?.name?.charAt(0) || 'S'}
+                            </div>
+                          )}
                           <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-black dark:text-white">
                             {article.author?.name || 'Redaksi'}
                           </span>

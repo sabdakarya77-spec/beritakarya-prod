@@ -179,9 +179,13 @@ export default function Navbar({
                   aria-label="Menu profil"
                   className="flex items-center gap-1.5 rounded-full p-1 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
                 >
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white shadow-sm">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="h-6 w-6 rounded-full object-cover shadow-sm" />
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-[10px] font-bold text-white shadow-sm">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden max-w-[88px] truncate text-[11px] font-semibold md:inline">
                     {user.name.split(' ')[0]}
                   </span>
