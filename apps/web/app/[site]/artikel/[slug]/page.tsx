@@ -577,6 +577,8 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   </div>
 
+                  <AdSpace type="rectangle" label="Advertisement" />
+
                   <div className={cn(sidebarCardClass, 'space-y-4')}>
                     <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted">
                       Kategori Terkait
@@ -658,7 +660,6 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   )}
 
-                  <AdSpace type="rectangle" label="Advertisement" />
                   <AdSpace type="rectangle" slot="rectangle_secondary" label="Sponsored" />
                 </div>
               </aside>
