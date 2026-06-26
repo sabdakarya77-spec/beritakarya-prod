@@ -313,7 +313,7 @@ export default function AdSpace({
       const ad = fallbackAds[0];
       return (
         <div className={cn(
-          "relative w-full h-[50px] min-h-[50px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
+          "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
           className
         )}>
           {/* Media (image or video) */}
