@@ -48,6 +48,7 @@ interface StudioContextValue {
   checkingAvailability: boolean;
   checkAvailability: () => Promise<void>;
   completedBookingId: string | null;
+  receiptUploadFailed: boolean;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -75,43 +76,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [activeStep, setActiveStep] = useState<SectionId>(initialStep);
-  const [availability, setAvailability] = useState<AvailabilityStatus | null>(null);
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  // Semua slot mendukung rotasi — selalu tersedia
+  const availability: AvailabilityStatus = { available: true };
+  const checkingAvailability = false;
+  const checkAvailability = async () => {};
   const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
-
-  const checkAvailability = async () => {
-    if (!data.selectedPackage) return
-    // Leaderboard always available
-    if (data.selectedPackage.slot === 'leaderboard') {
-      setAvailability({ available: true })
-      return
-    }
-    setCheckingAvailability(true)
-    try {
-      const res = await api.get('/ads/availability', {
-        params: {
-          slot: data.selectedPackage.slot,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          siteId: site || 'pusat',
-        }
-      })
-      const result = res.data?.data
-      setAvailability(result || { available: true })
-    } catch {
-      setAvailability({ available: true }) // fail-open
-    } finally {
-      setCheckingAvailability(false)
-    }
-  }
-
-  // Re-check availability when package or dates change
-  useEffect(() => {
-    if (data.selectedPackage && data.startDate && data.endDate) {
-      checkAvailability()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.selectedPackage?.id, data.startDate, data.endDate])
+  const [receiptUploadFailed, setReceiptUploadFailed] = useState(false);
 
   // Sync activeStep with URL query param on navigation
   useEffect(() => {
@@ -195,9 +165,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           const uploadedReceiptUrl = await uploadFile(data.receiptFile);
           if (uploadedReceiptUrl) {
             await api.post(`/ads/bookings/${bookingId}/pay`, { paymentProof: uploadedReceiptUrl });
+          } else {
+            setReceiptUploadFailed(true);
           }
         } catch {
-          // Receipt upload failed — booking is still created, user can pay later
+          setReceiptUploadFailed(true);
         }
       }
 
@@ -211,7 +183,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, checkAvailability, completedBookingId }}>
+    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, checkAvailability, completedBookingId, receiptUploadFailed }}>
       {children}
     </StudioContext.Provider>
   );

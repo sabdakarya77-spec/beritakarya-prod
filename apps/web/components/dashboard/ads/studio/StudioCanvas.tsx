@@ -23,7 +23,7 @@ import { getAdSlotDefinition } from '../../../../lib/constants';
 import { useStudio } from './StudioContext';
 
 export function StudioCanvas() {
-  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId } = useStudio();
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId, receiptUploadFailed } = useStudio();
   const [expandedSection, setExpandedSection] = useState<string>('package');
 
   const formatRupiah = (val: string | number) =>
@@ -92,7 +92,15 @@ export function StudioCanvas() {
               <span className="text-brand-red font-black">{formatRupiah(selectedPackage.price)}</span>
             </div>
           )}
-          {!hasReceipt && (
+          {receiptUploadFailed && (
+            <div className="flex items-start gap-2 px-4 py-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-left">
+              <AlertCircle size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-[10px] text-amber-700 dark:text-amber-400">
+                Gagal mengunggah bukti transfer. Silakan upload ulang di halaman Pembayaran.
+              </p>
+            </div>
+          )}
+          {(!hasReceipt || receiptUploadFailed) && (
             <Link
               href={`/${site}/ads/bookings`}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
@@ -299,37 +307,11 @@ export function StudioCanvas() {
                 </div>
               </div>
 
-              {/* Availability indicator */}
-              {data.selectedPackage && data.selectedPackage.slot !== 'leaderboard' && (
-                <div className="flex items-center gap-2">
-                  {checkingAvailability ? (
-                    <div className="flex items-center gap-2 text-[10px] text-gray-400">
-                      <div className="w-3 h-3 border-2 border-gray-300 border-t-brand-red rounded-full animate-spin" />
-                      Mengecek ketersediaan...
-                    </div>
-                  ) : availability?.available === false ? (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg w-full">
-                      <span className="text-red-500 text-sm">✕</span>
-                      <div>
-                        <p className="text-[10px] font-bold text-red-600 dark:text-red-400">Slot Tidak Tersedia</p>
-                        <p className="text-[9px] text-red-500/70">{availability?.message || 'Slot sudah ditempati untuk tanggal ini'}</p>
-                      </div>
-                    </div>
-                  ) : availability?.available === true ? (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
-                      <span className="text-emerald-500 text-sm">✓</span>
-                      <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Slot Tersedia</p>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-
-              {data.selectedPackage?.slot === 'leaderboard' && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg">
-                  <span className="text-blue-500 text-sm">ℹ</span>
-                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Leaderboard mendukung rotasi multi-iklan</p>
-                </div>
-              )}
+              {/* Info: semua slot mendukung rotasi */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg">
+                <span className="text-blue-500 text-sm">ℹ</span>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Semua slot mendukung rotasi multi-iklan</p>
+              </div>
 
               <div className="flex justify-between pt-2">
                 <button

@@ -120,6 +120,21 @@ export const adTrackingLimiter = rateLimit({
   legacyHeaders: false,
 })
 
+export const bookingLimiter = rateLimit({
+  store: getStore('booking'),
+  windowMs: 60 * 60 * 1000, // 1 jam
+  max: 10,                   // 10 booking per user per jam
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMITED',
+      message: 'Terlalu banyak pemesanan. Coba lagi nanti.',
+    },
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
 /**
  * Rate limiter for public (unauthenticated) read endpoints.
  * More restrictive than the general API limiter to prevent abuse.

@@ -95,48 +95,48 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 - ✅ End date otomatis di-recompute saat start date atau paket diubah
 - ✅ Label durasi paket ditampilkan di samping end date
 
-### 8. Tidak Ada Review Konten Iklan
+### 8. Tidak Ada Review Konten Iklan ✅
 
 **Masalah**: Approval hanya cek pembayaran, tidak ada review konten kreatif (image/video).
 
-**Solusi**:
-- Tambah step review konten di admin: preview kreatif + checklist (tidak misleading, tidak SARA, dll)
-- Bisa digabung dengan approval atau jadi step terpisah
-- File terkait:
-  - `apps/web/app/[site]/dashboard/(admin)/ads/bookings/page.tsx`
+**Solusi** (sudah diterapkan):
+- ✅ Checklist review konten di admin booking card — 5 item yang harus dicentang sebelum approve
+- ✅ Tombol "Setujui" disabled jika checklist belum lengkap
+- ✅ Item: tidak misleading, tidak SARA, ukuran sesuai, URL aktif, tidak melanggar hak cipta
 
-### 9. Slot Non-Leaderboard Eksklusif 1 Pengiklan
+### 9. Slot Non-Leaderboard Eksklusif 1 Pengiklan ✅
 
 **Masalah**: Untuk rectangle, rectangle_secondary, dan in_feed — hanya 1 pengiklan yang bisa menempati slot. Booking baru menggantikan yang lama.
 
-**Solusi**:
-- Tambah rotasi untuk slot non-leaderboard (sudah ada untuk leaderboard)
-- Bisa pakai sistem round-robin atau weighted rotation
-- File terkait:
-  - `apps/api/src/modules/ad/ad.repository.ts` (createOrUpdateAdForSlot)
-  - `apps/web/components/ui/AdSpace.tsx`
+**Solusi** (sudah diterapkan):
+- ✅ Semua slot sekarang mendukung rotasi multi-iklan (sama seperti leaderboard)
+- ✅ Approve endpoint: `createAd` + `getNextOrder` untuk semua slot
+- ✅ Hapus overlap check — tidak relevan lagi dengan rotasi
+- ✅ Availability: semua slot selalu tersedia
+- ✅ Frontend: carousel otomatis aktif jika ada 2+ ads di slot yang sama
 
-### 10. Tidak Ada Auto-Expiry
+### 10. Tidak Ada Auto-Expiry ✅
 
 **Masalah**: Iklan tetap aktif setelah endDate habis. Tidak ada cron job untuk menonaktifkan.
 
-**Solusi**:
-- Tambah cron job yang jalan setiap hari
-- Cek booking yang `endDate < today` dan status `ACTIVE`
-- Set `isActive = false` pada Advertisement terkait
-- File terkait:
-  - `apps/api/src/cron/` (tambah adExpiry cron)
+**Solusi** (sudah ada sebelumnya):
+- ✅ Cron job `ad-expiry` sudah terdaftar di `cron.router.ts`
+- ✅ Endpoint `POST /api/cron/ad-expiry` — dijalankan setiap jam
+- ✅ Fungsi `runAdExpiry()` di `ad-expiry.ts` — cek ACTIVE + endDate lewat → COMPLETED + nonaktifkan Advertisement
   - `apps/api/src/modules/ad/ad.repository.ts`
 
 ---
 
 ## Masalah Kecil (Prioritas 3)
 
-### 11. Duplicate Admin Views
+### 11. Duplicate Admin Views ✅
 
 **Masalah**: Halaman booking approval ada di 2 tempat (standalone page + embedded tab).
 
-**Solusi**: Gabungkan jadi satu komponen yang bisa dipakai di kedua tempat.
+**Solusi** (sudah diterapkan):
+- ✅ Komponen `BookingReviewList` — reusable, include checklist review konten + campaign name
+- ✅ Standalone page dan embedded tab menggunakan komponen yang sama
+- ✅ Hapus ~180 baris kode duplikat dari `SuperadminAdsView.tsx`
 
 ### 12. `wapimred` Tidak Bisa Approve
 
@@ -144,17 +144,22 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 
 **Solusi**: Tambah permission approve/reject untuk role `wapimred`, atau sembunyikan tombol jika tidak punya akses.
 
-### 13. Rate Limit di Booking Creation
+### 13. Rate Limit di Booking Creation ✅
 
 **Masalah**: Tidak ada rate limit di `POST /ads/bookings`.
 
-**Solusi**: Tambah rate limiter (misalnya 10 booking per jam per user).
+**Solusi** (sudah diterapkan):
+- ✅ `bookingLimiter` — 10 booking per user per jam
+- ✅ Diterapkan di `POST /bookings` sebelum middleware auth
 
-### 14. Error Handling di Order Flow
+### 14. Error Handling di Order Flow ✅
 
 **Masalah**: Jika booking berhasil tapi upload bukti gagal, booking orphan di status PENDING.
 
-**Solusi**: Tambah retry mechanism atau rollback. Jangan tampilkan success screen jika ada step yang gagal.
+**Solusi** (sudah diterapkan):
+- ✅ State `receiptUploadFailed` — track jika upload gagal
+- ✅ Warning di success screen — "Gagal mengunggah bukti transfer"
+- ✅ Tombol "Bayar Sekarang" tetap muncul jika receipt gagal
 
 ---
 
@@ -169,13 +174,13 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 | 5 | Payment gateway | ✅ Selesai | — |
 | 6 | Campaign name tersimpan | ✅ Selesai | — |
 | 7 | End date konsisten | ✅ Selesai | — |
-| 8 | Review konten iklan | 🟡 Sedang | 1 hari |
-| 9 | Rotasi slot non-leaderboard | 🟡 Sedang | 1-2 hari |
-| 10 | Auto-expiry cron | 🟡 Sedang | 0.5 hari |
-| 11 | Duplicate admin views | 🟢 Kecil | 0.5 hari |
+| 8 | Review konten iklan | ✅ Selesai | — |
+| 9 | Rotasi slot non-leaderboard | ✅ Selesai | — |
+| 10 | Auto-expiry cron | ✅ Sudah Ada | — |
+| 11 | Duplicate admin views | ✅ Selesai | — |
 | 12 | Permission wapimred | 🟢 Kecil | 0.5 hari |
-| 13 | Rate limit booking | 🟢 Kecil | 0.5 hari |
-| 14 | Error handling order | 🟢 Kecil | 0.5 hari |
+| 13 | Rate limit booking | ✅ Selesai | — |
+| 14 | Error handling order | ✅ Selesai | — |
 
 ---
 

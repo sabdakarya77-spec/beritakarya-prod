@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
-import { adTrackingLimiter } from '../../lib/rateLimit'
+import { adTrackingLimiter, bookingLimiter } from '../../lib/rateLimit'
 import { isDuplicateImpression, syncTrackingToBooking, sanitizeAdCode } from './ad.service'
 import * as repo from './ad.repository'
 import { emailService } from '../../services/email.service'
@@ -207,35 +207,14 @@ adRouter.get('/availability',
       return res.status(400).json({ success: false, message: 'slot, startDate, endDate, siteId wajib diisi' })
     }
 
-    // Leaderboard supports rotation — always available
-    if (slot === 'leaderboard') {
-      return res.json({ success: true, data: { available: true } })
-    }
-
-    const conflicting = await repo.findConflictingBooking(
-      siteId,
-      slot,
-      new Date(startDate),
-      new Date(endDate)
-    )
-
-    if (conflicting) {
-      return res.json({
-        success: true,
-        data: {
-          available: false,
-          message: `Slot sudah ditempati hingga ${conflicting.endDate.toISOString().split('T')[0]}`,
-          conflictingEndDate: conflicting.endDate.toISOString().split('T')[0],
-        }
-      })
-    }
-
+    // Semua slot mendukung rotasi — selalu tersedia
     res.json({ success: true, data: { available: true } })
   })
 )
 
 // 3. POST /bookings — Advertiser to book an ad slot
 adRouter.post('/bookings',
+  bookingLimiter,
   requireAuth,
   requireRole(['advertiser']),
   asyncHandler(async (req: Request, res: Response) => {
@@ -256,16 +235,7 @@ adRouter.post('/bookings',
     const computedEndDate = new Date(start)
     computedEndDate.setDate(computedEndDate.getDate() + pkg.durationDays)
 
-    // Cek overlap untuk non-leaderboard slots
-    if (pkg.slot !== 'leaderboard') {
-      const conflicting = await repo.findConflictingBooking(siteId, pkg.slot, start, computedEndDate)
-      if (conflicting) {
-        return res.status(409).json({
-          success: false,
-          message: `Slot "${pkg.slot}" sudah ditempati hingga ${conflicting.endDate.toISOString().split('T')[0]}. Silakan pilih tanggal lain.`
-        })
-      }
-    }
+    // Semua slot mendukung rotasi — tidak perlu cek overlap
 
     const booking = await repo.createBooking({
       userId: req.user!.userId,
@@ -465,12 +435,8 @@ adRouter.post('/webhook/midtrans',
             clicks: 0,
             bookingId: booking.id,
           }
-          if (fullBooking.package.slot === 'leaderboard') {
-            const nextOrder = await repo.getNextOrder(fullBooking.siteId, 'leaderboard')
-            await repo.createAd({ siteId: fullBooking.siteId, slot: 'leaderboard', ...adData, order: nextOrder })
-          } else {
-            await repo.createOrUpdateAdForSlot(fullBooking.siteId, fullBooking.package.slot, adData)
-          }
+          const nextOrder = await repo.getNextOrder(fullBooking.siteId, fullBooking.package.slot)
+          await repo.createAd({ siteId: fullBooking.siteId, slot: fullBooking.package.slot, ...adData, order: nextOrder })
         }
       } catch (err) {
         console.error('Gagal sync ad setelah pembayaran Midtrans:', err)
@@ -581,30 +547,13 @@ adRouter.post('/bookings/:id/approve',
       return res.status(400).json({ success: false, message: 'Booking belum menunggu verifikasi pembayaran' })
     }
 
-    // Validasi overlap: non-leaderboard slot tidak boleh ada booking aktif yang tanggalnya overlap
-    if (booking.package.slot !== 'leaderboard') {
-      const overlapping = await repo.findOverlappingBooking(
-        booking.siteId,
-        booking.package.slot,
-        booking.id,
-        booking.startDate,
-        booking.endDate
-      )
-      if (overlapping) {
-        return res.status(409).json({
-          success: false,
-          message: `Slot "${booking.package.slot}" sudah ditempati booking lain (${overlapping.id}) pada rentang tanggal ${overlapping.startDate.toISOString().slice(0, 10)} — ${overlapping.endDate.toISOString().slice(0, 10)}. Tolak atau tunggu hingga booking tersebut berakhir.`
-        })
-      }
-    }
-
     // Update booking status
     const updatedBooking = await repo.updateBooking(id, {
       paymentStatus: 'PAID',
       status: 'ACTIVE',
     })
 
-    // AUTO-INTEGRATION: Sync to active Advertisement table
+    // AUTO-INTEGRATION: Sync to active Advertisement table (semua slot pakai rotasi)
     const adData = {
       imageUrl: booking.imageUrl,
       imageUrlTablet: booking.imageUrlTablet || null,
@@ -618,17 +567,13 @@ adRouter.post('/bookings/:id/approve',
       bookingId: booking.id,
     }
 
-    if (booking.package.slot === 'leaderboard') {
-      const nextOrder = await repo.getNextOrder(booking.siteId, 'leaderboard')
-      await repo.createAd({
-        siteId: booking.siteId,
-        slot: 'leaderboard',
-        ...adData,
-        order: nextOrder,
-      })
-    } else {
-      await repo.createOrUpdateAdForSlot(booking.siteId, booking.package.slot, adData)
-    }
+    const nextOrder = await repo.getNextOrder(booking.siteId, booking.package.slot)
+    await repo.createAd({
+      siteId: booking.siteId,
+      slot: booking.package.slot,
+      ...adData,
+      order: nextOrder,
+    })
 
     // Kirim notifikasi ke pengiklan (tidak gagalkan proses)
     try {
