@@ -1,10 +1,17 @@
 import { Inter, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { constructMetadata } from '../lib/metadata'
+import type { Viewport } from 'next'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-plus-jakarta-sans' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata = constructMetadata()
 

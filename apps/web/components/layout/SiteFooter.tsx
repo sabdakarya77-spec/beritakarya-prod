@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MapPin, Mail, Phone } from 'lucide-react';
-import { SiFacebook, SiInstagram, SiTelegram, SiTiktok, SiWhatsapp, SiX, SiYoutube } from 'react-icons/si';
+import { SiFacebook, SiInstagram, SiTelegram, SiTiktok, SiWhatsapp, SiX, SiYoutube } from '../ui/SocialIcons';
 
 import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { Container } from './Container';

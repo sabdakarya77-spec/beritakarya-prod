@@ -204,6 +204,7 @@ export default async function ArticlePage({ params }: Props) {
       <JsonLd id="ld-article" data={articleSchema} />
       <JsonLd id="ld-breadcrumb" data={breadcrumbSchema} />
       <ReadingProgress />
+      <main id="main-content">
       <ImageLightboxWrapper>
         <article className="min-h-screen">
           {/* --- RESPONSIVE HERO --- */}
@@ -675,6 +676,7 @@ export default async function ArticlePage({ params }: Props) {
           site={siteParam}
         />
       </ImageLightboxWrapper>
+      </main>
 
     </PublicSiteLayout>
   )

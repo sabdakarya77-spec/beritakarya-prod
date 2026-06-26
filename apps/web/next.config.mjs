@@ -66,7 +66,36 @@ const nextConfig = {
     ]
   },
   async headers() {
+    const isProd = process.env.NODE_ENV === 'production'
+
+    // CSP directives — sesuaikan dengan environment
+    const cspDirectives = [
+      "default-src 'self'",
+      isProd
+        ? "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com"
+        : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.beritakarya.co https://beritakarya.co wss://*.beritakarya.co https://www.google-analytics.com https://www.googletagmanager.com ws://localhost:*",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+    ].join('; ')
+
     return [
+      {
+        // Security headers untuk SEMUA halaman (termasuk di Vercel)
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+          { key: 'Content-Security-Policy', value: cspDirectives },
+        ],
+      },
       {
         // Service Worker butuh header Service-Worker-Allowed agar /sw.js
         // bisa di-scope ke path yang lebih dalam (mis. /bandung/, /surabaya/).

@@ -444,10 +444,11 @@ export default function SettingsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label htmlFor="settings-name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Nama Publikasi Regional <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="settings-name"
                       type="text"
                       value={settings.name}
                       onChange={(e) => setSettings({...settings, name: e.target.value})}
@@ -458,10 +459,11 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Domain Publik (URL)</label>
+                    <label htmlFor="settings-domain" className="text-sm font-medium text-gray-700 dark:text-gray-300">Domain Publik (URL)</label>
                     <div className="relative">
-                      <input 
-                        type="text" 
+                      <input
+                        id="settings-domain"
+                        type="text"
                         value={settings.domain}
                         onChange={(e) => setSettings({...settings, domain: e.target.value})}
                         onBlur={(e) => setSettings({...settings, domain: cleanDomain(e.target.value)})}
@@ -492,14 +494,15 @@ export default function SettingsPage() {
 
                   <div className="md:col-span-2 space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label htmlFor="settings-description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Deskripsi Situs (SEO & Meta Description)
                       </label>
                       <span className={`text-sm ${settings.description.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
                         {settings.description.length} / 160 Karakter
                       </span>
                     </div>
-                    <textarea 
+                    <textarea
+                      id="settings-description"
                       value={settings.description}
                       onChange={(e) => setSettings({...settings, description: e.target.value})}
                       placeholder="Tulis ringkasan tentang jenis berita, fokus daerah, dan komitmen portal..."
@@ -698,11 +701,12 @@ export default function SettingsPage() {
 
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <label htmlFor="settings-address" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                       <MapPin size={14} className="text-brand-red" /> Alamat Fisik Kantor Redaksi
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      id="settings-address"
+                      type="text"
                       value={settings.address}
                       onChange={(e) => setSettings({...settings, address: e.target.value})}
                       placeholder="Contoh: Gedung BeritaKarya Lt. 3, Jl. Asia Afrika No. 45, Bandung"
@@ -712,14 +716,15 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                      <label htmlFor="settings-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
                         <span className="flex items-center gap-2"><Mail size={14} className="text-brand-red" /> Email Kontak Resmi</span>
                         {!isValidEmail(settings.contactEmail) && (
                           <span className="text-red-500 text-xs">Format Email Tidak Valid!</span>
                         )}
                       </label>
-                      <input 
-                        type="email" 
+                      <input
+                        id="settings-email"
+                        type="email"
                         value={settings.contactEmail}
                         onChange={(e) => setSettings({...settings, contactEmail: e.target.value})}
                         placeholder="redaksi.bandung@beritakarya.co"
@@ -732,11 +737,12 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                      <label htmlFor="settings-phone" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                         <Phone size={14} className="text-brand-red" /> Nomor Telepon / WhatsApp
                       </label>
-                      <input 
-                        type="text" 
+                      <input
+                        id="settings-phone"
+                        type="text"
                         value={settings.phone}
                         onChange={(e) => setSettings({...settings, phone: e.target.value})}
                         placeholder="+62 812-3456-7890"
@@ -779,8 +785,9 @@ export default function SettingsPage() {
                       <hr className="border-gray-200 dark:border-gray-800" />
 
                       <div className="space-y-3">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Teks Footer Hak Cipta</label>
+                        <label htmlFor="settings-footer-text" className="text-sm font-medium text-gray-700 dark:text-gray-300">Teks Footer Hak Cipta</label>
                         <input
+                          id="settings-footer-text"
                           type="text"
                           value={settings.footerText}
                           onChange={(e) => setSettings({...settings, footerText: e.target.value})}
@@ -828,9 +835,10 @@ export default function SettingsPage() {
 
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Service Account Email</label>
-                    <input 
-                      type="text" 
+                    <label htmlFor="settings-gsa-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Service Account Email</label>
+                    <input
+                      id="settings-gsa-email"
+                      type="text"
                       value={settings.googleIndexingConfig.clientEmail}
                       onChange={(e) => setSettings({
                         ...settings,
@@ -846,7 +854,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Private Key (PEM Format)</label>
+                      <label htmlFor="settings-private-key" className="text-sm font-medium text-gray-700 dark:text-gray-300">Private Key (PEM Format)</label>
                       <button
                         type="button"
                         onClick={() => setShowPrivateKey(!showPrivateKey)}
@@ -858,7 +866,8 @@ export default function SettingsPage() {
                     </div>
                     
                     {showPrivateKey ? (
-                      <textarea 
+                      <textarea
+                        id="settings-private-key"
                         value={settings.googleIndexingConfig.privateKey}
                         onChange={(e) => setSettings({
                           ...settings,
@@ -911,8 +920,9 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-1 gap-6">
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Property ID</label>
+                      <label htmlFor="settings-ga4-id" className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Property ID</label>
                       <input
+                        id="settings-ga4-id"
                         type="text"
                         value={settings.ga4PropertyId}
                         onChange={(e) => setSettings({ ...settings, ga4PropertyId: e.target.value })}
@@ -925,8 +935,9 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Search Console Site URL</label>
+                      <label htmlFor="settings-gsc-url" className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Search Console Site URL</label>
                       <input
+                        id="settings-gsc-url"
                         type="text"
                         value={settings.gscSiteUrl}
                         onChange={(e) => setSettings({ ...settings, gscSiteUrl: e.target.value })}

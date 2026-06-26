@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { usePrefersReducedMotion } from '../../hooks/useReducedMotion';
 
 interface ScrollAnimateProps {
   children: React.ReactNode;
@@ -10,6 +11,12 @@ interface ScrollAnimateProps {
 }
 
 export default function ScrollAnimate({ children, delay = 0, className = '' }: ScrollAnimateProps) {
+  const shouldReduceMotion = usePrefersReducedMotion()
+
+  if (shouldReduceMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}

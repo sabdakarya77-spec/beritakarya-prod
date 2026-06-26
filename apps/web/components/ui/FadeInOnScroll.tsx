@@ -12,11 +12,16 @@ export default function FadeInOnScroll({ children, className = '', delay = 0 }: 
   const ref = useRef<HTMLDivElement>(null)
   const [jsReady, setJsReady] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
 
   // Mark JS as hydrated — only then apply fade animation
   useEffect(() => {
-    setJsReady(true)
-  }, [])
+    if (!prefersReducedMotion) {
+      setJsReady(true)
+    }
+  }, [prefersReducedMotion])
 
   useEffect(() => {
     if (!jsReady) return

@@ -9,6 +9,7 @@ import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 import { useSavedArticles } from '../../hooks/useSavedArticles';
+import { usePrefersReducedMotion } from '../../hooks/useReducedMotion';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export default function MobileMenu({
   const pathname = usePathname();
   const activeSite = siteConfig?.id || pathname.split('/')[1] || 'pusat';
   const { count: savedArticlesCount } = useSavedArticles(activeSite);
+  const shouldReduceMotion = usePrefersReducedMotion()
 
   // Track which parent category slug is expanded
   const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
@@ -54,19 +56,20 @@ export default function MobileMenu({
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0 }}
+            transition={shouldReduceMotion ? { duration: 0 } : undefined}
             onClick={onClose}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden"
           />
 
           {/* Menu Content */}
           <motion.div
-            initial={{ x: '-100%' }}
+            initial={shouldReduceMotion ? false : { x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            exit={shouldReduceMotion ? { x: 0 } : { x: '-100%' }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed top-0 left-0 bottom-0 z-[101] flex w-[82%] max-w-sm flex-col bg-white shadow-2xl dark:bg-slate-950 md:hidden"
           >
             {/* Header */}
@@ -81,6 +84,7 @@ export default function MobileMenu({
               </Link>
               <button
                 onClick={onClose}
+                aria-label="Tutup menu"
                 className="rounded-full p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
               >
                 <X size={18} className="text-brand-text-muted" />

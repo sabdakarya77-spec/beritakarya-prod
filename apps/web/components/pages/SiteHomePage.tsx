@@ -3,7 +3,7 @@ import PublicSiteLayout from '../layout/PublicSiteLayout'
 import AdSpace from '../ui/AdSpace'
 import Link from 'next/link'
 import { TrendingUp, Zap, Star, Clock, Mail, ArrowRight, Play } from 'lucide-react'
-import { SiTelegram, SiWhatsapp } from 'react-icons/si'
+import { SiTelegram, SiWhatsapp } from '../ui/SocialIcons'
 import LoadMoreArticles from '../ui/LoadMoreArticles'
 import SavedArticlesFeed from '../ui/SavedArticlesFeed'
 import VideoWidget from '../ui/VideoWidget'
@@ -516,7 +516,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               • Video / Partner Placement
         ════════════════════════════════════════════════════════ */}
         <Container className="py-4 md:py-6">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6 2xl:gap-8">
 
             {/* ── Kolom Utama (8 kolom) ── */}
             <div className="lg:col-span-8">
@@ -588,7 +588,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                           <ArrowRight size={14} />
                         </Link>
                       </div>
-                      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:gap-6">
+                      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:gap-6 2xl:gap-8">
                         {mainFeedStream.map((article: HomeArticle) => (
                           <NewsCard
                             key={article.id}
@@ -806,7 +806,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       </h3>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
                     {editorChoice.map((article: HomeArticle) => (
                       <div
                         key={article.id}
@@ -854,7 +854,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       </h3>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
                     {opinionArticles.map((article: HomeArticle) => (
                       <div key={article.id} className="flex h-full flex-col justify-between gap-3">
                         <div>
@@ -944,7 +944,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                       </h3>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
                     {videoStories.map((article: HomeArticle) => {
                       const videoImg = getVideoThumbnail(article)
                       return (
