@@ -286,8 +286,8 @@ export default function AdSpace({
   };
 
   const styles = {
-    // Multi-size IAB: mobile 320×50, tablet 728×90, desktop 970×250
-    leaderboard: "w-full h-[50px] min-h-[50px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] mb-6",
+    // Multi-size IAB: mobile 320×100, tablet 728×90, desktop 970×250
+    leaderboard: "w-full h-[100px] min-h-[100px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] mb-6",
     rectangle: "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-8",
     rectangle_secondary: "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-8",
     'in-feed': "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-12"
