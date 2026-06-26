@@ -36,6 +36,13 @@ interface AdItem {
   order: number;
 }
 
+interface FallbackAd {
+  mediaType?: string;
+  mediaUrl?: string;
+  headline?: string;
+  [key: string]: unknown;
+}
+
 // Mapping of animation effect keys to CSS class names (defined in globals.css)
 const ANIM_CLASS_MAP: Record<string, string> = {
   ken_burns: 'ad-ken-burns',
@@ -161,7 +168,7 @@ export default function AdSpace({
   const site = params?.site as string | undefined;
   const [ads, setAds] = useState<AdItem[]>([]);
   // Fallback ads fetched from CMS when no ads are configured for the slot
-  const [fallbackAds, setFallbackAds] = useState<Record<string, unknown>[]>([]);
+  const [fallbackAds, setFallbackAds] = useState<FallbackAd[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showCloseBtn, setShowCloseBtn] = useState(false);
