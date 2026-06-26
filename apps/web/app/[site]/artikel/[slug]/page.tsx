@@ -445,6 +445,11 @@ export default async function ArticlePage({ params }: Props) {
                     <CommentSection articleId={article.id} />
                   </div>
 
+                  {/* In-Feed Ad — after content, before recommendations */}
+                  <div className="my-10">
+                    <AdSpace type="in-feed" label="Iklan" />
+                  </div>
+
                   {/* Recommended Articles */}
                   <FadeInOnScroll>
                     <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/5 md:mt-12 md:pt-10">
