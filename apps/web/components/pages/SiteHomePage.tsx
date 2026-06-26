@@ -409,9 +409,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
         {/* ─── AD LEADERBOARD — setelah hero agar user disambut konten terlebih dahulu ─── */}
         <Container className="py-4 md:py-5">
-          <div className="flex justify-center rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
-            <AdSpace type="leaderboard" />
-          </div>
+          <AdSpace type="leaderboard" />
         </Container>
 
         {/* ════════════════════════════════════════════════════════
@@ -562,15 +560,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
                   {/* Inline Ad */}
                   {showInlineSponsor && (
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/5 dark:bg-white/[0.02]">
-                      <div className="mb-4 flex items-center justify-between">
-                        <span className={sectionEyebrowMutedClass}>Sponsorship</span>
-                        <span className="text-[10px] font-medium uppercase tracking-[0.1em] text-brand-text-muted">
-                          Advertisement
-                        </span>
-                      </div>
-                      <AdSpace type="in-feed" className="mx-auto" />
-                    </div>
+                    <AdSpace type="in-feed" />
                   )}
 
                   {/* 6 Kartu Medium Grid 2-Kolom (artikel[10..15]) */}
@@ -769,12 +759,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     />
                   </div>
                 ) : (
-                  <div>
-                    <div className="mb-4">
-                      <span className={`${sectionEyebrowClass} text-brand-red`}>Partner Placement</span>
-                    </div>
-                    <AdSpace type="rectangle" />
-                  </div>
+                  <AdSpace type="rectangle" />
                 )}
               </div>
             </aside>
