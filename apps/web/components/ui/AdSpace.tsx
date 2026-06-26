@@ -290,7 +290,7 @@ export default function AdSpace({
     leaderboard: "w-full h-[50px] min-h-[50px] sm:h-[90px] sm:min-h-[90px] md:h-[250px] md:min-h-[250px] mb-6",
     rectangle: "w-full h-[250px] min-h-[250px] mb-8",
     rectangle_secondary: "w-full h-[250px] min-h-[250px] mb-8",
-    'in-feed': "w-full h-40 min-h-[160px] mb-12"
+    'in-feed': "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-12"
   };
 
   // Loading state
