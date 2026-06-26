@@ -142,7 +142,7 @@ export default function InFeedShowcase({ site, className }: InFeedShowcaseProps)
         {/* CTA */}
         <div className="mt-3 flex items-center justify-between">
           <Link
-            href={`/${site}/ads`}
+            href="https://beritakarya.co/pusat/p/adss"
             className="text-[10px] md:text-[11px] font-bold text-brand-red hover:text-brand-red/80 transition-colors"
           >
             Pelajari Selengkapnya →

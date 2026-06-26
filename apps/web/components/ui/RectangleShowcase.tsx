@@ -164,7 +164,7 @@ export default function RectangleShowcase({ site, className }: RectangleShowcase
             {/* CTA + Dots */}
             <div className="flex items-center justify-between">
               <Link
-                href={`/${site}/ads`}
+                href="https://beritakarya.co/pusat/p/adss"
                 className="bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[10px] font-bold px-3 py-1 rounded-full transition-colors"
               >
                 {ad.ctaText} →
