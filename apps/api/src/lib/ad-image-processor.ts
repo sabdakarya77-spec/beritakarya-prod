@@ -180,6 +180,28 @@ export function generateGradientSvg(
 const MAX_FILE_SIZE = 200 * 1024 // 200 KB
 const ASPECT_RATIO_TOLERANCE = 0.15 // 15%
 
+// ─── Fase 0: Upload Tracking (Data Collection) ──────────────────────────────
+// Kumpulkan data 2-4 minggu untuk keputusan Fase 1 (AI Upscale)
+
+interface UploadMetrics {
+  timestamp: string
+  originalWidth: number
+  originalHeight: number
+  targetSlot: string
+  targetWidth: number
+  targetHeight: number
+  needsUpscale: boolean
+  ratioGapPercent: number
+  method: string
+  outputSizeKB: number
+  dominantColor: string
+  processingTimeMs: number
+}
+
+function logUploadMetrics(metrics: UploadMetrics): void {
+  console.log(JSON.stringify({ _type: 'ad_upload_metrics', ...metrics }))
+}
+
 /**
  * Proses gambar iklan dengan smart approach:
  * 1. Jika rasio cocok → smart crop (cover)
@@ -190,8 +212,11 @@ const ASPECT_RATIO_TOLERANCE = 0.15 // 15%
 export async function processAdSmart(
   buffer: Buffer,
   targetW: number,
-  targetH: number
+  targetH: number,
+  slotName: string = 'unknown'
 ): Promise<ProcessResult> {
+  const startTime = Date.now()
+
   // Get original dimensions
   const origMeta = await sharp(buffer).metadata()
   const origW = origMeta.width || 0
@@ -209,18 +234,19 @@ export async function processAdSmart(
   const origRatio = origW / origH
   const ratioDiff = Math.abs(origRatio - targetRatio) / targetRatio
 
+  // Fase 0: Check apakah gambar perlu upscale (data collection)
+  const needsUpscale = origW < targetW || origH < targetH
+
   let result: Buffer
   let method: 'palette_gradient' | 'smart_crop'
 
   if (ratioDiff <= ASPECT_RATIO_TOLERANCE) {
-    // Rasio cocok → smart crop langsung
     result = await sharp(buffer)
       .resize(targetW, targetH, { fit: 'cover', position: 'attention' })
       .webp({ quality: 80 })
       .toBuffer()
     method = 'smart_crop'
   } else {
-    // Rasio beda → palette gradient background + contain
     result = await createPaletteBanner(buffer, targetW, targetH, palette)
     method = 'palette_gradient'
   }
@@ -240,6 +266,24 @@ export async function processAdSmart(
   }
 
   const meta = await sharp(result).metadata()
+  const processingTimeMs = Date.now() - startTime
+
+  // Fase 0: Log metrics
+  logUploadMetrics({
+    timestamp: new Date().toISOString(),
+    originalWidth: origW,
+    originalHeight: origH,
+    targetSlot: slotName,
+    targetWidth: targetW,
+    targetHeight: targetH,
+    needsUpscale,
+    ratioGapPercent: Math.round(ratioDiff * 100),
+    method,
+    outputSizeKB: Math.round(result.length / 1024),
+    dominantColor: palette.hex,
+    processingTimeMs,
+  })
+
   return {
     buffer: result,
     width: meta.width || targetW,

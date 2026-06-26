@@ -516,4 +516,142 @@ pnpm --filter @beritakarya/web exec playwright test tests/e2e/ad-booking.spec.ts
 
 ---
 
+## 15. Roadmap & Plan Kerja
+
+> **Prinsip:** Jangan bangun solusi sebelum tahu masalahnya seberapa besar.
+
+Sistem saat ini (Palette Gradient) sudah **berhasil** — cepat (< 2 detik), gratis, profesional. Sebelum menambah kompleksitas AI, perlu data untuk tahu apakah investasi itu perlu.
+
+### Pipeline Saat Ini
+
+```
+Upload gambar → Extract warna → Cek rasio
+    │                    │
+    ▼                    ▼
+Rasio cocok         Rasio beda
+    │                    │
+    ▼                    ▼
+Smart Crop          Palette Gradient
+(fit: cover)        (warna brand → gradient)
+    │                    │
+    └────────┬───────────┘
+             ▼
+      Compress WebP (max 200KB)
+             ▼
+      Simpan ke MinIO
+```
+
+**Kelebihan:** Cepat, gratis, konsisten, profesional.
+**Kekurangan:** Gambar sangat kecil (< 200px) bisa sedikit blur setelah upscale biasa.
+
+### Fase 0: Kumpulkan Data (Minggu 1-2)
+
+**Tujuan:** Tahu seberapa besar masalah gambar kecil/blur.
+
+**Tugas:**
+
+```
+[✓] Tambah logging dimensi upload di ad-image-processor.ts
+    → Catat: originalWidth, originalHeight, targetSlot, method yang dipakai
+    → Log ke console (JSON structured), bisa dianalisis via PM2 logs
+
+[ ] Jalankan 2-4 minggu di production
+
+[ ] Analisis data:
+    → Berapa % upload yang gambar kecil (< 300px)?
+    → Berapa % yang rasio sangat beda (gap > 40%)?
+    → Berapa % yang menggunakan palette_gradient vs smart_crop?
+    → Apakah ada keluhan pengiklan tentang hasil?
+```
+
+**Keputusan:**
+- Jika < 10% upload bermasalah → **stop**, Palette Gradient sudah cukup
+- Jika > 10% → lanjut Fase 1
+
+### Fase 1: AI Upscale via Replicate API (Minggu 3-4)
+
+**Syarat:** Data Fase 0 menunjukkan > 10% upload gambar kecil.
+
+**Kenapa Replicate (bukan self-hosted):**
+
+| Aspek | Replicate | Self-hosted |
+|-------|-----------|-------------|
+| Setup | Tambah API key | Install Python + PyTorch + weights |
+| Cocok dengan | LXC production | Butuh Docker atau install manual |
+| Performa | 2-5 detik (GPU cloud) | 5-30 detik (CPU) |
+| Biaya | ~Rp 30/gambar | Listrik + RAM server |
+| Maintenance | Zero | Update model, monitor crash |
+
+**Tugas:**
+
+```
+[ ] Daftar Replicate → buat API token → pilih model Real-ESRGAN x4plus
+[ ] Tambah fungsi upscale di ad-image-processor.ts
+[ ] Tambah dimensi checker sebelum pipeline rasio
+[ ] Tambah env var: REPLICATE_API_TOKEN
+[ ] Update AdSmartPreview.tsx → badge "AI Upscaled"
+```
+
+**Fallback chain:**
+```
+Replicate API gagal / timeout
+    → Return gambar ASLI (tanpa upscale)
+    → Lanjut pipeline Palette Gradient seperti biasa
+    → Log warning, tidak block user
+```
+
+**Estimasi biaya:** 50 upload/bulan × 20% upscale × Rp 30 = **Rp 300/bulan**
+
+### Fase 2: Evaluasi + Keputusan (Minggu 5-6)
+
+| Kondisi | Aksi |
+|---------|------|
+| Cost < Rp 500rb/bulan, volume rendah | Lanjut Replicate, selesai |
+| Cost > Rp 1jt/bulan, volume tinggi | Evaluasi self-hosted Real-ESRGAN di LXC |
+| Hampir tidak ada yang pakai | Matikan fitur, hemat cost |
+
+### Phase 3: Backlog (Kapan Saja, Jika Diperlukan)
+
+| Fitur | Estimasi | Kapan Dibutuhkan |
+|-------|----------|------------------|
+| Frequency Capping | 3-4 hari | Jika user komplain iklan terlalu sering muncul |
+| Export Reports (CSV/PDF) | 2-3 hari | Jika advertiser minta laporan |
+| Enhanced Analytics (device/geo) | 4-5 hari | Jika ada kebutuhan targeting |
+| Category-Based Targeting | 5-7 hari | Jika advertiser ingin iklan tampil di kategori tertentu |
+| Auto A/B Testing | 4-5 hari | Jika ada advertiser aktif yang mau optimize |
+| Creative Templates | 1 minggu | Jika UMKM kesulitan buat desain |
+| AI Outpainting | 5-7 hari | Jika data menunjukkan banyak rasio ekstrem |
+
+### Ringkasan Timeline
+
+```
+Sekarang
+   │
+   ▼
+[ Fase 0 ]  Minggu 1-2 — Logging data upload
+   │
+   ▼
+[ Evaluasi ]  Minggu 3 — Analisis data → keputusan lanjut/stop
+   │
+   ├── < 10% bermasalah → STOP
+   └── > 10% bermasalah → lanjut ↓
+        │
+        ▼
+[ Fase 1 ]  Minggu 3-4 — Integrasi Replicate API
+        │
+        ▼
+[ Fase 2 ]  Minggu 5-6 — Evaluasi cost → keputusan final
+```
+
+### Keputusan Teknis
+
+| Keputusan | Pilihan | Alasan |
+|-----------|---------|--------|
+| Cloud vs Self-hosted | **Replicate (cloud)** | Cocok dengan LXC, zero maintenance, cost rendah |
+| Sync vs Async | **Sync** | Volume rendah, 5 detik masih acceptable |
+| Outpainting sekarang? | **Tidak** | Palette Gradient sudah handle rasio beda dengan baik |
+| Docker ditambah? | **Tidak** | Tidak perlu, Replicate via HTTP saja |
+
+---
+
 *Dokumentasi terakhir diperbarui: 26 Juni 2026*
