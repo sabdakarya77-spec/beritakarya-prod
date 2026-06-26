@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
 import { API_URL } from '../../lib/api';
 import BillboardShowcase from './BillboardShowcase';
+import InFeedShowcase from './InFeedShowcase';
+import RectangleShowcase from './RectangleShowcase';
+import SecondaryRectangleShowcase from './SecondaryRectangleShowcase';
 
 interface AdSpaceProps {
   type: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in-feed';
@@ -327,7 +330,22 @@ export default function AdSpace({
       return <BillboardShowcase site={site || 'pusat'} className={className} />;
     }
 
-    // Other slots: keep existing placeholder
+    // In-feed: native content-style showcase
+    if (type === 'in-feed') {
+      return <InFeedShowcase site={site || 'pusat'} className={className} />;
+    }
+
+    // Rectangle primary: bold gradient card showcase
+    if (type === 'rectangle') {
+      return <RectangleShowcase site={site || 'pusat'} className={className} />;
+    }
+
+    // Rectangle secondary: editorial/newsletter-style showcase
+    if (type === 'rectangle_secondary') {
+      return <SecondaryRectangleShowcase site={site || 'pusat'} className={className} />;
+    }
+
+    // Fallback for any other type
     return (
       <div
         className={cn(
@@ -336,22 +354,12 @@ export default function AdSpace({
           className
         )}
       >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
+        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg">
           {label}
         </span>
-        <div className="flex flex-col items-center justify-center gap-2 pt-7 sm:gap-3 sm:pt-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-text-muted sm:text-[10px] sm:tracking-[0.24em]">
-            Slot Iklan Mandiri
-          </p>
-          <div className="space-y-1">
-            <h4 className="text-[13px] font-black text-brand-black dark:text-white tracking-tight sm:text-sm md:text-lg">
-              Ruang promosi tersedia
-            </h4>
-            <p className="mx-auto max-w-[17rem] text-[10px] leading-5 text-brand-text-muted sm:max-w-sm md:text-xs">
-              Slot ini disiapkan untuk banner atau script iklan mandiri dari dashboard ads.
-            </p>
-          </div>
-        </div>
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-text-muted">
+          Slot Iklan Tersedia
+        </p>
       </div>
     );
   }
