@@ -304,7 +304,7 @@ mediaRouter.post(
         if (adSlot && adVariant && AD_VARIANTS[adSlot]?.[adVariant]) {
           // Use variant-specific dimensions
           const variantDims = AD_VARIANTS[adSlot][adVariant]
-          const adResult = await processAdSmart(req.file.buffer, variantDims.width, variantDims.height, `${adSlot}_${adVariant}`)
+          const adResult = await processAdSmart(req.file.buffer, variantDims.width, variantDims.height)
           const suffix = adVariant !== 'desktop' ? `-${adVariant}` : ''
           const adKey = `ads/${id}${suffix}.webp`
           await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
@@ -317,7 +317,7 @@ mediaRouter.post(
           originalFormat = 'ad-webp'
         } else if (targetSlot && AD_SLOTS[targetSlot]) {
           const slotDims = AD_SLOTS[targetSlot]
-          const adResult = await processAdSmart(req.file.buffer, slotDims.width, slotDims.height, targetSlot)
+          const adResult = await processAdSmart(req.file.buffer, slotDims.width, slotDims.height)
           const adKey = `ads/${id}.webp`
           await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
             isPublic: true,
