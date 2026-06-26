@@ -110,7 +110,7 @@ export default function RectangleShowcase({ site: _site, className }: RectangleS
   return (
     <div
       className={cn(
-        "relative w-full h-[250px] min-h-[250px] overflow-hidden rounded-xl",
+        "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
         className
       )}
       onMouseEnter={() => setIsPaused(true)}

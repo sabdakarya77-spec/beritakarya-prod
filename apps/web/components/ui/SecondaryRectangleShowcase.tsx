@@ -16,7 +16,7 @@ export default function SecondaryRectangleShowcase({ site: _site, className }: S
   return (
     <div
       className={cn(
-        "relative w-full h-[250px] min-h-[250px] overflow-hidden rounded-xl border border-gray-100 dark:border-white/5 bg-gradient-to-br from-gray-50 to-white dark:from-white/[0.03] dark:to-white/[0.06]",
+        "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl border border-gray-100 dark:border-white/5 bg-gradient-to-br from-gray-50 to-white dark:from-white/[0.03] dark:to-white/[0.06]",
         className
       )}
     >

@@ -153,7 +153,7 @@ export default function BillboardShowcase({ site: _site, className }: BillboardS
   return (
     <div
       className={cn(
-        "relative w-full h-24 md:h-[250px] overflow-hidden rounded-xl",
+        "relative w-full h-[50px] md:h-[250px] overflow-hidden rounded-xl",
         className
       )}
       onMouseEnter={() => setIsPaused(true)}
