@@ -746,22 +746,20 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               <MarketWidget initialData={marketData} />
 
               {/* Video / Partner Placement */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
-                {siteSettings?.featuredVideo ? (
-                  <div>
-                    <div className="mb-4">
-                      <span className={`${sectionEyebrowClass} text-brand-red`}>Pilihan Visual</span>
-                    </div>
-                    <VideoWidget
-                      title={siteSettings.featuredVideo.title}
-                      thumbnail={siteSettings.featuredVideo.thumbnail}
-                      duration={siteSettings.featuredVideo.duration}
-                    />
+              {siteSettings?.featuredVideo ? (
+                <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
+                  <div className="mb-4">
+                    <span className={`${sectionEyebrowClass} text-brand-red`}>Pilihan Visual</span>
                   </div>
-                ) : (
-                  <AdSpace type="rectangle" />
-                )}
-              </div>
+                  <VideoWidget
+                    title={siteSettings.featuredVideo.title}
+                    thumbnail={siteSettings.featuredVideo.thumbnail}
+                    duration={siteSettings.featuredVideo.duration}
+                  />
+                </div>
+              ) : (
+                <AdSpace type="rectangle" />
+              )}
             </aside>
           </div>
         </Container>
