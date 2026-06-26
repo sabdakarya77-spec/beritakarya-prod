@@ -58,7 +58,7 @@ export default function SecondaryRectangleShowcase({ site, className }: Secondar
         {/* CTA */}
         <div className="flex flex-col items-center gap-2">
           <Link
-            href="https://beritakarya.co/pusat/p/adss"
+            href="https://beritakarya.co/pusat/p/ads"
             className="w-full text-center bg-brand-black dark:bg-white/10 hover:bg-gray-800 dark:hover:bg-white/15 text-white text-[11px] font-bold py-2 rounded-lg transition-colors"
           >
             Pelajari Lebih Lanjut
