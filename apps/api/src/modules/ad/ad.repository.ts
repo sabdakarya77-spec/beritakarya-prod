@@ -170,6 +170,10 @@ export async function findBookingById<T extends Record<string, boolean> | undefi
   return prisma.adBooking.findUnique({ where: { id }, include }) as Promise<Record<string, unknown>>
 }
 
+export async function findBookingByExternalOrderId(externalOrderId: string) {
+  return prisma.adBooking.findUnique({ where: { externalOrderId } })
+}
+
 export async function findBookingsByUser(userId: string) {
   return prisma.adBooking.findMany({
     where: { userId },
@@ -218,6 +222,24 @@ export async function findOverlappingBooking(siteId: string, slot: string, exclu
       endDate: { gte: startDate },
     },
     include: { package: true },
+  })
+}
+
+/**
+ * Find any conflicting booking for a slot (ACTIVE or PENDING_REVIEW).
+ * Used for pre-submission availability checks.
+ */
+export async function findConflictingBooking(siteId: string, slot: string, startDate: Date, endDate: Date) {
+  return prisma.adBooking.findFirst({
+    where: {
+      siteId,
+      status: { in: ['ACTIVE', 'PENDING_REVIEW'] },
+      package: { slot },
+      startDate: { lte: endDate },
+      endDate: { gte: startDate },
+    },
+    include: { package: true },
+    orderBy: { endDate: 'desc' },
   })
 }
 

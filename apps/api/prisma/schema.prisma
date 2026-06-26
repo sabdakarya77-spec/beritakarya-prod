@@ -581,6 +581,8 @@ model AdBooking {
   endDate        DateTime
   paymentStatus  PaymentStatus @default(PENDING)
   paymentProof   String? // Bukti transfer bank/QRIS
+  snapToken      String? // Midtrans Snap token
+  externalOrderId String? @unique // Order ID untuk Midtrans
   status         AdStatus      @default(PENDING_REVIEW)
   rejectionNotes String?       @db.Text
   impressions    Int           @default(0)

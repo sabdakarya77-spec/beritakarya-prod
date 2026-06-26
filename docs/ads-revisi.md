@@ -19,66 +19,59 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 
 ## Masalah Kritis (Prioritas 1)
 
-### 1. Tidak Ada Self-Registration untuk Pengiklan
+### 1. Tidak Ada Self-Registration untuk Pengiklan ✅
 
 **Masalah**: Tidak ada cara bagi user biasa untuk mendaftar sebagai pengiklan. Harus menunggu admin membuatkan akun secara manual.
 
-**Solusi**:
-- Tambah tombol "Jadi Pengiklan" di halaman `/{site}/ads`
-- Buat form pendaftaran dengan field: nama bisnis, kontak, jenis usaha
-- Setelah daftar, role user di-upgrade ke `advertiser` (bisa langsung atau perlu approval admin)
-- File terkait:
-  - `apps/web/app/[site]/ads/page.tsx`
-  - `apps/api/src/modules/auth/` (tambah endpoint upgrade role)
+**Solusi** (sudah diterapkan):
+- ✅ Endpoint `POST /auth/upgrade-to-advertiser` — reader bisa upgrade ke advertiser sendiri
+- ✅ Komponen `BecomeAdvertiser` — halaman "Jadi Pengiklan" dengan manfaat dan CTA
+- ✅ Layout guard diupdate — reader melihat form upgrade, bukan redirect diam-diam
+- ✅ Auth store — fungsi `upgradeToAdvertiser()` untuk frontend
 
-### 2. Tidak Ada Cek Ketersediaan Slot
+### 2. Tidak Ada Cek Ketersediaan Slot ✅
 
 **Masalah**: Pengiklan bisa submit booking untuk slot yang sudah ditempati orang lain. Baru ditolak saat approval — buang waktu.
 
-**Solusi**:
-- Tambah kalender ketersediaan slot di step 1 (pilih paket)
-- Tampilkan slot mana yang sudah terbooking untuk rentang tanggal tertentu
-- Endpoint baru: `GET /ads/slots/availability?slot=...&start=...&end=...`
-- File terkait:
-  - `apps/api/src/modules/ad/ad.controller.ts`
-  - `apps/api/src/modules/ad/ad.repository.ts`
-  - `apps/web/components/dashboard/ads/studio/StudioCanvas.tsx`
+**Solusi** (sudah diterapkan):
+- ✅ Endpoint `GET /ads/availability` — cek slot tersedia atau tidak untuk tanggal tertentu
+- ✅ Cek overlap di `POST /bookings` — tolak langsung jika slot sudah ditempati (409)
+- ✅ Indikator ketersediaan di UI — badge hijau "Slot Tersedia" / merah "Slot Tidak Tersedia"
+- ✅ Tombol "Selanjutnya" disabled jika slot tidak tersedia
+- ✅ Leaderboard selalu tersedia (mendukung rotasi)
 
-### 3. Bukti Transfer Wajib Saat Order
+### 3. Bukti Transfer Wajib Saat Order ✅
 
 **Masalah**: Wizard memaksa upload bukti transfer bersamaan dengan submit materi iklan. Pengiklan harus sudah bayar sebelum submit.
 
-**Solusi**:
-- Pisahkan alur: Submit materi → Dapat invoice → Bayar → Upload bukti
-- Step payment di wizard cukup tampilkan info rekening + tombol "Bayar Nanti"
-- Halaman bookings tetap bisa upload bukti kapan saja
-- File terkait:
-  - `apps/web/components/dashboard/ads/studio/StudioContext.tsx` (ubah handleSubmit)
-  - `apps/web/components/dashboard/ads/studio/StudioCanvas.tsx` (ubah step payment)
+**Solusi** (sudah diterapkan):
+- ✅ Bukti transfer jadi opsional di wizard — bisa di-skip
+- ✅ Submit booking tanpa bukti → booking langsung dibuat (status PENDING)
+- ✅ Success screen tampilkan tombol "Bayar Sekarang" → link ke halaman Pembayaran
+- ✅ Halaman Pembayaran (`/{site}/ads/bookings`) sudah bisa upload bukti kapan saja
 
-### 4. Tidak Ada Notifikasi Status
+### 4. Tidak Ada Notifikasi Status ✅
 
 **Masalah**: Setelah submit, pengiklan tidak dapat notifikasi saat iklan disetujui atau ditolak. Harus cek manual.
 
-**Solusi**:
-- Kirim email notifikasi saat status booking berubah (approved/rejected)
-- Tambah bell icon notifikasi di dashboard pengiklan
-- Bisa pakai Resend/SendGrid untuk email
-- File terkait:
-  - `apps/api/src/modules/ad/ad.controller.ts` (tambah trigger notifikasi di approve/reject)
-  - `apps/api/src/modules/notification/` (buat modul baru atau gunakan yang sudah ada)
+**Solusi** (sudah diterapkan):
+- ✅ Method `sendBookingNotification` di email service — email approve/reject dengan template branded
+- ✅ In-app notification via `sendNotification` — muncul di bell icon dashboard
+- ✅ Trigger di approve endpoint — email + notifikasi saat iklan disetujui
+- ✅ Trigger di reject endpoint — email + notifikasi saat iklan ditolak (dengan alasan)
+- ✅ Gagal kirim notifikasi tidak gagalkan proses approve/reject
 
-### 5. Tidak Ada Payment Gateway
+### 5. Tidak Ada Payment Gateway ✅
 
 **Masalah**: Pembayaran masih manual transfer bank + upload bukti. Proses lambat dan rawan error.
 
-**Solusi**:
-- Integrasi Midtrans atau Xendit
-- Auto-konfirmasi pembayaran (tidak perlu upload bukti)
-- Tetap opsi manual transfer sebagai fallback
-- File terkait:
-  - `apps/api/src/modules/payment/` (buat modul baru)
-  - `apps/web/components/dashboard/ads/studio/StudioContext.tsx`
+**Solusi** (sudah diterapkan):
+- ✅ Integrasi Midtrans Snap — popup pembayaran dengan VA, e-wallet, QRIS, kartu kredit
+- ✅ Endpoint `POST /bookings/:id/pay-gateway` — buat Snap transaction
+- ✅ Endpoint `POST /webhook/midtrans` — auto-konfirmasi dari Midtrans callback
+- ✅ Tombol "Bayar Online" di halaman Pembayaran
+- ✅ Manual transfer tetap bisa (fallback)
+- ⚠️ Perluisi API key Midtrans di `.env`
 
 ---
 
@@ -93,16 +86,14 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 - ✅ Kirim `campaignName` saat create booking
 - ✅ Tampilkan di halaman history dan admin booking queue
 
-### 7. End Date Di-Override API
+### 7. End Date Di-Override API ✅
 
 **Masalah**: UI memperbolehkan edit end date, tapi API mengabaikan dan menghitung ulang dari `startDate + durationDays`.
 
-**Solusi**:
-- Pilih salah satu: (a) kunci end date di UI, atau (b) biarkan API pakai end date dari client
-- Opsi (a) lebih sederhana — hilangkan edit end date, tampilkan sebagai info saja
-- File terkait:
-  - `apps/web/components/dashboard/ads/studio/StudioCanvas.tsx`
-  - `apps/api/src/modules/ad/ad.controller.ts`
+**Solusi** (sudah diterapkan):
+- ✅ Kunci end date di UI — tampilkan sebagai teks read-only dengan format tanggal Indonesia
+- ✅ End date otomatis di-recompute saat start date atau paket diubah
+- ✅ Label durasi paket ditampilkan di samping end date
 
 ### 8. Tidak Ada Review Konten Iklan
 
@@ -171,13 +162,13 @@ Namun masih ada beberapa masalah kritis yang perlu diperbaiki sebelum sistem sia
 
 | # | Masalah | Prioritas | Estimasi |
 |---|---------|-----------|----------|
-| 1 | Self-registration pengiklan | 🔴 Kritis | 2-3 hari |
-| 2 | Cek ketersediaan slot | 🔴 Kritis | 1-2 hari |
-| 3 | Pisahkan bayar dari order | 🔴 Kritis | 1 hari |
-| 4 | Notifikasi email | 🔴 Kritis | 1-2 hari |
-| 5 | Payment gateway | 🔴 Kritis | 2-3 hari |
+| 1 | Self-registration pengiklan | ✅ Selesai | — |
+| 2 | Cek ketersediaan slot | ✅ Selesai | — |
+| 3 | Pisahkan bayar dari order | ✅ Selesai | — |
+| 4 | Notifikasi email | ✅ Selesai | — |
+| 5 | Payment gateway | ✅ Selesai | — |
 | 6 | Campaign name tersimpan | ✅ Selesai | — |
-| 7 | End date konsisten | 🟡 Sedang | 0.5 hari |
+| 7 | End date konsisten | ✅ Selesai | — |
 | 8 | Review konten iklan | 🟡 Sedang | 1 hari |
 | 9 | Rotasi slot non-leaderboard | 🟡 Sedang | 1-2 hari |
 | 10 | Auto-expiry cron | 🟡 Sedang | 0.5 hari |

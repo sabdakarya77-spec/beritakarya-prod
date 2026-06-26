@@ -37,6 +37,8 @@ export interface AdBooking {
   endDate: string;
   paymentStatus: 'PENDING' | 'VERIFYING' | 'PAID' | 'REJECTED';
   paymentProof: string | null;
+  snapToken?: string | null;
+  externalOrderId?: string | null;
   status: 'PENDING_REVIEW' | 'ACTIVE' | 'COMPLETED' | 'REJECTED';
   rejectionNotes: string | null;
   impressions: number;

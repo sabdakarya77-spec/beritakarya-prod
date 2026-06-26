@@ -27,6 +27,12 @@ const initialData: StudioData = {
   receiptPreviewUrl: '',
 };
 
+interface AvailabilityStatus {
+  available: boolean;
+  message?: string;
+  conflictingEndDate?: string;
+}
+
 interface StudioContextValue {
   data: StudioData;
   setData: Dispatch<SetStateAction<StudioData>>;
@@ -38,6 +44,10 @@ interface StudioContextValue {
   handleSubmit: (e: React.FormEvent) => void;
   activeStep: SectionId;
   setActiveStep: Dispatch<SetStateAction<SectionId>>;
+  availability: AvailabilityStatus | null;
+  checkingAvailability: boolean;
+  checkAvailability: () => Promise<void>;
+  completedBookingId: string | null;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -65,6 +75,43 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [activeStep, setActiveStep] = useState<SectionId>(initialStep);
+  const [availability, setAvailability] = useState<AvailabilityStatus | null>(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
+
+  const checkAvailability = async () => {
+    if (!data.selectedPackage) return
+    // Leaderboard always available
+    if (data.selectedPackage.slot === 'leaderboard') {
+      setAvailability({ available: true })
+      return
+    }
+    setCheckingAvailability(true)
+    try {
+      const res = await api.get('/ads/availability', {
+        params: {
+          slot: data.selectedPackage.slot,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          siteId: site || 'pusat',
+        }
+      })
+      const result = res.data?.data
+      setAvailability(result || { available: true })
+    } catch {
+      setAvailability({ available: true }) // fail-open
+    } finally {
+      setCheckingAvailability(false)
+    }
+  }
+
+  // Re-check availability when package or dates change
+  useEffect(() => {
+    if (data.selectedPackage && data.startDate && data.endDate) {
+      checkAvailability()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.selectedPackage?.id, data.startDate, data.endDate])
 
   // Sync activeStep with URL query param on navigation
   useEffect(() => {
@@ -111,8 +158,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!data.selectedPackage || !data.adFile || !data.receiptFile) {
-      setError('Mohon lengkapi seluruh materi iklan dan bukti transfer.');
+    if (!data.selectedPackage || !data.adFile) {
+      setError('Mohon lengkapi materi iklan.');
       return;
     }
     setSubmitting(true);
@@ -141,10 +188,20 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       });
       if (!bookingRes.data?.success) throw new Error(bookingRes.data?.message || 'Gagal membuat pesanan.');
       const bookingId = bookingRes.data.data.id;
-      const uploadedReceiptUrl = await uploadFile(data.receiptFile);
-      if (!uploadedReceiptUrl) throw new Error('Gagal mengunggah bukti transfer.');
-      const payRes = await api.post(`/ads/bookings/${bookingId}/pay`, { paymentProof: uploadedReceiptUrl });
-      if (!payRes.data?.success) throw new Error(payRes.data?.message || 'Gagal memverifikasi pembayaran.');
+
+      // Upload receipt if provided (optional)
+      if (data.receiptFile) {
+        try {
+          const uploadedReceiptUrl = await uploadFile(data.receiptFile);
+          if (uploadedReceiptUrl) {
+            await api.post(`/ads/bookings/${bookingId}/pay`, { paymentProof: uploadedReceiptUrl });
+          }
+        } catch {
+          // Receipt upload failed — booking is still created, user can pay later
+        }
+      }
+
+      setCompletedBookingId(bookingId);
       setIsSuccess(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem.');
@@ -154,7 +211,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep }}>
+    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, checkAvailability, completedBookingId }}>
       {children}
     </StudioContext.Provider>
   );

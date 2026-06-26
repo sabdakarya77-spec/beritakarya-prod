@@ -5,6 +5,9 @@ import { asyncHandler } from '../../utils/asyncHandler'
 import { adTrackingLimiter } from '../../lib/rateLimit'
 import { isDuplicateImpression, syncTrackingToBooking, sanitizeAdCode } from './ad.service'
 import * as repo from './ad.repository'
+import { emailService } from '../../services/email.service'
+import { sendNotification } from '../notification/notification.controller'
+import { createSnapTransaction, verifyMidtransSignature, mapMidtransStatus } from '../../services/midtrans.service'
 
 export const adRouter = Router()
 
@@ -193,7 +196,45 @@ adRouter.get('/packages',
   })
 )
 
-// 2. POST /bookings — Advertiser to book an ad slot
+// 2. GET /availability — Check if a slot is available for given dates
+adRouter.get('/availability',
+  requireAuth,
+  requireRole(['advertiser']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { slot, startDate, endDate, siteId } = req.query as Record<string, string>
+
+    if (!slot || !startDate || !endDate || !siteId) {
+      return res.status(400).json({ success: false, message: 'slot, startDate, endDate, siteId wajib diisi' })
+    }
+
+    // Leaderboard supports rotation — always available
+    if (slot === 'leaderboard') {
+      return res.json({ success: true, data: { available: true } })
+    }
+
+    const conflicting = await repo.findConflictingBooking(
+      siteId,
+      slot,
+      new Date(startDate),
+      new Date(endDate)
+    )
+
+    if (conflicting) {
+      return res.json({
+        success: true,
+        data: {
+          available: false,
+          message: `Slot sudah ditempati hingga ${conflicting.endDate.toISOString().split('T')[0]}`,
+          conflictingEndDate: conflicting.endDate.toISOString().split('T')[0],
+        }
+      })
+    }
+
+    res.json({ success: true, data: { available: true } })
+  })
+)
+
+// 3. POST /bookings — Advertiser to book an ad slot
 adRouter.post('/bookings',
   requireAuth,
   requireRole(['advertiser']),
@@ -214,6 +255,17 @@ adRouter.post('/bookings',
 
     const computedEndDate = new Date(start)
     computedEndDate.setDate(computedEndDate.getDate() + pkg.durationDays)
+
+    // Cek overlap untuk non-leaderboard slots
+    if (pkg.slot !== 'leaderboard') {
+      const conflicting = await repo.findConflictingBooking(siteId, pkg.slot, start, computedEndDate)
+      if (conflicting) {
+        return res.status(409).json({
+          success: false,
+          message: `Slot "${pkg.slot}" sudah ditempati hingga ${conflicting.endDate.toISOString().split('T')[0]}. Silakan pilih tanggal lain.`
+        })
+      }
+    }
 
     const booking = await repo.createBooking({
       userId: req.user!.userId,
@@ -291,6 +343,162 @@ adRouter.post('/bookings/:id/pay',
   })
 )
 
+// 4b. POST /bookings/:id/pay-gateway — Advertiser to pay via Midtrans Snap
+adRouter.post('/bookings/:id/pay-gateway',
+  requireAuth,
+  requireRole(['advertiser']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    const existing = await repo.findBookingById(id, { package: true }) as unknown as {
+      id: string; userId: string; paymentStatus: string; siteId: string;
+      snapToken: string | null; externalOrderId: string | null;
+      package: { name: string; price: { toString(): string } }
+    } | null
+    if (!existing || existing.userId !== req.user!.userId) {
+      return res.status(403).json({ success: false, message: 'Akses ditolak' })
+    }
+
+    if (existing.paymentStatus !== 'PENDING') {
+      return res.status(400).json({ success: false, message: 'Booking sudah diproses' })
+    }
+
+    // Jika sudah ada snap token, return langsung
+    if (existing.snapToken) {
+      return res.json({ success: true, data: { snapToken: existing.snapToken } })
+    }
+
+    // Buat external order ID unik
+    const externalOrderId = `BK-AD-${existing.id.slice(0, 8)}-${Date.now()}`
+    const grossAmount = Math.round(Number(existing.package.price.toString()))
+
+    const user = await repo.findBookingById(id, { user: true }) as unknown as { user: { name: string; email: string } } | null
+    const customerName = user?.user?.name || 'Pengiklan'
+    const customerEmail = user?.user?.email || 'unknown@beritakarya.co'
+
+    try {
+      const snapResult = await createSnapTransaction({
+        orderId: externalOrderId,
+        grossAmount,
+        customerName,
+        customerEmail,
+        itemDetails: [{
+          id: existing.package ? 'pkg' : 'ad',
+          name: existing.package?.name || 'Iklan BeritaKarya',
+          price: grossAmount,
+          quantity: 1,
+        }],
+      })
+
+      // Simpan snap token dan external order ID
+      await repo.updateBooking(id, {
+        snapToken: snapResult.token,
+        externalOrderId,
+      })
+
+      res.json({ success: true, data: { snapToken: snapResult.token, redirectUrl: snapResult.redirect_url } })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Gagal membuat transaksi Midtrans'
+      res.status(500).json({ success: false, message })
+    }
+  })
+)
+
+// 4c. POST /webhook/midtrans — Midtrans notification callback (public)
+adRouter.post('/webhook/midtrans',
+  asyncHandler(async (req: Request, res: Response) => {
+    const notification = req.body
+
+    // Verifikasi signature
+    const isValid = verifyMidtransSignature({
+      order_id: notification.order_id,
+      status_code: notification.status_code,
+      gross_amount: notification.gross_amount,
+      signature_key: notification.signature_key,
+    })
+
+    if (!isValid) {
+      return res.status(403).json({ success: false, message: 'Invalid signature' })
+    }
+
+    // Cari booking berdasarkan externalOrderId
+    const booking = await repo.findBookingByExternalOrderId(notification.order_id)
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' })
+    }
+
+    // Map status Midtrans ke status kita
+    const { paymentStatus, shouldActivate } = mapMidtransStatus(
+      notification.transaction_status,
+      notification.fraud_status
+    )
+
+    // Update booking
+    const updateData: Record<string, unknown> = { paymentStatus }
+    if (paymentStatus === 'PAID') {
+      updateData.status = 'ACTIVE'
+    } else if (paymentStatus === 'REJECTED') {
+      updateData.status = 'REJECTED'
+      updateData.rejectionNotes = `Pembayaran ${notification.transaction_status} via Midtrans`
+    }
+
+    await repo.updateBooking(booking.id, updateData)
+
+    // Jika aktif, sync ke Advertisement table
+    if (shouldActivate) {
+      try {
+        const fullBooking = await repo.findBookingById(booking.id, { package: true }) as unknown as {
+          siteId: string; imageUrl: string | null; imageUrlTablet: string | null;
+          imageUrlMobile: string | null; linkUrl: string | null; animationEffect: string | null;
+          package: { slot: string }
+        } | null
+        if (fullBooking) {
+          const adData = {
+            imageUrl: fullBooking.imageUrl,
+            imageUrlTablet: fullBooking.imageUrlTablet || null,
+            imageUrlMobile: fullBooking.imageUrlMobile || null,
+            linkUrl: fullBooking.linkUrl,
+            animationEffect: fullBooking.animationEffect || null,
+            code: null,
+            isActive: true,
+            impressions: 0,
+            clicks: 0,
+            bookingId: booking.id,
+          }
+          if (fullBooking.package.slot === 'leaderboard') {
+            const nextOrder = await repo.getNextOrder(fullBooking.siteId, 'leaderboard')
+            await repo.createAd({ siteId: fullBooking.siteId, slot: 'leaderboard', ...adData, order: nextOrder })
+          } else {
+            await repo.createOrUpdateAdForSlot(fullBooking.siteId, fullBooking.package.slot, adData)
+          }
+        }
+      } catch (err) {
+        console.error('Gagal sync ad setelah pembayaran Midtrans:', err)
+      }
+    }
+
+    // Kirim notifikasi ke pengiklan
+    try {
+      const pkg = (await repo.findBookingById(booking.id, { package: true, user: true })) as unknown as {
+        package: { name: string }; user: { email: string; name: string }
+      } | null
+      if (pkg) {
+        if (paymentStatus === 'PAID') {
+          await sendNotification({ userId: booking.userId, siteId: booking.siteId, type: 'booking_approved', title: 'Pembayaran Berhasil', message: `Pembayaran iklan "${pkg.package.name}" berhasil. Iklan sedang aktif.`, link: `/${booking.siteId}/ads/bookings` })
+          await emailService.sendBookingNotification(pkg.user.email, pkg.user.name, 'approved', pkg.package.name, null, booking.siteId)
+        } else if (paymentStatus === 'REJECTED') {
+          await sendNotification({ userId: booking.userId, siteId: booking.siteId, type: 'booking_rejected', title: 'Pembayaran Gagal', message: `Pembayaran iklan "${pkg.package.name}" gagal. Silakan coba lagi.`, link: `/${booking.siteId}/ads/bookings` })
+        }
+      }
+    } catch (err) {
+      console.error('Gagal kirim notifikasi setelah webhook Midtrans:', err)
+    }
+
+    // Return 200 agar Midtrans tidak retry
+    res.json({ success: true })
+  })
+)
+
 // 5. POST /packages — Superadmin only to create a new ad package
 adRouter.post('/packages',
   requireAuth,
@@ -357,7 +565,7 @@ adRouter.post('/bookings/:id/approve',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
 
-    const _booking = await repo.findBookingById(id, { package: true })
+    const _booking = await repo.findBookingById(id, { package: true, user: true })
     if (!_booking) {
       return res.status(404).json({ success: false, message: 'Pemesanan tidak ditemukan' })
     }
@@ -365,7 +573,8 @@ adRouter.post('/bookings/:id/approve',
       id: string; siteId: string; userId: string; status: string; paymentStatus: string;
       startDate: Date; endDate: Date; imageUrl: string | null; imageUrlTablet: string | null; imageUrlMobile: string | null; linkUrl: string | null;
       animationEffect: string | null;
-      package: { slot: string };
+      package: { slot: string; name: string };
+      user: { email: string; name: string };
     }
 
     if (booking.paymentStatus !== 'VERIFYING') {
@@ -421,6 +630,14 @@ adRouter.post('/bookings/:id/approve',
       await repo.createOrUpdateAdForSlot(booking.siteId, booking.package.slot, adData)
     }
 
+    // Kirim notifikasi ke pengiklan (tidak gagalkan proses)
+    try {
+      await sendNotification({ userId: booking.userId, siteId: booking.siteId, type: 'booking_approved', title: 'Iklan Disetujui', message: `Iklan "${booking.package.name}" telah disetujui dan aktif.`, link: `/${booking.siteId}/ads/bookings` })
+      await emailService.sendBookingNotification(booking.user.email, booking.user.name, 'approved', booking.package.name, null, booking.siteId)
+    } catch (notifErr) {
+      console.error('Gagal mengirim notifikasi booking approval:', notifErr)
+    }
+
     res.json({ success: true, data: updatedBooking })
   })
 )
@@ -432,11 +649,32 @@ adRouter.post('/bookings/:id/reject',
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { rejectionNotes } = req.body
+
+    // Ambil booking dengan user untuk notifikasi
+    const _existing = await repo.findBookingById(id, { package: true, user: true })
+    if (!_existing) {
+      return res.status(404).json({ success: false, message: 'Pemesanan tidak ditemukan' })
+    }
+    const existing = _existing as unknown as {
+      id: string; siteId: string; userId: string;
+      user: { email: string; name: string };
+      package: { name: string };
+    }
+
     const booking = await repo.updateBooking(id, {
       paymentStatus: 'REJECTED',
       status: 'REJECTED',
       rejectionNotes: rejectionNotes || null,
     })
+
+    // Kirim notifikasi ke pengiklan (tidak gagalkan proses)
+    try {
+      await sendNotification({ userId: existing.userId, siteId: existing.siteId, type: 'booking_rejected', title: 'Iklan Ditolak', message: `Iklan "${existing.package.name}" ditolak. ${rejectionNotes || ''}`.trim(), link: `/${existing.siteId}/ads/bookings` })
+      await emailService.sendBookingNotification(existing.user.email, existing.user.name, 'rejected', existing.package.name, rejectionNotes, existing.siteId)
+    } catch (notifErr) {
+      console.error('Gagal mengirim notifikasi booking rejection:', notifErr)
+    }
+
     res.json({ success: true, data: booking })
   })
 )

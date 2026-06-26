@@ -12,6 +12,7 @@ interface AuthState {
   lastActiveSite: string | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string, siteId?: string, role?: string) => Promise<void>
+  upgradeToAdvertiser: () => Promise<void>
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
   setLastActiveSite: (siteId: string) => void
@@ -70,6 +71,22 @@ export const useAuthStore = create<AuthState>()(
         } else {
           msg = errorData.message || msg
         }
+      }
+      set({ error: msg, isLoading: false })
+      throw new Error(msg)
+    }
+  },
+
+  upgradeToAdvertiser: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data } = await api.post('/auth/upgrade-to-advertiser')
+      set({ user: data.data.user, isLoading: false })
+    } catch (err: unknown) {
+      let msg = 'Gagal upgrade ke Pengiklan'
+      const axiosErr = err as { response?: { data?: { message?: string } } }
+      if (axiosErr.response?.data?.message) {
+        msg = axiosErr.response.data.message
       }
       set({ error: msg, isLoading: false })
       throw new Error(msg)

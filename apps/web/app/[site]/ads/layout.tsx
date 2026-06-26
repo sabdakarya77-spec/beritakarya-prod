@@ -31,6 +31,7 @@ import { useRouter } from 'next/navigation'
 import NotificationBell from '../../../components/dashboard/NotificationBell'
 import { AIConsentModal } from '../../../components/editor/AIConsentModal'
 import { StudioProvider } from '../../../components/dashboard/ads/studio/StudioContext'
+import BecomeAdvertiser from '../../../components/dashboard/ads/BecomeAdvertiser'
 
 function StudioConditionalWrapper({ isAdStudio, children }: { isAdStudio: boolean; children: React.ReactNode }) {
   return isAdStudio ? <StudioProvider>{children}</StudioProvider> : <>{children}</>
@@ -68,7 +69,8 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
         setTheme(savedTheme)
         document.documentElement.classList.toggle('dark', savedTheme === 'dark')
       }
-      if (user && user.role !== 'advertiser' && user.role !== 'superadmin' && user.role !== 'wapimred') {
+      // Redirect non-reader non-advertiser roles (e.g. reporter) to dashboard
+      if (user && user.role !== 'advertiser' && user.role !== 'superadmin' && user.role !== 'wapimred' && user.role !== 'reader') {
         router.replace(`/${site}/dashboard`)
       }
     }
@@ -141,6 +143,15 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
     .slice(0, 2) || 'U'
 
   if (!user) return null
+
+  // Reader: show upgrade page instead of ads dashboard
+  if (user.role === 'reader') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0f1a] font-sans text-brand-black dark:text-white transition-colors duration-500">
+        <BecomeAdvertiser site={site} onSuccess={() => router.push(`/${site}/ads`)} />
+      </div>
+    )
+  }
 
   return (
     <StudioConditionalWrapper isAdStudio={isAdStudioRoute}>

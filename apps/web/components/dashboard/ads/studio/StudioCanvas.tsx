@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Monitor,
   CheckCircle2,
@@ -15,13 +16,14 @@ import {
   Package,
   FileText,
   CreditCard,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
 import { useStudio } from './StudioContext';
 
 export function StudioCanvas() {
-  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep } = useStudio();
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId } = useStudio();
   const [expandedSection, setExpandedSection] = useState<string>('package');
 
   const formatRupiah = (val: string | number) =>
@@ -62,6 +64,7 @@ export function StudioCanvas() {
 
   // Success state
   if (isSuccess) {
+    const hasReceipt = data.receiptFile !== null;
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center space-y-5 max-w-sm">
@@ -69,10 +72,16 @@ export function StudioCanvas() {
             <CheckCircle2 size={40} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-brand-black dark:text-white uppercase tracking-tight">Pesanan Terkirim!</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-              Materi iklan dan bukti pembayaran telah diunggah. Menunggu verifikasi Superadmin (5-15 menit).
-            </p>
+            <h2 className="text-xl font-black text-brand-black dark:text-white uppercase tracking-tight">Pesanan Berhasil Dibuat!</h2>
+            {hasReceipt ? (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                Materi iklan dan bukti pembayaran telah diunggah. Menunggu verifikasi Superadmin (5-15 menit).
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                Materi iklan telah diunggah. Silakan lakukan pembayaran dan upload bukti transfer di halaman Pembayaran.
+              </p>
+            )}
           </div>
           {selectedPackage && (
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-gray-100 dark:bg-white/5 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-500">
@@ -82,6 +91,15 @@ export function StudioCanvas() {
               <span className="w-px h-3 bg-gray-300 dark:bg-white/10" />
               <span className="text-brand-red font-black">{formatRupiah(selectedPackage.price)}</span>
             </div>
+          )}
+          {!hasReceipt && (
+            <Link
+              href={`/${site}/ads/bookings`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            >
+              Bayar Sekarang
+              <ArrowRight size={14} />
+            </Link>
           )}
         </div>
       </div>
@@ -258,22 +276,60 @@ export function StudioCanvas() {
                   <input
                     type="date"
                     value={data.startDate}
-                    onChange={(e) => setData(prev => ({ ...prev, startDate: e.target.value }))}
+                    onChange={(e) => {
+                      const newStart = e.target.value;
+                      setData(prev => {
+                        const end = new Date(newStart);
+                        end.setDate(end.getDate() + (prev.selectedPackage?.durationDays || 7));
+                        return { ...prev, startDate: newStart, endDate: end.toISOString().split('T')[0] };
+                      });
+                    }}
                     min={new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
                   />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Berakhir</label>
-                  <input
-                    type="date"
-                    value={data.endDate}
-                    onChange={(e) => setData(prev => ({ ...prev, endDate: e.target.value }))}
-                    min={data.startDate}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-brand-black dark:text-white focus:outline-none focus:border-brand-red transition-colors"
-                  />
+                  <div className="w-full px-4 py-3 bg-gray-100 dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-500 dark:text-gray-400">
+                    {data.endDate
+                      ? new Date(data.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : '—'}
+                    <span className="ml-2 text-[9px] text-gray-400">({data.selectedPackage?.durationDays || 7} hari)</span>
+                  </div>
                 </div>
               </div>
+
+              {/* Availability indicator */}
+              {data.selectedPackage && data.selectedPackage.slot !== 'leaderboard' && (
+                <div className="flex items-center gap-2">
+                  {checkingAvailability ? (
+                    <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                      <div className="w-3 h-3 border-2 border-gray-300 border-t-brand-red rounded-full animate-spin" />
+                      Mengecek ketersediaan...
+                    </div>
+                  ) : availability?.available === false ? (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg w-full">
+                      <span className="text-red-500 text-sm">✕</span>
+                      <div>
+                        <p className="text-[10px] font-bold text-red-600 dark:text-red-400">Slot Tidak Tersedia</p>
+                        <p className="text-[9px] text-red-500/70">{availability?.message || 'Slot sudah ditempati untuk tanggal ini'}</p>
+                      </div>
+                    </div>
+                  ) : availability?.available === true ? (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
+                      <span className="text-emerald-500 text-sm">✓</span>
+                      <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Slot Tersedia</p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              {data.selectedPackage?.slot === 'leaderboard' && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg">
+                  <span className="text-blue-500 text-sm">ℹ</span>
+                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Leaderboard mendukung rotasi multi-iklan</p>
+                </div>
+              )}
 
               <div className="flex justify-between pt-2">
                 <button
@@ -285,8 +341,8 @@ export function StudioCanvas() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => data.campaignName && data.linkUrl && setActiveStep('creative')}
-                  disabled={!data.campaignName || !data.linkUrl}
+                  onClick={() => data.campaignName && data.linkUrl && (!availability || availability.available) && setActiveStep('creative')}
+                  disabled={!data.campaignName || !data.linkUrl || (availability?.available === false)}
                   className="px-5 py-2.5 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed rounded-xl"
                 >
                   Selanjutnya
@@ -408,7 +464,7 @@ export function StudioCanvas() {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">Pembayaran</h3>
-                  <p className="text-[10px] text-gray-400">Transfer ke rekening berikut dan upload bukti</p>
+                  <p className="text-[10px] text-gray-400">Transfer ke rekening berikut. Bukti bisa diupload sekarang atau nanti.</p>
                 </div>
               </div>
 
@@ -433,7 +489,7 @@ export function StudioCanvas() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Bukti Transfer</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Bukti Transfer <span className="font-normal text-gray-300">(Opsional — bisa diupload nanti)</span></label>
                 <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-6 text-center rounded-xl bg-gray-50/50 dark:bg-white/[0.02]">
                   <input
                     type="file"
@@ -464,7 +520,7 @@ export function StudioCanvas() {
                 <button
                   type="button"
                   onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
-                  disabled={submitting || !data.receiptFile}
+                  disabled={submitting}
                   className="px-6 py-2.5 bg-brand-red hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center gap-2 shadow-lg shadow-brand-red/20"
                 >
                   {submitting ? (

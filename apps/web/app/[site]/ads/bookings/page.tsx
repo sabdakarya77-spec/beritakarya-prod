@@ -18,7 +18,15 @@ import {
   CreditCard,
   Clock,
   ExternalLink,
+  Smartphone,
 } from 'lucide-react';
+
+// Midtrans Snap JS types
+declare global {
+  interface Window {
+    snap?: { pay: (token: string, options: Record<string, unknown>) => void }
+  }
+}
 import type { AdBooking } from '../../../../components/dashboard/ads/types';
 
 const BANK_ACCOUNTS = [
@@ -48,6 +56,17 @@ export default function PaymentsPage() {
       if (!signal?.aborted) setLoading(false);
     }
   };
+
+  // Load Midtrans Snap JS
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.snap) {
+      const script = document.createElement('script');
+      script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+      script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '');
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,6 +100,41 @@ export default function PaymentsPage() {
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
       addToast(msg || 'Gagal mengunggah bukti pembayaran', 'error');
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  const handlePayGateway = async (bookingId: string) => {
+    setUploadingId(bookingId);
+    try {
+      const res = await api.post(`/ads/bookings/${bookingId}/pay-gateway`);
+      const { snapToken } = res.data.data;
+      if (!snapToken) throw new Error('Gagal mendapatkan token pembayaran');
+
+      // Buka Midtrans Snap popup
+      if (window.snap) {
+        window.snap.pay(snapToken, {
+          onSuccess: async () => {
+            addToast('Pembayaran berhasil!', 'success');
+            await fetchBookings();
+          },
+          onPending: () => {
+            addToast('Pembayaran sedang diproses', 'info');
+          },
+          onError: () => {
+            addToast('Pembayaran gagal', 'error');
+          },
+          onClose: () => {
+            addToast('Popup pembayaran ditutup', 'info');
+          },
+        });
+      } else {
+        addToast('Midtrans Snap belum dimuat. Coba refresh halaman.', 'error');
+      }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      addToast(msg || 'Gagal memproses pembayaran', 'error');
     } finally {
       setUploadingId(null);
     }
@@ -203,6 +257,27 @@ export default function PaymentsPage() {
                         <StatusIcon size={12} />
                         {statusConfig.label}
                       </span>
+
+                      {/* Pay online button */}
+                      {(b.paymentStatus === 'PENDING' || b.paymentStatus === 'REJECTED') && (
+                        <button
+                          onClick={() => handlePayGateway(b.id)}
+                          disabled={uploadingId === b.id}
+                          className={cn(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all",
+                            uploadingId === b.id
+                              ? "bg-gray-100 dark:bg-white/5 text-gray-400"
+                              : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/20"
+                          )}
+                        >
+                          {uploadingId === b.id ? (
+                            <RefreshCw size={12} className="animate-spin" />
+                          ) : (
+                            <Smartphone size={12} />
+                          )}
+                          {uploadingId === b.id ? 'Memproses...' : 'Bayar Online'}
+                        </button>
+                      )}
 
                       {/* Upload receipt button */}
                       {(b.paymentStatus === 'PENDING' || b.paymentStatus === 'REJECTED') && (

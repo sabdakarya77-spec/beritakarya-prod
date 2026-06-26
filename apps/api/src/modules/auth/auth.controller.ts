@@ -155,6 +155,28 @@ authRouter.post('/register', asyncHandler(async (req: Request, res: Response) =>
   res.status(201).json(result)
 }))
 
+authRouter.post('/upgrade-to-advertiser', requireAuth, asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.userId
+  const currentRole = req.user!.role
+
+  if (currentRole !== 'reader') {
+    return res.status(400).json({
+      success: false,
+      message: 'Hanya Pembaca yang bisa upgrade ke Pengiklan. Role saat ini: ' + currentRole
+    })
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { role: 'advertiser' },
+    select: { id: true, email: true, name: true, role: true, siteId: true, avatarUrl: true }
+  })
+
+  logger.info(`User ${userId} upgraded from reader to advertiser via self-service`)
+
+  res.json({ success: true, data: { user: updatedUser }, message: 'Berhasil menjadi Pengiklan!' })
+}))
+
 authRouter.post('/verify-email', asyncHandler(async (req: Request, res: Response) => {
   const { email, token } = z.object({
     email: z.string().email('Email tidak valid'),

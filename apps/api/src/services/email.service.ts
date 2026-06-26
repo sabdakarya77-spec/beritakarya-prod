@@ -338,6 +338,66 @@ class EmailService {
 
     return this.sendEmail(userEmail, subject, html)
   }
+
+  async sendBookingNotification(
+    userEmail: string,
+    userName: string,
+    status: 'approved' | 'rejected',
+    packageName: string,
+    rejectionNotes?: string | null,
+    siteId?: string | null
+  ): Promise<boolean> {
+    const isApproved = status === 'approved'
+    const subject = isApproved
+      ? `✅ Iklan Anda Disetujui - BeritaKarya`
+      : `❌ Iklan Anda Ditolak - BeritaKarya`
+
+    const baseUrl = process.env.FRONTEND_URL || 'https://beritakarya.co'
+    const slug = siteId || 'pusat'
+    const bookingsUrl = `${baseUrl}/${slug}/ads/bookings`
+
+    const statusColor = isApproved ? '#10b981' : '#ef4444'
+    const statusText = isApproved ? 'Disetujui' : 'Ditolak'
+    const statusIcon = isApproved ? '✅' : '❌'
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;">
+        <div style="background: #e11d48; padding: 20px; text-align: center;">
+          <img src="${baseUrl}/logo.png" alt="BeritaKarya" style="max-height: 40px; margin: 0 auto; display: block;" onerror="this.onerror=null; this.parentNode.innerHTML='<h1 style=\\'margin: 0; font-size: 24px; color: white;\\'>BeritaKarya</h1>';"/>
+        </div>
+
+        <div style="padding: 30px; background: #f9f9f9;">
+          <h2 style="color: ${statusColor};">${statusIcon} Iklan ${statusText}</h2>
+
+          <p>Halo <strong>${userName}</strong>,</p>
+
+          <p>Pesanan iklan Anda telah <strong style="color: ${statusColor};">${statusText.toLowerCase()}</strong> oleh admin:</p>
+
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${statusColor};">
+            <p style="margin-top: 0;"><strong>Paket:</strong> ${packageName}</p>
+            <p style="margin-bottom: 0;"><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span></p>
+            ${!isApproved && rejectionNotes ? `<p style="margin-bottom: 0; color: #ef4444;"><strong>Alasan:</strong> ${rejectionNotes}</p>` : ''}
+          </div>
+
+          ${isApproved
+            ? '<p>Iklan Anda sudah aktif dan akan tayang sesuai jadwal. Pantau performa iklan dari dashboard Anda.</p>'
+            : '<p>Silakan perbaiki materi iklan sesuai catatan di atas dan ajukan kembali.</p>'
+          }
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${bookingsUrl}" style="background-color: ${statusColor}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Lihat Pesanan Saya</a>
+          </div>
+        </div>
+
+        <div style="background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+          <p style="margin-bottom: 10px;">Email ini dikirim otomatis. Mohon jangan membalas email ini.</p>
+          <p style="margin: 12px 0 0 0;">&copy; ${new Date().getFullYear()} BeritaKarya Nusantara</p>
+        </div>
+      </div>
+    `
+
+    return this.sendEmail(userEmail, subject, html)
+  }
 }
 
 export const emailService = new EmailService()
