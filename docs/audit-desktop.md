@@ -527,7 +527,7 @@ Pattern yang baik: store terpisah per domain, tidak ada god store.
 | 7 | Dashboard form labels tanpa htmlFor | `settings/page.tsx` | Form aksesibilitas | ✅ Selesai |
 | 8 | MobileMenu close button tanpa aria-label | `MobileMenu.tsx:82` | Aksesibilitas | ✅ Selesai |
 | 9 | Framer Motion tidak check reduced motion | Multiple files | Aksesibilitas | ✅ Selesai |
-| 10 | Testing coverage terbatas | `*.test.ts` | Kualitas kode | ⏳ Belum |
+| 10 | Testing coverage terbatas | `*.test.ts` | Kualitas kode | ✅ Selesai (SmartImage, NewsCard, SocialIcons, useReducedMotion — 137 tests) |
 
 ### Low (Perbaikan minor)
 
