@@ -69,7 +69,7 @@ export default function AdsSlotsContent() {
         return doUpload(croppedFile, slotId);
       } catch {
         // Cropper cancelled or failed — fallback: upload original file
-        // Backend will handle resize/letterbox automatically
+        // Backend will handle resize/palette-gradient automatically
         addToast('Crop dibatalkan. Mengupload gambar asli — sistem akan menyesuaikan otomatis.', 'info');
         return doUpload(file, slotId);
       }

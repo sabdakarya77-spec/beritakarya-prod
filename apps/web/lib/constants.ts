@@ -130,7 +130,7 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
   {
     id: 'rectangle',
     name: 'Sidebar Rectangle Utama',
-    size: '300 x 250 px',
+    size: '300 x 250 px / Mobile: 300 x 100 px',
     desc: 'Muncul di sidebar homepage dan sidebar artikel sebagai slot promosi utama.',
     placementPages: ['homepage', 'artikel'],
     publicSize: '300 x 250 px / Mobile: 300 x 100 px',
@@ -142,12 +142,12 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
       'Format: Gambar statis, GIF, Video ringkas',
       'Penempatan: Sidebar homepage dan artikel',
     ],
-    publicMockup: '300 x 250 px',
+    publicMockup: '300 x 250 px / Mobile: 300 x 100 px',
   },
   {
     id: 'rectangle_secondary',
     name: 'Sidebar Rectangle Sekunder',
-    size: '300 x 250 px',
+    size: '300 x 250 px / Mobile: 300 x 100 px',
     desc: 'Muncul sebagai slot iklan tambahan di sidebar halaman detail artikel.',
     placementPages: ['artikel'],
     publicSize: '300 x 250 px / Mobile: 300 x 100 px',
@@ -159,12 +159,12 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
       'Format: Gambar statis, GIF, Video ringkas',
       'Penempatan: Sidebar artikel posisi kedua',
     ],
-    publicMockup: '300 x 250 px',
+    publicMockup: '300 x 250 px / Mobile: 300 x 100 px',
   },
   {
     id: 'in_feed',
     name: 'In-Feed',
-    size: '300 x 250 px',
+    size: '300 x 250 px / Mobile: 300 x 100 px',
     desc: 'Disisipkan secara otomatis di area feed homepage dan di tengah konten artikel.',
     placementPages: ['homepage', 'artikel'],
     publicSize: '300 x 250 px / Mobile: 300 x 100 px',
@@ -176,7 +176,7 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
       'Format: Gambar statis, GIF, Video ringkas',
       'Penempatan: Area feed homepage dan konten artikel',
     ],
-    publicMockup: '300 x 250 px',
+    publicMockup: '300 x 250 px / Mobile: 300 x 100 px',
   },
 ]
 

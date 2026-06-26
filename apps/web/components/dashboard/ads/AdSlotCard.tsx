@@ -71,7 +71,7 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
         <div>
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">{slot.name}</h3>
-            <span className="text-[9px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">{slot.size}</span>
+            <span className="text-[9px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">{slot.publicSize || slot.size}</span>
             {(() => {
               const templateMap: Record<string, string> = {
                 leaderboard: '/templates/leaderboard-970x250.svg',
@@ -211,7 +211,7 @@ export function AdSlotCard({ slot, data, onSave, onUpload, isSaving }: { slot: A
               {/* Preview Area */}
               <div className="space-y-2">
                 <label className="dash-label">Live Preview Banner / Video</label>
-                <div className="aspect-[4/1] bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden relative group">
+                <div className="aspect-[3/1] md:aspect-[6/5] bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden relative group">
                   {imageUrl ? (
                     imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i) || imageUrl.toLowerCase().includes('video') ? (
                       <video src={imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />

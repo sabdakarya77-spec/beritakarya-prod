@@ -14,7 +14,7 @@ import type { AdBooking } from './types';
 const REVIEW_ITEMS = [
   { key: 'content_ok', label: 'Konten tidak menyesatkan atau misleading' },
   { key: 'no_prohibited', label: 'Tidak mengandung SARA, pornografi, atau konten terlarang' },
-  { key: 'size_ok', label: 'Materi kreatif sesuai ukuran slot yang dipilih' },
+  { key: 'size_ok', label: 'Materi kreatif sesuai ukuran slot (desktop & mobile)' },
   { key: 'url_ok', label: 'URL tujuan aktif dan relevan' },
   { key: 'no_copyright', label: 'Tidak melanggar hak cipta atau trademark' },
 ];
