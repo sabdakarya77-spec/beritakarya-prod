@@ -21,6 +21,7 @@ import {
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
 import { useStudio } from './StudioContext';
+import { AdSmartPreview } from './AdSmartPreview';
 
 export function StudioCanvas() {
   const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId, receiptUploadFailed } = useStudio();
@@ -387,6 +388,13 @@ export function StudioCanvas() {
                 </div>
               )}
 
+              {/* Smart Preview — shows processed result for all slots */}
+              <AdSmartPreview
+                file={data.adFile}
+                previewUrl={data.adPreviewUrl}
+                mediaType={data.mediaType}
+              />
+
               {/* Animation */}
               {data.mediaType === 'image' && (
                 <div className="pt-3 border-t border-gray-100 dark:border-white/5">
@@ -649,12 +657,12 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
   const sizeLabels: Record<string, string> = {
-    leaderboard: '970 × 250 px',
-    rectangle: '300 × 250 px',
-    rectangle_secondary: '300 × 250 px',
-    in_feed: '300 × 250 px',
+    leaderboard: '970×250 / 728×90 / 320×50',
+    rectangle: '300×250 / 300×100',
+    rectangle_secondary: '300×250 / 300×100',
+    in_feed: '300×250 / 300×100',
   };
-  const sizeLabel = sizeLabels[slot] || '300 × 250 px';
+  const sizeLabel = sizeLabels[slot] || '300×250 / 300×100';
 
   return (
     <div className="space-y-1">

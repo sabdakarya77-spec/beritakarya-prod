@@ -19,10 +19,10 @@
 |-------|--------|
 | **Layout** | Full-width, vertikal (gambar di atas, teks di bawah) |
 | **Aspect ratio** | Min-height 340px, gambar fill penuh |
-| **Gambar** | Full-bleed background dengan overlay gradient (`from-slate-950`) |
+| **Gambar** | Full-bleed background dengan overlay gradient (`from-slate-950 via-slate-950/55 to-transparent`) |
 | **Badge** | `EditorialBadge` (breaking/exclusive/featured) + category label merah |
-| **Judul** | `text-lg` → `text-[1.6rem]`, max 20ch, font-extrabold |
-| **Excerpt** | 2 baris, `text-xs` → `text-sm`, warna `gray-300` |
+| **Judul** | `text-lg` → `md:text-xl` → `lg:text-[1.6rem]`, max-w-[75%], line-clamp-2, font-extrabold |
+| **Excerpt** | 2 baris, `text-xs` → `md:text-sm`, max-w-[80%], warna `gray-300`, opacity-90 |
 | **Meta** | Avatar penulis + nama, tanggal (Clock icon), waktu baca (BookOpen icon) |
 | **Bookmark** | Tombol di kanan atas, style bulat transparan atas gambar |
 | **Hover** | `hover:-translate-y-0.5`, gambar `scale-[1.03]` |
@@ -187,7 +187,7 @@ Muncul saat user memfilter "Tersimpan" di homepage.
 
 ```
 NewsCard
-├── SmartImage (optimized image + blur/dominant color)
+├── SmartImage + prefetchImage (optimized image + blur/dominant color + hover prefetch)
 ├── EditorialBadge (breaking/exclusive/featured badge)
 ├── ArticleBookmarkButton (save/bookmark)
 ├── resolveArticleBadge() → menentukan badge variant
@@ -211,7 +211,7 @@ Berikut urutan lengkap semua komponen/section yang muncul di halaman homepage (`
 | **Komponen** | `BreakingNewsTicker` (`components/ui/BreakingNewsTicker.tsx`) |
 | **Posisi** | Paling atas, full-width |
 | **Container** | `bg-brand-black`, di-wrap `Container` |
-| **Layout** | Bar horizontal, height `h-8` (mobile) → `h-10` (desktop) |
+| **Layout** | Bar horizontal, height `h-8` (mobile) → `sm:h-9` → `lg:h-10` (desktop) |
 | **Konten** | Teks berita berjalan (marquee) dari API `/api/breaking-news`, fallback ke 4 hardcoded news |
 | **Visual** | Dot merah pulsing + label "TERKINI", gradient fade kiri-kanan, separator dot merah antar item |
 | **Animasi** | `framer-motion` infinite scroll kiri, durasi 40 detik |
@@ -265,9 +265,9 @@ Berikut urutan lengkap semua komponen/section yang muncul di halaman homepage (`
 | **Komponen** | `MagazineBentoHero` (`components/berita/MagazineBentoHero.tsx`) |
 | **Posisi** | Section pertama setelah navbar |
 | **Container** | `Container`, `py-5 md:py-6`, background gradient subtle |
-| **Layout** | Bento grid asymetris: 1 kartu lead besar (kiri) + 3 kartu side (kanan stacked) |
+| **Layout** | Bento grid asymetris: 1 kartu lead besar (kiri) + 4 kartu navigasi side (kanan stacked) |
 | **Artikel** | 4 artikel terbaru dari `distributeArticles()` slot `[0..3]` |
-| **Fitur** | Auto-slide setiap 5 detik, SmartImage dengan posisi adaptif (portrait/landscape), category badge, overlay gradient |
+| **Fitur** | Auto-slide setiap 5 detik (pause saat hover), SmartImage dengan posisi adaptif (portrait/landscape), category badge, overlay gradient |
 | **NewsCard?** | ❌ Tidak menggunakan NewsCard, custom rendering |
 
 ---
@@ -294,7 +294,7 @@ Berikut urutan lengkap semua komponen/section yang muncul di halaman homepage (`
 | **Animasi** | Wrap dengan `ScrollAnimate` (fade-in on scroll) |
 | **Header** | ⚡ Zap icon merah + "FOKUS REDAKSI" (eyebrow text) |
 | **Layout Grid** | `grid-cols-1 md:grid-cols-3` (3 kolom desktop) |
-| **Artikel** | Slot `[4..7]` dari `distributeArticles()`, prioritaskan `isFeatured`/`isExclusive` |
+| **Artikel** | Slot `[4..6]` dari `distributeArticles()` (3 kartu dirender), prioritaskan `isFeatured`/`isExclusive` |
 
 | Posisi Kartu | NewsCard Variant | Grid | Detail |
 |-------------|-----------------|------|--------|
@@ -381,9 +381,11 @@ Sidebar berhenti di sini. Semua section di bawah menggunakan lebar penuh.
 
 | Kolom | Konten |
 |-------|--------|
-| **Kolom 1-2** (lebih lebar) | Logo/nama site (serif, besar), deskripsi site, icon social media (WhatsApp, Facebook, TikTok, Telegram, YouTube, X, Instagram), alamat, telepon, email |
-| **Kolom 3** | "Kategori Utama" — max 9 kategori (exclude terbaru, tersimpan, advertorial), link ke filter kategori |
+| **Kolom 1-2** (lebih lebar, `md:col-span-2`) | Logo/nama site (serif, besar), deskripsi site, icon social media (WhatsApp, Facebook, TikTok, Telegram, YouTube, X, Instagram), alamat, telepon, email |
+| **Kolom 3** (`lg:col-span-2`) | "Kategori Utama" — max 9 kategori (exclude terbaru, tersimpan, advertorial), link ke filter kategori |
 | **Kolom 4** | "Kerja Sama" — link Iklan, Advertorial, Kemitraan & Partner |
+
+> **Catatan**: Grid footer responsive — `md:grid-cols-4` → `lg:grid-cols-5` (5 kolom di layar besar, Kategori Utama expand `lg:col-span-2`)
 
 #### Bagian Bawah Footer
 
@@ -532,24 +534,34 @@ Sidebar berhenti di sini. Semua section di bawah menggunakan lebar penuh.
 ## 7. Data Shape (NewsCardArticle)
 
 ```typescript
+// Sub-interface untuk blocks
+interface NewsCardBlock {
+  type: string;
+  content?: string;
+  url?: string;
+  embedType?: string;
+  images?: Array<{ url?: string }>;
+}
+
+// Main article interface
 {
   id?: string;
-  slug: string;               // wajib
-  title: string;              // wajib
-  featuredImage?: string;
-  featuredImageBlur?: string; // blur placeholder
-  featuredImageColor?: string;// dominant color
-  readingTimeMin?: number;
-  publishedAt?: string;
-  createdAt?: string;
-  category?: { name };        // legacy single category
-  categories?: [{ category: { name, slug } }]; // multi-category
-  author?: { name, avatarUrl };
-  blocks?: [{ type, content, url, embedType, images }];
+  slug: string;                          // wajib
+  title: string;                         // wajib
+  featuredImage?: string | null;
+  featuredImageBlur?: string | null;     // blur placeholder
+  featuredImageColor?: string | null;    // dominant color
+  readingTimeMin?: number | null;
+  publishedAt?: string | null;
+  createdAt?: string | null;
+  category?: { name?: string | null } | null;        // legacy single category
+  categories?: Array<{ category?: { name?: string | null; slug?: string | null } | null }> | null; // multi-category
+  author?: { name?: string | null; avatarUrl?: string | null } | null;
+  blocks?: NewsCardBlock[];
   isBreaking?: boolean;
   isExclusive?: boolean;
   isFeatured?: boolean;
-  excerpt?: string;
+  excerpt?: string | null;
   status?: string;
 }
 ```

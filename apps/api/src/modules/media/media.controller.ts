@@ -11,6 +11,13 @@ import { logger } from '../../lib/logger'
 import { StorageService } from '../../services/storage.service'
 import nodePath from 'path'
 import fs from 'fs/promises'
+import {
+  processAdSmart,
+  validateAdImage,
+  generatePreviews,
+  AD_SLOTS,
+  AD_VARIANTS,
+} from '../../lib/ad-image-processor'
 
 // Path ke editorial.png watermark
 const MEDIA_WATERMARK_PATH = nodePath.join(__dirname, '..', '..', 'assets', 'watermarks', 'editorial.png')
@@ -52,205 +59,10 @@ async function loadSharp() {
   }
 }
 
-// ─── Ad Slot Dimensions ──────────────────────────────────────────────────────
-
-interface SlotDimensions {
-  width: number
-  height: number
-  minWidth: number
-  minHeight: number
-}
-
-const AD_SLOT_SIZES: Record<string, SlotDimensions> = {
-  leaderboard: { width: 970, height: 250, minWidth: 600, minHeight: 150 },
-  rectangle: { width: 300, height: 250, minWidth: 200, minHeight: 180 },
-  rectangle_secondary: { width: 300, height: 250, minWidth: 200, minHeight: 180 },
-  in_feed: { width: 300, height: 250, minWidth: 200, minHeight: 180 },
-}
-
-// Multi-size IAB variants for leaderboard
-const AD_SLOT_VARIANTS: Record<string, Record<string, SlotDimensions>> = {
-  leaderboard: {
-    desktop: { width: 970, height: 250, minWidth: 600, minHeight: 150 },
-    tablet:  { width: 728, height: 90,  minWidth: 500, minHeight: 60 },
-    mobile:  { width: 320, height: 50,  minWidth: 280, minHeight: 40 },
-  },
-}
-
-const AD_MAX_SIZE_BYTES = 200 * 1024 // 200 KB
-const ASPECT_RATIO_TOLERANCE = 0.15 // 15% tolerance for aspect ratio matching
-
-// ─── Ad-specific image processing with smart resize + letterbox ──────────────
-
-async function processAdImage(
-  buffer: Buffer,
-  slot?: string
-): Promise<{ buffer: Buffer; width: number; height: number; letterboxed: boolean }> {
-  const sharp = await loadSharp()
-
-  // Get original dimensions
-  const origMeta = await sharp(buffer).metadata()
-  const origW = origMeta.width || 0
-  const origH = origMeta.height || 0
-
-  if (origW === 0 || origH === 0) {
-    throw new AppError('Gambar tidak memiliki dimensi yang valid', 400, 'INVALID_IMAGE_DIMENSIONS')
-  }
-
-  // If slot specified, validate minimum dimensions
-  const slotSize = slot ? AD_SLOT_SIZES[slot] : null
-  if (slotSize) {
-    if (origW < slotSize.minWidth || origH < slotSize.minHeight) {
-      throw new AppError(
-        `Gambar terlalu kecil. Minimum ${slotSize.minWidth}×${slotSize.minHeight}px untuk slot ${slot}. Ukuran Anda: ${origW}×${origH}px.`,
-        400,
-        'IMAGE_TOO_SMALL'
-      )
-    }
-  }
-
-  // Check if aspect ratio matches target (if slot specified)
-  let letterboxed = false
-  let processed: Buffer
-
-  if (slotSize) {
-    const targetRatio = slotSize.width / slotSize.height
-    const origRatio = origW / origH
-    const ratioDiff = Math.abs(origRatio - targetRatio) / targetRatio
-
-    if (ratioDiff > ASPECT_RATIO_TOLERANCE) {
-      // Aspect ratio doesn't match → letterbox (blur background + contain foreground)
-      letterboxed = true
-      processed = await createLetterbox(buffer, slotSize.width, slotSize.height)
-    } else {
-      // Aspect ratio matches → resize to target
-      processed = await sharp(buffer)
-        .resize(slotSize.width, slotSize.height, { fit: 'cover', position: 'attention' })
-        .webp({ quality: 80 })
-        .toBuffer()
-    }
-  } else {
-    // No slot specified → just resize to max width
-    processed = await sharp(buffer)
-      .resize(1200, undefined, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer()
-  }
-
-  // Compress until under max size
-  let quality = 80
-  while (processed.length > AD_MAX_SIZE_BYTES && quality > 30) {
-    quality -= 10
-    if (slotSize && letterboxed) {
-      processed = await createLetterbox(buffer, slotSize.width, slotSize.height, quality)
-    } else if (slotSize) {
-      processed = await sharp(buffer)
-        .resize(slotSize.width, slotSize.height, { fit: 'cover', position: 'attention' })
-        .webp({ quality })
-        .toBuffer()
-    } else {
-      processed = await sharp(buffer)
-        .resize(1200, undefined, { fit: 'inside', withoutEnlargement: true })
-        .webp({ quality })
-        .toBuffer()
-    }
-  }
-
-  const meta = await sharp(processed).metadata()
-  return { buffer: processed, width: meta.width || 0, height: meta.height || 0, letterboxed }
-}
-
-// ─── Process ad image with explicit dimensions (for multi-size IAB variants) ──
-
-async function processAdImageWithDims(
-  buffer: Buffer,
-  dims: SlotDimensions
-): Promise<{ buffer: Buffer; width: number; height: number; letterboxed: boolean }> {
-  const sharp = await loadSharp()
-
-  const origMeta = await sharp(buffer).metadata()
-  const origW = origMeta.width || 0
-  const origH = origMeta.height || 0
-
-  if (origW === 0 || origH === 0) {
-    throw new AppError('Gambar tidak memiliki dimensi yang valid', 400, 'INVALID_IMAGE_DIMENSIONS')
-  }
-
-  if (origW < dims.minWidth || origH < dims.minHeight) {
-    throw new AppError(
-      `Gambar terlalu kecil. Minimum ${dims.minWidth}×${dims.minHeight}px. Ukuran Anda: ${origW}×${origH}px.`,
-      400,
-      'IMAGE_TOO_SMALL'
-    )
-  }
-
-  let letterboxed = false
-  let processed: Buffer
-
-  const targetRatio = dims.width / dims.height
-  const origRatio = origW / origH
-  const ratioDiff = Math.abs(origRatio - targetRatio) / targetRatio
-
-  if (ratioDiff > ASPECT_RATIO_TOLERANCE) {
-    letterboxed = true
-    processed = await createLetterbox(buffer, dims.width, dims.height)
-  } else {
-    processed = await sharp(buffer)
-      .resize(dims.width, dims.height, { fit: 'cover', position: 'attention' })
-      .webp({ quality: 80 })
-      .toBuffer()
-  }
-
-  let quality = 80
-  while (processed.length > AD_MAX_SIZE_BYTES && quality > 30) {
-    quality -= 10
-    if (letterboxed) {
-      processed = await createLetterbox(buffer, dims.width, dims.height, quality)
-    } else {
-      processed = await sharp(buffer)
-        .resize(dims.width, dims.height, { fit: 'cover', position: 'attention' })
-        .webp({ quality })
-        .toBuffer()
-    }
-  }
-
-  const meta = await sharp(processed).metadata()
-  return { buffer: processed, width: meta.width || 0, height: meta.height || 0, letterboxed }
-}
-
-// ─── Letterbox: blur background + contain foreground ─────────────────────────
-
-async function createLetterbox(
-  buffer: Buffer,
-  targetW: number,
-  targetH: number,
-  quality: number = 80
-): Promise<Buffer> {
-  const sharp = await loadSharp()
-
-  // 1. Create blurred background (cover → fills entire area → blur)
-  const background = await sharp(buffer)
-    .resize(targetW, targetH, { fit: 'cover', position: 'attention' })
-    .blur(30)
-    .toBuffer()
-
-  // 2. Resize original with contain (fits inside → adds transparent padding)
-  const foreground = await sharp(buffer)
-    .resize(targetW, targetH, {
-      fit: 'contain',
-      position: 'attention',
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .toBuffer()
-
-  // 3. Composite: foreground on top of blurred background
-  const result = await sharp(background)
-    .composite([{ input: foreground, gravity: 'center' }])
-    .webp({ quality })
-    .toBuffer()
-
-  return result
-}
+// ─── Ad Image Processing ─────────────────────────────────────────────────────
+// NOTE: Fungsi processAdImage, processAdImageWithDims, dan createLetterbox
+// telah dipindahkan ke ../../lib/ad-image-processor.ts (palette gradient approach)
+// Import: processAdSmart, validateAdImage, generatePreviews
 
 // ─── Image Processing (Sharp) ─────────────────────────────────────────────────
 
@@ -481,13 +293,18 @@ mediaRouter.post(
         thumbUrl = url
         originalFormat = `ad-${ext}`
       } else {
-        // ── Ad image: smart resize + letterbox + compress to max 200KB ──
-        // Resolve target dimensions: variant-specific > slot default
+        // ── Ad image: smart palette gradient + resize + compress ──
+        // Validasi (warning only, tidak memblokir)
+        const validation = await validateAdImage(req.file.buffer, adSlot)
+        if (!validation.valid) {
+          throw new AppError(validation.errors.join(' '), 400, 'INVALID_AD_IMAGE')
+        }
+
         let targetSlot = adSlot
-        if (adSlot && adVariant && AD_SLOT_VARIANTS[adSlot]?.[adVariant]) {
-          // Use variant-specific dimensions — pass as custom slot
-          const variantDims = AD_SLOT_VARIANTS[adSlot][adVariant]
-          const adResult = await processAdImageWithDims(req.file.buffer, variantDims)
+        if (adSlot && adVariant && AD_VARIANTS[adSlot]?.[adVariant]) {
+          // Use variant-specific dimensions
+          const variantDims = AD_VARIANTS[adSlot][adVariant]
+          const adResult = await processAdSmart(req.file.buffer, variantDims.width, variantDims.height)
           const suffix = adVariant !== 'desktop' ? `-${adVariant}` : ''
           const adKey = `ads/${id}${suffix}.webp`
           await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
@@ -498,8 +315,9 @@ mediaRouter.post(
           width = adResult.width
           height = adResult.height
           originalFormat = 'ad-webp'
-        } else {
-          const adResult = await processAdImage(req.file.buffer, targetSlot)
+        } else if (targetSlot && AD_SLOTS[targetSlot]) {
+          const slotDims = AD_SLOTS[targetSlot]
+          const adResult = await processAdSmart(req.file.buffer, slotDims.width, slotDims.height)
           const adKey = `ads/${id}.webp`
           await StorageService.uploadBuffer(adResult.buffer, adKey, 'image/webp', mediaBucket, {
             isPublic: true,
@@ -508,6 +326,20 @@ mediaRouter.post(
           thumbUrl = url
           width = adResult.width
           height = adResult.height
+          originalFormat = 'ad-webp'
+        } else {
+          // No slot specified — just convert to webp
+          const sharp = await loadSharp()
+          const processed = await sharp(req.file.buffer)
+            .resize(1200, undefined, { fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer()
+          const adKey = `ads/${id}.webp`
+          await StorageService.uploadBuffer(processed, adKey, 'image/webp', mediaBucket, {
+            isPublic: true,
+          })
+          url = StorageService.getPublicUrl(mediaBucket, adKey)
+          thumbUrl = url
           originalFormat = 'ad-webp'
         }
       }
@@ -554,6 +386,56 @@ mediaRouter.post(
     })
 
     res.status(201).json({ success: true, data: media })
+  })
+)
+
+// ─── POST /api/v1/media/ad-preview -- preview iklan di semua slot ─────────────
+
+mediaRouter.post(
+  '/ad-preview',
+  requireAuth,
+  siteMiddleware,
+  requireSiteAccess,
+  upload.single('file'),
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!req.file) {
+      throw new AppError('File tidak ditemukan', 400, 'FILE_NOT_FOUND')
+    }
+
+    const validation = await validateAdImage(req.file.buffer)
+    if (!validation.valid) {
+      throw new AppError(validation.errors.join(' '), 400, 'INVALID_AD_IMAGE')
+    }
+
+    const previews = await generatePreviews(req.file.buffer)
+    const storage = StorageService.mediaBucket
+
+    // Upload semua preview ke temporary storage
+    const previewData = await Promise.all(
+      previews.map(async (preview) => {
+        const key = `ads/preview/${uuidv4()}.webp`
+        await StorageService.uploadBuffer(preview.result.buffer, key, 'image/webp', storage, {
+          isPublic: true,
+        })
+        return {
+          slot: preview.slot,
+          variant: preview.variant,
+          url: StorageService.getPublicUrl(storage, key),
+          width: preview.result.width,
+          height: preview.result.height,
+          method: preview.result.method,
+          dominantColor: preview.result.dominantColor,
+        }
+      })
+    )
+
+    res.json({
+      success: true,
+      data: {
+        previews: previewData,
+        warnings: validation.warnings,
+      },
+    })
   })
 )
 

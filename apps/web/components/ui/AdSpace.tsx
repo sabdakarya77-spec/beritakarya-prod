@@ -121,7 +121,7 @@ function AdSlide({
         </span>
         {isVideo ? (
           <video src={effectiveUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-        ) : _type === 'leaderboard' && (ad.imageUrlMobile || ad.imageUrlTablet || ad.imageUrlMobileAlt || ad.imageUrlTabletAlt) ? (
+        ) : (ad.imageUrlMobile || ad.imageUrlTablet || ad.imageUrlMobileAlt || ad.imageUrlTabletAlt) ? (
           (() => {
             // Pick responsive sources: use alt variants when A/B selected 'B', otherwise primary
             const useAlt = selectedVariant === 'B';
@@ -141,7 +141,7 @@ function AdSlide({
         ) : (
           <img src={effectiveUrl} alt={label} className={cn(
             "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-            _type === 'leaderboard' && ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
+            ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
           )} />
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
