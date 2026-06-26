@@ -13,8 +13,6 @@ type IconProps = {
   className?: string
 }
 
-const defaultProps: IconProps = { size: 24, className: '' }
-
 export function SiFacebook({ size = 24, className = '' }: IconProps) {
   return (
     <svg role="img" viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">

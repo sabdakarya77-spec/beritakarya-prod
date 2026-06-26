@@ -5,7 +5,6 @@ import { SmartImage, prefetchImage } from './SmartImage'
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
   default: ({ src, alt, onError, onLoad, className, ...props }: Record<string, unknown>) => (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src as string}
       alt={alt as string}
@@ -17,11 +16,6 @@ vi.mock('next/image', () => ({
     />
   ),
 }))
-
-const baseArticle = {
-  slug: 'test-article',
-  title: 'Test Article',
-}
 
 describe('SmartImage', () => {
   describe('Rendering', () => {
