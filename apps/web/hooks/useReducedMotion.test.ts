@@ -23,7 +23,7 @@ describe('usePrefersReducedMotion', () => {
   })
 
   it('returns false when framer-motion returns undefined', () => {
-    vi.mocked(useReducedMotion).mockReturnValue(undefined)
+    vi.mocked(useReducedMotion).mockReturnValue(undefined as unknown as null)
     const { result } = renderHook(() => usePrefersReducedMotion())
     expect(result.current).toBe(false)
   })
@@ -45,7 +45,7 @@ describe('useSafeMotion', () => {
   })
 
   it('returns motion props when framer-motion returns undefined (defaults to false)', () => {
-    vi.mocked(useReducedMotion).mockReturnValue(undefined)
+    vi.mocked(useReducedMotion).mockReturnValue(undefined as unknown as null)
     const motionProps = { animate: { opacity: 1 } }
     const { result } = renderHook(() => useSafeMotion(motionProps))
     // undefined ?? false = false → reduced motion is NOT preferred
