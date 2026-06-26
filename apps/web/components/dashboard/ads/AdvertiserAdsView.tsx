@@ -9,10 +9,12 @@ import {
   Megaphone,
   RefreshCw,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { api } from '../../../lib/api';
 import { cn } from '../../../lib/utils';
 import type { AdBooking } from './types';
-import { AdPerformanceChart } from './AdPerformanceChart';
+
+const AdPerformanceChart = dynamic(() => import('./AdPerformanceChart').then(mod => ({ default: mod.AdPerformanceChart })), { ssr: false });
 
 interface DataPoint {
   date: string;

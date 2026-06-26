@@ -1,27 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell
-} from 'recharts'
-import { 
-  ClipboardCheck, 
-  Search, 
-  CheckCircle2, 
-  XCircle, 
-  Loader2, 
+import dynamic from 'next/dynamic'
+import {
+  ClipboardCheck,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Loader2,
   AlertCircle,
   Eye,
   RefreshCw,
   Clock
 } from 'lucide-react'
+
+const KYCTrendChart = dynamic(() => import('../../../../../../components/dashboard/KYCTrendChart').then(mod => ({ default: mod.KYCTrendChart })), { ssr: false })
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 // [A-5d] Fix: use api (axios with auth interceptor + auto token refresh) instead of raw axios with manual token
@@ -174,28 +167,7 @@ export default function KYCReviewPage() {
             </div>
           </div>
           <div className="h-[240px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.trendData || []}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis 
-                  dataKey="date" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
-                  tickFormatter={(val) => new Date(val).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '12px', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {(stats.trendData || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 6 ? '#e11d48' : '#cbd5e1'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <KYCTrendChart data={stats.trendData || []} />
           </div>
         </div>
       </div>

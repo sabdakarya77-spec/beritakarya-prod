@@ -2,14 +2,17 @@
 
 import { BarChart3, TrendingUp, FileText, ArrowRight, Clock3, CheckCircle2, Users, PenSquare } from 'lucide-react';
 import Link from 'next/link';
-import TrafficChart from '../../../../components/dashboard/TrafficChart';
-import { GA4TrafficChart } from '../../../../components/dashboard/GA4TrafficChart';
+import dynamic from 'next/dynamic';
 import { GA4AudienceCards } from '../../../../components/dashboard/GA4AudienceCards';
 import { GA4SourceTable } from '../../../../components/dashboard/GA4SourceTable';
-import { GSCPerformanceChart } from '../../../../components/dashboard/GSCPerformanceChart';
 import { GSCTopQueries } from '../../../../components/dashboard/GSCTopQueries';
 import { GSCTopPages } from '../../../../components/dashboard/GSCTopPages';
 import { useParams } from 'next/navigation';
+
+// Dynamic imports untuk chart components (recharts ~200 KB gzipped)
+const TrafficChart = dynamic(() => import('../../../../components/dashboard/TrafficChart'), { ssr: false });
+const GA4TrafficChart = dynamic(() => import('../../../../components/dashboard/GA4TrafficChart').then(mod => ({ default: mod.GA4TrafficChart })), { ssr: false });
+const GSCPerformanceChart = dynamic(() => import('../../../../components/dashboard/GSCPerformanceChart').then(mod => ({ default: mod.GSCPerformanceChart })), { ssr: false });
 import { useEffect, useState } from 'react';
 import Skeleton from '../../../../components/ui/Skeleton';
 import { api } from '../../../../lib/api';
