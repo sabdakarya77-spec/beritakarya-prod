@@ -83,6 +83,7 @@ export default function AdsHistoryPage() {
             <thead>
               <tr className="border-b border-gray-100 dark:border-white/5">
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Paket</th>
+                <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Kampanye</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Slot</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Tanggal</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Status</th>
@@ -95,6 +96,7 @@ export default function AdsHistoryPage() {
               {bookings.map((b) => (
                 <tr key={b.id} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
                   <td className="py-3 px-4 font-semibold text-brand-black dark:text-white">{b.package?.name || '-'}</td>
+                  <td className="py-3 px-4 text-gray-500">{b.campaignName || '-'}</td>
                   <td className="py-3 px-4 text-gray-500">{b.package?.slot || '-'}</td>
                   <td className="py-3 px-4 text-gray-500">{new Date(b.startDate).toLocaleDateString('id-ID')} — {new Date(b.endDate).toLocaleDateString('id-ID')}</td>
                   <td className="py-3 px-4">

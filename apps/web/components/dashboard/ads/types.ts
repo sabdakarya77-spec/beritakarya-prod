@@ -28,6 +28,7 @@ export interface AdBooking {
   userId: string;
   siteId: string;
   packageId: string;
+  campaignName?: string | null;
   imageUrl: string | null;
   imageUrlTablet?: string | null;
   imageUrlMobile?: string | null;

@@ -130,6 +130,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       const bookingRes = await api.post('/ads/bookings', {
         packageId: data.selectedPackage.id,
         siteId: site || 'pusat',
+        campaignName: data.campaignName || null,
         imageUrl: uploadedAdUrl,
         imageUrlTablet: uploadedTabletUrl,
         imageUrlMobile: uploadedMobileUrl,

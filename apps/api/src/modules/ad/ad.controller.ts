@@ -198,7 +198,7 @@ adRouter.post('/bookings',
   requireAuth,
   requireRole(['advertiser']),
   asyncHandler(async (req: Request, res: Response) => {
-    const { packageId, siteId, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, startDate, animationEffect } = req.body
+    const { packageId, siteId, campaignName, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, startDate, animationEffect } = req.body
 
     const pkg = await repo.findPackageById(packageId)
     if (!pkg || !pkg.isActive) {
@@ -219,6 +219,7 @@ adRouter.post('/bookings',
       userId: req.user!.userId,
       siteId,
       packageId,
+      campaignName: campaignName || null,
       imageUrl: imageUrl || null,
       imageUrlTablet: imageUrlTablet || null,
       imageUrlMobile: imageUrlMobile || null,

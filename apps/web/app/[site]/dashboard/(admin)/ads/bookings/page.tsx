@@ -172,6 +172,9 @@ export default function AdsBookingsPage() {
                     <h4 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">{b.package?.name}</h4>
                     <span className="text-[8px] font-black px-2 py-0.5 bg-brand-red/10 text-brand-red rounded-full uppercase tracking-wider">{b.siteId} (Cabang)</span>
                   </div>
+                  {b.campaignName && (
+                    <p className="text-[10px] text-gray-400 mt-1">Kampanye: <strong className="text-brand-black dark:text-white">{b.campaignName}</strong></p>
+                  )}
                   <p className="text-[10px] text-gray-400 mt-1">Pemesan: <strong className="text-brand-black dark:text-white">{b.user?.name}</strong> ({b.user?.email})</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

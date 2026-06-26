@@ -571,6 +571,7 @@ model AdBooking {
   userId         String
   siteId         String
   packageId      String
+  campaignName   String?       // Nama kampanye iklan (opsional)
   imageUrl        String? // File banner gambar WebP (desktop)
   imageUrlTablet  String? // Tablet variant (728×90) — leaderboard only
   imageUrlMobile  String? // Mobile variant (320×50) — leaderboard only
