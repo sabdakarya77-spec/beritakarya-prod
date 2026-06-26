@@ -14,7 +14,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
 import BackButton from '../../../../../../../components/ui/BackButton'
 import axios from 'axios'
 import { api } from '../../../../../../../lib/api'

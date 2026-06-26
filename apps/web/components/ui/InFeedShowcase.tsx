@@ -72,7 +72,7 @@ interface InFeedShowcaseProps {
   className?: string;
 }
 
-export default function InFeedShowcase({ site, className }: InFeedShowcaseProps) {
+export default function InFeedShowcase({ site: _site, className }: InFeedShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

@@ -118,7 +118,7 @@ interface BillboardShowcaseProps {
   className?: string;
 }
 
-export default function BillboardShowcase({ site, className }: BillboardShowcaseProps) {
+export default function BillboardShowcase({ site: _site, className }: BillboardShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

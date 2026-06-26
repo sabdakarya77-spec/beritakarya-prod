@@ -161,7 +161,7 @@ export default function AdSpace({
   const site = params?.site as string | undefined;
   const [ads, setAds] = useState<AdItem[]>([]);
   // Fallback ads fetched from CMS when no ads are configured for the slot
-  const [fallbackAds, setFallbackAds] = useState<any[]>([]);
+  const [fallbackAds, setFallbackAds] = useState<Record<string, unknown>[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showCloseBtn, setShowCloseBtn] = useState(false);
@@ -238,7 +238,7 @@ export default function AdSpace({
           if (json.success && Array.isArray(json.data)) {
             setFallbackAds(json.data);
           }
-        } catch (e) {
+        } catch {
           // ignore errors – fallback will remain empty
         }
       };

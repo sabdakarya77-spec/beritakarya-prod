@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Megaphone, BarChart3, ArrowRight, MessageSquareMore, RefreshCw } from 'lucide-react';
+import { Megaphone, BarChart3, ArrowRight, MessageSquareMore } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '../../lib/api';
-import { cn } from '../../lib/utils';
 
 interface AdvertiserDashboardOverviewProps {
   greeting: string;

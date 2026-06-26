@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
@@ -42,7 +42,6 @@ export default function PaymentsPage() {
   const [bookings, setBookings] = useState<AdBooking[]>([]);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchBookings = async (signal?: AbortSignal) => {
     setLoading(true);

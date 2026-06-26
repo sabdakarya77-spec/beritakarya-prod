@@ -35,12 +35,6 @@ interface AdPerformanceChartProps {
   bookingName?: string;
 }
 
-const PERIODS = [
-  { label: '7H', days: 7 },
-  { label: '14H', days: 14 },
-  { label: '30H', days: 30 },
-];
-
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (

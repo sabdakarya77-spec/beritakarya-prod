@@ -279,7 +279,7 @@ export default function CategoriesDashboard() {
   // in Global View use the real order field value.
   const potentialParents = (() => {
     const result: Array<Category & { displayCode?: string }> = [];
-    const flatten = (items: Category[], depth: number = 0, parentCode: string = '', parentIdx: number = 0) => {
+    const flatten = (items: Category[], depth: number = 0, parentCode: string = '', _parentIdx: number = 0) => {
       items.forEach((item, idx) => {
         // Skip self when editing
         if (editingCategory && item.id === editingCategory.id) return;

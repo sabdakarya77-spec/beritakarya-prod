@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Monitor, Loader2, Palette, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, Palette, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { api } from '../../../../lib/api';
 
@@ -49,7 +49,7 @@ const SLOT_SIZES: Record<string, string> = {
   in_feed_mobile: '300×100',
 };
 
-export function AdSmartPreview({ file, previewUrl, mediaType }: AdSmartPreviewProps) {
+export function AdSmartPreview({ file, previewUrl: _previewUrl, mediaType }: AdSmartPreviewProps) {
   const [previews, setPreviews] = useState<PreviewItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

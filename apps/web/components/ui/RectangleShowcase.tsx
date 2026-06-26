@@ -76,7 +76,7 @@ interface RectangleShowcaseProps {
   className?: string;
 }
 
-export default function RectangleShowcase({ site, className }: RectangleShowcaseProps) {
+export default function RectangleShowcase({ site: _site, className }: RectangleShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

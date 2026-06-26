@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useToastStore } from '../../../store/toastStore';
 import {
   Plus,
   Trash2,
-  AlertCircle,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';

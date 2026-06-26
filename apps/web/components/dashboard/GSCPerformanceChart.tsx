@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import {
   AreaChart,
   Area,
-  LineChart,
   Line,
   XAxis,
   YAxis,

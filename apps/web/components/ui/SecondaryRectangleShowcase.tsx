@@ -12,7 +12,7 @@ interface SecondaryRectangleShowcaseProps {
   className?: string;
 }
 
-export default function SecondaryRectangleShowcase({ site, className }: SecondaryRectangleShowcaseProps) {
+export default function SecondaryRectangleShowcase({ site: _site, className }: SecondaryRectangleShowcaseProps) {
   return (
     <div
       className={cn(

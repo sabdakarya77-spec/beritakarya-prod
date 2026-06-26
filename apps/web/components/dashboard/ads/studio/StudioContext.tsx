@@ -59,14 +59,14 @@ export function useStudio() {
   return ctx;
 }
 
+const VALID_STEPS: SectionId[] = ['package', 'campaign', 'creative', 'payment'];
+
 export function StudioProvider({ children }: { children: ReactNode }) {
   const { site } = useParams() as { site: string };
   const searchParams = useSearchParams();
-
-  const validSteps: SectionId[] = ['package', 'campaign', 'creative', 'payment'];
   const initialStep = (() => {
     const step = searchParams.get('step');
-    return step && validSteps.includes(step as SectionId) ? (step as SectionId) : 'package';
+    return step && VALID_STEPS.includes(step as SectionId) ? (step as SectionId) : 'package';
   })();
 
   const [data, setData] = useState<StudioData>(initialData);
@@ -86,7 +86,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   // Sync activeStep with URL query param on navigation
   useEffect(() => {
     const step = searchParams.get('step');
-    if (step && validSteps.includes(step as SectionId)) {
+    if (step && VALID_STEPS.includes(step as SectionId)) {
       setActiveStep(step as SectionId);
     }
   }, [searchParams]);

@@ -23,7 +23,7 @@ interface AdsOverviewContentProps {
 
 export default function AdsOverviewContent({ basePath, bookings, packages }: AdsOverviewContentProps) {
   const totalImpressions = bookings.reduce((acc, b) => acc + b.impressions, 0);
-  const totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
+  const _totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
   const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
   const verifyingBookings = bookings.filter(b => b.paymentStatus === 'VERIFYING');
 

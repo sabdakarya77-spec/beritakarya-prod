@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import {
   Monitor,
@@ -24,8 +23,7 @@ import { useStudio } from './StudioContext';
 import { AdSmartPreview } from './AdSmartPreview';
 
 export function StudioCanvas() {
-  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId, receiptUploadFailed } = useStudio();
-  const [expandedSection, setExpandedSection] = useState<string>('package');
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability: _checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
 
   const formatRupiah = (val: string | number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
@@ -61,7 +59,7 @@ export function StudioCanvas() {
   const slotName = slotDef?.name || 'Slot Iklan';
   const slotSize = slotDef?.publicSize || 'Responsive';
   const previewSrc = data.adPreviewUrl || null;
-  const isLeaderboard = selectedPackage?.slot === 'leaderboard';
+  const _isLeaderboard = selectedPackage?.slot === 'leaderboard';
 
   // Success state
   if (isSuccess) {

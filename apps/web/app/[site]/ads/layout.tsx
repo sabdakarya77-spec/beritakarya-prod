@@ -22,7 +22,6 @@ import {
   FileText,
   Upload,
   Settings,
-  User,
 } from 'lucide-react'
 import { ROLE_LABELS } from '../../../lib/constants'
 import { useState, useEffect } from 'react'
