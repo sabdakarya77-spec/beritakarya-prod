@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 
 // ─── In-Feed Showcase ────────────────────────────────────────────────────────
 // Fallback untuk slot in-feed saat tidak ada iklan yang aktif.
-// Tampil sebagai native content card yang menyatu dengan artikel.
+// Gaya visual compact dengan gradient + icon, konsisten dengan showcase lain.
 
 interface InFeedAd {
   id: string;
@@ -15,19 +15,21 @@ interface InFeedAd {
   category: string;
   accentFrom: string;
   accentTo: string;
+  ctaText: string;
   icon: React.ReactNode;
 }
 
 const IN_FEED_ADS: InFeedAd[] = [
   {
-    id: 'infeed-content',
-    headline: 'Jangkau Pembaca Tepat Sasaran',
-    subheadline: 'Iklan konten native tampil alami di antara artikel, meningkatkan engagement tanpa mengganggu.',
-    category: 'Iklan Native',
+    id: 'infeed-native',
+    headline: 'Iklan Native',
+    subheadline: 'Tampil alami di antara konten, tanpa mengganggu pengalaman baca.',
+    category: 'Konten Native',
     accentFrom: 'from-sky-500',
     accentTo: 'to-cyan-700',
+    ctaText: 'Pelajari',
     icon: (
-      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-15">
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-20">
         <rect x="8" y="12" width="48" height="8" rx="2" stroke="currentColor" strokeWidth="2" />
         <rect x="8" y="24" width="32" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
         <rect x="8" y="32" width="40" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
@@ -38,13 +40,14 @@ const IN_FEED_ADS: InFeedAd[] = [
   },
   {
     id: 'infeed-promo',
-    headline: 'Promosikan Bisnis Anda',
-    subheadline: 'Tampilkan produk atau layanan Anda langsung di tengah konten yang dibaca audiens.',
-    category: 'Promosi Bisnis',
+    headline: 'Promosikan Bisnis',
+    subheadline: 'Tampilkan produk langsung di tengah konten yang dibaca audiens.',
+    category: 'Promosi',
     accentFrom: 'from-amber-500',
     accentTo: 'to-orange-700',
+    ctaText: 'Mulai',
     icon: (
-      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-15">
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-20">
         <path d="M32 8l20 12v16c0 12-8 20-20 24-12-4-20-12-20-24V20L32 8z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
         <path d="M24 32l6 6 12-12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -52,13 +55,14 @@ const IN_FEED_ADS: InFeedAd[] = [
   },
   {
     id: 'infeed-brand',
-    headline: 'Bangun Brand Awareness',
-    subheadline: 'Posisikan brand Anda di antara konten berkualitas untuk kesan profesional dan terpercaya.',
+    headline: 'Bangun Brand',
+    subheadline: 'Posisikan brand di antara konten berkualitas untuk kesan profesional.',
     category: 'Branding',
     accentFrom: 'from-violet-500',
     accentTo: 'to-purple-700',
+    ctaText: 'Eksplor',
     icon: (
-      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-15">
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full opacity-20">
         <circle cx="32" cy="32" r="24" stroke="currentColor" strokeWidth="2" />
         <path d="M20 32h24M32 20v24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         <circle cx="32" cy="32" r="8" stroke="currentColor" strokeWidth="1.5" />
@@ -89,7 +93,7 @@ export default function InFeedShowcase({ site: _site, className }: InFeedShowcas
     stopRotation();
     intervalRef.current = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % totalSlides);
-    }, 6000);
+    }, 7000);
   }, [stopRotation, totalSlides]);
 
   useEffect(() => {
@@ -97,75 +101,93 @@ export default function InFeedShowcase({ site: _site, className }: InFeedShowcas
     return stopRotation;
   }, [isPaused, startRotation, stopRotation]);
 
-  const ad = IN_FEED_ADS[currentIndex];
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    stopRotation();
+    if (!isPaused) startRotation();
+  };
 
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-xl",
+        "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
         className
       )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative bg-gradient-to-r from-gray-50 to-gray-100 dark:from-white/[0.03] dark:to-white/[0.06] border border-gray-100 dark:border-white/5 rounded-xl px-5 py-4">
-        {/* Badge */}
-        <span className="inline-block rounded-sm bg-black/[0.06] dark:bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-brand-text-muted mb-3">
-          Iklan
-        </span>
-
-        {/* Content */}
-        <div className="flex items-start gap-4">
-          <div className="flex-1 min-w-0">
-            <p className={cn(
-              "text-[9px] font-bold uppercase tracking-[0.2em] mb-1 transition-colors duration-500",
-              `bg-gradient-to-r ${ad.accentFrom} ${ad.accentTo} bg-clip-text text-transparent`
-            )}>
-              {ad.category}
-            </p>
-            <h4 className="text-sm md:text-base font-black text-brand-black dark:text-white tracking-tight leading-tight mb-1 transition-all duration-500">
-              {ad.headline}
-            </h4>
-            <p className="text-[11px] md:text-xs text-brand-text-muted leading-relaxed transition-all duration-500">
-              {ad.subheadline}
-            </p>
-          </div>
+      {/* Slides */}
+      {IN_FEED_ADS.map((ad, index) => (
+        <div
+          key={ad.id}
+          className={cn(
+            "absolute inset-0 transition-all duration-[600ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+            index === currentIndex
+              ? "opacity-100 z-10"
+              : "opacity-0 z-0"
+          )}
+        >
+          {/* Background gradient */}
+          <div className={cn(
+            "absolute inset-0 bg-gradient-to-br",
+            ad.accentFrom,
+            ad.accentTo,
+            "transition-transform duration-[7000ms] ease-out",
+            index === currentIndex ? "scale-100" : "scale-110"
+          )} />
 
           {/* Decorative icon */}
-          <div className={cn(
-            "flex-shrink-0 w-12 h-12 md:w-16 md:h-16 text-brand-text-muted transition-all duration-500"
-          )}>
+          <div className="absolute right-3 bottom-3 w-16 h-16 md:w-20 md:h-20 text-white pointer-events-none">
             {ad.icon}
           </div>
-        </div>
 
-        {/* CTA */}
-        <div className="mt-3 flex items-center justify-between">
-          <Link
-            href="https://beritakarya.co/pusat/p/ads"
-            className="text-[10px] md:text-[11px] font-bold text-brand-red hover:text-brand-red/80 transition-colors"
-          >
-            Pelajari Selengkapnya →
-          </Link>
+          {/* Content */}
+          <div className="relative z-10 h-full flex flex-col justify-between p-4 md:p-5">
+            {/* Badge */}
+            <span className="self-start rounded-sm bg-black/30 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/90">
+              Iklan
+            </span>
 
-          {/* Dots */}
-          <div className="flex gap-1">
-            {IN_FEED_ADS.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={cn(
-                  "rounded-full transition-all duration-300",
-                  index === currentIndex
-                    ? "w-3 h-1 bg-brand-red"
-                    : "w-1 h-1 bg-gray-300 dark:bg-white/20 hover:bg-gray-400"
-                )}
-                aria-label={`Slide ${index + 1}`}
-              />
-            ))}
+            {/* Text */}
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
+                {ad.category}
+              </p>
+              <h4 className="text-sm md:text-lg font-black text-white tracking-tight leading-tight mb-1">
+                {ad.headline}
+              </h4>
+              <p className="text-[10px] md:text-[11px] text-white/60 leading-relaxed max-w-[180px] md:max-w-[200px]">
+                {ad.subheadline}
+              </p>
+            </div>
+
+            {/* CTA + Dots */}
+            <div className="flex items-center justify-between">
+              <Link
+                href="https://beritakarya.co/pusat/p/ads"
+                className="bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[10px] font-bold px-3 py-1 rounded-full transition-colors"
+              >
+                {ad.ctaText} →
+              </Link>
+              <div className="flex gap-1">
+                {IN_FEED_ADS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goToSlide(i)}
+                    className={cn(
+                      "rounded-full transition-all duration-300",
+                      i === currentIndex
+                        ? "w-3 h-1 bg-white"
+                        : "w-1 h-1 bg-white/30 hover:bg-white/50"
+                    )}
+                    aria-label={`Slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
