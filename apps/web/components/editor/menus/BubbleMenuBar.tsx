@@ -55,6 +55,10 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
     <BubbleMenu
       editor={editor}
       className="flex items-center gap-1 p-1 bg-slate-900 dark:bg-slate-800 rounded-xl shadow-xl border border-slate-700 z-50"
+      options={{
+        placement: isMobile ? 'bottom' : 'top',
+        offset: isMobile ? 16 : 8,
+      }}
     >
       <BubbleButton
         onClick={() => editor.chain().focus().toggleBold().run()}
