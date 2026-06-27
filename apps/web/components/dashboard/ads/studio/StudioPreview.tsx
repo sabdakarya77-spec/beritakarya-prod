@@ -182,8 +182,8 @@ function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
     HOME_FEED_1: { h: 'h-20 md:h-36', label: '300×250' },
     HOME_FEED_2: { h: 'h-20 md:h-36', label: '300×250' },
     ARTICLE_TOP: { h: 'h-20 md:h-28', label: '300×250' },
-    ARTICLE_MIDDLE: { h: 'h-20 md:h-28', label: '300×250' },
-    ARTICLE_BOTTOM: { h: 'h-20 md:h-28', label: '300×250' },
+    ARTICLE_MIDDLE: { h: 'h-16 md:h-24', label: '300×200' },
+    ARTICLE_BOTTOM: { h: 'h-12 md:h-20', label: '300×150' },
   };
   const dim = dimensions[slot] || dimensions.HOME_TOP;
 

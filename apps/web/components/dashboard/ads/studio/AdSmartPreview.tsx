@@ -61,12 +61,12 @@ const SLOT_SIZES: Record<string, string> = {
   ARTICLE_TOP_desktop: '300×250',
   ARTICLE_TOP_tablet: '300×250',
   ARTICLE_TOP_mobile: '300×250',
-  ARTICLE_MIDDLE_desktop: '300×250',
-  ARTICLE_MIDDLE_tablet: '300×250',
-  ARTICLE_MIDDLE_mobile: '300×250',
-  ARTICLE_BOTTOM_desktop: '300×250',
-  ARTICLE_BOTTOM_tablet: '300×250',
-  ARTICLE_BOTTOM_mobile: '300×250',
+  ARTICLE_MIDDLE_desktop: '300×200',
+  ARTICLE_MIDDLE_tablet: '300×200',
+  ARTICLE_MIDDLE_mobile: '300×200',
+  ARTICLE_BOTTOM_desktop: '300×150',
+  ARTICLE_BOTTOM_tablet: '300×150',
+  ARTICLE_BOTTOM_mobile: '300×150',
 };
 
 export function AdSmartPreview({ file, previewUrl: _previewUrl, mediaType }: AdSmartPreviewProps) {

@@ -39,8 +39,8 @@ export const AD_SLOTS: Record<string, SlotConfig> = {
   HOME_FEED_1:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
   HOME_FEED_2:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
   ARTICLE_TOP:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  ARTICLE_MIDDLE:   { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  ARTICLE_BOTTOM:   { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  ARTICLE_MIDDLE:   { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+  ARTICLE_BOTTOM:   { width: 300, height: 150, minWidth: 150, minHeight: 75 },
 }
 
 export const AD_VARIANTS: Record<string, Record<string, SlotConfig>> = {
@@ -65,14 +65,14 @@ export const AD_VARIANTS: Record<string, Record<string, SlotConfig>> = {
     mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
   },
   ARTICLE_MIDDLE: {
-    desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+    desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+    tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+    mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
   },
   ARTICLE_BOTTOM: {
-    desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+    desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+    tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+    mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
   },
 }
 

@@ -289,8 +289,8 @@ export default function AdSpace({
     HOME_FEED_1:    "w-full h-[250px] min-h-[250px] mb-8",
     HOME_FEED_2:    "w-full h-[250px] min-h-[250px] mb-8",
     ARTICLE_TOP:    "w-full h-[250px] min-h-[250px] mb-8",
-    ARTICLE_MIDDLE: "w-full h-[250px] min-h-[250px] mb-12",
-    ARTICLE_BOTTOM: "w-full h-[250px] min-h-[250px] mb-6",
+    ARTICLE_MIDDLE: "w-full h-[200px] min-h-[200px] mb-12",
+    ARTICLE_BOTTOM: "w-full h-[150px] min-h-[150px] mb-6",
   };
 
   // Loading state
