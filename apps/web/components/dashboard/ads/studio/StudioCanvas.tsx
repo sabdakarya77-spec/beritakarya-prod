@@ -20,7 +20,7 @@ import {
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
 import { useStudio } from './StudioContext';
-import { AdSmartPreview } from './AdSmartPreview';
+
 
 export function StudioCanvas() {
   const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, uploadAndProcess, activeStep, setActiveStep, availability, checkingAvailability: _checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
@@ -394,12 +394,29 @@ export function StudioCanvas() {
                 </div>
               )}
 
-              {/* Smart Preview — shows processed result for all slots */}
-              <AdSmartPreview
-                file={data.adFile}
-                previewUrl={data.adPreviewUrl}
-                mediaType={data.mediaType}
-              />
+              {/* Cross-slot preview */}
+              {data.isLoadingCrossPreviews && (
+                <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-xl">
+                  <RefreshCw size={12} className="animate-spin text-gray-400" />
+                  <span className="text-[9px] text-gray-400 font-bold">Mengecek cocok untuk slot lain...</span>
+                </div>
+              )}
+              {data.crossSlotPreviews && data.crossSlotPreviews.length > 0 && (
+                <div className="pt-3 border-t border-gray-100 dark:border-white/5">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">📐 Juga Cocok Untuk Slot Lain</label>
+                  <div className="flex gap-3 overflow-x-auto pb-1">
+                    {data.crossSlotPreviews.map((p) => (
+                      <div key={`${p.slot}-${p.variant || ''}`} className="flex-shrink-0 w-28 text-center">
+                        <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 mb-1">
+                          <img src={p.url} alt={p.slot} className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-[9px] font-bold text-gray-500 capitalize">{p.slot.replace('_', ' ')}</p>
+                        <p className="text-[8px] font-mono text-gray-400">{p.width}×{p.height}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Animation */}
               {data.mediaType === 'image' && (

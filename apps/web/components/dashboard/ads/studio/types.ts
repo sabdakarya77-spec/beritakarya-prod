@@ -16,6 +16,16 @@ export interface ProcessedVariant {
   dominantColor: string;
 }
 
+export interface CrossSlotPreview {
+  slot: string;
+  variant?: string;
+  url: string;
+  width: number;
+  height: number;
+  method: string;
+  dominantColor: string;
+}
+
 export interface StudioData {
   // Package
   selectedPackage: AdPackage | null;
@@ -37,6 +47,9 @@ export interface StudioData {
   } | null;
   processingWarnings: string[];
   isProcessing: boolean;
+  // Cross-slot previews (hasil dari /ad-preview — how image looks in OTHER slots)
+  crossSlotPreviews: CrossSlotPreview[] | null;
+  isLoadingCrossPreviews: boolean;
   // Animation
   animationEffect: string;
   // Payment

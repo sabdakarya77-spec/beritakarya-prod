@@ -293,6 +293,30 @@ export function StudioControls() {
             </div>
           )}
 
+          {/* Cross-slot preview */}
+          {data.isLoadingCrossPreviews && (
+            <div className="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-lg">
+              <RefreshCw size={10} className="animate-spin text-gray-400" />
+              <span className="text-[7px] text-gray-400 font-bold">Cocok untuk slot lain...</span>
+            </div>
+          )}
+          {data.crossSlotPreviews && data.crossSlotPreviews.length > 0 && (
+            <div className="pt-1 border-t border-gray-100 dark:border-white/5">
+              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-1">📐 Juga Cocok Untuk</label>
+              <div className="flex gap-1 overflow-x-auto">
+                {data.crossSlotPreviews.map((p) => (
+                  <div key={`${p.slot}-${p.variant || ''}`} className="flex-shrink-0 w-20 text-center">
+                    <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-md overflow-hidden border border-gray-200 dark:border-white/10 mb-0.5">
+                      <img src={p.url} alt={p.slot} className="w-full h-full object-contain" />
+                    </div>
+                    <p className="text-[7px] font-bold text-gray-500 capitalize">{p.slot.replace('_', ' ')}</p>
+                    <p className="text-[6px] font-mono text-gray-400">{p.width}×{p.height}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Animation */}
           {data.mediaType === 'image' && (
             <div className="pt-1 border-t border-gray-100 dark:border-white/5">

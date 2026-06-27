@@ -389,21 +389,28 @@ export async function processForAllSlots(
 export async function generatePreviews(
   buffer: Buffer
 ): Promise<PreviewResult[]> {
-  const previews: PreviewResult[] = []
+  // Build all tasks first, then run in parallel
+  const tasks: { slot: string; variant?: string; width: number; height: number }[] = []
 
   for (const [slot, dims] of Object.entries(AD_SLOTS)) {
     if (AD_VARIANTS[slot]) {
       for (const [variant, vDims] of Object.entries(AD_VARIANTS[slot])) {
-        const result = await processAdSmart(buffer, vDims.width, vDims.height)
-        previews.push({ slot, variant, result })
+        tasks.push({ slot, variant, width: vDims.width, height: vDims.height })
       }
     } else {
-      const result = await processAdSmart(buffer, dims.width, dims.height)
-      previews.push({ slot, result })
+      tasks.push({ slot, width: dims.width, height: dims.height })
     }
   }
 
-  return previews
+  // Process all variants in parallel (significantly faster than sequential)
+  const results = await Promise.all(
+    tasks.map(async (t) => {
+      const result = await processAdSmart(buffer, t.width, t.height)
+      return { slot: t.slot, variant: t.variant, result } as PreviewResult
+    })
+  )
+
+  return results
 }
 
 // ─── Validation (lebih lunak dari sebelumnya) ────────────────────────────────

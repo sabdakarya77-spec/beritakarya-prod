@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { api } from '../../../../lib/api';
-import type { AdPackage, StudioData, SectionId } from './types';
+import type { AdPackage, StudioData, SectionId, CrossSlotPreview } from './types';
 
 const initialData: StudioData = {
   selectedPackage: null,
@@ -18,6 +18,8 @@ const initialData: StudioData = {
   processedVariants: null,
   processingWarnings: [],
   isProcessing: false,
+  crossSlotPreviews: null,
+  isLoadingCrossPreviews: false,
   animationEffect: 'ken_burns',
   receiptFile: null,
   receiptFileName: '',
@@ -117,7 +119,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     const slot = data.selectedPackage?.slot
     if (!slot) return
 
-    setData(prev => ({ ...prev, isProcessing: true, processingWarnings: [], processedVariants: null }))
+    setData(prev => ({ ...prev, isProcessing: true, processingWarnings: [], processedVariants: null, crossSlotPreviews: null }))
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -136,12 +138,38 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           processingWarnings: d.warnings || [],
           isProcessing: false,
         }))
+
+        // Fetch cross-slot previews (background, non-blocking)
+        fetchCrossSlotPreviews(file)
       } else {
         setData(prev => ({ ...prev, isProcessing: false, processingWarnings: ['Gagal memproses gambar'] }))
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Gagal memproses gambar'
       setData(prev => ({ ...prev, isProcessing: false, processingWarnings: [msg] }))
+    }
+  }
+
+  // Fetch previews for OTHER slots (how image looks everywhere)
+  const fetchCrossSlotPreviews = async (file: File): Promise<void> => {
+    setData(prev => ({ ...prev, isLoadingCrossPreviews: true }))
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await api.post('/media/ad-preview', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (res.data?.success) {
+        const previews: CrossSlotPreview[] = (res.data.data.previews || [])
+          .filter((p: CrossSlotPreview) => p.slot !== data.selectedPackage?.slot) // exclude selected slot
+          .filter((p: CrossSlotPreview) => !p.variant || p.variant === 'desktop') // show only desktop variant for simplicity
+        setData(prev => ({ ...prev, crossSlotPreviews: previews, isLoadingCrossPreviews: false }))
+      } else {
+        setData(prev => ({ ...prev, isLoadingCrossPreviews: false }))
+      }
+    } catch {
+      // Non-critical: cross-slot preview is informational only
+      setData(prev => ({ ...prev, isLoadingCrossPreviews: false }))
     }
   }
 
