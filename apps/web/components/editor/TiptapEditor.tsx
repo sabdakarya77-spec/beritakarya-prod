@@ -428,7 +428,22 @@ function extractTextContent(node: JSONNode): string {
       }
       // Recurse into block children (paragraph, heading, etc.) used by mediaText, callout, etc.
       if (child.content && child.type !== 'text') {
-        return extractTextContent(child)
+        const inner = extractTextContent(child)
+        switch (child.type) {
+          case 'paragraph':
+            return `<p>${inner}</p>`
+          case 'heading': {
+            const level = child.attrs?.level || 2
+            return `<h${level}>${inner}</h${level}>`
+          }
+          case 'blockquote':
+          case 'quote':
+            return `<blockquote>${inner}</blockquote>`
+          case 'listItem':
+            return `<li>${inner}</li>`
+          default:
+            return inner
+        }
       }
       return ''
     })

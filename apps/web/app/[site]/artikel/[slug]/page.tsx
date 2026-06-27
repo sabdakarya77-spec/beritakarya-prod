@@ -882,11 +882,10 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
             </figure>
           </div>
           {/* Text Column */}
-          <div className="w-full md:w-1/2 min-w-0 max-w-full overflow-hidden">
-            <p className={cn(bodyTextClass, 'm-0 whitespace-pre-wrap break-words break-all')}>
-              {block.content}
-            </p>
-          </div>
+          <div
+            className={cn(bodyTextClass, 'w-full md:w-1/2 min-w-0 max-w-full overflow-hidden whitespace-pre-wrap break-words [&_blockquote]:border-l-4 [&_blockquote]:border-brand-red [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 dark:[&_blockquote]:text-brand-text-muted [&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0')}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
+          />
         </div>
       )
     default:
