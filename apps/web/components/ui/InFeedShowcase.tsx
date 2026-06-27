@@ -74,9 +74,18 @@ const IN_FEED_ADS: InFeedAd[] = [
 interface InFeedShowcaseProps {
   site: string;
   className?: string;
+  slot?: string;
 }
 
-export default function InFeedShowcase({ site: _site, className }: InFeedShowcaseProps) {
+const SLOT_HEIGHTS: Record<string, string> = {
+  HOME_FEED_1:    'h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px]',
+  HOME_FEED_2:    'h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px]',
+  ARTICLE_TOP:    'h-[250px] min-h-[250px]',
+  ARTICLE_MIDDLE: 'h-[200px] min-h-[200px]',
+  ARTICLE_BOTTOM: 'h-[150px] min-h-[150px]',
+};
+
+export default function InFeedShowcase({ site: _site, className, slot }: InFeedShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -110,7 +119,8 @@ export default function InFeedShowcase({ site: _site, className }: InFeedShowcas
   return (
     <div
       className={cn(
-        "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
+        "relative w-full overflow-hidden rounded-xl",
+        SLOT_HEIGHTS[slot || ''] || 'h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px]',
         className
       )}
       onMouseEnter={() => setIsPaused(true)}

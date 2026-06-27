@@ -339,7 +339,7 @@ export default function AdSpace({
 
     // In-feed style slots: native content-style showcase
     if (type === 'HOME_FEED_1' || type === 'HOME_FEED_2' || type === 'ARTICLE_MIDDLE' || type === 'ARTICLE_TOP' || type === 'ARTICLE_BOTTOM') {
-      return <InFeedShowcase site={site || 'pusat'} className={className} />;
+      return <InFeedShowcase site={site || 'pusat'} className={className} slot={type} />;
     }
 
     // Generic fallback for any other type
