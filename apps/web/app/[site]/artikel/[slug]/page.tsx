@@ -311,6 +311,13 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
 
+          {/* --- ARTICLE_TOP AD (above content grid, full main content width) --- */}
+          <Container>
+            <div className="mb-8 md:mb-10">
+              <AdSpace type="ARTICLE_TOP" label="Iklan" />
+            </div>
+          </Container>
+
           {/* --- CONTENT SECTION --- */}
           <Container>
             <div className={cn(articleRailClassName, 'mb-12 md:mb-16')}>
@@ -392,15 +399,6 @@ export default async function ArticlePage({ params }: Props) {
                                 );
                               }
 
-                              // After 3rd paragraph: insert ARTICLE_TOP ad (after pull quote)
-                              if (paragraphCount === 3) {
-                                elements.push(
-                                  <div key="visual-break-articletop-ad" className="my-10">
-                                    <AdSpace type="ARTICLE_TOP" label="Iklan" />
-                                  </div>
-                                );
-                              }
-
                               // After 8th paragraph: insert ARTICLE_MIDDLE ad
                               if (paragraphCount === 8) {
                                 elements.push(
@@ -452,11 +450,6 @@ export default async function ArticlePage({ params }: Props) {
                   {/* Comment Section */}
                   <div id="comments">
                     <CommentSection articleId={article.id} />
-                  </div>
-
-                  {/* ARTICLE_BOTTOM — before recommendations */}
-                  <div className="my-10">
-                    <AdSpace type="ARTICLE_BOTTOM" label="Iklan" />
                   </div>
 
                   {/* Recommended Articles */}
@@ -677,6 +670,14 @@ export default async function ArticlePage({ params }: Props) {
               </aside>
             </div>
           </Container>
+
+          {/* --- ARTICLE_BOTTOM AD (below content grid, full container width) --- */}
+          <Container>
+            <div className="mb-8 md:mb-10">
+              <AdSpace type="ARTICLE_BOTTOM" label="Iklan" />
+            </div>
+          </Container>
+
         </article>
 
         {/* Mobile bottom bar — Share & Bookmark, only visible on < md */}
