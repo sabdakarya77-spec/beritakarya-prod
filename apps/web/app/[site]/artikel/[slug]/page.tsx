@@ -63,8 +63,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteName = siteSettings?.name || fallbackConfig?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1));
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico';
 
-  const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'paragraph')?.content || ''
-  const coverImage = article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')?.url || '/logo.png'
+  const blocks = Array.isArray(article.blocks) ? article.blocks : []
+  const excerpt = blocks.find((b: Block) => b.type === 'paragraph')?.content || ''
+
+  // Robust OG image fallback logic:
+  // 1. Featured image (set by author)
+  // 2. First image block in content
+  // 3. First image from mediaText block
+  // 4. Dynamic OG generation API (generates branded image with title)
+  const coverImage = article.featuredImage
+    || blocks.find((b: Block) => b.type === 'image')?.url
+    || blocks.find((b: Block) => b.type === 'mediaText')?.url
+    || `/api/og?title=${encodeURIComponent(article.title)}&site=${encodeURIComponent(siteName)}`
 
   return constructMetadata({
     title: article.metaTitle || `${article.title} - ${siteName}`,
