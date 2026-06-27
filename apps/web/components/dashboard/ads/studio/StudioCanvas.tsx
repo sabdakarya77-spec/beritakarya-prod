@@ -683,9 +683,9 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
     HOME_TOP: '970×250 / 728×100 / 320×100',
     HOME_FEED_1: '300×250',
     HOME_FEED_2: '300×250',
-    ARTICLE_TOP: '728×90 / 300×250',
+    ARTICLE_TOP: '300×250',
     ARTICLE_MIDDLE: '300×250',
-    ARTICLE_BOTTOM: '970×90 / 320×50',
+    ARTICLE_BOTTOM: '300×250',
   };
   const sizeLabel = sizeLabels[slot] || '300×250 / 300×100';
 
