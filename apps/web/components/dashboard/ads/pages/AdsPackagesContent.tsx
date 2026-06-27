@@ -22,7 +22,7 @@ export default function AdsPackagesContent() {
   const [showPkgForm, setShowPkgForm] = useState(false);
   const [editingPkgId, setEditingPkgId] = useState<string | null>(null);
   const [pkgName, setPkgName] = useState('');
-  const [pkgSlot, setPkgSlot] = useState('leaderboard');
+  const [pkgSlot, setPkgSlot] = useState('HOME_TOP');
   const [pkgFormat, setPkgFormat] = useState('ALL');
   const [pkgDuration, setPkgDuration] = useState('7');
   const [pkgPrice, setPkgPrice] = useState('');
@@ -127,7 +127,7 @@ export default function AdsPackagesContent() {
           onClick={() => {
             setEditingPkgId(null);
             setPkgName('');
-            setPkgSlot('leaderboard');
+            setPkgSlot('HOME_TOP');
             setPkgFormat('ALL');
             setPkgDuration('7');
             setPkgPrice('');

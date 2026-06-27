@@ -31,10 +31,12 @@ export interface AdPackage {
 // Icon mapping per slot — visual only, not slot metadata.
 // Slot name/size/desc come from AD_SLOT_DEFINITIONS (single source of truth).
 const SLOT_ICONS: Record<AdSlotId, LucideIcon> = {
-  leaderboard: TrendingUp,
-  rectangle: Eye,
-  rectangle_secondary: ChevronRight,
-  in_feed: ImageIcon,
+  HOME_TOP: TrendingUp,
+  HOME_FEED_1: Eye,
+  HOME_FEED_2: Eye,
+  ARTICLE_TOP: ChevronRight,
+  ARTICLE_MIDDLE: ImageIcon,
+  ARTICLE_BOTTOM: ChevronRight,
 }
 
 const VALUE_PROPS = [

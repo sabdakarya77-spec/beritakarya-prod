@@ -4,14 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
 import { API_URL } from '../../lib/api';
+import type { AdSlotId } from '../../lib/constants';
 import BillboardShowcase from './BillboardShowcase';
 import InFeedShowcase from './InFeedShowcase';
-import RectangleShowcase from './RectangleShowcase';
-import SecondaryRectangleShowcase from './SecondaryRectangleShowcase';
 
 interface AdSpaceProps {
-  type: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in-feed';
-  slot?: 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed';
+  type: AdSlotId;
+  slot?: AdSlotId;
   label?: string;
   className?: string;
 }
@@ -181,7 +180,7 @@ export default function AdSpace({
   const trackedRef = useRef<Set<string>>(new Set());
 
   // Allow UI to reuse the same visual format while targeting a different backend slot.
-  const slotName = slot || (type === 'in-feed' ? 'in_feed' : type);
+  const slotName = slot || type;
 
   // Fetch ads
   useEffect(() => {
@@ -233,13 +232,13 @@ export default function AdSpace({
     return stopRotation;
   }, [startRotation, stopRotation]);
 
-  // Fetch CMS fallback ads when there are no ads for the slot (only for leaderboard)
+  // Fetch CMS fallback ads when there are no ads for the slot (only for HOME_TOP)
   useEffect(() => {
     if (loading) return;
-    if (ads.length === 0 && type === 'leaderboard') {
+    if (ads.length === 0 && type === 'HOME_TOP') {
       const fetchFallback = async () => {
         try {
-          const res = await fetch(`${API_URL}/api/v1/ads/fallback?slot=leaderboard`);
+          const res = await fetch(`${API_URL}/api/v1/ads/fallback?slot=HOME_TOP`);
           if (!res.ok) return;
           const json = await res.json();
           if (json.success && Array.isArray(json.data)) {
@@ -264,9 +263,9 @@ export default function AdSpace({
     }).catch(() => {});
   }, [ads, currentIndex]);
 
-  // Show close button after 5s for sticky leaderboard
+  // Show close button after 5s for sticky HOME_TOP
   useEffect(() => {
-    if (type !== 'leaderboard' || ads.length === 0 || isStickyClosed) return;
+    if (type !== 'HOME_TOP' || ads.length === 0 || isStickyClosed) return;
     const timer = setTimeout(() => setShowCloseBtn(true), 5000);
     return () => clearTimeout(timer);
   }, [type, ads.length, isStickyClosed]);
@@ -285,12 +284,13 @@ export default function AdSpace({
     }
   };
 
-  const styles = {
-    // Multi-size IAB: mobile 320×100, tablet 728×100, desktop 970×250
-    leaderboard: "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-6",
-    rectangle: "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-8",
-    rectangle_secondary: "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-8",
-    'in-feed': "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-12"
+  const styles: Record<AdSlotId, string> = {
+    HOME_TOP:       "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-6",
+    HOME_FEED_1:    "w-full h-[250px] min-h-[250px] mb-8",
+    HOME_FEED_2:    "w-full h-[250px] min-h-[250px] mb-8",
+    ARTICLE_TOP:    "w-full h-[250px] min-h-[250px] md:h-[90px] md:min-h-[90px] mb-8",
+    ARTICLE_MIDDLE: "w-full h-[250px] min-h-[250px] mb-12",
+    ARTICLE_BOTTOM: "w-full h-[50px] min-h-[50px] md:h-[90px] md:min-h-[90px] mb-6",
   };
 
   // Loading state
@@ -308,8 +308,8 @@ export default function AdSpace({
 
   // No ads at all — render fallback handling
   if (ads.length === 0) {
-    // Leaderboard: try to render CMS‑configured fallback ads
-    if (type === 'leaderboard' && fallbackAds.length > 0) {
+    // HOME_TOP: try to render CMS‑configured fallback ads
+    if (type === 'HOME_TOP' && fallbackAds.length > 0) {
       const ad = fallbackAds[0];
       return (
         <div className={cn(
@@ -332,27 +332,17 @@ export default function AdSpace({
       );
     }
 
-    // Default static fallback for leaderboard when no CMS data
-    if (type === 'leaderboard') {
+    // Default static fallback for HOME_TOP when no CMS data
+    if (type === 'HOME_TOP') {
       return <BillboardShowcase site={site || 'pusat'} className={className} />;
     }
 
-    // In-feed: native content-style showcase
-    if (type === 'in-feed') {
+    // In-feed style slots: native content-style showcase
+    if (type === 'HOME_FEED_1' || type === 'HOME_FEED_2' || type === 'ARTICLE_MIDDLE') {
       return <InFeedShowcase site={site || 'pusat'} className={className} />;
     }
 
-    // Rectangle primary: bold gradient card showcase
-    if (type === 'rectangle') {
-      return <RectangleShowcase site={site || 'pusat'} className={className} />;
-    }
-
-    // Rectangle secondary: editorial/newsletter-style showcase
-    if (type === 'rectangle_secondary') {
-      return <SecondaryRectangleShowcase site={site || 'pusat'} className={className} />;
-    }
-
-    // Fallback for any other type
+    // Generic fallback for ARTICLE_TOP, ARTICLE_BOTTOM
     return (
       <div
         className={cn(
@@ -371,8 +361,8 @@ export default function AdSpace({
     );
   }
 
-  // Sticky + close button wrapper for leaderboard on mobile
-  const isSticky = type === 'leaderboard' && ads.length > 0 && !isStickyClosed;
+  // Sticky + close button wrapper for HOME_TOP on mobile
+  const isSticky = type === 'HOME_TOP' && ads.length > 0 && !isStickyClosed;
   const stickyClasses = isSticky ? 'md:relative fixed bottom-0 left-0 right-0 z-30 md:z-auto' : '';
   const stickyBg = isSticky ? 'bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:border-0 md:shadow-none md:bg-transparent' : '';
 
@@ -412,7 +402,7 @@ export default function AdSpace({
     </>
   );
 
-  // Wrap with sticky container for mobile leaderboard
+  // Wrap with sticky container for mobile HOME_TOP
   if (isSticky) {
     return (
       <div className={cn(stickyClasses, stickyBg)}>

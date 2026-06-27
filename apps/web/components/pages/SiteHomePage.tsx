@@ -407,9 +407,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           </section>
         )}
 
-        {/* ─── AD LEADERBOARD — setelah hero agar user disambut konten terlebih dahulu ─── */}
+        {/* ─── AD HOME_TOP — setelah hero agar user disambut konten terlebih dahulu ─── */}
         <Container className="py-4 md:py-5">
-          <AdSpace type="leaderboard" />
+          <AdSpace type="HOME_TOP" />
         </Container>
 
         {/* ════════════════════════════════════════════════════════
@@ -558,9 +558,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                     </div>
                   )}
 
-                  {/* Inline Ad */}
+                  {/* Inline Ad — HOME_FEED_1 */}
                   {showInlineSponsor && (
-                    <AdSpace type="in-feed" />
+                    <AdSpace type="HOME_FEED_1" />
                   )}
 
                   {/* 6 Kartu Medium Grid 2-Kolom (artikel[10..15]) */}
@@ -758,7 +758,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                   />
                 </div>
               ) : (
-                <AdSpace type="rectangle" />
+                <AdSpace type="HOME_FEED_2" />
               )}
             </aside>
           </div>

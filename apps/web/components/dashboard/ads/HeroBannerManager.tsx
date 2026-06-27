@@ -3,7 +3,7 @@
 import { Plus, Eye } from 'lucide-react';
 import type { Ad } from './types';
 import type { AdSlotDefinition } from '../../../lib/constants';
-import { LeaderboardBannerRow } from './LeaderboardBannerRow';
+import { HeroBannerRow } from './HeroBannerRow';
 
 // Contoh kategori yang tampil di billboard showcase saat slot kosong (sinkron dengan BillboardShowcase.tsx)
 const SHOWCASE_CATEGORIES = [
@@ -13,7 +13,7 @@ const SHOWCASE_CATEGORIES = [
   { name: 'UMKM & Lokal', color: 'bg-emerald-600' },
 ];
 
-export function LeaderboardManager({
+export function HeroBannerManager({
   ads,
   slotDef,
   onAdd,
@@ -99,7 +99,7 @@ export function LeaderboardManager({
       ) : (
         <div className="divide-y divide-gray-50 dark:divide-white/5">
           {ads.map((ad, index) => (
-            <LeaderboardBannerRow
+            <HeroBannerRow
               key={ad.id}
               ad={ad}
               index={index}

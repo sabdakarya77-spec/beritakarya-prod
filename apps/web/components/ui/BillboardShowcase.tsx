@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { cn } from '../../lib/utils';
 
 // ─── Category Example Ads ────────────────────────────────────────────────────
-// Contoh iklan kategori yang tampil saat slot leaderboard kosong.
+// Contoh iklan kategori yang tampil saat slot HOME_TOP kosong.
 // Tujuan: menunjukkan visualisasi billboard kepada calon advertiser.
 
 interface CategoryAd {
@@ -95,7 +95,7 @@ const CATEGORY_ADS: CategoryAd[] = [
   {
     id: 'video_demo',
     headline: 'Video Demo Billboard',
-    subheadline: 'Contoh iklan video pada slot leaderboard',
+    subheadline: 'Contoh iklan video pada slot Hero Banner',
     category: 'Demo Video',
     accentFrom: 'from-pink-600',
     accentTo: 'to-rose-800',
@@ -107,7 +107,7 @@ const CATEGORY_ADS: CategoryAd[] = [
       </svg>
     ),
     mediaType: 'video',
-    mediaUrl: '/videos/leaderboard-demo.mp4',
+    mediaUrl: '/videos/home-top-demo.mp4',
   },
 ];
 

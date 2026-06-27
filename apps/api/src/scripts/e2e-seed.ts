@@ -133,52 +133,52 @@ async function main() {
 
   // 5. Upsert ad packages
   const pkg1 = await prisma.adPackage.upsert({
-    where: { id: `${E2E_PREFIX}pkg-leaderboard-30` },
+    where: { id: `${E2E_PREFIX}pkg-home-top-30` },
     update: {
-      name: 'Billboard Banner Pusat',
-      slot: 'leaderboard',
+      name: 'Hero Banner Pusat',
+      slot: 'HOME_TOP',
       durationDays: 30,
       price: 1500000,
-      description: 'Impresi tertinggi di first-fold bagian atas.',
+      description: 'Impresi tertinggi di first-fold bagian atas homepage.',
       allowedFormat: 'ALL',
       isActive: true,
     },
     create: {
-      id: `${E2E_PREFIX}pkg-leaderboard-30`,
-      name: 'Billboard Banner Pusat',
-      slot: 'leaderboard',
+      id: `${E2E_PREFIX}pkg-home-top-30`,
+      name: 'Hero Banner Pusat',
+      slot: 'HOME_TOP',
       durationDays: 30,
       price: 1500000,
-      description: 'Impresi tertinggi di first-fold bagian atas.',
+      description: 'Impresi tertinggi di first-fold bagian atas homepage.',
       allowedFormat: 'ALL',
       isActive: true,
     },
   })
-  console.log('[E2E Seed] AdPackage leaderboard OK:', pkg1.id)
+  console.log('[E2E Seed] AdPackage HOME_TOP OK:', pkg1.id)
 
   const pkg2 = await prisma.adPackage.upsert({
-    where: { id: `${E2E_PREFIX}pkg-rectangle-14` },
+    where: { id: `${E2E_PREFIX}pkg-home-feed1-14` },
     update: {
-      name: 'Sidebar Rectangle',
-      slot: 'rectangle',
+      name: 'Feed Atas',
+      slot: 'HOME_FEED_1',
       durationDays: 14,
       price: 500000,
-      description: 'Slot sidebar homepage dan artikel.',
+      description: 'Slot iklan di tengah feed homepage.',
       allowedFormat: 'IMAGE',
       isActive: true,
     },
     create: {
-      id: `${E2E_PREFIX}pkg-rectangle-14`,
-      name: 'Sidebar Rectangle',
-      slot: 'rectangle',
+      id: `${E2E_PREFIX}pkg-home-feed1-14`,
+      name: 'Feed Atas',
+      slot: 'HOME_FEED_1',
       durationDays: 14,
       price: 500000,
-      description: 'Slot sidebar homepage dan artikel.',
+      description: 'Slot iklan di tengah feed homepage.',
       allowedFormat: 'IMAGE',
       isActive: true,
     },
   })
-  console.log('[E2E Seed] AdPackage rectangle OK:', pkg2.id)
+  console.log('[E2E Seed] AdPackage HOME_FEED_1 OK:', pkg2.id)
 
   // 6. Ensure site 'pusat' has legal page content (for /pusat/p/about etc.)
   await prisma.site.update({

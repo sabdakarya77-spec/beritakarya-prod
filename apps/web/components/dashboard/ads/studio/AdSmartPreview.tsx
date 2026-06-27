@@ -22,31 +22,51 @@ interface AdSmartPreviewProps {
 }
 
 const SLOT_LABELS: Record<string, string> = {
-  leaderboard: 'Leaderboard',
-  leaderboard_desktop: 'Desktop',
-  leaderboard_tablet: 'Tablet',
-  leaderboard_mobile: 'Mobile',
-  rectangle: 'Sidebar Utama',
-  rectangle_desktop: 'Desktop',
-  rectangle_mobile: 'Mobile',
-  rectangle_secondary: 'Sidebar Sekunder',
-  rectangle_secondary_desktop: 'Desktop',
-  rectangle_secondary_mobile: 'Mobile',
-  in_feed: 'In-Feed',
-  in_feed_desktop: 'Desktop',
-  in_feed_mobile: 'Mobile',
+  HOME_TOP: 'Hero Banner',
+  HOME_TOP_desktop: 'Desktop',
+  HOME_TOP_tablet: 'Tablet',
+  HOME_TOP_mobile: 'Mobile',
+  HOME_FEED_1: 'Feed Atas',
+  HOME_FEED_1_desktop: 'Desktop',
+  HOME_FEED_1_tablet: 'Tablet',
+  HOME_FEED_1_mobile: 'Mobile',
+  HOME_FEED_2: 'Feed Bawah',
+  HOME_FEED_2_desktop: 'Desktop',
+  HOME_FEED_2_tablet: 'Tablet',
+  HOME_FEED_2_mobile: 'Mobile',
+  ARTICLE_TOP: 'Artikel Atas',
+  ARTICLE_TOP_desktop: 'Desktop',
+  ARTICLE_TOP_tablet: 'Tablet',
+  ARTICLE_TOP_mobile: 'Mobile',
+  ARTICLE_MIDDLE: 'Artikel Tengah',
+  ARTICLE_MIDDLE_desktop: 'Desktop',
+  ARTICLE_MIDDLE_tablet: 'Tablet',
+  ARTICLE_MIDDLE_mobile: 'Mobile',
+  ARTICLE_BOTTOM: 'Artikel Bawah',
+  ARTICLE_BOTTOM_desktop: 'Desktop',
+  ARTICLE_BOTTOM_tablet: 'Tablet',
+  ARTICLE_BOTTOM_mobile: 'Mobile',
 };
 
 const SLOT_SIZES: Record<string, string> = {
-  leaderboard_desktop: '970×250',
-  leaderboard_tablet: '728×90',
-  leaderboard_mobile: '320×100',
-  rectangle_desktop: '300×250',
-  rectangle_mobile: '300×100',
-  rectangle_secondary_desktop: '300×250',
-  rectangle_secondary_mobile: '300×100',
-  in_feed_desktop: '300×250',
-  in_feed_mobile: '300×100',
+  HOME_TOP_desktop: '970×250',
+  HOME_TOP_tablet: '728×100',
+  HOME_TOP_mobile: '320×100',
+  HOME_FEED_1_desktop: '300×250',
+  HOME_FEED_1_tablet: '300×250',
+  HOME_FEED_1_mobile: '300×250',
+  HOME_FEED_2_desktop: '300×250',
+  HOME_FEED_2_tablet: '300×250',
+  HOME_FEED_2_mobile: '300×250',
+  ARTICLE_TOP_desktop: '728×90',
+  ARTICLE_TOP_tablet: '728×90',
+  ARTICLE_TOP_mobile: '300×250',
+  ARTICLE_MIDDLE_desktop: '300×250',
+  ARTICLE_MIDDLE_tablet: '300×250',
+  ARTICLE_MIDDLE_mobile: '300×250',
+  ARTICLE_BOTTOM_desktop: '970×90',
+  ARTICLE_BOTTOM_tablet: '728×90',
+  ARTICLE_BOTTOM_mobile: '320×50',
 };
 
 export function AdSmartPreview({ file, previewUrl: _previewUrl, mediaType }: AdSmartPreviewProps) {
@@ -168,37 +188,55 @@ export function AdSmartPreview({ file, previewUrl: _previewUrl, mediaType }: AdS
           </div>
 
           {/* Group by slot */}
-          {previews.some(p => p.slot === 'leaderboard') && (
+          {previews.some(p => p.slot === 'HOME_TOP') && (
             <PreviewGroup
-              title="Leaderboard"
-              previews={previews.filter(p => p.slot === 'leaderboard')}
+              title="Hero Banner"
+              previews={previews.filter(p => p.slot === 'HOME_TOP')}
               selectedKey={selectedPreview}
               onSelect={setSelectedPreview}
             />
           )}
 
-          {previews.some(p => p.slot === 'rectangle') && (
+          {previews.some(p => p.slot === 'HOME_FEED_1') && (
             <PreviewGroup
-              title="Sidebar"
-              previews={previews.filter(p => p.slot === 'rectangle')}
+              title="Feed Atas"
+              previews={previews.filter(p => p.slot === 'HOME_FEED_1')}
               selectedKey={selectedPreview}
               onSelect={setSelectedPreview}
             />
           )}
 
-          {previews.some(p => p.slot === 'rectangle_secondary') && (
+          {previews.some(p => p.slot === 'HOME_FEED_2') && (
             <PreviewGroup
-              title="Sidebar Sekunder"
-              previews={previews.filter(p => p.slot === 'rectangle_secondary')}
+              title="Feed Bawah"
+              previews={previews.filter(p => p.slot === 'HOME_FEED_2')}
               selectedKey={selectedPreview}
               onSelect={setSelectedPreview}
             />
           )}
 
-          {previews.some(p => p.slot === 'in_feed') && (
+          {previews.some(p => p.slot === 'ARTICLE_TOP') && (
             <PreviewGroup
-              title="In-Feed"
-              previews={previews.filter(p => p.slot === 'in_feed')}
+              title="Artikel Atas"
+              previews={previews.filter(p => p.slot === 'ARTICLE_TOP')}
+              selectedKey={selectedPreview}
+              onSelect={setSelectedPreview}
+            />
+          )}
+
+          {previews.some(p => p.slot === 'ARTICLE_MIDDLE') && (
+            <PreviewGroup
+              title="Artikel Tengah"
+              previews={previews.filter(p => p.slot === 'ARTICLE_MIDDLE')}
+              selectedKey={selectedPreview}
+              onSelect={setSelectedPreview}
+            />
+          )}
+
+          {previews.some(p => p.slot === 'ARTICLE_BOTTOM') && (
+            <PreviewGroup
+              title="Artikel Bawah"
+              previews={previews.filter(p => p.slot === 'ARTICLE_BOTTOM')}
               selectedKey={selectedPreview}
               onSelect={setSelectedPreview}
             />

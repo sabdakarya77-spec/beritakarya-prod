@@ -109,7 +109,7 @@ adRouter.get('/public',
   // This is a simple hard‑coded response that can later be hooked into a CMS.
   adRouter.get('/fallback',
     asyncHandler(async (req: Request, res: Response) => {
-      const slot = req.query.slot as string || 'leaderboard'
+      const slot = req.query.slot as string || 'HOME_TOP'
       // Minimal static fallback data – matches the shape used by the front‑end fallback UI.
       const fallbackAds = [
         {
@@ -117,7 +117,7 @@ adRouter.get('/public',
           slot,
           mediaType: 'image',
           // Next.js serves files from the `public` folder at the root URL without the `/public` prefix
-          mediaUrl: '/fallbacks/leaderboard.svg',
+          mediaUrl: '/fallbacks/home-top.svg',
           headline: 'Ruang Iklan Premium',
           subheadline: 'Jangkau audiens luas dengan banner berkualitas tinggi di BeritaKarya',
         }

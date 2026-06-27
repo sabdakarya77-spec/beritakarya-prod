@@ -59,7 +59,7 @@ export function StudioPreview() {
     );
   }
 
-  const isLeaderboard = selectedPackage.slot === 'leaderboard';
+  const isHeroBanner = selectedPackage.slot === 'HOME_TOP';
   const previewSrc = adPreviewUrl || null;
 
   return (
@@ -99,9 +99,9 @@ export function StudioPreview() {
 
             {/* Page Content */}
             <div className="relative">
-              {isLeaderboard && (
+              {isHeroBanner && (
                 <div className="p-3 bg-gray-50/80 dark:bg-white/[0.02]">
-                  <AdSlotMockup slot="leaderboard" previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
+                  <AdSlotMockup slot="HOME_TOP" previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                 </div>
               )}
 
@@ -124,8 +124,8 @@ export function StudioPreview() {
                       <div className="h-2 bg-gray-100 dark:bg-white/5 rounded w-3/4" />
                     </div>
 
-                    {selectedPackage?.slot === 'in_feed' && (
-                      <AdSlotMockup slot="in_feed" previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
+                    {(selectedPackage?.slot === 'HOME_FEED_1' || selectedPackage?.slot === 'HOME_FEED_2' || selectedPackage?.slot === 'ARTICLE_MIDDLE') && (
+                      <AdSlotMockup slot={selectedPackage.slot} previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                     )}
 
                     <div className="space-y-2">
@@ -146,7 +146,7 @@ export function StudioPreview() {
                   </div>
 
                   <div className="w-36 flex-shrink-0 space-y-3">
-                    {(selectedPackage?.slot === 'rectangle' || selectedPackage?.slot === 'rectangle_secondary') && (
+                    {(selectedPackage?.slot === 'ARTICLE_TOP' || selectedPackage?.slot === 'ARTICLE_BOTTOM') && (
                       <AdSlotMockup slot={selectedPackage.slot} previewSrc={previewSrc} mediaType={mediaType} isEmpty={!adPreviewUrl} />
                     )}
                     <div className="space-y-2">
@@ -178,12 +178,14 @@ function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; isEmpty: boolean;
 }) {
   const dimensions: Record<string, { h: string; label: string }> = {
-    leaderboard: { h: 'h-12 sm:h-20 md:h-32', label: '970×250 / 728×100 / 320×100' },
-    rectangle: { h: 'h-20 md:h-36', label: '300×250 / 300×100' },
-    rectangle_secondary: { h: 'h-20 md:h-36', label: '300×250 / 300×100' },
-    in_feed: { h: 'h-20 md:h-28', label: '300×250 / 300×100' },
+    HOME_TOP: { h: 'h-12 sm:h-20 md:h-32', label: '970×250 / 728×100 / 320×100' },
+    HOME_FEED_1: { h: 'h-20 md:h-36', label: '300×250' },
+    HOME_FEED_2: { h: 'h-20 md:h-36', label: '300×250' },
+    ARTICLE_TOP: { h: 'h-12 md:h-16', label: '728×90 / 300×250' },
+    ARTICLE_MIDDLE: { h: 'h-20 md:h-28', label: '300×250' },
+    ARTICLE_BOTTOM: { h: 'h-8 md:h-16', label: '970×90 / 320×50' },
   };
-  const dim = dimensions[slot] || dimensions.rectangle;
+  const dim = dimensions[slot] || dimensions.HOME_TOP;
 
   return (
     <div className={cn(

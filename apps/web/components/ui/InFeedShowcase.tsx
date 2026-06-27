@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { cn } from '../../lib/utils';
 
 // ─── In-Feed Showcase ────────────────────────────────────────────────────────
-// Fallback untuk slot in-feed saat tidak ada iklan yang aktif.
+// Fallback untuk slot feed (HOME_FEED_1, HOME_FEED_2, ARTICLE_MIDDLE) saat tidak ada iklan yang aktif.
 // Gaya visual compact dengan gradient + icon, konsisten dengan showcase lain.
 
 interface InFeedAd {

@@ -14,7 +14,7 @@ import {
 import { cn } from '../../../lib/utils';
 import type { Ad } from './types';
 
-export function LeaderboardBannerRow({
+export function HeroBannerRow({
   ad,
   index,
   total,
@@ -49,9 +49,8 @@ export function LeaderboardBannerRow({
       const url = await onUpload(file, ad.slot);
       if (url) setImageUrl(url);
     } catch (err) {
-      // Show error to user
       const message = err instanceof Error ? err.message : 'Upload gagal';
-      alert(message); // TODO: replace with toast notification
+      alert(message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -73,7 +72,7 @@ export function LeaderboardBannerRow({
         {/* Order controls */}
         <div className="flex flex-col gap-1">
           <button
-            onClick={() => onReorder('leaderboard', 'up', index)}
+            onClick={() => onReorder('HOME_TOP', 'up', index)}
             disabled={index === 0}
             className={cn("p-1 rounded text-gray-400 hover:text-brand-red transition-colors", index === 0 && "opacity-30 cursor-not-allowed")}
           >
@@ -81,7 +80,7 @@ export function LeaderboardBannerRow({
           </button>
           <span className="text-[9px] font-mono text-gray-400 text-center">{index + 1}</span>
           <button
-            onClick={() => onReorder('leaderboard', 'down', index)}
+            onClick={() => onReorder('HOME_TOP', 'down', index)}
             disabled={index === total - 1}
             className={cn("p-1 rounded text-gray-400 hover:text-brand-red transition-colors", index === total - 1 && "opacity-30 cursor-not-allowed")}
           >

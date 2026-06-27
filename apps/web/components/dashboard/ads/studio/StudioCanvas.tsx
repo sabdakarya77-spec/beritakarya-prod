@@ -53,7 +53,7 @@ export function StudioCanvas() {
   const slotName = slotDef?.name || 'Slot Iklan';
   const slotSize = slotDef?.publicSize || 'Responsive';
   const previewSrc = data.adPreviewUrl || null;
-  const _isLeaderboard = selectedPackage?.slot === 'leaderboard';
+  const _isHeroBanner = selectedPackage?.slot === 'HOME_TOP';
 
   // Success state
   if (isSuccess) {
@@ -593,14 +593,14 @@ export function StudioCanvas() {
                     </div>
                   </div>
 
-                  {/* Leaderboard — top of page, full width */}
-                  {selectedPackage.slot === 'leaderboard' && (
+                  {/* HOME_TOP — top of page, full width */}
+                  {selectedPackage.slot === 'HOME_TOP' && (
                     <AdSlotPreview
-                      slot="leaderboard"
+                      slot="HOME_TOP"
                       previewSrc={previewSrc}
                       mediaType={data.mediaType}
                       aspectRatio={970 / 250}
-                      label="Leaderboard Atas"
+                      label="Hero Banner"
                     />
                   )}
 
@@ -613,14 +613,14 @@ export function StudioCanvas() {
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-full" />
                       <div className="h-1.5 bg-gray-100 dark:bg-white/5 rounded w-5/6" />
 
-                      {/* In-Feed slot — between content blocks */}
-                      {selectedPackage.slot === 'in_feed' && (
+                      {/* ARTICLE_MIDDLE / HOME_FEED_1 — between content blocks */}
+                      {(selectedPackage.slot === 'ARTICLE_MIDDLE' || selectedPackage.slot === 'HOME_FEED_1' || selectedPackage.slot === 'HOME_FEED_2') && (
                         <AdSlotPreview
-                          slot="in_feed"
+                          slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
                           aspectRatio={300 / 250}
-                          label="In-Feed"
+                          label={slotName}
                         />
                       )}
 
@@ -641,14 +641,14 @@ export function StudioCanvas() {
 
                     {/* Sidebar */}
                     <div className="w-32 flex-shrink-0 space-y-2">
-                      {/* Rectangle slot — sidebar utama */}
-                      {(selectedPackage.slot === 'rectangle' || selectedPackage.slot === 'rectangle_secondary') && (
+                      {/* ARTICLE_TOP / ARTICLE_BOTTOM — in-article slots */}
+                      {(selectedPackage.slot === 'ARTICLE_TOP' || selectedPackage.slot === 'ARTICLE_BOTTOM') && (
                         <AdSlotPreview
                           slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
                           aspectRatio={300 / 250}
-                          label={selectedPackage.slot === 'rectangle' ? 'Sidebar Utama' : 'Sidebar Sekunder'}
+                          label={slotName}
                         />
                       )}
 
@@ -680,10 +680,12 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
   const sizeLabels: Record<string, string> = {
-    leaderboard: '970×250 / 728×100 / 320×100',
-    rectangle: '300×250 / 300×100',
-    rectangle_secondary: '300×250 / 300×100',
-    in_feed: '300×250 / 300×100',
+    HOME_TOP: '970×250 / 728×100 / 320×100',
+    HOME_FEED_1: '300×250',
+    HOME_FEED_2: '300×250',
+    ARTICLE_TOP: '728×90 / 300×250',
+    ARTICLE_MIDDLE: '300×250',
+    ARTICLE_BOTTOM: '970×90 / 320×50',
   };
   const sizeLabel = sizeLabels[slot] || '300×250 / 300×100';
 

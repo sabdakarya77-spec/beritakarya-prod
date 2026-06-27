@@ -25,72 +25,80 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 ### 2.1 Daftar Slot
 
-| Slot ID | Nama | Penempatan | Rotasi |
-|---------|------|------------|--------|
-| `leaderboard` | Leaderboard Atas | Homepage atas (billboard utama) | ✅ Multi-iklan |
-| `rectangle` | Sidebar Rectangle Utama | Sidebar homepage + artikel | ✅ Multi-iklan |
-| `rectangle_secondary` | Sidebar Rectangle Sekunder | Sidebar artikel posisi kedua | ✅ Multi-iklan |
-| `in_feed` | In-Feed | Feed homepage + konten artikel | ✅ Multi-iklan |
+> **Konvensi Penamaan:** Slot dinamai berdasarkan **lokasi penempatan**, bukan ukuran. Tidak ada slot sidebar — semua iklan berada di dalam alur konten. Lihat [2.6 Strategi Slot Mobile](#26-strategi-slot-mobile--penamaan-berbasis-lokasi) untuk penjelasan lengkap.
+
+| Slot ID | Nama Lokasi | Penempatan | Rotasi |
+|---------|-------------|------------|--------|
+| `HOME_TOP` | Hero Banner | Homepage atas (billboard utama) | ✅ Multi-iklan |
+| `HOME_FEED_1` | Feed Atas | Homepage, setelah headline (posisi 6-8 berita) | ✅ Multi-iklan |
+| `HOME_FEED_2` | Feed Bawah | Homepage, setelah 12-15 berita | ✅ Multi-iklan |
+| `ARTICLE_TOP` | Artikel Atas | Halaman artikel, setelah paragraf ke-3 | ✅ Multi-iklan |
+| `ARTICLE_MIDDLE` | Artikel Tengah | Halaman artikel, setelah paragraf ke-8 | ✅ Multi-iklan |
+| `ARTICLE_BOTTOM` | Artikel Bawah | Halaman artikel, sebelum artikel terkait | ✅ Multi-iklan |
+
+> **Catatan Migrasi:** Slot lama (`leaderboard`, `rectangle`, `rectangle_secondary`, `in_feed`) perlu di-migrate ke nama lokasi baru di database dan API. Slot sidebar (`rectangle`, `rectangle_secondary`) **dihapus** dan digantikan oleh `HOME_FEED_1`, `HOME_FEED_2`, `ARTICLE_TOP`, dan `ARTICLE_BOTTOM`.
 
 ### 2.2 Ukuran Per Breakpoint
 
-| Slot | Desktop | Tablet | Mobile | Rasio Desktop | Rasio Mobile |
-|------|---------|--------|--------|---------------|--------------|
-| **Leaderboard** | 970 × 250 px | 728 × 100 px | 320 × 100 px | 3.88:1 | 3.2:1 |
-| **Rectangle** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
-| **Rectangle Secondary** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
-| **In-Feed** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
+| Slot | Desktop | Tablet | Mobile |
+|------|---------|--------|--------|
+| **HOME_TOP** | 970 × 250 px | 728 × 100 px | 320 × 100 px |
+| **HOME_FEED_1** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
+| **HOME_FEED_2** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
+| **ARTICLE_TOP** | 728 × 90 px | 728 × 90 px | 300 × 250 px |
+| **ARTICLE_MIDDLE** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
+| **ARTICLE_BOTTOM** | 970 × 90 px | 728 × 90 px | 320 × 50 px |
 
-> **Catatan Mobile**: Ukuran 300×100 px dan 320×100 px dipilih agar iklan tidak mendominasi layar mobile (320px lebar) dan tetap seimbang dengan NewsCard.
+> **Catatan Mobile**: Ukuran 300×250 px adalah standar IAB medium rectangle yang umum digunakan di mobile. Ukuran 320×100 px dan 320×50 px untuk hero dan bottom banner agar tidak mendominasi layar.
 
 ### 2.3 Visibilitas Slot Per Device
 
-Tidak semua slot tampil di semua device. Sidebar di-hide di mobile/tablet (class `hidden xl:block`).
+Semua 6 slot tampil di **semua device** (desktop, tablet, mobile) — yang berbeda hanya **ukurannya**. Tidak ada slot sidebar; semua iklan berada di dalam alur konten.
 
 **Homepage:**
 
-| Slot | Desktop (xl+) | Tablet (< xl) | Mobile (< sm) |
+| Slot | Desktop | Tablet | Mobile |
 |------|:---:|:---:|:---:|
-| Leaderboard | ✅ | ✅ | ✅ |
-| In-Feed | ✅ | ✅ | ✅ |
-| Rectangle (sidebar) | ✅ | ❌ | ❌ |
+| HOME_TOP | ✅ | ✅ | ✅ |
+| HOME_FEED_1 | ✅ | ✅ | ✅ |
+| HOME_FEED_2 | ✅ | ✅ | ✅ |
 
-→ **Desktop: 3 slot, Tablet/Mobile: 2 slot**
+→ **3 slot di semua device**
 
 **Artikel:**
 
-| Slot | Desktop (xl+) | Tablet (< xl) | Mobile (< sm) |
+| Slot | Desktop | Tablet | Mobile |
 |------|:---:|:---:|:---:|
-| In-Feed (paragraf ke-7) | ✅ | ✅ | ✅ |
-| In-Feed (setelah konten) | ❌ (`xl:hidden`) | ✅ | ✅ |
-| Rectangle (sidebar atas) | ✅ | ❌ | ❌ |
-| Rectangle Secondary (sidebar bawah) | ✅ | ❌ | ❌ |
+| ARTICLE_TOP | ✅ | ✅ | ✅ |
+| ARTICLE_MIDDLE | ✅ | ✅ | ✅ |
+| ARTICLE_BOTTOM | ✅ | ✅ | ✅ |
 
-→ **Desktop: 3 slot, Tablet/Mobile: 2 slot**
+→ **3 slot di semua device**
 
 **Total keseluruhan:**
 
 | Device | Homepage | Artikel | Total |
 |--------|----------|---------|-------|
 | **Desktop** | 3 | 3 | **6** |
-| **Tablet** | 2 | 2 | **4** |
-| **Mobile** | 2 | 2 | **4** |
+| **Tablet** | 3 | 3 | **6** |
+| **Mobile** | 3 | 3 | **6** |
 
-> **Implikasi Paket**: Slot `rectangle` dan `rectangle_secondary` hanya tampil di desktop (sidebar). Slot `leaderboard` dan `in_feed` tampil di semua device. Ini penting untuk pricing dan transparansi ke advertiser.
+> **Implikasi Paket**: Semua 6 slot tampil di semua device. Ukuran menyesuaikan device (lihat [2.2 Ukuran Per Breakpoint](#22-ukuran-per-breakpoint)). Ini menyederhanakan pricing — satu paket, semua device terjangkau.
 
 ### 2.4 Minimum Upload Size (Validasi Lunak — Warning, Bukan Error)
 
 | Slot | Variant | Min Width | Min Height | Catatan |
 |------|---------|-----------|------------|---------|
-| Leaderboard | Desktop | 300 px | 80 px | Sistem akan upscale + gradient jika kecil |
-| Leaderboard | Tablet | 250 px | 40 px | Sistem akan upscale + gradient jika kecil |
-| Leaderboard | Mobile | 200 px | 30 px | Sistem akan upscale + gradient jika kecil |
-| Rectangle | Desktop | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| Rectangle | Mobile | 150 px | 50 px | Sistem akan upscale + gradient jika kecil |
-| Rectangle Secondary | Desktop | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| Rectangle Secondary | Mobile | 150 px | 50 px | Sistem akan upscale + gradient jika kecil |
-| In-Feed | Desktop | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| In-Feed | Mobile | 150 px | 50 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Desktop | 300 px | 80 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Tablet | 250 px | 40 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Mobile | 200 px | 30 px | Sistem akan upscale + gradient jika kecil |
+| HOME_FEED_1 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
+| HOME_FEED_2 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_TOP | Desktop/Tablet | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_TOP | Mobile | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_MIDDLE | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_BOTTOM | Desktop | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_BOTTOM | Mobile | 150 px | 30 px | Sistem akan upscale + gradient jika kecil |
 
 > **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, rasio beda di-handle dengan palette gradient background.
 
@@ -106,7 +114,108 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 </picture>
 ```
 
-Leaderboard juga **sticky di mobile** (fixed bottom viewport, closeable setelah 5 detik).
+`HOME_TOP` juga **sticky di mobile** (fixed bottom viewport, closeable setelah 5 detik).
+
+### 2.6 Strategi Slot Mobile — Penamaan Berbasis Lokasi
+
+> **Prinsip:** Jangan beri nama slot berdasarkan ukuran (misal `970x250`). Beri nama berdasarkan **lokasi penempatan** agar sistem dapat menyesuaikan ukuran secara otomatis per device tanpa mengubah nama slot. **Tidak ada slot sidebar** — semua iklan berada di dalam alur konten.
+
+#### Konvensi Penamaan Slot
+
+| Slot Name | Deskripsi | Desktop | Mobile |
+|-----------|-----------|---------|--------|
+| `HOME_TOP` | Hero banner homepage | 970 × 250 | 320 × 100 |
+| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 300 × 250 | 300 × 250 |
+| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 300 × 250 | 300 × 250 |
+| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 728 × 90 | 300 × 250 |
+| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 250 | 300 × 250 |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 970 × 90 | 320 × 50 |
+
+> **Manfaat:** Paket iklan yang dijual tetap 6 slot. Sistem secara otomatis menampilkan ukuran yang sesuai untuk desktop atau mobile. Pengelolaan, pelaporan, dan penjualan jadi jauh lebih mudah.
+
+#### Layout Homepage Mobile
+
+```
+────────────────────
+Header
+────────────────────
+
+Hero Banner (HOME_TOP)
+320 × 100
+
+Headline
+
+Berita 1
+Berita 2
+
+Banner (HOME_FEED_1)
+300 × 250
+
+Berita 3
+Berita 4
+
+Banner (HOME_FEED_2)
+300 × 250
+
+Berita 5
+Berita 6
+
+Footer
+────────────────────
+```
+
+#### Layout Halaman Artikel Mobile
+
+```
+────────────────────
+Judul Artikel
+Info Penulis
+Gambar Hero
+────────────────────
+
+Paragraf 1
+Paragraf 2
+Paragraf 3
+
+Banner (ARTICLE_TOP)
+300 × 250
+
+Paragraf 4
+Paragraf 5
+Paragraf 6
+Paragraf 7
+Paragraf 8
+
+Banner (ARTICLE_MIDDLE)
+300 × 250
+
+Paragraf 9
+Paragraf 10
+
+Banner (ARTICLE_BOTTOM)
+320 × 50
+
+Artikel Terkait
+Footer
+────────────────────
+```
+
+#### Density Ratio & Pertimbangan UX
+
+| Aturan | Target |
+|--------|--------|
+| Rasio iklan terhadap konten | ≤ 30% di viewport |
+| Jarak antar iklan (mobile) | Minimal 4-6 konten card / 3-4 paragraf |
+| Frekuensi scroll sebelum iklan | Minimal 2-3 layar (viewport height) |
+
+> **Catatan:** Slot `HOME_FEED_2` (setelah berita 12-15) mungkin tidak menghasilkan impresi signifikan jika pengguna tidak scroll sejauh itu. Pertimbangkan untuk menggabungkannya dengan `HOME_FEED_1` atau menggunakan infinite scroll dengan iklan dinamis.
+
+#### Lazy Loading
+
+Slot yang berada di bawah fold **tidak boleh dimuat** sampai pengguna mendekati posisi tersebut. Gunakan `IntersectionObserver` atau `loading="lazy"` untuk:
+- Menghemat bandwidth
+- Meningkatkan Core Web Vitals (LCP, CLS)
+- Menghindari counted impression tanpa viewport visibility
 
 ---
 
@@ -176,7 +285,7 @@ Response:
   "data": {
     "previews": [
       {
-        "slot": "leaderboard",
+        "slot": "HOME_TOP",
         "variant": "desktop",
         "url": "https://...",
         "width": 970,
@@ -201,7 +310,7 @@ File: `apps/web/components/ui/AdSpace.tsx`
 
 | Fitur | Detail |
 |-------|--------|
-| **Props** | `type: 'leaderboard' \| 'rectangle' \| 'rectangle_secondary' \| 'in-feed'`, `slot?`, `label?`, `className?` |
+| **Props** | `type: 'HOME_TOP' \| 'HOME_FEED_1' \| 'HOME_FEED_2' \| 'ARTICLE_TOP' \| 'ARTICLE_MIDDLE' \| 'ARTICLE_BOTTOM'`, `slot?`, `label?`, `className?` |
 | **Fetch** | `GET /api/v1/ads/public?site=<siteId>`, filter by `slotName` di client |
 | **Carousel** | Auto-rotate 7 detik, pause on hover |
 | **Impresi** | `POST /api/v1/ads/track/<id>?action=impression` (satu kali per ad ID per page load) |
@@ -210,17 +319,19 @@ File: `apps/web/components/ui/AdSpace.tsx`
 | **Animation** | `ken_burns`, `fade_slide`, `parallax`, `pulse_scale` |
 | **Video** | Auto-detect `.mp4/.webm/.ogg/.mov`, render `<video autoPlay loop muted>` |
 | **Script** | Sandboxed iframe `allow-scripts allow-popups` |
-| **Sticky Mobile** | Leaderboard fixed bottom, closeable after 5 detik |
+| **Sticky Mobile** | HOME_TOP fixed bottom, closeable after 5 detik |
 | **Fallback** | CMS fallback dari `/api/v1/ads/fallback` → showcase components |
 
 ### 4.2 Showcase Fallbacks
 
 | Komponen | File | Slot |
 |----------|------|------|
-| `BillboardShowcase` | `components/ui/BillboardShowcase.tsx` | Leaderboard |
-| `RectangleShowcase` | `components/ui/RectangleShowcase.tsx` | Rectangle |
-| `SecondaryRectangleShowcase` | `components/ui/SecondaryRectangleShowcase.tsx` | Rectangle Secondary |
-| `InFeedShowcase` | `components/ui/InFeedShowcase.tsx` | In-Feed |
+| `BillboardShowcase` | `components/ui/BillboardShowcase.tsx` | HOME_TOP |
+| `FeedShowcase1` | `components/ui/FeedShowcase1.tsx` | HOME_FEED_1 |
+| `FeedShowcase2` | `components/ui/FeedShowcase2.tsx` | HOME_FEED_2 |
+| `ArticleTopShowcase` | `components/ui/ArticleTopShowcase.tsx` | ARTICLE_TOP |
+| `ArticleMiddleShowcase` | `components/ui/ArticleMiddleShowcase.tsx` | ARTICLE_MIDDLE |
+| `ArticleBottomShowcase` | `components/ui/ArticleBottomShowcase.tsx` | ARTICLE_BOTTOM |
 
 ### 4.3 Ad Studio (Booking Wizard)
 
@@ -246,9 +357,9 @@ File: `apps/web/components/dashboard/ads/studio/`
 
 | Komponen | File | Fungsi |
 |----------|------|--------|
-| `AdsSlotsContent` | `dashboard/ads/pages/AdsSlotsContent.tsx` | **Card Grid layout** — 4 slot cards dengan preview, stats, single upload |
-| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | **Production card** — preview iklan aktif, stats (impresi/klik/CTR), upload → auto-generate, device badge |
-| `LeaderboardManager` | `dashboard/ads/LeaderboardManager.tsx` | Carousel banner management |
+| `AdsSlotsContent` | `dashboard/ads/pages/AdsSlotsContent.tsx` | **Card Grid layout** — 6 slot cards dengan preview, stats, single upload |
+| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | **Production card** — preview iklan aktif per slot (HOME_TOP, HOME_FEED_1, dst.), stats (impresi/klik/CTR), upload → auto-generate, device badge |
+| `HeroBannerManager` | `dashboard/ads/HeroBannerManager.tsx` | Carousel banner management (HOME_TOP) |
 | `BookingReviewList` | `dashboard/ads/BookingReviewList.tsx` | Review queue + 5-item content checklist |
 | `AdPerformanceChart` | `dashboard/ads/AdPerformanceChart.tsx` | Recharts area chart |
 | `AdvertiserAdsView` | `dashboard/ads/AdvertiserAdsView.tsx` | Advertiser dashboard + stats |
@@ -319,7 +430,7 @@ File: `apps/web/components/dashboard/ads/studio/`
 model Advertisement {
   id                String   @id @default(uuid())
   siteId            String
-  slot              String   // 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed'
+  slot              String   // 'HOME_TOP' | 'HOME_FEED_1' | 'HOME_FEED_2' | 'ARTICLE_TOP' | 'ARTICLE_MIDDLE' | 'ARTICLE_BOTTOM'
   code              String?  // HTML/JS snippet
   imageUrl          String?  // Desktop
   imageUrlTablet    String?  // Tablet variant
@@ -415,7 +526,7 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
       ↓
 2. Buka Ad Studio (/{site}/ads/order)
       ↓
-3. Pilih Paket (Leaderboard / Rectangle / In-Feed)
+3. Pilih Paket (HOME_TOP / HOME_FEED_1 / HOME_FEED_2 / ARTICLE_TOP / ARTICLE_MIDDLE / ARTICLE_BOTTOM)
       ↓
 4. Isi Detail (Nama Kampanye, URL, Tanggal)
       ↓
@@ -504,7 +615,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 6 | Campaign name tersimpan | ✅ Selesai |
 | 7 | End date konsisten (read-only) | ✅ Selesai |
 | 8 | Review konten iklan (5-item checklist) | ✅ Selesai |
-| 9 | Rotasi slot non-leaderboard | ✅ Selesai |
+| 9 | Rotasi slot non-HERO | ✅ Selesai |
 | 10 | Auto-expiry cron | ✅ Sudah Ada |
 | 11 | Duplicate admin views | ✅ Selesai |
 | 12 | Permission wapimred approve | 🟢 Kecil (0.5 hari) |
@@ -575,6 +686,7 @@ pnpm --filter @beritakarya/web exec playwright test tests/e2e/ad-booking.spec.ts
 | **Auto A/B Testing** | Statistical significance testing + auto-select winner |
 | **Export Reports** | CSV/PDF export untuk advertiser |
 | **Ad Quality** | Automated content moderation (AI-based) |
+| **Mobile Slot Optimization** | Lazy loading + infinite scroll dynamic ad placement untuk `HOME_FEED_1`/`HOME_FEED_2` |
 
 ---
 
@@ -716,4 +828,4 @@ Sekarang
 
 ---
 
-*Dokumentasi terakhir diperbarui: 27 Juni 2026*
+*Dokumentasi terakhir diperbarui: 27 Juni 2026 — migrasi ke 6 slot berbasis lokasi, hapus sidebar*

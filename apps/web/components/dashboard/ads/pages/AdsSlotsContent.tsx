@@ -9,7 +9,7 @@ import { useToastStore } from '../../../../store/toastStore';
 import { RefreshCw, AlertCircle, ArrowLeft, Plus } from 'lucide-react';
 import { AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
 import type { Ad } from '../types';
-import { LeaderboardManager } from '../LeaderboardManager';
+import { HeroBannerManager } from '../HeroBannerManager';
 import { AdSlotCard } from '../AdSlotCard';
 
 export default function AdsSlotsContent() {
@@ -42,10 +42,10 @@ export default function AdsSlotsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
-  // Leaderboard-specific handlers (multi-banner carousel)
+  // HOME_TOP-specific handlers (multi-banner carousel)
   const handleAddLeaderboardBanner = async () => {
     try {
-      await api.post('/ads', { slot: 'leaderboard', isActive: true });
+      await api.post('/ads', { slot: 'HOME_TOP', isActive: true });
       await fetchAds();
     } catch (error: unknown) {
       const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
@@ -96,7 +96,7 @@ export default function AdsSlotsContent() {
     }
   };
 
-  // Upload handler for LeaderboardManager (old-style single variant upload)
+  // Upload handler for HeroBannerManager (single variant upload)
   const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -122,8 +122,8 @@ export default function AdsSlotsContent() {
     );
   }
 
-  const leaderboardAds = ads.filter(a => a.slot === 'leaderboard').sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  const nonLeaderboardSlots = AD_SLOT_DEFINITIONS.filter(s => s.id !== 'leaderboard');
+  const heroBannerAds = ads.filter(a => a.slot === 'HOME_TOP').sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const otherSlots = AD_SLOT_DEFINITIONS.filter(s => s.id !== 'HOME_TOP');
 
   return (
     <div className="space-y-6">
@@ -140,10 +140,10 @@ export default function AdsSlotsContent() {
         </div>
       ) : (
         <>
-          {/* Leaderboard — carousel manager (special layout) */}
-          <LeaderboardManager
-            ads={leaderboardAds}
-            slotDef={AD_SLOT_DEFINITIONS.find(s => s.id === 'leaderboard')!}
+          {/* HOME_TOP — carousel manager (special layout) */}
+          <HeroBannerManager
+            ads={heroBannerAds}
+            slotDef={AD_SLOT_DEFINITIONS.find(s => s.id === 'HOME_TOP')!}
             onAdd={handleAddLeaderboardBanner}
             onUpdate={handleUpdateAd}
             onDelete={handleDeleteAd}
@@ -152,9 +152,9 @@ export default function AdsSlotsContent() {
             savingId={savingAdId}
           />
 
-          {/* Card Grid — 3 kolom untuk slot non-leaderboard */}
+          {/* Card Grid — 3 kolom untuk slot lainnya */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {nonLeaderboardSlots.map(slot => {
+            {otherSlots.map(slot => {
               const slotAds = ads.filter(a => a.slot === slot.id);
               return (
                 <AdSlotCard

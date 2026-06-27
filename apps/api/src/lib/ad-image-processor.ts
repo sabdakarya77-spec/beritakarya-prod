@@ -35,29 +35,44 @@ export interface PreviewResult {
 // ─── Slot Definitions (sama dengan yang ada di media.controller.ts) ──────────
 
 export const AD_SLOTS: Record<string, SlotConfig> = {
-  leaderboard: { width: 970, height: 250, minWidth: 300, minHeight: 80 },
-  rectangle: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  rectangle_secondary: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  in_feed: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  HOME_TOP:         { width: 970, height: 250, minWidth: 300, minHeight: 80 },
+  HOME_FEED_1:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  HOME_FEED_2:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  ARTICLE_TOP:      { width: 728, height: 90, minWidth: 200, minHeight: 50 },
+  ARTICLE_MIDDLE:   { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  ARTICLE_BOTTOM:   { width: 970, height: 90, minWidth: 200, minHeight: 50 },
 }
 
 export const AD_VARIANTS: Record<string, Record<string, SlotConfig>> = {
-  leaderboard: {
+  HOME_TOP: {
     desktop: { width: 970, height: 250, minWidth: 300, minHeight: 80 },
-    tablet: { width: 728, height: 100, minWidth: 250, minHeight: 40 },
-    mobile: { width: 320, height: 100, minWidth: 200, minHeight: 30 },
+    tablet:  { width: 728, height: 100, minWidth: 250, minHeight: 40 },
+    mobile:  { width: 320, height: 100, minWidth: 200, minHeight: 30 },
   },
-  rectangle: {
+  HOME_FEED_1: {
     desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile: { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
   },
-  rectangle_secondary: {
+  HOME_FEED_2: {
     desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile: { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
   },
-  in_feed: {
+  ARTICLE_TOP: {
+    desktop: { width: 728, height: 90, minWidth: 200, minHeight: 50 },
+    tablet:  { width: 728, height: 90, minWidth: 200, minHeight: 50 },
+    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  },
+  ARTICLE_MIDDLE: {
     desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile: { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
+  },
+  ARTICLE_BOTTOM: {
+    desktop: { width: 970, height: 90, minWidth: 200, minHeight: 50 },
+    tablet:  { width: 728, height: 90, minWidth: 200, minHeight: 50 },
+    mobile:  { width: 320, height: 50, minWidth: 150, minHeight: 30 },
   },
 }
 
@@ -351,7 +366,7 @@ export async function processForAllSlots(
   const results = new Map<string, ProcessResult>()
 
   if (targetSlot && AD_VARIANTS[targetSlot]) {
-    // Slot dengan multi-variant (leaderboard: desktop, tablet, mobile)
+    // Slot dengan multi-variant (HOME_TOP: desktop, tablet, mobile)
     for (const [variant, dims] of Object.entries(AD_VARIANTS[targetSlot])) {
       const result = await processAdSmart(buffer, dims.width, dims.height)
       results.set(`${targetSlot}_${variant}`, result)

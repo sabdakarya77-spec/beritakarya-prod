@@ -392,11 +392,20 @@ export default async function ArticlePage({ params }: Props) {
                                 );
                               }
 
-                              // After 7th paragraph: insert in-feed ad
-                              if (paragraphCount === 7) {
+                              // After 3rd paragraph: insert ARTICLE_TOP ad (after pull quote)
+                              if (paragraphCount === 3) {
                                 elements.push(
-                                  <div key="visual-break-infeed-ad" className="my-10">
-                                    <AdSpace type="in-feed" label="Iklan" />
+                                  <div key="visual-break-articletop-ad" className="my-10">
+                                    <AdSpace type="ARTICLE_TOP" label="Iklan" />
+                                  </div>
+                                );
+                              }
+
+                              // After 8th paragraph: insert ARTICLE_MIDDLE ad
+                              if (paragraphCount === 8) {
+                                elements.push(
+                                  <div key="visual-break-articlemiddle-ad" className="my-10">
+                                    <AdSpace type="ARTICLE_MIDDLE" label="Iklan" />
                                   </div>
                                 );
                               }
@@ -445,9 +454,9 @@ export default async function ArticlePage({ params }: Props) {
                     <CommentSection articleId={article.id} />
                   </div>
 
-                  {/* In-Feed Ad — mobile only, after content before recommendations */}
-                  <div className="my-10 xl:hidden">
-                    <AdSpace type="in-feed" label="Iklan" />
+                  {/* ARTICLE_BOTTOM — before recommendations */}
+                  <div className="my-10">
+                    <AdSpace type="ARTICLE_BOTTOM" label="Iklan" />
                   </div>
 
                   {/* Recommended Articles */}
@@ -583,8 +592,6 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   </div>
 
-                  <AdSpace type="rectangle" label="Advertisement" />
-
                   <div className={cn(sidebarCardClass, 'space-y-4')}>
                     <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted">
                       Kategori Terkait
@@ -666,7 +673,6 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   )}
 
-                  <AdSpace type="rectangle" slot="rectangle_secondary" label="Sponsored" />
                 </div>
               </aside>
             </div>

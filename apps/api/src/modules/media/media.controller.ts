@@ -406,7 +406,7 @@ mediaRouter.post(
 
     const adSlot = req.query.slot as string | undefined
     if (!adSlot || !AD_VARIANTS[adSlot]) {
-      throw new AppError('Slot iklan tidak valid. Gunakan: leaderboard, rectangle, rectangle_secondary, in_feed', 400, 'INVALID_SLOT')
+      throw new AppError('Slot iklan tidak valid. Gunakan: HOME_TOP, HOME_FEED_1, HOME_FEED_2, ARTICLE_TOP, ARTICLE_MIDDLE, ARTICLE_BOTTOM', 400, 'INVALID_SLOT')
     }
 
     const isVideo = req.file.mimetype.startsWith('video/')

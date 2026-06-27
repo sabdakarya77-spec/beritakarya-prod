@@ -43,8 +43,8 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
   const totalClicks = ads.reduce((sum, a) => sum + (a.clicks || 0), 0);
   const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0.00';
 
-  // Device coverage
-  const isMobileVisible = slot.id === 'leaderboard' || slot.id === 'in_feed';
+  // Device coverage — semua slot tampil di semua device
+  const isMobileVisible = true;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
