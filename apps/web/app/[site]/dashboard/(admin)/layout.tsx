@@ -45,7 +45,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [globalSearch, setGlobalSearch] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
+
+  // Detect mobile/PWA for conditional navigation behavior
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -222,7 +231,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </Link>
                   <Link
                     href={`/${site}`}
-                    target="_blank"
+                    target={isMobile ? undefined : '_blank'}
                     className="flex items-center gap-3 rounded-2xl px-3 py-3 text-xs font-black uppercase tracking-[0.18em] text-gray-500 transition-colors hover:bg-gray-50 hover:text-brand-red dark:hover:bg-white/5"
                   >
                     <ExternalLink size={14} />
@@ -442,7 +451,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={toggleTheme} className="p-2 text-gray-400 hover:text-white transition-colors">
             {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
           </button>
-          <Link href={`/${site}`} target="_blank" className="p-2 text-brand-red hover:bg-brand-red/10 rounded-lg transition-colors">
+          <Link href={`/${site}`} target={isMobile ? undefined : '_blank'} className="p-2 text-brand-red hover:bg-brand-red/10 rounded-lg transition-colors">
             <ExternalLink size={18} />
           </Link>
         </div>
@@ -531,7 +540,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="w-px h-6 bg-gray-100 dark:bg-white/5 mx-1 hidden md:block" />
             <Link
               href={`/${site}`}
-              target="_blank"
+              target={isMobile ? undefined : '_blank'}
               className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all text-gray-400 hover:text-brand-red"
             >
               <ExternalLink size={12} /> <span className="hidden sm:inline">Portal</span>
