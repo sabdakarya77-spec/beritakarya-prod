@@ -1,15 +1,67 @@
 import { Router, Request, Response } from 'express'
+import { v4 as uuidv4 } from 'uuid'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { adTrackingLimiter, bookingLimiter } from '../../lib/rateLimit'
 import { isDuplicateImpression, syncTrackingToBooking, sanitizeAdCode } from './ad.service'
+import { processAdSmart, AD_VARIANTS } from '../../lib/ad-image-processor'
+import { StorageService } from '../../services/storage.service'
 import * as repo from './ad.repository'
 import { emailService } from '../../services/email.service'
 import { sendNotification } from '../notification/notification.controller'
 import { createSnapTransaction, verifyMidtransSignature, mapMidtransStatus } from '../../services/midtrans.service'
+import { logger } from '../../lib/logger'
 
 export const adRouter = Router()
+
+// ─── Helper: Auto-generate variants from image URL ───────────────────────────
+// Downloads image from URL, generates all variants for the slot, uploads to storage.
+// Returns { imageUrl, imageUrlTablet, imageUrlMobile } or null on failure.
+
+async function generateVariantsFromUrl(
+  imageUrl: string,
+  slot: string
+): Promise<{ imageUrl: string; imageUrlTablet: string | null; imageUrlMobile: string | null } | null> {
+  const variants = AD_VARIANTS[slot]
+  if (!variants) return null
+
+  try {
+    // Download image from URL
+    const response = await fetch(imageUrl)
+    if (!response.ok) {
+      logger.warn(`[AdController] Failed to download image for variant generation: ${response.status}`)
+      return null
+    }
+    const arrayBuffer = await response.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    const mediaBucket = StorageService.mediaBucket
+    const id = uuidv4()
+    const results: Record<string, string> = {}
+
+    // Generate all variants in parallel
+    const entries = Object.entries(variants)
+    await Promise.all(
+      entries.map(async ([variantName, dims]) => {
+        const result = await processAdSmart(buffer, dims.width, dims.height, `${slot}_${variantName}`)
+        const suffix = variantName !== 'desktop' ? `-${variantName}` : ''
+        const key = `ads/${id}${suffix}.webp`
+        await StorageService.uploadBuffer(result.buffer, key, 'image/webp', mediaBucket, { isPublic: true })
+        results[variantName] = StorageService.getPublicUrl(mediaBucket, key)
+      })
+    )
+
+    return {
+      imageUrl: results.desktop || imageUrl,
+      imageUrlTablet: results.tablet || null,
+      imageUrlMobile: results.mobile || null,
+    }
+  } catch (err) {
+    logger.warn('[AdController] Variant generation failed, falling back to original URL:', err)
+    return null
+  }
+}
 
 // Public endpoint for tracking views/clicks — with rate limiting & dedup
 adRouter.post('/track/:id',
@@ -423,10 +475,24 @@ adRouter.post('/webhook/midtrans',
           package: { slot: string }
         } | null
         if (fullBooking) {
+          // Auto-generate variants from imageUrl if tablet/mobile URLs are missing
+          let finalImageUrl = fullBooking.imageUrl
+          let finalTabletUrl = fullBooking.imageUrlTablet || null
+          let finalMobileUrl = fullBooking.imageUrlMobile || null
+
+          if (fullBooking.imageUrl && (!finalTabletUrl || !finalMobileUrl)) {
+            const generated = await generateVariantsFromUrl(fullBooking.imageUrl, fullBooking.package.slot)
+            if (generated) {
+              finalImageUrl = generated.imageUrl
+              finalTabletUrl = generated.imageUrlTablet
+              finalMobileUrl = generated.imageUrlMobile
+            }
+          }
+
           const adData = {
-            imageUrl: fullBooking.imageUrl,
-            imageUrlTablet: fullBooking.imageUrlTablet || null,
-            imageUrlMobile: fullBooking.imageUrlMobile || null,
+            imageUrl: finalImageUrl,
+            imageUrlTablet: finalTabletUrl,
+            imageUrlMobile: finalMobileUrl,
             linkUrl: fullBooking.linkUrl,
             animationEffect: fullBooking.animationEffect || null,
             code: null,
@@ -553,11 +619,25 @@ adRouter.post('/bookings/:id/approve',
       status: 'ACTIVE',
     })
 
-    // AUTO-INTEGRATION: Sync to active Advertisement table (semua slot pakai rotasi)
+    // AUTO-INTEGRATION: Sync to active Advertisement table
+    // Auto-generate variants from imageUrl if tablet/mobile URLs are missing
+    let finalImageUrl = booking.imageUrl
+    let finalTabletUrl = booking.imageUrlTablet || null
+    let finalMobileUrl = booking.imageUrlMobile || null
+
+    if (booking.imageUrl && (!finalTabletUrl || !finalMobileUrl)) {
+      const generated = await generateVariantsFromUrl(booking.imageUrl, booking.package.slot)
+      if (generated) {
+        finalImageUrl = generated.imageUrl
+        finalTabletUrl = generated.imageUrlTablet
+        finalMobileUrl = generated.imageUrlMobile
+      }
+    }
+
     const adData = {
-      imageUrl: booking.imageUrl,
-      imageUrlTablet: booking.imageUrlTablet || null,
-      imageUrlMobile: booking.imageUrlMobile || null,
+      imageUrl: finalImageUrl,
+      imageUrlTablet: finalTabletUrl,
+      imageUrlMobile: finalMobileUrl,
       linkUrl: booking.linkUrl,
       animationEffect: booking.animationEffect || null,
       code: null,
