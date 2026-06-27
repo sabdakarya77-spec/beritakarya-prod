@@ -828,4 +828,57 @@ Sekarang
 
 ---
 
-*Dokumentasi terakhir diperbarui: 27 Juni 2026 — migrasi ke 6 slot berbasis lokasi, hapus sidebar*
+## 16. Plan Selanjutnya: Pricing & Dashboard Admin
+
+> **Status:** Belum diimplementasikan. Dibutuhkan diskusi harga sebelum eksekusi.
+
+### 16.1 Struktur Harga Baru
+
+Saat ini harga iklan di database masih mengikuti slot lama. Perlu ditentukan harga untuk 6 slot baru:
+
+| Slot | Posisi | Estimasi Visibilitas | Harga? |
+|------|--------|---------------------|--------|
+| `HOME_TOP` | Hero banner homepage | Paling tinggi (first fold) | **Perlu diskusi** |
+| `HOME_FEED_1` | Feed homepage atas | Tinggi | **Perlu diskusi** |
+| `HOME_FEED_2` | Feed homepage bawah | Sedang | **Perlu diskusi** |
+| `ARTICLE_TOP` | Atas artikel (paragraf 3) | Tinggi (pembaca sudah engaged) | **Perlu diskusi** |
+| `ARTICLE_MIDDLE` | Tengah artikel (paragraf 8) | Sedang-tinggi | **Perlu diskusi** |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum related) | Sedang | **Perlu diskusi** |
+
+**Pertimbangan:**
+- Harga berdasarkan durasi (7/14/30 hari) atau berdasarkan impresi (CPM)?
+- Paket bundle (homepage only, article only, all-in)?
+- Diskon untuk paket bulanan?
+- Harga berbeda per slot atau tier (premium/standard/economy)?
+
+### 16.2 Dashboard Admin yang Perlu Diupdate
+
+| Komponen | File | Perubahan |
+|----------|------|-----------|
+| **AdsPackagesContent** | `pages/AdsPackagesContent.tsx` | Slot dropdown sudah update, tapi form & deskripsi paket perlu disesuaikan dengan harga baru |
+| **AdsSlotsContent** | `pages/AdsSlotsContent.tsx` | Layout card grid — pastikan 6 slot cards tampil dengan benar |
+| **AdsOverviewContent** | `pages/AdsOverviewContent.tsx` | Stats cards — mungkin perlu breakdown per slot |
+| **AdSlotCard** | `AdSlotCard.tsx` | Preview & stats per slot — pastikan ukuran preview sesuai slot baru |
+| **HeroBannerManager** | `HeroBannerManager.tsx` | Sudah di-rename, pastikan carousel berfungsi untuk HOME_TOP |
+| **AdsMarketingPage** | `AdsMarketingPage.tsx` | Halaman publik pricing — update deskripsi, harga, dan CTA untuk 6 slot |
+| **StudioCanvas** | `studio/StudioCanvas.tsx` | Preview mockup — sudah update, verifikasi visual |
+| **BookingReviewList** | `BookingReviewList.tsx` | Admin review — pastikan menampilkan slot name baru |
+| **AdvertiserAdsView** | `AdvertiserAdsView.tsx` | Dashboard advertiser — stats per booking |
+
+### 16.3 Checklist Eksekusi
+
+```
+[ ] Diskusi & tentukan harga per slot (7/14/30 hari)
+[ ] Update AdPackage seed data dengan harga baru
+[ ] Update AdsMarketingPage — deskripsi, harga, highlight per slot
+[ ] Update AdsPackagesContent — form create/edit paket
+[ ] Update AdsSlotsContent — verifikasi 6 card grid
+[ ] Update AdSlotCard — preview size sesuai slot
+[ ] Update AdsOverviewContent — stats breakdown
+[ ] E2E test — booking flow dengan slot baru
+[ ] Deploy ke production
+```
+
+---
+
+*Dokumentasi terakhir diperbarui: 27 Juni 2026 — tambah plan pricing & dashboard admin (section 16)*
