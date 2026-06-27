@@ -482,3 +482,68 @@ export async function validateAdImage(
 
   return { valid: true, warnings, errors }
 }
+
+// ─── Video Validation ────────────────────────────────────────────────────────
+
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50 MB
+const MIN_VIDEO_WIDTH = 480
+const MIN_VIDEO_HEIGHT = 270
+const RECOMMENDED_VIDEO_WIDTH = 1280
+const RECOMMENDED_VIDEO_HEIGHT = 720
+
+/**
+ * Validasi video untuk iklan.
+ * Cek: format, ukuran file, resolusi.
+ * Tidak memblokir — hanya warning dan error yang jelas.
+ */
+export async function validateAdVideo(
+  buffer: Buffer,
+  mimeType: string
+): Promise<ValidationResult> {
+  const warnings: string[] = []
+  const errors: string[] = []
+
+  // Cek format
+  const supportedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/ogg']
+  if (!supportedTypes.includes(mimeType)) {
+    errors.push(`Format video ${mimeType} tidak didukung. Gunakan MP4, WebM, atau MOV.`)
+    return { valid: false, warnings, errors }
+  }
+
+  // Cek ukuran file
+  if (buffer.length > MAX_VIDEO_SIZE) {
+    const sizeMB = Math.round(buffer.length / 1024 / 1024)
+    errors.push(`Ukuran video ${sizeMB} MB melebihi batas maksimum 50 MB.`)
+    return { valid: false, warnings, errors }
+  }
+
+  // Cek resolusi via sharp (extract first frame metadata)
+  try {
+    const meta = await sharp(buffer, { page: 0 }).metadata()
+    const w = meta.width || 0
+    const h = meta.height || 0
+
+    if (w > 0 && h > 0) {
+      if (w < MIN_VIDEO_WIDTH || h < MIN_VIDEO_HEIGHT) {
+        warnings.push(
+          `Resolusi video rendah (${w}×${h}px). Rekomendasi minimum: ${RECOMMENDED_VIDEO_WIDTH}×${RECOMMENDED_VIDEO_HEIGHT}px.`
+        )
+      } else if (w < RECOMMENDED_VIDEO_WIDTH || h < RECOMMENDED_VIDEO_HEIGHT) {
+        warnings.push(
+          `Resolusi video ${w}×${h}px. Untuk hasil terbaik, gunakan ${RECOMMENDED_VIDEO_WIDTH}×${RECOMMENDED_VIDEO_HEIGHT}px atau lebih.`
+        )
+      }
+    }
+  } catch {
+    // Sharp tidak bisa baca metadata video — tidak fatal
+    warnings.push('Tidak dapat membaca metadata resolusi video.')
+  }
+
+  // Info ukuran file
+  const sizeMB = Math.round(buffer.length / 1024 / 1024 * 10) / 10
+  if (sizeMB > 20) {
+    warnings.push(`Ukuran video ${sizeMB} MB. Untuk performa terbaik, kompresi ke bawah 20 MB.`)
+  }
+
+  return { valid: true, warnings, errors }
+}

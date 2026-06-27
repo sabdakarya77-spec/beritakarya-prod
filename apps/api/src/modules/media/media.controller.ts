@@ -14,6 +14,7 @@ import fs from 'fs/promises'
 import {
   processAdSmart,
   validateAdImage,
+  validateAdVideo,
   generatePreviews,
   AD_SLOTS,
   AD_VARIANTS,
@@ -414,7 +415,13 @@ mediaRouter.post(
     const warnings: string[] = []
 
     if (isVideo) {
-      // ── Video: upload langsung + generate thumbnail ──
+      // ── Video: validasi + upload + generate thumbnail ──
+      const videoValidation = await validateAdVideo(req.file.buffer, req.file.mimetype)
+      if (!videoValidation.valid) {
+        throw new AppError(videoValidation.errors.join(' '), 400, 'INVALID_AD_VIDEO')
+      }
+      warnings.push(...videoValidation.warnings)
+
       const ext = req.file.mimetype === 'video/webm' ? 'webm' : 'mp4'
       const videoKey = `ads/${id}.${ext}`
       await StorageService.uploadBuffer(req.file.buffer, videoKey, req.file.mimetype, mediaBucket, {
