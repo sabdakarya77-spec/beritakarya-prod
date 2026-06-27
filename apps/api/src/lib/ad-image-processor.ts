@@ -44,8 +44,8 @@ export const AD_SLOTS: Record<string, SlotConfig> = {
 export const AD_VARIANTS: Record<string, Record<string, SlotConfig>> = {
   leaderboard: {
     desktop: { width: 970, height: 250, minWidth: 300, minHeight: 80 },
-    tablet: { width: 728, height: 90, minWidth: 250, minHeight: 40 },
-    mobile: { width: 320, height: 50, minWidth: 200, minHeight: 30 },
+    tablet: { width: 728, height: 100, minWidth: 250, minHeight: 40 },
+    mobile: { width: 320, height: 100, minWidth: 200, minHeight: 30 },
   },
   rectangle: {
     desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },

@@ -34,14 +34,49 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 | Slot | Desktop | Tablet | Mobile | Rasio Desktop | Rasio Mobile |
 |------|---------|--------|--------|---------------|--------------|
-| **Leaderboard** | 970 × 250 px | 728 × 90 px | 320 × 50 px | 3.88:1 | 6.4:1 |
+| **Leaderboard** | 970 × 250 px | 728 × 100 px | 320 × 100 px | 3.88:1 | 3.2:1 |
 | **Rectangle** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
 | **Rectangle Secondary** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
 | **In-Feed** | 300 × 250 px | — | 300 × 100 px | 1.2:1 | 3:1 |
 
-> **Catatan Mobile**: Ukuran 300×100 px dipilih agar iklan tidak mendominasi layar mobile (320px lebar) dan tetap seimbang dengan NewsCard. Standar IAB: Large Mobile Banner.
+> **Catatan Mobile**: Ukuran 300×100 px dan 320×100 px dipilih agar iklan tidak mendominasi layar mobile (320px lebar) dan tetap seimbang dengan NewsCard.
 
-### 2.3 Minimum Upload Size (Validasi Lunak — Warning, Bukan Error)
+### 2.3 Visibilitas Slot Per Device
+
+Tidak semua slot tampil di semua device. Sidebar di-hide di mobile/tablet (class `hidden xl:block`).
+
+**Homepage:**
+
+| Slot | Desktop (xl+) | Tablet (< xl) | Mobile (< sm) |
+|------|:---:|:---:|:---:|
+| Leaderboard | ✅ | ✅ | ✅ |
+| In-Feed | ✅ | ✅ | ✅ |
+| Rectangle (sidebar) | ✅ | ❌ | ❌ |
+
+→ **Desktop: 3 slot, Tablet/Mobile: 2 slot**
+
+**Artikel:**
+
+| Slot | Desktop (xl+) | Tablet (< xl) | Mobile (< sm) |
+|------|:---:|:---:|:---:|
+| In-Feed (paragraf ke-7) | ✅ | ✅ | ✅ |
+| In-Feed (setelah konten) | ❌ (`xl:hidden`) | ✅ | ✅ |
+| Rectangle (sidebar atas) | ✅ | ❌ | ❌ |
+| Rectangle Secondary (sidebar bawah) | ✅ | ❌ | ❌ |
+
+→ **Desktop: 3 slot, Tablet/Mobile: 2 slot**
+
+**Total keseluruhan:**
+
+| Device | Homepage | Artikel | Total |
+|--------|----------|---------|-------|
+| **Desktop** | 3 | 3 | **6** |
+| **Tablet** | 2 | 2 | **4** |
+| **Mobile** | 2 | 2 | **4** |
+
+> **Implikasi Paket**: Slot `rectangle` dan `rectangle_secondary` hanya tampil di desktop (sidebar). Slot `leaderboard` dan `in_feed` tampil di semua device. Ini penting untuk pricing dan transparansi ke advertiser.
+
+### 2.4 Minimum Upload Size (Validasi Lunak — Warning, Bukan Error)
 
 | Slot | Variant | Min Width | Min Height | Catatan |
 |------|---------|-----------|------------|---------|
@@ -57,7 +92,7 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 > **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, rasio beda di-handle dengan palette gradient background.
 
-### 2.4 Responsive Rendering di Frontend
+### 2.5 Responsive Rendering di Frontend
 
 Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
