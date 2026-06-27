@@ -204,23 +204,41 @@ export default function BillboardShowcase({ site: _site, className }: BillboardS
               Iklan
             </span>
 
-            {/* Text */}
-            <div className="ml-0 md:ml-0">
-              <p className="text-[9px] md:text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-0.5 md:mb-1">
+            {/* Mobile: horizontal layout (headline + CTA side by side) */}
+            <div className="flex items-center justify-between gap-2 sm:hidden">
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] font-semibold uppercase tracking-[0.2em] text-white/60 mb-0.5">
+                  {ad.category}
+                </p>
+                <h3 className="text-sm font-black text-white tracking-tight leading-tight truncate">
+                  {ad.headline}
+                </h3>
+              </div>
+              <Link
+                href="https://beritakarya.co/pusat/p/ads"
+                className="shrink-0 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[9px] font-semibold px-2.5 py-1 rounded-full transition-colors"
+              >
+                Pasang Iklan →
+              </Link>
+            </div>
+
+            {/* Desktop: vertical layout */}
+            <div className="hidden sm:block">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-1">
                 {ad.category}
               </p>
-              <h3 className="text-sm md:text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight">
+              <h3 className="text-2xl lg:text-3xl font-black text-white tracking-tight leading-tight">
                 {ad.headline}
               </h3>
-              <p className="text-[9px] md:text-sm text-white/70 mt-0.5 md:mt-2 max-w-md hidden sm:block">
+              <p className="text-sm text-white/70 mt-2 max-w-md">
                 {ad.subheadline}
               </p>
             </div>
 
-            {/* CTA — kanan bawah */}
+            {/* CTA — desktop only (absolute bottom-right) */}
             <Link
               href="https://beritakarya.co/pusat/p/ads"
-              className="absolute right-3 md:right-6 bottom-2 md:bottom-4 z-20 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[9px] md:text-xs font-semibold px-2.5 md:px-4 py-1 md:py-1.5 rounded-full transition-colors"
+              className="hidden sm:flex absolute right-6 bottom-4 z-20 bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
             >
               Pasang Iklan Anda →
             </Link>

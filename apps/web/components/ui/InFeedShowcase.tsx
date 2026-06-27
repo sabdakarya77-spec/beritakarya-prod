@@ -143,46 +143,69 @@ export default function InFeedShowcase({ site: _site, className }: InFeedShowcas
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-between p-4 md:p-5">
-            {/* Badge */}
-            <span className="self-start rounded-sm bg-black/30 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/90">
-              Iklan
-            </span>
-
-            {/* Text */}
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
-                {ad.category}
-              </p>
-              <h4 className="text-sm md:text-lg font-black text-white tracking-tight leading-tight mb-1">
-                {ad.headline}
-              </h4>
-              <p className="text-[10px] md:text-[11px] text-white/60 leading-relaxed max-w-[180px] md:max-w-[200px]">
-                {ad.subheadline}
-              </p>
-            </div>
-
-            {/* CTA + Dots */}
-            <div className="flex items-center justify-between">
+            {/* Mobile: Badge + CTA side by side */}
+            <div className="flex items-center justify-between sm:hidden">
+              <span className="rounded-sm bg-black/30 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/90">
+                Iklan
+              </span>
               <Link
                 href="https://beritakarya.co/pusat/p/ads"
-                className="bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[10px] font-bold px-3 py-1 rounded-full transition-colors"
+                className="bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[9px] font-bold px-2.5 py-1 rounded-full transition-colors"
               >
                 {ad.ctaText} →
               </Link>
-              <div className="flex gap-1">
-                {IN_FEED_ADS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goToSlide(i)}
-                    className={cn(
-                      "rounded-full transition-all duration-300",
-                      i === currentIndex
-                        ? "w-3 h-1 bg-white"
-                        : "w-1 h-1 bg-white/30 hover:bg-white/50"
-                    )}
-                    aria-label={`Slide ${i + 1}`}
-                  />
-                ))}
+            </div>
+
+            {/* Mobile: headline only */}
+            <div className="sm:hidden">
+              <h4 className="text-sm font-black text-white tracking-tight leading-tight">
+                {ad.headline}
+              </h4>
+            </div>
+
+            {/* Desktop: full layout */}
+            <div className="hidden sm:flex sm:flex-col sm:justify-between sm:h-full">
+              {/* Badge */}
+              <span className="self-start rounded-sm bg-black/30 backdrop-blur-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/90">
+                Iklan
+              </span>
+
+              {/* Text */}
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
+                  {ad.category}
+                </p>
+                <h4 className="text-lg font-black text-white tracking-tight leading-tight mb-1">
+                  {ad.headline}
+                </h4>
+                <p className="text-[11px] text-white/60 leading-relaxed max-w-[200px]">
+                  {ad.subheadline}
+                </p>
+              </div>
+
+              {/* CTA + Dots */}
+              <div className="flex items-center justify-between">
+                <Link
+                  href="https://beritakarya.co/pusat/p/ads"
+                  className="bg-white/15 backdrop-blur-sm hover:bg-white/25 text-white text-[10px] font-bold px-3 py-1 rounded-full transition-colors"
+                >
+                  {ad.ctaText} →
+                </Link>
+                <div className="flex gap-1">
+                  {IN_FEED_ADS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToSlide(i)}
+                      className={cn(
+                        "rounded-full transition-all duration-300",
+                        i === currentIndex
+                          ? "w-3 h-1 bg-white"
+                          : "w-1 h-1 bg-white/30 hover:bg-white/50"
+                      )}
+                      aria-label={`Slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
