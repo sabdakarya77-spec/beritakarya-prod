@@ -11,6 +11,7 @@ import {
   Package,
   ClipboardList,
   AlertCircle,
+  MousePointerClick,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import type { AdBooking, AdPackage } from '../types';
@@ -23,40 +24,47 @@ interface AdsOverviewContentProps {
 
 export default function AdsOverviewContent({ basePath, bookings, packages }: AdsOverviewContentProps) {
   const totalImpressions = bookings.reduce((acc, b) => acc + b.impressions, 0);
-  const _totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
+  const totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
   const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
   const verifyingBookings = bookings.filter(b => b.paymentStatus === 'VERIFYING');
 
   return (
     <div className="space-y-8">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-brand-red">
-          <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Wallet size={20} /></div>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="dash-card p-5 flex items-center gap-3 border-l-4 border-l-brand-red">
+          <div className="p-2.5 bg-brand-red/10 text-brand-red rounded-lg"><Wallet size={18} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Booking</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{bookings.length}</p>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Booking</p>
+            <p className="text-lg font-black text-brand-black dark:text-white">{bookings.length}</p>
           </div>
         </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-emerald-500">
-          <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl"><CheckCircle2 size={20} /></div>
+        <div className="dash-card p-5 flex items-center gap-3 border-l-4 border-l-emerald-500">
+          <div className="p-2.5 bg-emerald-500/10 text-emerald-500 rounded-lg"><CheckCircle2 size={18} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Iklan Aktif</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{activeBookings.length}</p>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Aktif</p>
+            <p className="text-lg font-black text-brand-black dark:text-white">{activeBookings.length}</p>
           </div>
         </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-blue-500">
-          <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl"><BarChart3 size={20} /></div>
+        <div className="dash-card p-5 flex items-center gap-3 border-l-4 border-l-blue-500">
+          <div className="p-2.5 bg-blue-500/10 text-blue-500 rounded-lg"><BarChart3 size={18} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Impresi</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{totalImpressions.toLocaleString()}</p>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Impresi</p>
+            <p className="text-lg font-black text-brand-black dark:text-white">{totalImpressions.toLocaleString()}</p>
           </div>
         </div>
-        <div className="dash-card p-6 flex items-center gap-4 border-l-4 border-l-amber-500">
-          <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl"><Eye size={20} /></div>
+        <div className="dash-card p-5 flex items-center gap-3 border-l-4 border-l-violet-500">
+          <div className="p-2.5 bg-violet-500/10 text-violet-500 rounded-lg"><MousePointerClick size={18} /></div>
           <div>
-            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Menunggu Verifikasi</p>
-            <p className="text-xl font-black text-brand-black dark:text-white">{verifyingBookings.length}</p>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Klik</p>
+            <p className="text-lg font-black text-brand-black dark:text-white">{totalClicks.toLocaleString()}</p>
+          </div>
+        </div>
+        <div className="dash-card p-5 flex items-center gap-3 border-l-4 border-l-amber-500">
+          <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-lg"><Eye size={18} /></div>
+          <div>
+            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Verifikasi</p>
+            <p className="text-lg font-black text-brand-black dark:text-white">{verifyingBookings.length}</p>
           </div>
         </div>
       </div>
