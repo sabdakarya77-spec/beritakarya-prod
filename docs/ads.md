@@ -45,11 +45,11 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 | **HOME_TOP** | 970 × 250 px | 728 × 100 px | 320 × 100 px |
 | **HOME_FEED_1** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
 | **HOME_FEED_2** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
-| **ARTICLE_TOP** | 728 × 90 px | 728 × 90 px | 300 × 250 px |
-| **ARTICLE_MIDDLE** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
-| **ARTICLE_BOTTOM** | 970 × 90 px | 728 × 90 px | 320 × 50 px |
+| **ARTICLE_TOP** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
+| **ARTICLE_MIDDLE** | 300 × 200 px | 300 × 200 px | 300 × 200 px |
+| **ARTICLE_BOTTOM** | 300 × 150 px | 300 × 150 px | 300 × 150 px |
 
-> **Catatan Mobile**: Ukuran 300×250 px adalah standar IAB medium rectangle yang umum digunakan di mobile. Ukuran 320×100 px dan 320×50 px untuk hero dan bottom banner agar tidak mendominasi layar.
+> **Catatan Slot Artikel**: Semua slot artikel menggunakan lebar konsisten 300 px dengan tinggi bervariasi (descending: 250 → 200 → 150). Ini memberikan visual rhythm yang profesional — iklan paling besar di awal, makin kecil di bawah. Ukuran seragam di semua device.
 
 ### 2.3 Visibilitas Slot Per Device
 
@@ -94,11 +94,9 @@ Semua 6 slot tampil di **semua device** (desktop, tablet, mobile) — yang berbe
 | HOME_TOP | Mobile | 200 px | 30 px | Sistem akan upscale + gradient jika kecil |
 | HOME_FEED_1 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
 | HOME_FEED_2 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_TOP | Desktop/Tablet | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_TOP | Mobile | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_MIDDLE | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_BOTTOM | Desktop | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_BOTTOM | Mobile | 150 px | 30 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_TOP | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_MIDDLE | Semua | 150 px | 100 px | Sistem akan upscale + gradient jika kecil |
+| ARTICLE_BOTTOM | Semua | 150 px | 75 px | Sistem akan upscale + gradient jika kecil |
 
 > **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, rasio beda di-handle dengan palette gradient background.
 
@@ -127,9 +125,9 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 | `HOME_TOP` | Hero banner homepage | 970 × 250 | 320 × 100 |
 | `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 300 × 250 | 300 × 250 |
 | `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 300 × 250 | 300 × 250 |
-| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 728 × 90 | 300 × 250 |
-| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 250 | 300 × 250 |
-| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 970 × 90 | 320 × 50 |
+| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 300 × 250 | 300 × 250 |
+| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 200 | 300 × 200 |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 300 × 150 | 300 × 150 |
 
 > **Manfaat:** Paket iklan yang dijual tetap 6 slot. Sistem secara otomatis menampilkan ukuran yang sesuai untuk desktop atau mobile. Pengelolaan, pelaporan, dan penjualan jadi jauh lebih mudah.
 
@@ -187,13 +185,13 @@ Paragraf 7
 Paragraf 8
 
 Banner (ARTICLE_MIDDLE)
-300 × 250
+300 × 200
 
 Paragraf 9
 Paragraf 10
 
 Banner (ARTICLE_BOTTOM)
-320 × 50
+300 × 150
 
 Artikel Terkait
 Footer
@@ -533,9 +531,9 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 5. Upload 1 File (gambar atau video)
       ↓
    🎨 Backend auto-generate semua variant:
-   → Desktop (970×250 / 300×250)
-   → Tablet (728×100)
-   → Mobile (320×100 / 300×100)
+   → Desktop (970×250 / 300×250 / 300×200 / 300×150)
+   → Tablet (728×100 / 300×250 / 300×200 / 300×150)
+   → Mobile (320×100 / 300×250 / 300×200 / 300×150)
    → Return semua URL + warnings
       ↓
    📐 Preview muncul otomatis:
@@ -881,4 +879,4 @@ Saat ini harga iklan di database masih mengikuti slot lama. Perlu ditentukan har
 
 ---
 
-*Dokumentasi terakhir diperbarui: 27 Juni 2026 — tambah plan pricing & dashboard admin (section 16)*
+*Dokumentasi terakhir diperbarui: 27 Juni 2026 — update ukuran slot artikel descending (300×250, 300×200, 300×150)*
