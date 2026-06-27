@@ -445,8 +445,8 @@ export default async function ArticlePage({ params }: Props) {
                     <CommentSection articleId={article.id} />
                   </div>
 
-                  {/* In-Feed Ad — after content, before recommendations */}
-                  <div className="my-10">
+                  {/* In-Feed Ad — mobile only, after content before recommendations */}
+                  <div className="my-10 xl:hidden">
                     <AdSpace type="in-feed" label="Iklan" />
                   </div>
 
