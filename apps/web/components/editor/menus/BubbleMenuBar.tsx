@@ -22,9 +22,8 @@ interface BubbleMenuBarProps {
 /**
  * Bubble Menu - appears on text selection using Tiptap React BubbleMenu component
  *
- * On mobile devices, this menu is hidden to avoid overlapping with the native
- * context menu (cut/copy/paste). The TiptapEditorToolbar provides the same
- * formatting tools and is always visible.
+ * On mobile devices, the menu appears below the selection to avoid overlapping
+ * with the native context menu (cut/copy/paste) which typically appears above.
  */
 export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
   const [isMobile, setIsMobile] = useState(false)
@@ -38,8 +37,6 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Hide on mobile to prevent overlap with native context menu (cut/copy/paste)
-  if (isMobile) return null
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href
     const url = window.prompt('Enter URL', previousUrl)
@@ -58,6 +55,10 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
     <BubbleMenu
       editor={editor}
       className="flex items-center gap-1 p-1 bg-slate-900 dark:bg-slate-800 rounded-xl shadow-xl border border-slate-700 z-50"
+      tippyOptions={{
+        placement: isMobile ? 'bottom' : 'top',
+        offset: isMobile ? [0, 16] : [0, 8],
+      }}
     >
       <BubbleButton
         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -146,7 +147,7 @@ function BubbleButton({ onClick, isActive, title, disabled, children }: BubbleBu
       title={title}
       disabled={disabled}
       className={cn(
-        'p-2 rounded-lg transition-colors',
+        'p-2 lg:p-2 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center',
         isActive
           ? 'bg-brand-red text-white'
           : 'text-slate-300 hover:bg-slate-700 hover:text-white',
