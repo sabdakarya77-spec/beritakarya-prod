@@ -15,12 +15,9 @@ const initialData: StudioData = {
   adFile: null,
   adFileName: '',
   adPreviewUrl: '',
-  adFileTablet: null,
-  adFileNameTablet: '',
-  adPreviewUrlTablet: '',
-  adFileMobile: null,
-  adFileNameMobile: '',
-  adPreviewUrlMobile: '',
+  processedVariants: null,
+  processingWarnings: [],
+  isProcessing: false,
   animationEffect: 'ken_burns',
   receiptFile: null,
   receiptFileName: '',
@@ -42,6 +39,7 @@ interface StudioContextValue {
   error: string;
   isSuccess: boolean;
   handleSubmit: (e: React.FormEvent) => void;
+  uploadAndProcess: (file: File) => Promise<void>;
   activeStep: SectionId;
   setActiveStep: Dispatch<SetStateAction<SectionId>>;
   availability: AvailabilityStatus | null;
@@ -114,13 +112,45 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     fetchPackages();
   }, []);
 
-  const uploadFile = async (file: File, variant?: string): Promise<string> => {
+  // Single upload — backend auto-generates semua variant
+  const uploadAndProcess = async (file: File): Promise<void> => {
+    const slot = data.selectedPackage?.slot
+    if (!slot) return
+
+    setData(prev => ({ ...prev, isProcessing: true, processingWarnings: [], processedVariants: null }))
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await api.post(`/media/upload-ad?slot=${slot}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (res.data?.success) {
+        const d = res.data.data
+        setData(prev => ({
+          ...prev,
+          processedVariants: {
+            desktop: d.desktop || null,
+            tablet: d.tablet || null,
+            mobile: d.mobile || null,
+          },
+          processingWarnings: d.warnings || [],
+          isProcessing: false,
+        }))
+      } else {
+        setData(prev => ({ ...prev, isProcessing: false, processingWarnings: ['Gagal memproses gambar'] }))
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Gagal memproses gambar'
+      setData(prev => ({ ...prev, isProcessing: false, processingWarnings: [msg] }))
+    }
+  }
+
+  // Legacy upload for receipt (non-ad files)
+  const uploadFile = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('siteId', site || 'pusat');
-    const slotParam = data.selectedPackage?.slot ? `&slot=${data.selectedPackage.slot}` : '';
-    const variantParam = variant ? `&variant=${variant}` : '';
-    const res = await api.post(`/media/upload?purpose=ad${slotParam}${variantParam}`, formData, {
+    const res = await api.post(`/media/upload?purpose=payment`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data?.data?.url || res.data?.url || res.data?.filePath || res.data || '';
@@ -132,25 +162,21 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setError('Mohon lengkapi materi iklan.');
       return;
     }
+    if (!data.processedVariants?.desktop) {
+      setError('Materi iklan belum diproses. Tunggu hingga preview muncul.');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
-      const isLeaderboard = data.selectedPackage.slot === 'leaderboard' && data.mediaType === 'image';
-      const uploadedAdUrl = await uploadFile(data.adFile, 'desktop');
-      if (!uploadedAdUrl) throw new Error('Gagal mengunggah materi kreatif.');
-      let uploadedTabletUrl: string | null = null;
-      let uploadedMobileUrl: string | null = null;
-      if (isLeaderboard) {
-        if (data.adFileTablet) uploadedTabletUrl = await uploadFile(data.adFileTablet, 'tablet');
-        if (data.adFileMobile) uploadedMobileUrl = await uploadFile(data.adFileMobile, 'mobile');
-      }
+      const v = data.processedVariants;
       const bookingRes = await api.post('/ads/bookings', {
         packageId: data.selectedPackage.id,
         siteId: site || 'pusat',
         campaignName: data.campaignName || null,
-        imageUrl: uploadedAdUrl,
-        imageUrlTablet: uploadedTabletUrl,
-        imageUrlMobile: uploadedMobileUrl,
+        imageUrl: v.desktop?.url || null,
+        imageUrlTablet: v.tablet?.url || null,
+        imageUrlMobile: v.mobile?.url || null,
         linkUrl: data.linkUrl || '#',
         animationEffect: data.mediaType === 'image' ? data.animationEffect : null,
         startDate: new Date(data.startDate).toISOString(),
@@ -183,7 +209,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability, checkAvailability, completedBookingId, receiptUploadFailed }}>
+    <StudioContext.Provider value={{ data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, uploadAndProcess, activeStep, setActiveStep, availability, checkingAvailability, checkAvailability, completedBookingId, receiptUploadFailed }}>
       {children}
     </StudioContext.Provider>
   );

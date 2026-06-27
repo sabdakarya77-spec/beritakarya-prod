@@ -23,7 +23,7 @@ import { useStudio } from './StudioContext';
 import { AdSmartPreview } from './AdSmartPreview';
 
 export function StudioCanvas() {
-  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, activeStep, setActiveStep, availability, checkingAvailability: _checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, uploadAndProcess, activeStep, setActiveStep, availability, checkingAvailability: _checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
 
   const formatRupiah = (val: string | number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));
@@ -31,19 +31,13 @@ export function StudioCanvas() {
   const getSlotLabel = (slot: string) => getAdSlotDefinition(slot)?.name || slot.toUpperCase();
   const getSlotDimensions = (slot: string) => getAdSlotDefinition(slot)?.publicSize || 'Responsive';
 
-  const handleAdFileChange = (e: React.ChangeEvent<HTMLInputElement>, variant?: 'tablet' | 'mobile') => {
+  const handleAdFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
-    if (variant === 'tablet') {
-      if (data.adPreviewUrlTablet) URL.revokeObjectURL(data.adPreviewUrlTablet);
-      setData(prev => ({ ...prev, adFileTablet: file, adFileNameTablet: file.name, adPreviewUrlTablet: URL.createObjectURL(file) }));
-    } else if (variant === 'mobile') {
-      if (data.adPreviewUrlMobile) URL.revokeObjectURL(data.adPreviewUrlMobile);
-      setData(prev => ({ ...prev, adFileMobile: file, adFileNameMobile: file.name, adPreviewUrlMobile: URL.createObjectURL(file) }));
-    } else {
-      if (data.adPreviewUrl) URL.revokeObjectURL(data.adPreviewUrl);
-      setData(prev => ({ ...prev, adFile: file, adFileName: file.name, adPreviewUrl: URL.createObjectURL(file) }));
-    }
+    if (data.adPreviewUrl) URL.revokeObjectURL(data.adPreviewUrl);
+    setData(prev => ({ ...prev, adFile: file, adFileName: file.name, adPreviewUrl: URL.createObjectURL(file) }));
+    // Auto-process: backend generates semua variant
+    uploadAndProcess(file);
   };
 
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -365,23 +359,37 @@ export function StudioCanvas() {
                 </div>
               </div>
 
-              {/* Multi-size leaderboard */}
-              {data.selectedPackage?.slot === 'leaderboard' && data.mediaType === 'image' && (
+              {/* Server-processed preview */}
+              {data.isProcessing && (
+                <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl">
+                  <RefreshCw size={14} className="animate-spin text-blue-500" />
+                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Memproses gambar untuk semua ukuran...</span>
+                </div>
+              )}
+              {data.processedVariants?.desktop && (
                 <div className="space-y-2 pt-3 border-t border-gray-100 dark:border-white/5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">📱 Versi Tambahan</label>
-                  {[
-                    { variant: 'tablet' as const, label: 'Tablet 728×90', name: data.adFileNameTablet },
-                    { variant: 'mobile' as const, label: 'Mobile 320×50', name: data.adFileNameMobile },
-                  ].map(({ variant, label, name }) => (
-                    <div key={variant} className="relative border border-dashed border-gray-200 dark:border-white/10 p-3 text-center rounded-xl">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleAdFileChange(e, variant)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      <p className="text-[10px] font-bold text-brand-black dark:text-white">{name || label}</p>
-                    </div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">✅ Hasil Proses Otomatis</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: 'Desktop', v: data.processedVariants.desktop },
+                      { name: 'Tablet', v: data.processedVariants.tablet },
+                      { name: 'Mobile', v: data.processedVariants.mobile },
+                    ].map(({ name, v }) => v && (
+                      <div key={name} className="text-center">
+                        <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 mb-1">
+                          <img src={v.url} alt={name} className="w-full h-full object-contain" />
+                        </div>
+                        <p className="text-[9px] font-bold text-gray-500">{name}</p>
+                        <p className="text-[8px] font-mono text-gray-400">{v.width}×{v.height}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {data.processingWarnings.length > 0 && (
+                <div className="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
+                  {data.processingWarnings.map((w, i) => (
+                    <p key={i} className="text-[9px] text-amber-600 dark:text-amber-400 font-bold">⚠️ {w}</p>
                   ))}
                 </div>
               )}
@@ -655,7 +663,7 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
   const sizeLabels: Record<string, string> = {
-    leaderboard: '970×250 / 728×90 / 320×50',
+    leaderboard: '970×250 / 728×100 / 320×100',
     rectangle: '300×250 / 300×100',
     rectangle_secondary: '300×250 / 300×100',
     in_feed: '300×250 / 300×100',

@@ -8,6 +8,14 @@ export interface AdPackage {
   isActive: boolean;
 }
 
+export interface ProcessedVariant {
+  url: string;
+  width: number;
+  height: number;
+  method: string;
+  dominantColor: string;
+}
+
 export interface StudioData {
   // Package
   selectedPackage: AdPackage | null;
@@ -17,17 +25,18 @@ export interface StudioData {
   linkUrl: string;
   startDate: string;
   endDate: string;
-  // Creative
+  // Creative — single file upload
   adFile: File | null;
   adFileName: string;
   adPreviewUrl: string;
-  // Multi-size IAB (leaderboard)
-  adFileTablet: File | null;
-  adFileNameTablet: string;
-  adPreviewUrlTablet: string;
-  adFileMobile: File | null;
-  adFileNameMobile: string;
-  adPreviewUrlMobile: string;
+  // Server-processed variants (hasil dari /upload-ad)
+  processedVariants: {
+    desktop: ProcessedVariant | null;
+    tablet: ProcessedVariant | null;
+    mobile: ProcessedVariant | null;
+  } | null;
+  processingWarnings: string[];
+  isProcessing: boolean;
   // Animation
   animationEffect: string;
   // Payment

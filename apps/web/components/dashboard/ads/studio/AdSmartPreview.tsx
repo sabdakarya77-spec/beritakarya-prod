@@ -40,7 +40,7 @@ const SLOT_LABELS: Record<string, string> = {
 const SLOT_SIZES: Record<string, string> = {
   leaderboard_desktop: '970×250',
   leaderboard_tablet: '728×90',
-  leaderboard_mobile: '320×50',
+  leaderboard_mobile: '320×100',
   rectangle_desktop: '300×250',
   rectangle_mobile: '300×100',
   rectangle_secondary_desktop: '300×250',

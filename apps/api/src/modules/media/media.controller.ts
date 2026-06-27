@@ -389,6 +389,125 @@ mediaRouter.post(
   })
 )
 
+// ─── POST /api/v1/media/upload-ad — single upload, auto-generate semua variant ──
+// Advertiser upload 1 file, backend generate desktop/tablet/mobile variants
+
+mediaRouter.post(
+  '/upload-ad',
+  requireAuth,
+  siteMiddleware,
+  requireSiteAccess,
+  upload.single('file'),
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!req.file) {
+      throw new AppError('File tidak ditemukan', 400, 'FILE_NOT_FOUND')
+    }
+
+    const adSlot = req.query.slot as string | undefined
+    if (!adSlot || !AD_VARIANTS[adSlot]) {
+      throw new AppError('Slot iklan tidak valid. Gunakan: leaderboard, rectangle, rectangle_secondary, in_feed', 400, 'INVALID_SLOT')
+    }
+
+    const isVideo = req.file.mimetype.startsWith('video/')
+    const mediaBucket = StorageService.mediaBucket
+    const id = uuidv4()
+    const warnings: string[] = []
+
+    if (isVideo) {
+      // ── Video: upload langsung + generate thumbnail ──
+      const ext = req.file.mimetype === 'video/webm' ? 'webm' : 'mp4'
+      const videoKey = `ads/${id}.${ext}`
+      await StorageService.uploadBuffer(req.file.buffer, videoKey, req.file.mimetype, mediaBucket, {
+        isPublic: true,
+      })
+      const videoUrl = StorageService.getPublicUrl(mediaBucket, videoKey)
+
+      // Generate thumbnail dari frame pertama
+      let thumbnailUrl: string | null = null
+      try {
+        const sharp = await loadSharp()
+        const thumbBuffer = await sharp(req.file.buffer, { page: 0 })
+          .resize(600, undefined, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 75 })
+          .toBuffer()
+        const thumbKey = `ads/${id}-thumb.webp`
+        await StorageService.uploadBuffer(thumbBuffer, thumbKey, 'image/webp', mediaBucket, {
+          isPublic: true,
+        })
+        thumbnailUrl = StorageService.getPublicUrl(mediaBucket, thumbKey)
+      } catch (err) {
+        logger.warn('[Media] Video thumbnail generation failed (non-fatal):', err)
+        warnings.push('Thumbnail video gagal dibuat')
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          desktop: { url: videoUrl, width: 0, height: 0, method: 'video', dominantColor: null },
+          tablet: null,
+          mobile: null,
+          thumbnail: thumbnailUrl,
+          warnings,
+          originalFormat: ext,
+        },
+      })
+    }
+
+    // ── Image: validasi + generate semua variant ──
+    const validation = await validateAdImage(req.file.buffer, adSlot)
+    if (!validation.valid) {
+      throw new AppError(validation.errors.join(' '), 400, 'INVALID_AD_IMAGE')
+    }
+    warnings.push(...validation.warnings)
+
+    // Get original dimensions
+    const sharp = await loadSharp()
+    const origMeta = await sharp(req.file.buffer).metadata()
+    const originalDimensions = { width: origMeta.width || 0, height: origMeta.height || 0 }
+
+    // Generate semua variant untuk slot yang dipilih
+    const variants = AD_VARIANTS[adSlot]
+    const variantEntries = Object.entries(variants)
+
+    const results = await Promise.all(
+      variantEntries.map(async ([variantName, dims]) => {
+        const result = await processAdSmart(req.file!.buffer, dims.width, dims.height, `${adSlot}_${variantName}`)
+        const suffix = variantName !== 'desktop' ? `-${variantName}` : ''
+        const key = `ads/${id}${suffix}.webp`
+        await StorageService.uploadBuffer(result.buffer, key, 'image/webp', mediaBucket, {
+          isPublic: true,
+        })
+        return [
+          variantName,
+          {
+            url: StorageService.getPublicUrl(mediaBucket, key),
+            width: result.width,
+            height: result.height,
+            method: result.method,
+            dominantColor: result.dominantColor,
+          },
+        ] as const
+      })
+    )
+
+    // Build response object
+    const responseData: Record<string, unknown> = {}
+    for (const [name, data] of results) {
+      responseData[name] = data
+    }
+
+    res.json({
+      success: true,
+      data: {
+        ...responseData,
+        thumbnail: null,
+        warnings,
+        originalDimensions,
+      },
+    })
+  })
+)
+
 // ─── POST /api/v1/media/ad-preview -- preview iklan di semua slot ─────────────
 
 mediaRouter.post(
