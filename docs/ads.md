@@ -9,9 +9,11 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 | Komponen | Keterangan |
 |----------|------------|
 | **AdSpace** (frontend) | Komponen React yang fetch iklan publik, render banner gambar/video/script HTML, carousel 7 detik, tracking impresi & klik |
-| **Ad Studio** (frontend) | Wizard 4 langkah: Pilih Paket → Detail Iklan → Upload Materi → Pembayaran |
-| **Smart Image Processor** (backend) | Proses gambar upload ke semua ukuran slot dengan palette gradient background |
-| **Ad Preview** (frontend + backend) | Preview real-time hasil proses di semua slot sebelum submit |
+| **Ad Studio** (frontend) | Wizard 4 langkah: Pilih Paket → Detail Iklan → **Upload 1 File** (auto-generate semua variant) → Pembayaran |
+| **Smart Image Processor** (backend) | Proses gambar upload ke semua ukuran slot dengan palette gradient background, **parallel processing** |
+| **Video Validator** (backend) | Validasi video ads: format, ukuran max 50MB, resolusi, auto-generate thumbnail |
+| **Ad Preview** (frontend + backend) | Preview real-time hasil proses + **cross-slot preview** ("juga cocok untuk slot lain") |
+| **Auto-Variant Generator** (backend) | Saat booking di-approve, auto-generate semua variant dari 1 imageUrl |
 | **Payment Gateway** | Midtrans Snap (VA, e-wallet, QRIS, kartu kredit) + manual transfer |
 | **Admin Review** | Checklist 5 item + approve/reject dengan notifikasi email |
 | **Analytics** | Time-series impresi/klik/CTR per booking, Recharts visualization |
@@ -228,19 +230,29 @@ File: `apps/web/components/dashboard/ads/studio/`
 |------|----------|--------|
 | 1. Package | `StudioCanvas` | Pilih paket + format (image/video) |
 | 2. Campaign | `StudioCanvas` | Nama kampanye, URL tujuan, tanggal |
-| 3. Creative | `StudioCanvas` + `AdSmartPreview` | Upload materi + preview semua slot |
+| 3. Creative | `StudioCanvas` + `StudioControls` | **Upload 1 file** → auto-generate semua variant (desktop/tablet/mobile) → preview hasil + cross-slot preview |
 | 4. Payment | `StudioCanvas` | Upload bukti transfer (opsional) |
+
+**Flow Upload (baru):**
+1. Advertiser pilih 1 file gambar/video
+2. Frontend panggil `POST /upload-ad?slot=<slot>`
+3. Backend auto-generate semua variant (desktop, tablet, mobile)
+4. Return semua URL + metadata + warnings
+5. Frontend tampilkan preview (3 gambar berdampingan)
+6. Background: fetch cross-slot preview untuk slot lain
+7. Submit booking dengan semua variant URLs
 
 ### 4.4 Admin Components
 
 | Komponen | File | Fungsi |
 |----------|------|--------|
-| `SuperadminAdsView` | `dashboard/ads/SuperadminAdsView.tsx` | 3-tab: Active Ads, Packages, Bookings |
-| `BookingReviewList` | `dashboard/ads/BookingReviewList.tsx` | Review queue + 5-item content checklist |
+| `AdsSlotsContent` | `dashboard/ads/pages/AdsSlotsContent.tsx` | **Card Grid layout** — 4 slot cards dengan preview, stats, single upload |
+| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | **Production card** — preview iklan aktif, stats (impresi/klik/CTR), upload → auto-generate, device badge |
 | `LeaderboardManager` | `dashboard/ads/LeaderboardManager.tsx` | Carousel banner management |
-| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | Single slot editor (image/script mode) |
+| `BookingReviewList` | `dashboard/ads/BookingReviewList.tsx` | Review queue + 5-item content checklist |
 | `AdPerformanceChart` | `dashboard/ads/AdPerformanceChart.tsx` | Recharts area chart |
 | `AdvertiserAdsView` | `dashboard/ads/AdvertiserAdsView.tsx` | Advertiser dashboard + stats |
+| `AdsOverviewContent` | `dashboard/ads/pages/AdsOverviewContent.tsx` | Overview: 5 stat cards (Booking, Aktif, Impresi, Klik, Verifikasi) |
 
 ---
 
@@ -286,8 +298,9 @@ File: `apps/web/components/dashboard/ads/studio/`
 
 | Method | Endpoint | Fungsi |
 |--------|----------|--------|
-| `POST` | `/api/v1/media/upload?purpose=ad&slot=<slot>&variant=<variant>` | Upload + proses gambar iklan |
-| `POST` | `/api/v1/media/ad-preview` | Preview gambar di semua slot |
+| `POST` | `/api/v1/media/upload-ad?slot=<slot>` | **Single upload → auto-generate semua variant** (desktop/tablet/mobile). Return semua URL + metadata + warnings |
+| `POST` | `/api/v1/media/upload?purpose=ad&slot=<slot>&variant=<variant>` | Upload + proses gambar iklan (legacy, single variant) |
+| `POST` | `/api/v1/media/ad-preview` | Preview gambar di semua slot (parallel processing) |
 
 ### 5.5 Webhook & Cron
 
@@ -406,15 +419,22 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
       ↓
 4. Isi Detail (Nama Kampanye, URL, Tanggal)
       ↓
-5. Upload Materi (1 gambar ukuran apapun)
+5. Upload 1 File (gambar atau video)
       ↓
-   🎨 Smart Preview muncul otomatis
-   → Tampilkan hasil di semua slot (desktop/tablet/mobile)
-   → Warna dominan + metode (gradient/crop)
+   🎨 Backend auto-generate semua variant:
+   → Desktop (970×250 / 300×250)
+   → Tablet (728×100)
+   → Mobile (320×100 / 300×100)
+   → Return semua URL + warnings
+      ↓
+   📐 Preview muncul otomatis:
+   → 3 gambar berdampingan (desktop/tablet/mobile)
+   → Cross-slot preview ("Juga cocok untuk slot lain")
+   → Warning jika gambar kecil / rasio beda
       ↓
 6. Pilih Efek Animasi (Ken Burns / Fade Slide / Parallax / Pulse)
       ↓
-7. Submit Booking
+7. Submit Booking (dengan semua variant URLs)
       ↓
 8. Pembayaran (opsional saat submit):
    - Midtrans Snap (VA, e-wallet, QRIS, kartu kredit)
@@ -427,7 +447,7 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
    - [ ] URL aktif
    - [ ] Tidak melanggar hak cipta
       ↓
-10. Approve → Auto-sync ke Advertisement → Notifikasi email + in-app
+10. Approve → Auto-generate variant (jika belum ada) → Auto-sync ke Advertisement → Notifikasi email + in-app
       ↓
 11. Iklan Tayang (carousel rotasi setiap 7 detik)
       ↓
@@ -462,7 +482,13 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | MOV | — | ✅ | — |
 | HTML/JS | — | — | ✅ (sandboxed iframe) |
 
-Max file size: 20 MB (upload), 200 KB (output processed image)
+**Batasan Upload:**
+
+| Tipe | Max Size | Catatan |
+|------|----------|---------|
+| Gambar | 20 MB | Output diproses max 200 KB (WebP, iteratif quality 80→30) |
+| Video | 50 MB | Validasi: format, resolusi min 480×270, rekomendasi 1280×720 |
+| Video thumbnail | — | Auto-generate dari frame pertama saat upload |
 
 ---
 
@@ -505,16 +531,17 @@ Max file size: 20 MB (upload), 200 KB (output processed image)
 
 | File | Fungsi |
 |------|--------|
-| `apps/api/src/modules/ad/ad.controller.ts` | Semua endpoint ads |
+| `apps/api/src/modules/ad/ad.controller.ts` | Semua endpoint ads + `generateVariantsFromUrl` helper |
 | `apps/api/src/modules/ad/ad.repository.ts` | Prisma data access |
 | `apps/api/src/modules/ad/ad.service.ts` | Impresi dedup, booking sync |
-| `apps/api/src/lib/ad-image-processor.ts` | Smart image processing |
-| `apps/api/src/modules/media/media.controller.ts` | Upload + preview endpoint |
+| `apps/api/src/lib/ad-image-processor.ts` | Smart image processing, video validation, parallel previews |
+| `apps/api/src/modules/media/media.controller.ts` | Upload endpoint + `/upload-ad` (single → all variants) |
 | `apps/api/src/cron/ad-expiry.ts` | Auto-expiry cron |
 | `apps/api/src/services/midtrans.service.ts` | Midtrans integration |
 | `apps/web/components/ui/AdSpace.tsx` | Komponen iklan publik |
-| `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard |
-| `apps/web/components/dashboard/ads/studio/AdSmartPreview.tsx` | Preview component |
+| `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard (single upload + preview) |
+| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card (preview, stats, upload) |
+| `apps/web/components/dashboard/ads/pages/AdsSlotsContent.tsx` | Admin Card Grid layout |
 | `apps/web/lib/constants.ts` | Slot definitions (lines 112-181) |
 | `apps/web/tests/e2e/ad-booking.spec.ts` | E2E tests |
 
@@ -689,4 +716,4 @@ Sekarang
 
 ---
 
-*Dokumentasi terakhir diperbarui: 26 Juni 2026*
+*Dokumentasi terakhir diperbarui: 27 Juni 2026*
