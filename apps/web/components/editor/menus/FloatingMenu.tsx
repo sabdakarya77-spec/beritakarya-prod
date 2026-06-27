@@ -18,6 +18,7 @@ import {
   Columns,
   GalleryHorizontal,
   Grid,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '../../../lib/utils'
 
@@ -28,21 +29,42 @@ interface FloatingMenuBarProps {
 /**
  * Floating Menu — appears on empty paragraph lines as a single "+" button.
  * Clicking the "+" button expands a beautiful vertical menu, preventing horizontal clutter.
+ * Also appears on non-paragraph blocks (quote, heading, etc.) with a "Hapus Blok" option.
  */
 export function FloatingMenuBar({ editor }: FloatingMenuBarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isOnNonParagraphBlock, setIsOnNonParagraphBlock] = useState(false)
 
-  // Reset open state when the cursor changes position (selection updates)
+  // Track selection changes to detect non-paragraph blocks
   useEffect(() => {
     if (!editor) return
-    const handleUpdate = () => {
+    const handleSelectionUpdate = () => {
       setIsOpen(false)
+      const { $anchor } = editor.state.selection
+      const nodeType = $anchor.parent.type.name
+      setIsOnNonParagraphBlock(nodeType !== 'paragraph' && nodeType !== 'doc')
     }
-    editor.on('selectionUpdate', handleUpdate)
+    editor.on('selectionUpdate', handleSelectionUpdate)
     return () => {
-      editor.off('selectionUpdate', handleUpdate)
+      editor.off('selectionUpdate', handleSelectionUpdate)
     }
   }, [editor])
+
+  const deleteCurrentBlock = () => {
+    if (!editor) return
+    const { $anchor } = editor.state.selection
+    const depth = $anchor.depth
+    if (depth > 0) {
+      const node = $anchor.node(depth)
+      const pos = $anchor.before(depth)
+      editor.chain()
+        .focus()
+        .deleteRange({ from: pos, to: pos + node.nodeSize })
+        .insertContentAt(pos, { type: 'paragraph' })
+        .run()
+    }
+    setIsOpen(false)
+  }
 
   const insertImage = useCallback(() => {
     const url = window.prompt('Masukkan URL gambar')
@@ -184,11 +206,12 @@ export function FloatingMenuBar({ editor }: FloatingMenuBarProps) {
       shouldShow={({ state }) => {
         const { $anchor, empty } = state.selection
         if (!empty) return false
-        // Only show on truly empty paragraphs
-        return (
-          $anchor.parent.type.name === 'paragraph' &&
-          $anchor.parent.content.size === 0
-        )
+        const nodeType = $anchor.parent.type.name
+        // Show on empty paragraphs (for insert menu)
+        if (nodeType === 'paragraph' && $anchor.parent.content.size === 0) return true
+        // Show on non-paragraph blocks (for delete option)
+        if (nodeType !== 'paragraph' && nodeType !== 'doc') return true
+        return false
       }}
     >
       <div className="relative z-50">
@@ -210,6 +233,20 @@ export function FloatingMenuBar({ editor }: FloatingMenuBarProps) {
         {/* Dropdown Menu (Premium Vertical List) */}
         {isOpen && (
           <div className="absolute left-0 mt-2 w-60 max-h-[280px] overflow-y-auto rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 shadow-2xl flex flex-col gap-0.5 z-[9999] no-scrollbar">
+            {/* Delete block option - only show when on non-paragraph block */}
+            {isOnNonParagraphBlock && (
+              <button
+                type="button"
+                onClick={deleteCurrentBlock}
+                className="flex items-center gap-3 w-full px-2.5 py-1.5 text-xs text-left rounded-lg transition-colors cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <span className="flex items-center justify-center w-6 h-6 rounded-md bg-red-100 dark:bg-red-900/30 text-red-500">
+                  <Trash2 size={16} />
+                </span>
+                <span>Hapus Blok</span>
+              </button>
+            )}
+            {isOnNonParagraphBlock && <div className="my-1 border-t border-gray-100 dark:border-slate-700/50" />}
             {menuItems.map((item, index) => {
               if ('divider' in item) {
                 return (
