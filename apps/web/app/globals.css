@@ -220,7 +220,7 @@
     @apply leading-[1.75] md:leading-[1.85] text-brand-text/90 antialiased;
   }
 
-  .article-content p:first-of-type::first-letter {
+  .article-content > p:first-of-type::first-letter {
     font-family: var(--font-playfair), Georgia, serif;
     @apply float-left text-brand-red mr-3 text-7xl md:text-8xl font-black leading-[0.7] mt-3;
     initial-letter: 3; /* Modern CSS property for better drop caps */
