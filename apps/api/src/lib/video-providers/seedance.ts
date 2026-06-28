@@ -22,6 +22,11 @@ export class SeedanceProvider extends BaseVideoProvider {
   }
 
   async generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse> {
+    const apiKey = await this.getApiKey()
+    if (!apiKey) {
+      return { success: false, error: 'Seedance API key tidak dikonfigurasi', provider: 'seedance' }
+    }
+
     const duration = Math.min(request.duration || 10, this.maxDuration)
 
     try {
@@ -29,7 +34,7 @@ export class SeedanceProvider extends BaseVideoProvider {
       const submitRes = await fetch('https://api.seedance.ai/v1/video/generate', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -56,7 +61,7 @@ export class SeedanceProvider extends BaseVideoProvider {
       // Step 2: Poll sampai selesai
       const result = await this.pollUntilDone(
         `https://api.seedance.ai/v1/video/task/${taskId}`,
-        { 'Authorization': `Bearer ${this.apiKey}` },
+        { 'Authorization': `Bearer ${apiKey}` },
         120000, // 2 menit max
         3000    // poll setiap 3 detik
       )

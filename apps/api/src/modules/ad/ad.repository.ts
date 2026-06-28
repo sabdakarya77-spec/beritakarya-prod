@@ -366,3 +366,25 @@ export async function findVideoPromptsByCategory(category: string) {
 export async function findVideoPromptById(id: string) {
   return prisma.videoPrompt.findUnique({ where: { id } })
 }
+
+// ─── VideoProviderConfig (API Keys) ──────────────────────────────────────────
+
+export async function getProviderConfig(provider: string) {
+  return prisma.videoProviderConfig.findUnique({ where: { provider } })
+}
+
+export async function getAllProviderConfigs() {
+  return prisma.videoProviderConfig.findMany()
+}
+
+export async function upsertProviderConfig(provider: string, apiKey: string) {
+  return prisma.videoProviderConfig.upsert({
+    where: { provider },
+    update: { apiKey, isActive: true, updatedAt: new Date() },
+    create: { provider, apiKey, isActive: true },
+  })
+}
+
+export async function deleteProviderConfig(provider: string) {
+  return prisma.videoProviderConfig.delete({ where: { provider } })
+}

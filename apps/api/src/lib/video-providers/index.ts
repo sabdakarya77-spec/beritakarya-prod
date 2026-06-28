@@ -38,7 +38,7 @@ export interface VideoProvider {
   tier: 'budget' | 'standard' | 'premium'
   costPerSecond: number // USD
   maxDuration: number // Detik
-  isAvailable(): boolean
+  isAvailable(): Promise<boolean>
   generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse>
 }
 
@@ -72,8 +72,14 @@ export function getProvider(id: VideoProviderId): VideoProvider | null {
 /**
  * Ambil semua provider yang tersedia (punya API key)
  */
-export function getAvailableProviders(): VideoProvider[] {
-  return Object.values(providers).filter(p => p.isAvailable())
+export async function getAvailableProviders(): Promise<VideoProvider[]> {
+  const results = await Promise.all(
+    Object.values(providers).map(async p => ({
+      provider: p,
+      available: await p.isAvailable(),
+    }))
+  )
+  return results.filter(r => r.available).map(r => r.provider)
 }
 
 /**
@@ -124,14 +130,16 @@ export interface ProviderInfo {
   available: boolean
 }
 
-export function getProviderList(): ProviderInfo[] {
-  return Object.values(providers).map(p => ({
-    id: p.id,
-    name: p.name,
-    tier: p.tier,
-    costPerSecond: p.costPerSecond,
-    costEstimate10s: `$${(p.costPerSecond * 10).toFixed(2)}`,
-    costEstimate15s: `$${(p.costPerSecond * 15).toFixed(2)}`,
-    available: p.isAvailable(),
-  }))
+export async function getProviderList(): Promise<ProviderInfo[]> {
+  return Promise.all(
+    Object.values(providers).map(async p => ({
+      id: p.id,
+      name: p.name,
+      tier: p.tier,
+      costPerSecond: p.costPerSecond,
+      costEstimate10s: `$${(p.costPerSecond * 10).toFixed(2)}`,
+      costEstimate15s: `$${(p.costPerSecond * 15).toFixed(2)}`,
+      available: await p.isAvailable(),
+    }))
+  )
 }

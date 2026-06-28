@@ -714,8 +714,58 @@ adRouter.get(
   requireAuth,
   requireRole(['superadmin', 'wapimred']),
   asyncHandler(async (_req: Request, res: Response) => {
-    const providers = getProviderList()
+    const providers = await getProviderList()
     res.json({ success: true, data: providers })
+  })
+)
+
+// ─── Production: Save Provider API Key ───────────────────────────────────────
+
+adRouter.post(
+  '/production/providers',
+  requireAuth,
+  requireRole(['superadmin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { provider, apiKey } = req.body
+
+    if (!provider || typeof provider !== 'string') {
+      return res.status(400).json({ success: false, message: 'Provider wajib diisi' })
+    }
+    if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'API Key wajib diisi' })
+    }
+
+    const validProviders = ['seedance', 'kling', 'hailuo', 'pika', 'luma', 'runway']
+    if (!validProviders.includes(provider)) {
+      return res.status(400).json({ success: false, message: 'Provider tidak valid' })
+    }
+
+    try {
+      await repo.upsertProviderConfig(provider, apiKey.trim())
+      res.json({ success: true, message: `API key ${provider} berhasil disimpan` })
+    } catch (err) {
+      console.error('Gagal simpan provider config:', err)
+      res.status(500).json({ success: false, message: 'Gagal simpan API key' })
+    }
+  })
+)
+
+// ─── Production: Delete Provider API Key ─────────────────────────────────────
+
+adRouter.delete(
+  '/production/providers/:provider',
+  requireAuth,
+  requireRole(['superadmin']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { provider } = req.params
+
+    try {
+      await repo.deleteProviderConfig(provider)
+      res.json({ success: true, message: `API key ${provider} berhasil dihapus` })
+    } catch (err) {
+      console.error('Gagal hapus provider config:', err)
+      res.status(500).json({ success: false, message: 'Gagal hapus API key' })
+    }
   })
 )
 

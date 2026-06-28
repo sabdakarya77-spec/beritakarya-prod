@@ -22,13 +22,18 @@ export class LumaProvider extends BaseVideoProvider {
   }
 
   async generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse> {
+    const apiKey = await this.getApiKey()
+    if (!apiKey) {
+      return { success: false, error: 'Luma API key tidak dikonfigurasi', provider: 'luma' }
+    }
+
     const duration = Math.min(request.duration || 10, this.maxDuration)
 
     try {
       const submitRes = await fetch('https://api.lumalabs.ai/dream-machine/v1/videos', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -54,7 +59,7 @@ export class LumaProvider extends BaseVideoProvider {
 
       const result = await this.pollUntilDone(
         `https://api.lumalabs.ai/dream-machine/v1/videos/${taskId}`,
-        { 'Authorization': `Bearer ${this.apiKey}` },
+        { 'Authorization': `Bearer ${apiKey}` },
         180000, // Luma bisa lebih lambat
         5000
       )

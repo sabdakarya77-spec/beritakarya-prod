@@ -22,13 +22,18 @@ export class RunwayProvider extends BaseVideoProvider {
   }
 
   async generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse> {
+    const apiKey = await this.getApiKey()
+    if (!apiKey) {
+      return { success: false, error: 'Runway API key tidak dikonfigurasi', provider: 'runway' }
+    }
+
     const duration = Math.min(request.duration || 10, this.maxDuration)
 
     try {
       const submitRes = await fetch('https://api.dev.runwayml.com/v1/video_generations', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
           'X-Runway-Version': '2024-11-06',
         },
@@ -57,7 +62,7 @@ export class RunwayProvider extends BaseVideoProvider {
       const result = await this.pollUntilDone(
         `https://api.dev.runwayml.com/v1/video_generations/${taskId}`,
         {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'X-Runway-Version': '2024-11-06',
         },
         180000,

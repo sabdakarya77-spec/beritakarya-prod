@@ -22,13 +22,18 @@ export class KlingProvider extends BaseVideoProvider {
   }
 
   async generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse> {
+    const apiKey = await this.getApiKey()
+    if (!apiKey) {
+      return { success: false, error: 'Kling API key tidak dikonfigurasi', provider: 'kling' }
+    }
+
     const duration = Math.min(request.duration || 10, this.maxDuration)
 
     try {
       const submitRes = await fetch('https://api.kling.ai/v1/videos/generations', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -54,7 +59,7 @@ export class KlingProvider extends BaseVideoProvider {
 
       const result = await this.pollUntilDone(
         `https://api.kling.ai/v1/videos/generations/${taskId}`,
-        { 'Authorization': `Bearer ${this.apiKey}` },
+        { 'Authorization': `Bearer ${apiKey}` },
         120000,
         3000
       )

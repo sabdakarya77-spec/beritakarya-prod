@@ -22,13 +22,18 @@ export class HailuoProvider extends BaseVideoProvider {
   }
 
   async generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse> {
+    const apiKey = await this.getApiKey()
+    if (!apiKey) {
+      return { success: false, error: 'Hailuo API key tidak dikonfigurasi', provider: 'hailuo' }
+    }
+
     const duration = Math.min(request.duration || 10, this.maxDuration)
 
     try {
       const submitRes = await fetch('https://api.hailuoai.com/v1/video/generate', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -53,7 +58,7 @@ export class HailuoProvider extends BaseVideoProvider {
 
       const result = await this.pollUntilDone(
         `https://api.hailuoai.com/v1/video/task/${taskId}`,
-        { 'Authorization': `Bearer ${this.apiKey}` },
+        { 'Authorization': `Bearer ${apiKey}` },
         120000,
         3000
       )

@@ -3,8 +3,13 @@
  *
  * Abstract class untuk semua video provider.
  * Setiap provider harus mengimplementasikan generate().
+ *
+ * API key dibaca dari:
+ * 1. Database (VideoProviderConfig) — prioritas utama
+ * 2. Environment variable (.env) — fallback
  */
 
+import { prisma } from '../../db/client'
 import type { VideoProvider, VideoProviderId, VideoGenerateRequest, VideoGenerateResponse } from './index'
 
 export abstract class BaseVideoProvider implements VideoProvider {
@@ -14,14 +19,38 @@ export abstract class BaseVideoProvider implements VideoProvider {
   abstract costPerSecond: number
   abstract maxDuration: number
 
-  protected apiKey: string | undefined
+  private envKey: string
 
   constructor(envKey: string) {
-    this.apiKey = process.env[envKey]
+    this.envKey = envKey
   }
 
-  isAvailable(): boolean {
-    return !!this.apiKey && this.apiKey.length > 0
+  /**
+   * Ambil API key: database dulu, fallback ke .env
+   */
+  protected async getApiKey(): Promise<string | null> {
+    // 1. Coba dari database
+    try {
+      const config = await prisma.videoProviderConfig.findUnique({
+        where: { provider: this.id },
+      })
+      if (config?.apiKey && config.isActive) {
+        return config.apiKey
+      }
+    } catch { /* ignore */ }
+
+    // 2. Fallback ke environment variable
+    const envKey = process.env[this.envKey]
+    if (envKey && envKey.length > 0) {
+      return envKey
+    }
+
+    return null
+  }
+
+  async isAvailable(): Promise<boolean> {
+    const key = await this.getApiKey()
+    return !!key
   }
 
   abstract generate(request: VideoGenerateRequest): Promise<VideoGenerateResponse>
