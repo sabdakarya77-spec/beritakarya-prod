@@ -250,7 +250,7 @@ export async function updateArticle(
   input: Partial<{
     title: string; excerpt: string; blocks: ArticleBlock[]; metaTitle: string; metaDescription: string;
     categoryIds: string[]; tags: string[]; status: string;
-    contentType: string;
+    contentType: string; publishedAt: Date;
     isBreaking: boolean; isExclusive: boolean; isFeatured: boolean;
     featuredImage: string; reviewNotes: string; reviewedBy: string;
   }>,
@@ -287,7 +287,7 @@ export async function updateArticle(
   // [H-006] State Machine Workflow Validation
   const WORKFLOW_TRANSITIONS: Record<string, string[]> = {
     draft: ['submitted', 'deleted'],
-    submitted: ['draft', 'approved', 'published', 'rejected', 'review', 'revision'],
+    submitted: ['draft', 'approved', 'rejected', 'review', 'revision'],
     review: ['revision', 'approved', 'rejected'],
     revision: ['submitted', 'draft'],
     approved: ['published', 'scheduled', 'draft'],
@@ -326,6 +326,11 @@ export async function updateArticle(
   }
 
   let data: Record<string, unknown> = { ...input }
+
+  // Auto-set publishedAt when transitioning to published (if not already set)
+  if (input.status === 'published' && !article.publishedAt && !input.publishedAt) {
+    data.publishedAt = new Date()
+  }
 
   // Resolve categoryIds from slug to UUID if provided
   let resolvedCategoryIds: string[] | undefined

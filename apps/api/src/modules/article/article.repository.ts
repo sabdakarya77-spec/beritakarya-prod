@@ -77,7 +77,7 @@ export async function findArticlesBySite(
         },
         author: { select: { id: true, name: true, avatarUrl: true, role: true } }
       },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
       skip,
       take: limit
     }),
