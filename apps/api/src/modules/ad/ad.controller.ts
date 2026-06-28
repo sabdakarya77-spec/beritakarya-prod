@@ -723,7 +723,7 @@ adRouter.post(
     }
 
     // Cek booking exists dan status ACTIVE
-    const booking = await repo.findBookingById(bookingId)
+    const booking = await repo.findBookingById(bookingId) as { id: string; status: string; packageId: string; siteId: string; linkUrl: string | null } | null
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' })
     }
@@ -783,7 +783,7 @@ adRouter.post(
     }
 
     // Cek booking exists
-    const booking = await repo.findBookingById(bookingId)
+    const booking = await repo.findBookingById(bookingId) as { id: string; siteId: string; linkUrl: string | null } | null
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' })
     }
