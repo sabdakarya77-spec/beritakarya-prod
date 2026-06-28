@@ -13,6 +13,7 @@ import { notFound } from 'next/navigation'
 import ScrollAnimate from '../ui/ScrollAnimate'
 import { Container } from '../layout/Container'
 import MarketWidget from '../ui/MarketWidget'
+import PhotoJournalWidget from '../ui/PhotoJournalWidget'
 import { API_URL } from '../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../lib/siteSettings'
 
@@ -70,31 +71,6 @@ function resolveCategoryName(slug: string, categoriesTree: CategoryTreeNode[] = 
   return slug
 }
 
-// ─────────────────────────────────────────────
-// Helpers for Fallback Article Thumbnails
-// ─────────────────────────────────────────────
-function getPhotoThumbnail(article: HomeArticle): string | null {
-  if (article.featuredImage) return article.featuredImage
-
-  if (Array.isArray(article.blocks)) {
-    const galleryBlock = article.blocks.find((b: ArticleBlock) => b.type === 'gallery')
-    if (galleryBlock?.images?.[0]?.url) {
-      return galleryBlock.images[0].url
-    }
-
-    const imageBlock = article.blocks.find((b: ArticleBlock) => b.type === 'image')
-    if (imageBlock?.url) {
-      return imageBlock.url
-    }
-
-    const gridBlock = article.blocks.find((b: ArticleBlock) => b.type === 'imageGrid')
-    if (gridBlock?.images?.[0]?.url) {
-      return gridBlock.images[0].url
-    }
-  }
-
-  return '/placeholder.jpg'
-}
 
 function getVideoThumbnail(article: HomeArticle): string | null {
   if (article.featuredImage) return article.featuredImage
@@ -389,7 +365,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1
   const showVideoSection = isHomepage && videoStories.length >= 1
-  const showEditorialExtras = isHomepage && (showEditorChoice || showOpinionSection || showPhotoSection || showVideoSection)
+  const showEditorialExtras = isHomepage && (showEditorChoice || showOpinionSection || showVideoSection)
 
   const whatsappUrl = buildWhatsAppUrl(siteConfig.phone, siteConfig.name)
   const telegramUrl = siteConfig.socialLinks?.telegram || null
@@ -753,6 +729,11 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
               {/* Info Pasar */}
               <MarketWidget initialData={marketData} />
 
+              {/* Foto Jurnalistik — auto-rotate per 5 detik */}
+              {showPhotoSection && (
+                <PhotoJournalWidget articles={photoJournal} site={siteParam} />
+              )}
+
               {/* Video / Partner Placement — tanpa iklan sidebar */}
               {siteSettings?.featuredVideo && (
                 <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
@@ -777,8 +758,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
             • Pilihan Editor  — 3 kartu portrait aspect-[3/4]
             • Opini & Analisis — 3 kolom teks dominan
-            • Foto Jurnalistik — 3 kolom portrait aspect-[4/5]
             • Video Eksklusif — 3 kolom aspect-video, bg gelap
+            (Foto Jurnalistik → sidebar, di bawah Info Pasar)
         ════════════════════════════════════════════════════════ */}
         {showEditorialExtras && (
           <div className="border-t border-black/5 dark:border-white/5">
@@ -873,51 +854,6 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
                         </div>
                       </div>
                     ))}
-                  </div>
-                </ScrollAnimate>
-              )}
-
-              {/* Foto Jurnalistik — portrait (4:5) */}
-              {showPhotoSection && (
-                <ScrollAnimate>
-                  <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                      <h3 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
-                        Foto Jurnalistik
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                    {photoJournal.map((article: HomeArticle) => {
-                      const photoImg = getPhotoThumbnail(article)
-                      return (
-                        <Link
-                          key={article.id}
-                          href={`/${siteParam}/artikel/${article.slug}`}
-                          className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-md block"
-                        >
-                          {photoImg && (
-                            <SmartImage
-                              src={photoImg}
-                              context="gallery_full"
-                              alt={article.title}
-                              fill
-                              className="object-cover transition-transform duration-[5s] group-hover:scale-110"
-                            />
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
-                          <div className="absolute bottom-0 left-0 z-10 w-full p-5">
-                            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-red">
-                              Jurnal Foto
-                            </span>
-                            <h4 className="line-clamp-3 text-sm font-sans font-semibold leading-snug text-white">
-                              {article.title}
-                            </h4>
-                          </div>
-                        </Link>
-                      )
-                    })}
                   </div>
                 </ScrollAnimate>
               )}
