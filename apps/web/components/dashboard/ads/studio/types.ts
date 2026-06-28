@@ -3,7 +3,7 @@ export interface AdPackage {
   name: string;
   slot: string;
   durationDays: number;
-  price: number | string;
+  price: string; // Prisma Decimal serializes as string
   allowedFormat: string; // 'IMAGE' | 'VIDEO' | 'ALL'
   description: string | null;
   isActive: boolean;

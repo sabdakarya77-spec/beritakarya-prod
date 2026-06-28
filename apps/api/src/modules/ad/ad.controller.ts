@@ -582,10 +582,10 @@ adRouter.delete('/packages/:id',
   })
 )
 
-// 8. GET /bookings/all — Superadmin only to view all incoming ad bookings
+// 8. GET /bookings/all — Superadmin/Wapimred to view all incoming ad bookings
 adRouter.get('/bookings/all',
   requireAuth,
-  requireRole(['superadmin']),
+  requireRole(['superadmin', 'wapimred']),
   asyncHandler(async (req: Request, res: Response) => {
     const bookings = await repo.findAllBookings()
     res.json({ success: true, data: bookings })
@@ -641,7 +641,7 @@ adRouter.post('/bookings/:id/approve',
       imageUrlTablet: finalTabletUrl,
       imageUrlMobile: finalMobileUrl,
       linkUrl: booking.linkUrl,
-      animationEffect: booking.animationEffect || null,
+      animationEffect: null, // Deprecated — tidak dipakai lagi
       code: null,
       isActive: true,
       impressions: 0,

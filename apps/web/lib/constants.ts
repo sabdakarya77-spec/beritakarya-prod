@@ -263,6 +263,12 @@ export const IMAGE_AD_SLOTS: AdSlotId[] = AD_SLOT_DEFINITIONS
   .filter(s => s.format === 'IMAGE')
   .map(s => s.id)
 
+/** Rekening bank untuk pembayaran iklan */
+export const AD_BANK_ACCOUNTS = [
+  { bank: 'BCA', number: '829-0123-456', name: 'PT Berita Karya Nusantara' },
+  { bank: 'Mandiri', number: '137-00-1234567-8', name: 'PT Berita Karya Nusantara' },
+] as const;
+
 /**
  * @deprecated Hanya untuk fallback/seed. Frontend harus fetch dari API.
  * @see PublicSiteLayout.tsx — fetch `/categories/tree` dan gunakan ini sebagai fallback awal.

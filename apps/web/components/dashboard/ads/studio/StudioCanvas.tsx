@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { getAdSlotDefinition } from '../../../../lib/constants';
+import { getAdSlotDefinition, AD_BANK_ACCOUNTS } from '../../../../lib/constants';
 import { useStudio } from './StudioContext';
 
 
@@ -520,10 +520,7 @@ export function StudioCanvas() {
               </div>
 
               <div className="grid gap-2">
-                {[
-                  { bank: 'BCA', number: '829-0123-456' },
-                  { bank: 'Mandiri', number: '137-00-1234567-8' },
-                ].map(({ bank, number }) => (
+                {AD_BANK_ACCOUNTS.map(({ bank, number }) => (
                   <div key={bank} className="p-3 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-xl">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Building2 size={12} className="text-brand-red" />

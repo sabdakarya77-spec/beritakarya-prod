@@ -28,11 +28,9 @@ declare global {
   }
 }
 import type { AdBooking } from '../../../../components/dashboard/ads/types';
+import { AD_BANK_ACCOUNTS } from '../../../../lib/constants';
 
-const BANK_ACCOUNTS = [
-  { bank: 'BCA', number: '829-0123-456', name: 'PT Berita Karya Nusantara' },
-  { bank: 'Mandiri', number: '137-00-1234567-8', name: 'PT Berita Karya Nusantara' },
-];
+const BANK_ACCOUNTS = AD_BANK_ACCOUNTS;
 
 export default function PaymentsPage() {
   const { site } = useParams() as { site: string };

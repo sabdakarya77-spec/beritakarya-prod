@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { getAdSlotDefinition } from '../../../../lib/constants';
+import { getAdSlotDefinition, AD_BANK_ACCOUNTS } from '../../../../lib/constants';
 import { SectionHeader } from './SectionHeader';
 import { useStudio } from './StudioContext';
 import type { SectionId } from './types';
@@ -349,10 +349,7 @@ export function StudioControls() {
       {expandedSection === 'payment' && (
         <div className="space-y-2 pl-1">
           <div className="space-y-1">
-            {[
-              { bank: 'BCA', number: '829-0123-456' },
-              { bank: 'Mandiri', number: '137-00-1234567-8' },
-            ].map(({ bank, number }) => (
+            {AD_BANK_ACCOUNTS.map(({ bank, number }) => (
               <div key={bank} className="p-2 bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-lg">
                 <div className="flex items-center gap-1 mb-0.5">
                   <Building2 size={9} className="text-brand-red" />

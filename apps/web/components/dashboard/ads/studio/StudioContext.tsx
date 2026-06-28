@@ -96,12 +96,18 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         const res = await api.get('/ads/packages');
         const pkgList: AdPackage[] = res.data?.success ? res.data.data : [];
         setPackages(pkgList);
-        if (pkgList.length > 0) {
-          const pkg = pkgList[0];
+
+        // Cek package query param (dari marketing page "Pesan Paket")
+        const packageId = searchParams.get('package');
+        const preselectedPkg = packageId ? pkgList.find(p => p.id === packageId) : null;
+        const defaultPkg = preselectedPkg || pkgList[0];
+
+        if (defaultPkg) {
           setData(prev => ({
             ...prev,
-            selectedPackage: pkg,
-            endDate: new Date(Date.now() + pkg.durationDays * 86400000).toISOString().split('T')[0],
+            selectedPackage: defaultPkg,
+            mediaType: defaultPkg.allowedFormat === 'VIDEO' ? 'video' : 'image',
+            endDate: new Date(Date.now() + defaultPkg.durationDays * 86400000).toISOString().split('T')[0],
           }));
         }
       } catch {
@@ -111,7 +117,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       }
     };
     fetchPackages();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Single upload — backend auto-generates semua variant
   const uploadAndProcess = async (file: File): Promise<void> => {
@@ -208,7 +214,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         linkUrl: data.linkUrl || '#',
         animationEffect: null,
         startDate: new Date(data.startDate).toISOString(),
-        endDate: new Date(data.endDate).toISOString(),
+        // endDate tidak perlu dikirim — API hitung dari startDate + durationDays
       };
 
       if (isHomeTop) {

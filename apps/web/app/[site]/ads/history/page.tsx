@@ -87,6 +87,7 @@ export default function AdsHistoryPage() {
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Slot</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Tanggal</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Status</th>
+                <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Pembayaran</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Impresi</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Klik</th>
                 <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">CTR</th>
@@ -107,6 +108,15 @@ export default function AdsHistoryPage() {
                       b.status === 'REJECTED' ? "bg-red-100 text-red-700" :
                       "bg-gray-100 text-gray-500"
                     )}>{b.status}</span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={cn(
+                      "px-2 py-1 rounded-full text-[9px] font-bold uppercase",
+                      b.paymentStatus === 'PAID' ? "bg-emerald-100 text-emerald-700" :
+                      b.paymentStatus === 'VERIFYING' ? "bg-blue-100 text-blue-700" :
+                      b.paymentStatus === 'REJECTED' ? "bg-red-100 text-red-700" :
+                      "bg-amber-100 text-amber-700"
+                    )}>{b.paymentStatus}</span>
                   </td>
                   <td className="py-3 px-4 font-mono">{b.impressions.toLocaleString()}</td>
                   <td className="py-3 px-4 font-mono">{b.clicks.toLocaleString()}</td>
