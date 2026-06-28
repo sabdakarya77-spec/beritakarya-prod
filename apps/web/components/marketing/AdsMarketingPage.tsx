@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import type { PublicSiteConfig } from '../../lib/siteSettings'
 import { ADS_PUBLIC_PAGE } from '../../lib/marketingPages'
-import { AD_SLOT_MAP, type AdSlotId } from '../../lib/constants'
+import { AD_SLOT_MAP, getAdSlotDefinition, type AdSlotId } from '../../lib/constants'
 import { PublicInfoShell } from '../layout/PublicInfoShell'
 import { LegalPageHeader } from '../legal/LegalPageHeader'
 import { LegalDocumentBody } from '../legal/LegalDocumentBody'
@@ -148,9 +148,24 @@ export function AdsMarketingPage({
                         <div className="w-11 h-11 bg-brand-red/10 rounded-xl flex items-center justify-center">
                           <IconComponent size={20} className="text-brand-red" />
                         </div>
-                        <span className="px-3 py-1 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-wider rounded-full">
-                          Paket
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const slotDef = getAdSlotDefinition(pkg.slot);
+                            return slotDef?.tier ? (
+                              <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${
+                                slotDef.tier === 'PREMIUM' ? 'bg-amber-500/10 text-amber-600' :
+                                slotDef.tier === 'TINGGI' ? 'bg-blue-500/10 text-blue-600' :
+                                slotDef.tier === 'MENENGAH' ? 'bg-gray-100 dark:bg-white/10 text-gray-500' :
+                                'bg-gray-50 dark:bg-white/5 text-gray-400'
+                              }`}>
+                                {slotDef.tier}
+                              </span>
+                            ) : null;
+                          })()}
+                          <span className="px-3 py-1 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-wider rounded-full">
+                            {pkg.allowedFormat === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
+                          </span>
+                        </div>
                       </div>
                       <h3 className="text-lg font-black text-brand-black dark:text-white tracking-tight mb-2">
                         {pkg.name}
@@ -165,7 +180,7 @@ export function AdsMarketingPage({
                         </li>
                         <li className="flex items-center gap-2">
                           <ChevronRight size={12} className="text-brand-red shrink-0" /> Format:{' '}
-                          {pkg.allowedFormat === 'ALL' ? 'Gambar, GIF, Video' : pkg.allowedFormat}
+                          {pkg.allowedFormat === 'VIDEO' ? '🎥 Video (kami produksikan)' : pkg.allowedFormat === 'IMAGE' ? '🖼️ Banner (JPG/PNG/WebP)' : '🎥+🖼️ Semua Format'}
                         </li>
                         <li className="flex items-center gap-2">
                           <Clock size={12} className="text-brand-red shrink-0" /> Durasi:{' '}
