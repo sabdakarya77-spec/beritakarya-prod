@@ -130,6 +130,16 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     } catch { /* ignore */ }
   };
 
+  // Dynamic aspect ratio per slot
+  const aspectRatioClass: Record<string, string> = {
+    HOME_TOP: 'aspect-[960/240]',      // 4:1
+    HOME_FEED_1: 'aspect-[300/200]',   // 3:2
+    ARTICLE_TOP: 'aspect-[300/200]',   // 3:2
+    HOME_FEED_2: 'aspect-[300/150]',   // 2:1
+    ARTICLE_MIDDLE: 'aspect-[300/150]', // 2:1
+    ARTICLE_BOTTOM: 'aspect-[300/150]', // 2:1
+  };
+
   return (
     <div className="dash-card overflow-hidden">
       {/* Header */}
@@ -169,7 +179,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
       {/* Preview + Stats */}
       <div className="p-5">
         {/* Preview area */}
-        <div className="relative aspect-[960/240] bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 overflow-hidden mb-4">
+        <div className={cn("relative bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 overflow-hidden mb-4", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
           {primaryAd?.code ? (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
