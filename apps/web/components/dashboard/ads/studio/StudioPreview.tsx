@@ -178,11 +178,11 @@ function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; isEmpty: boolean;
 }) {
   const dimensions: Record<string, { h: string; label: string }> = {
-    HOME_TOP: { h: 'h-12 sm:h-20 md:h-32', label: '970×250 / 728×100 / 320×100' },
-    HOME_FEED_1: { h: 'h-20 md:h-36', label: '300×250' },
-    HOME_FEED_2: { h: 'h-20 md:h-36', label: '300×250' },
-    ARTICLE_TOP: { h: 'h-20 md:h-28', label: '300×250' },
-    ARTICLE_MIDDLE: { h: 'h-16 md:h-24', label: '300×200' },
+    HOME_TOP: { h: 'h-12 sm:h-20 md:h-32', label: '960×240 / 728×182 / 360×90' },
+    HOME_FEED_1: { h: 'h-16 md:h-28', label: '300×200' },
+    HOME_FEED_2: { h: 'h-12 md:h-20', label: '300×150' },
+    ARTICLE_TOP: { h: 'h-16 md:h-28', label: '300×200' },
+    ARTICLE_MIDDLE: { h: 'h-12 md:h-20', label: '300×150' },
     ARTICLE_BOTTOM: { h: 'h-12 md:h-20', label: '300×150' },
   };
   const dim = dimensions[slot] || dimensions.HOME_TOP;

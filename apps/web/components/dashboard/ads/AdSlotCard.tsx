@@ -169,7 +169,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
       {/* Preview + Stats */}
       <div className="p-5">
         {/* Preview area */}
-        <div className="relative aspect-[970/250] bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 overflow-hidden mb-4">
+        <div className="relative aspect-[960/240] bg-gray-50 dark:bg-black/20 rounded-xl border-2 border-dashed border-gray-100 dark:border-white/5 overflow-hidden mb-4">
           {primaryAd?.code ? (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">

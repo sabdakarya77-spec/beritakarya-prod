@@ -193,10 +193,10 @@ export default function AdSpace({
         const json = await res.json();
 
         if (json.success && json.data && active) {
-          const matched = json.data
-            .filter((a: AdItem) => a.slot === slotName)
-            .sort((a: AdItem, b: AdItem) => a.order - b.order);
-          setAds(matched);
+          const matched = json.data.filter((a: AdItem) => a.slot === slotName);
+          // Randomize urutan (bukan berdasarkan order) — setiap page load urutan berbeda
+          const shuffled = matched.sort(() => Math.random() - 0.5);
+          setAds(shuffled);
         }
       } catch (error) {
         console.error('Gagal memuat iklan', error);
@@ -209,8 +209,11 @@ export default function AdSpace({
     return () => { active = false; };
   }, [site, slotName]);
 
-  // Carousel: auto-rotate every 7s (only if multiple ads)
+  // Carousel: auto-rotate (only if multiple ads)
+  // HOME_TOP (video): 12 detik (video kita produksi, durasi 10-15 detik)
+  // Slot banner lainnya: 7 detik
   const isCarousel = ads.length > 1;
+  const CAROUSEL_INTERVAL = type === 'HOME_TOP' ? 12000 : 7000;
 
   const stopRotation = useCallback(() => {
     if (intervalRef.current) {
@@ -224,8 +227,8 @@ export default function AdSpace({
     stopRotation();
     intervalRef.current = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % ads.length);
-    }, 7000);
-  }, [isCarousel, ads.length, stopRotation]);
+    }, CAROUSEL_INTERVAL);
+  }, [isCarousel, ads.length, stopRotation, CAROUSEL_INTERVAL]);
 
   useEffect(() => {
     startRotation();
@@ -285,11 +288,11 @@ export default function AdSpace({
   };
 
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] mb-6",
-    HOME_FEED_1:    "w-full h-[250px] min-h-[250px] mb-8",
-    HOME_FEED_2:    "w-full h-[250px] min-h-[250px] mb-8",
-    ARTICLE_TOP:    "w-full h-[250px] min-h-[250px] mb-8",
-    ARTICLE_MIDDLE: "w-full h-[200px] min-h-[200px] mb-12",
+    HOME_TOP:       "w-full h-[90px] min-h-[90px] md:h-[182px] md:min-h-[182px] lg:h-[240px] lg:min-h-[240px] mb-6",
+    HOME_FEED_1:    "w-full h-[200px] min-h-[200px] mb-8",
+    HOME_FEED_2:    "w-full h-[150px] min-h-[150px] mb-8",
+    ARTICLE_TOP:    "w-full h-[200px] min-h-[200px] mb-8",
+    ARTICLE_MIDDLE: "w-full h-[150px] min-h-[150px] mb-12",
     ARTICLE_BOTTOM: "w-full h-[150px] min-h-[150px] mb-6",
   };
 
@@ -313,7 +316,7 @@ export default function AdSpace({
       const ad = fallbackAds[0];
       return (
         <div className={cn(
-          "relative w-full h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px] overflow-hidden rounded-xl",
+          "relative w-full h-[90px] min-h-[90px] md:h-[182px] md:min-h-[182px] lg:h-[240px] lg:min-h-[240px] overflow-hidden rounded-xl",
           className
         )}>
           {/* Media (image or video) */}

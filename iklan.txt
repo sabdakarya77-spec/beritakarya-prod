@@ -1,0 +1,246 @@
+Saya akan menjual produk seperti ini:
+| Produk               | Format         |
+| -------------------- | -------------- |
+| **Homepage Premium** | 🎥 Iklan Video |
+| Homepage Feed        | Banner         |
+| Homepage Feed 2      | Banner         |
+| **Artikel Premium**  | Banner         |
+| Artikel Tengah       | Banner         |
+| Artikel Bawah        | Banner         |
+
+Jadi hanya ada satu produk video.
+Kenapa?
+Karena akan sangat mudah dipasarkan.
+
+Marketing cukup mengatakan:
+"Slot paling premium di BeritaKarya adalah Homepage Premium. Kami buatkan video iklan Anda, cukup kirim logo dan foto."
+
+Kalimat itu kuat.
+
+Ketika trafik sudah besar
+Baru Anda menambah:
+Premium+
+HOME_TOP
+Video
+
+ARTICLE_TOP
+Video
+
+Jadi produk berkembang mengikuti trafik.
+
+Kesimpulan
+
+Untuk tahap awal saya memilih:
+
+✅ HOME_TOP = Iklan Video (eksklusif)
+✅ ARTICLE_TOP = Banner
+✅ Slot lainnya = Banner
+
+Alasannya bukan karena ARTICLE_TOP tidak cocok untuk video, tetapi karena Anda sedang membangun ciri khas BeritaKarya. Memiliki satu slot video premium yang benar-benar eksklusif lebih mudah dipasarkan, lebih ringan dikelola oleh tim kreatif, dan memberi alasan yang jelas bagi pengiklan untuk membeli slot paling mahal. Ketika bisnis dan kapasitas produksi sudah berkembang, Anda bisa memperluas konsep video ke ARTICLE_TOP tanpa mengubah fondasi produk yang sudah dikenal pelanggan.
+
+---
+
+## KEPUTUSAN TEKNIS (28 Juni 2026)
+
+### HOME_TOP — Video Creative Service
+
+Advertiser TIDAK upload video. Mereka hanya kirim **logo + foto**.
+Tim kreatif BeritaKarya yang produksi video iklan.
+
+**Alur:**
+1. Advertiser pilih paket HOME_TOP di Ad Studio
+2. Upload logo + foto (bukan video)
+3. Submit booking + bayar
+4. Admin approve → tim kreatif produksi video
+5. Upload video → langsung tayang (ACTIVE)
+6. Notifikasi + preview link ke advertiser
+7. Grace period 24-48 jam untuk review
+8. Revisi maks 1x, lewat dari itu dianggap setuju
+
+**Keuntungan:**
+- Kualitas video terjamin (kita yang produksi)
+- Mudah dipasarkan (UMKM tidak perlu produksi video sendiri)
+- Harga premium terjustifikasi (produk jadi, bukan slot kosong)
+- Operasional tetap cepat (tidak menunggu approve advertiser)
+
+**Perubahan database:**
+- AdBooking.previewUrl (String?) — link preview video
+- AdBooking.revisionCount (Int, default 0) — jumlah revisi (maks 1)
+- AdBooking.creativeNotes (String?) — catatan tim kreatif
+
+---
+
+### Standarisasi Ukuran Slot (3 Varian)
+
+Agar advertiser mudah, semua slot banner menggunakan 3 varian ukuran:
+- 1 desain bisa dipakai di beberapa slot sekaligus
+- Gradasi visual dari atas ke bawah (besar → kecil)
+
+| Varian | Ukuran | Rasio | Slot |
+|--------|--------|-------|------|
+| **Besar** | 960 × 240 | 4:1 | HOME_TOP (video) |
+| **Sedang** | 300 × 200 | 3:2 | HOME_FEED_1, ARTICLE_TOP |
+| **Kecil** | 300 × 150 | 2:1 | HOME_FEED_2, ARTICLE_MIDDLE, ARTICLE_BOTTOM |
+
+**Kenapa 3 varian?**
+- Tidak monoton — ada variasi visual di halaman
+- Rasio 3:2 dan 2:1 familiar untuk desainer
+- Slot Sedang (300×200) untuk posisi visibilitas tinggi
+- Slot Kecil (300×150) untuk posisi bawah, lebih ringan
+
+**Catatan HOME_TOP (semua 4:1):**
+- Desktop: 960×240
+- Tablet: 728×182
+- Mobile: 360×90 (sticky bottom, closeable setelah 5 detik)
+
+**File yang diupdate:**
+- docs/ads.md — ukuran slot, minimum upload, mobile layout
+- docs/harga.md — kolom ukuran di tabel harga
+- apps/api/src/lib/ad-image-processor.ts — AD_SLOTS + AD_VARIANTS
+- apps/api/prisma/schema.prisma — komentar slot
+- apps/web/lib/constants.ts — AD_SLOT_DEFINITIONS
+- apps/web/components/dashboard/ads/studio/StudioPreview.tsx
+- apps/web/components/dashboard/ads/studio/StudioCanvas.tsx
+- apps/web/components/dashboard/ads/studio/AdSmartPreview.tsx
+- apps/web/components/dashboard/ads/AdSlotCard.tsx
+- apps/web/components/ui/AdImageCropper.tsx
+
+---
+
+### Arsitektur: Format & Config-Based Sizes
+
+**1. Kolom Format (VIDEO/IMAGE)**
+Setiap slot sekarang punya format:
+- HOME_TOP → VIDEO (player video)
+- Semua lainnya → IMAGE (tag img)
+
+Developer langsung tahu render method dari format, tidak perlu if-else berdasarkan slot name.
+
+| Slot | Tier | Format |
+|------|------|--------|
+| HOME_TOP | PREMIUM | VIDEO |
+| HOME_FEED_1 | TINGGI | IMAGE |
+| HOME_FEED_2 | MENENGAH | IMAGE |
+| ARTICLE_TOP | TINGGI | IMAGE |
+| ARTICLE_MIDDLE | MENENGAH | IMAGE |
+| ARTICLE_BOTTOM | EKONOMI | IMAGE |
+
+**2. Ukuran di Config, Bukan Database**
+Database hanya simpan slot ID (misal: 'HOME_TOP'). Ukuran diambil dari config:
+- Backend: apps/api/src/config/ad-slots.ts
+- Frontend: apps/web/lib/constants.ts
+
+Keuntungan:
+- Ubah ukuran tanpa migrasi database
+- Satu sumber kebenaran
+- Tahun depan mau ubah 300×150 jadi 320×160? Cukup edit satu file.
+
+---
+
+### Carousel & Rotasi
+
+| Aspek | Keputusan |
+|-------|-----------|
+| HOME_TOP (Video) | 12 detik (video kita produksi, durasi 10-15 detik) |
+| Slot Banner | 7 detik |
+| Urutan | Random (setiap page load urutan berbeda) |
+| Transisi | Fade (opacity transition 700ms) |
+| Indikator | Tidak ada (lebih profesional) |
+| Pause on hover | Ya |
+
+File yang diupdate:
+- apps/web/components/ui/AdSpace.tsx — carousel logic, interval, random order, CSS heights
+- docs/ads.md — spesifikasi carousel
+
+Saya juga punya usulan kecil
+Daripada tabel ini Desktop, Tablet, Mobile
+
+Saya akan menambah satu kolom:
+| Slot | Tier | Desktop | Tablet | Mobile |
+| ---- | ---- | ------- | ------ | ------ |
+
+menjadi:
+| Slot        | Tier     | Format | Desktop | Tablet | Mobile |
+| ----------- | -------- | ------ | ------- | ------ | ------ |
+| HOME_TOP    | Premium  | Video  | ...     | ...    | ...    |
+| HOME_FEED_1 | Standard | Banner | ...     | ...    | ...    |
+
+Karena nanti developer akan lebih mudah. Misalnya:
+HOME_TOP
+
+↓
+
+Format
+
+VIDEO
+
+langsung memanggil player.
+
+Sedangkan
+
+HOME_FEED_1
+
+↓
+
+IMAGE
+
+langsung <img>.
+
+Tidak perlu if yang rumit.
+
+Saran terakhir (yang menurut saya sangat penting)
+
+Saya justru tidak akan menyimpan ukuran di database.
+
+Saya akan menyimpan seperti ini:
+
+HOME_TOP
+
+↓
+
+Tier
+
+PREMIUM
+
+↓
+
+Format
+
+VIDEO
+
+Lalu ukuran diambil dari konfigurasi.
+
+Misalnya
+
+{
+  "HOME_TOP": {
+    "desktop": "960x240",
+    "tablet": "728x182",
+    "mobile": "360x90"
+  }
+}
+
+Kenapa?
+
+Kalau tahun depan Anda ingin mengubah:
+
+300×150
+
+↓
+
+320×160
+
+Anda cukup mengubah satu file konfigurasi.
+
+Database tidak berubah.
+
+Developer juga lebih mudah.
+
+Kesimpulan saya
+
+Struktur slot Anda sudah sangat solid. Yang saya benar-benar akan ubah hanya satu hal, yaitu menjaga rasio HOME_TOP tetap konsisten di semua perangkat. Dengan rasio 4:1 yang sama pada desktop, tablet, dan mobile, tim kreatif cukup membuat satu versi video, developer tidak perlu menambahkan logika crop atau letterbox, dan tampilan brand pengiklan akan konsisten di semua ukuran layar. Itu akan menghemat waktu produksi dan mengurangi potensi masalah tampilan di masa depan.
+
+
+
+
+

@@ -212,11 +212,11 @@ model ArticleCategory {
 model Advertisement {
   id          String   @id @default(uuid())
   siteId      String
-  slot        String // 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed'
+  slot        String // 'HOME_TOP' | 'HOME_FEED_1' | 'HOME_FEED_2' | 'ARTICLE_TOP' | 'ARTICLE_MIDDLE' | 'ARTICLE_BOTTOM' — ukuran dari config/ad-slots.ts, bukan di DB
   code        String? // HTML/JS snippet like Google AdSense
-  imageUrl    String? // If they just want to upload an image banner (desktop 970×250)
-  imageUrlTablet String? // Tablet variant (728×90) — leaderboard only
-  imageUrlMobile String? // Mobile variant (320×50) — leaderboard only
+  imageUrl    String? // Desktop variant (ukuran dari config)
+  imageUrlTablet String? // Tablet variant (ukuran dari config)
+  imageUrlMobile String? // Mobile variant (ukuran dari config)
   // Multi-size IAB support – additional variant URLs for rectangle/in-feed etc.
   imageUrlTabletAlt String? // Alternative tablet size for non‑leaderboard slots
   imageUrlMobileAlt String? // Alternative mobile size for non‑leaderboard slots
@@ -553,8 +553,8 @@ model Invitation {
 // Katalog Paket Iklan yang dibuat oleh Superadmin
 model AdPackage {
   id            String      @id @default(uuid())
-  name          String // Contoh: "Banner Leaderboard Mingguan"
-  slot          String // 'leaderboard' | 'rectangle' | 'rectangle_secondary' | 'in_feed'
+  name          String // Contoh: "Hero Banner Video - 7 Hari"
+  slot          String // 'HOME_TOP' | 'HOME_FEED_1' | 'HOME_FEED_2' | 'ARTICLE_TOP' | 'ARTICLE_MIDDLE' | 'ARTICLE_BOTTOM' — format & tier dari config/ad-slots.ts
   durationDays  Int // Durasi tayang dalam hari (misal: 3, 7, 30)
   price         Decimal     @db.Decimal(12, 2) // Biaya dalam Rupiah
   allowedFormat String      @default("ALL") // 'IMAGE' | 'VIDEO' | 'ALL'
@@ -572,9 +572,9 @@ model AdBooking {
   siteId         String
   packageId      String
   campaignName   String?       // Nama kampanye iklan (opsional)
-  imageUrl        String? // File banner gambar WebP (desktop)
-  imageUrlTablet  String? // Tablet variant (728×90) — leaderboard only
-  imageUrlMobile  String? // Mobile variant (320×50) — leaderboard only
+  imageUrl        String? // Desktop variant (ukuran dari config/ad-slots.ts)
+  imageUrlTablet  String? // Tablet variant (ukuran dari config)
+  imageUrlMobile  String? // Mobile variant (ukuran dari config)
   linkUrl         String? // Tautan target ketika diklik
   animationEffect String? // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
   startDate       DateTime

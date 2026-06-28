@@ -5,18 +5,14 @@
  * Upload 1 gambar → hasil profesional di semua slot iklan.
  *
  * Prinsip: Jangan tolak gambar kecil. Tangani dengan cerdas.
+ *
+ * Ukuran slot diambil dari config/ad-slots.ts — bukan dari database.
  */
 
 import sharp from 'sharp'
+import { AD_SLOT_CONFIG, type SlotId, type SlotDimensions } from '../config/ad-slots'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
-export interface SlotConfig {
-  width: number
-  height: number
-  minWidth: number
-  minHeight: number
-}
 
 export interface ProcessResult {
   buffer: Buffer
@@ -32,49 +28,23 @@ export interface PreviewResult {
   result: ProcessResult
 }
 
-// ─── Slot Definitions (sama dengan yang ada di media.controller.ts) ──────────
+// ─── Slot Definitions (derived from config/ad-slots.ts) ──────────────────────
 
-export const AD_SLOTS: Record<string, SlotConfig> = {
-  HOME_TOP:         { width: 970, height: 250, minWidth: 300, minHeight: 80 },
-  HOME_FEED_1:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  HOME_FEED_2:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  ARTICLE_TOP:      { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  ARTICLE_MIDDLE:   { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-  ARTICLE_BOTTOM:   { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-}
+/** Dimensi default per slot (desktop) — untuk backward compatibility */
+export const AD_SLOTS: Record<string, SlotDimensions> = Object.fromEntries(
+  Object.entries(AD_SLOT_CONFIG).map(([id, config]) => [
+    id,
+    config.dimensions.desktop,
+  ])
+)
 
-export const AD_VARIANTS: Record<string, Record<string, SlotConfig>> = {
-  HOME_TOP: {
-    desktop: { width: 970, height: 250, minWidth: 300, minHeight: 80 },
-    tablet:  { width: 728, height: 100, minWidth: 250, minHeight: 40 },
-    mobile:  { width: 320, height: 100, minWidth: 200, minHeight: 30 },
-  },
-  HOME_FEED_1: {
-    desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  },
-  HOME_FEED_2: {
-    desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  },
-  ARTICLE_TOP: {
-    desktop: { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-    mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 125 },
-  },
-  ARTICLE_MIDDLE: {
-    desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-    tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-    mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-  },
-  ARTICLE_BOTTOM: {
-    desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-    tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-    mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-  },
-}
+/** Dimensi per variant (desktop/tablet/mobile) — dari config */
+export const AD_VARIANTS: Record<string, Record<string, SlotDimensions>> = Object.fromEntries(
+  Object.entries(AD_SLOT_CONFIG).map(([id, config]) => [
+    id,
+    config.dimensions,
+  ])
+)
 
 // ─── Color Extraction ────────────────────────────────────────────────────────
 

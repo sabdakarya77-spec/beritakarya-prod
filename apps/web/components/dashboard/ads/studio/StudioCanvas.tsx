@@ -599,7 +599,7 @@ export function StudioCanvas() {
                       slot="HOME_TOP"
                       previewSrc={previewSrc}
                       mediaType={data.mediaType}
-                      aspectRatio={970 / 250}
+                      aspectRatio={960 / 240}
                       label="Hero Banner"
                     />
                   )}
@@ -619,7 +619,7 @@ export function StudioCanvas() {
                           slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
-                          aspectRatio={300 / 250}
+                          aspectRatio={selectedPackage.slot === 'HOME_FEED_1' ? 300 / 200 : 300 / 150}
                           label={slotName}
                         />
                       )}
@@ -647,7 +647,7 @@ export function StudioCanvas() {
                           slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
-                          aspectRatio={300 / 250}
+                          aspectRatio={selectedPackage.slot === 'ARTICLE_TOP' ? 300 / 200 : 300 / 150}
                           label={slotName}
                         />
                       )}
@@ -680,14 +680,14 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
   const sizeLabels: Record<string, string> = {
-    HOME_TOP: '970×250 / 728×100 / 320×100',
-    HOME_FEED_1: '300×250',
-    HOME_FEED_2: '300×250',
-    ARTICLE_TOP: '300×250',
-    ARTICLE_MIDDLE: '300×200',
+    HOME_TOP: '960×240 / 728×182 / 360×90',
+    HOME_FEED_1: '300×200',
+    HOME_FEED_2: '300×150',
+    ARTICLE_TOP: '300×200',
+    ARTICLE_MIDDLE: '300×150',
     ARTICLE_BOTTOM: '300×150',
   };
-  const sizeLabel = sizeLabels[slot] || '300×250 / 300×100';
+  const sizeLabel = sizeLabels[slot] || '300×200 / 300×150';
 
   return (
     <div className="space-y-1">

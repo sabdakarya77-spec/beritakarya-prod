@@ -8,8 +8,8 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 | Komponen | Keterangan |
 |----------|------------|
-| **AdSpace** (frontend) | Komponen React yang fetch iklan publik, render banner gambar/video/script HTML, carousel 7 detik, tracking impresi & klik |
-| **Ad Studio** (frontend) | Wizard 4 langkah: Pilih Paket → Detail Iklan → **Upload 1 File** (auto-generate semua variant) → Pembayaran |
+| **AdSpace** (frontend) | Komponen React yang fetch iklan publik, render banner gambar/video/script HTML, carousel (video 12 detik, banner 7 detik), random order, fade transition, tracking impresi & klik |
+| **Ad Studio** (frontend) | Wizard 4 langkah: Pilih Paket → Detail Iklan → **Upload 1 File** (auto-generate semua variant) → Pembayaran. **Khusus HOME_TOP**: advertiser upload logo + foto, tim kreatif produksi video |
 | **Smart Image Processor** (backend) | Proses gambar upload ke semua ukuran slot dengan palette gradient background, **parallel processing** |
 | **Video Validator** (backend) | Validasi video ads: format, ukuran max 50MB, resolusi, auto-generate thumbnail |
 | **Ad Preview** (frontend + backend) | Preview real-time hasil proses + **cross-slot preview** ("juga cocok untuk slot lain") |
@@ -27,29 +27,33 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 > **Konvensi Penamaan:** Slot dinamai berdasarkan **lokasi penempatan**, bukan ukuran. Tidak ada slot sidebar — semua iklan berada di dalam alur konten. Lihat [2.6 Strategi Slot Mobile](#26-strategi-slot-mobile--penamaan-berbasis-lokasi) untuk penjelasan lengkap.
 
-| Slot ID | Nama Lokasi | Penempatan | Rotasi |
-|---------|-------------|------------|--------|
-| `HOME_TOP` | Hero Banner | Homepage atas (billboard utama) | ✅ Multi-iklan |
-| `HOME_FEED_1` | Feed Atas | Homepage, setelah headline (posisi 6-8 berita) | ✅ Multi-iklan |
-| `HOME_FEED_2` | Feed Bawah | Homepage, setelah 12-15 berita | ✅ Multi-iklan |
-| `ARTICLE_TOP` | Artikel Atas | Halaman artikel, setelah paragraf ke-3 | ✅ Multi-iklan |
-| `ARTICLE_MIDDLE` | Artikel Tengah | Halaman artikel, setelah paragraf ke-8 | ✅ Multi-iklan |
-| `ARTICLE_BOTTOM` | Artikel Bawah | Halaman artikel, sebelum artikel terkait | ✅ Multi-iklan |
+| Slot ID | Nama Lokasi | Tier | Format | Penempatan | Rotasi |
+|---------|-------------|------|--------|------------|--------|
+| `HOME_TOP` | Hero Banner | Premium | 🎥 Video | Homepage atas (billboard utama) | ✅ Multi-iklan |
+| `HOME_FEED_1` | Feed Atas | Tinggi | 🖼️ Banner | Homepage, setelah headline (posisi 6-8 berita) | ✅ Multi-iklan |
+| `HOME_FEED_2` | Feed Bawah | Menengah | 🖼️ Banner | Homepage, setelah 12-15 berita | ✅ Multi-iklan |
+| `ARTICLE_TOP` | Artikel Atas | Tinggi | 🖼️ Banner | Halaman artikel, setelah paragraf ke-3 | ✅ Multi-iklan |
+| `ARTICLE_MIDDLE` | Artikel Tengah | Menengah | 🖼️ Banner | Halaman artikel, setelah paragraf ke-8 | ✅ Multi-iklan |
+| `ARTICLE_BOTTOM` | Artikel Bawah | Ekonomi | 🖼️ Banner | Halaman artikel, sebelum artikel terkait | ✅ Multi-iklan |
+
+> **Format menentukan render:** `VIDEO` → player video, `IMAGE` → tag `<img>`. Developer tidak perlu if-else berdasarkan slot name — cukup cek format.
 
 > **Catatan Migrasi:** Slot lama (`leaderboard`, `rectangle`, `rectangle_secondary`, `in_feed`) perlu di-migrate ke nama lokasi baru di database dan API. Slot sidebar (`rectangle`, `rectangle_secondary`) **dihapus** dan digantikan oleh `HOME_FEED_1`, `HOME_FEED_2`, `ARTICLE_TOP`, dan `ARTICLE_BOTTOM`.
 
+> **Arsitektur Ukuran:** Ukuran slot **tidak disimpan di database**. Database hanya menyimpan slot ID (misal: `HOME_TOP`). Ukuran diambil dari file konfigurasi: `apps/api/src/config/ad-slots.ts` (backend) dan `apps/web/lib/constants.ts` (frontend). Keuntungan: ubah ukuran tanpa migrasi DB, satu sumber kebenaran.
+
 ### 2.2 Ukuran Per Breakpoint
 
-| Slot | Desktop | Tablet | Mobile |
-|------|---------|--------|--------|
-| **HOME_TOP** | 970 × 250 px | 728 × 100 px | 320 × 100 px |
-| **HOME_FEED_1** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
-| **HOME_FEED_2** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
-| **ARTICLE_TOP** | 300 × 250 px | 300 × 250 px | 300 × 250 px |
-| **ARTICLE_MIDDLE** | 300 × 200 px | 300 × 200 px | 300 × 200 px |
-| **ARTICLE_BOTTOM** | 300 × 150 px | 300 × 150 px | 300 × 150 px |
+| Slot | Desktop | Tablet | Mobile | Rasio | Varian |
+|------|---------|--------|--------|-------|--------|
+| **HOME_TOP** | 960 × 240 px | 728 × 182 px | 360 × 90 px | 4:1 | Besar |
+| **HOME_FEED_1** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
+| **HOME_FEED_2** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
+| **ARTICLE_TOP** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
+| **ARTICLE_MIDDLE** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
+| **ARTICLE_BOTTOM** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
 
-> **Catatan Slot Artikel**: Semua slot artikel menggunakan lebar konsisten 300 px dengan tinggi bervariasi (descending: 250 → 200 → 150). Ini memberikan visual rhythm yang profesional — iklan paling besar di awal, makin kecil di bawah. Ukuran seragam di semua device.
+> **3 Varian Ukuran:** Banner dipecah menjadi 3 varian (Besar/Sedang/Kecil) agar advertiser bisa membuat 1 desain untuk beberapa slot sekaligus. Slot dengan varian **Sedang** (HOME_FEED_1, ARTICLE_TOP) memiliki visibilitas lebih tinggi. Slot **Kecil** (HOME_FEED_2, ARTICLE_MIDDLE, ARTICLE_BOTTOM) lebih ringan dan konsisten.
 
 ### 2.3 Visibilitas Slot Per Device
 
@@ -90,13 +94,13 @@ Semua 6 slot tampil di **semua device** (desktop, tablet, mobile) — yang berbe
 | Slot | Variant | Min Width | Min Height | Catatan |
 |------|---------|-----------|------------|---------|
 | HOME_TOP | Desktop | 300 px | 80 px | Sistem akan upscale + gradient jika kecil |
-| HOME_TOP | Tablet | 250 px | 40 px | Sistem akan upscale + gradient jika kecil |
-| HOME_TOP | Mobile | 200 px | 30 px | Sistem akan upscale + gradient jika kecil |
-| HOME_FEED_1 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| HOME_FEED_2 | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_TOP | Semua | 150 px | 125 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_MIDDLE | Semua | 150 px | 100 px | Sistem akan upscale + gradient jika kecil |
-| ARTICLE_BOTTOM | Semua | 150 px | 75 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Tablet | 250 px | 60 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Mobile | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
+| HOME_FEED_1 | Semua | 150 px | 100 px | Varian Sedang (3:2), sistem akan upscale + gradient jika kecil |
+| HOME_FEED_2 | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
+| ARTICLE_TOP | Semua | 150 px | 100 px | Varian Sedang (3:2), sistem akan upscale + gradient jika kecil |
+| ARTICLE_MIDDLE | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
+| ARTICLE_BOTTOM | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
 
 > **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, rasio beda di-handle dengan palette gradient background.
 
@@ -120,14 +124,14 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 #### Konvensi Penamaan Slot
 
-| Slot Name | Deskripsi | Desktop | Mobile |
-|-----------|-----------|---------|--------|
-| `HOME_TOP` | Hero banner homepage | 970 × 250 | 320 × 100 |
-| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 300 × 250 | 300 × 250 |
-| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 300 × 250 | 300 × 250 |
-| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 300 × 250 | 300 × 250 |
-| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 200 | 300 × 200 |
-| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 300 × 150 | 300 × 150 |
+| Slot Name | Deskripsi | Desktop | Mobile | Varian |
+|-----------|-----------|---------|--------|--------|
+| `HOME_TOP` | Hero banner homepage | 960 × 240 | 360 × 90 | Besar |
+| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 300 × 200 | 300 × 200 | Sedang |
+| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 300 × 150 | 300 × 150 | Kecil |
+| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 300 × 200 | 300 × 200 | Sedang |
+| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 150 | 300 × 150 | Kecil |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 300 × 150 | 300 × 150 | Kecil |
 
 > **Manfaat:** Paket iklan yang dijual tetap 6 slot. Sistem secara otomatis menampilkan ukuran yang sesuai untuk desktop atau mobile. Pengelolaan, pelaporan, dan penjualan jadi jauh lebih mudah.
 
@@ -139,7 +143,7 @@ Header
 ────────────────────
 
 Hero Banner (HOME_TOP)
-320 × 100
+360 × 90
 
 Headline
 
@@ -147,13 +151,13 @@ Berita 1
 Berita 2
 
 Banner (HOME_FEED_1)
-300 × 250
+300 × 200 [Sedang]
 
 Berita 3
 Berita 4
 
 Banner (HOME_FEED_2)
-300 × 250
+300 × 150 [Kecil]
 
 Berita 5
 Berita 6
@@ -176,7 +180,7 @@ Paragraf 2
 Paragraf 3
 
 Banner (ARTICLE_TOP)
-300 × 250
+300 × 200 [Sedang]
 
 Paragraf 4
 Paragraf 5
@@ -185,13 +189,13 @@ Paragraf 7
 Paragraf 8
 
 Banner (ARTICLE_MIDDLE)
-300 × 200
+300 × 150 [Kecil]
 
 Paragraf 9
 Paragraf 10
 
 Banner (ARTICLE_BOTTOM)
-300 × 150
+300 × 150 [Kecil]
 
 Artikel Terkait
 Footer
@@ -310,7 +314,7 @@ File: `apps/web/components/ui/AdSpace.tsx`
 |-------|--------|
 | **Props** | `type: 'HOME_TOP' \| 'HOME_FEED_1' \| 'HOME_FEED_2' \| 'ARTICLE_TOP' \| 'ARTICLE_MIDDLE' \| 'ARTICLE_BOTTOM'`, `slot?`, `label?`, `className?` |
 | **Fetch** | `GET /api/v1/ads/public?site=<siteId>`, filter by `slotName` di client |
-| **Carousel** | Auto-rotate 7 detik, pause on hover |
+| **Carousel** | Auto-rotate — HOME_TOP (video) 12 detik, slot banner 7 detik. Random order, fade transition, tanpa indikator. Pause on hover |
 | **Impresi** | `POST /api/v1/ads/track/<id>?action=impression` (satu kali per ad ID per page load) |
 | **Klik** | `POST /api/v1/ads/track/<id>?action=click` (via `navigator.sendBeacon`) |
 | **A/B Testing** | Random variant per session (sessionStorage), use `winnerVariant` if set |
@@ -488,6 +492,9 @@ model AdBooking {
   rejectionNotes  String?
   impressions     Int           @default(0)
   clicks          Int           @default(0)
+  previewUrl      String?       // Link preview video (khusus HOME_TOP)
+  revisionCount   Int           @default(0) // Jumlah revisi video (maks 1)
+  creativeNotes   String?       // Catatan tim kreatif untuk advertiser
 }
 ```
 
@@ -558,12 +565,98 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
       ↓
 10. Approve → Auto-generate variant (jika belum ada) → Auto-sync ke Advertisement → Notifikasi email + in-app
       ↓
-11. Iklan Tayang (carousel rotasi setiap 7 detik)
+11. Iklan Tayang — HOME_TOP: video 12 detik, banner: rotasi 7 detik (random, fade, tanpa indikator)
       ↓
 12. Analytics (impresi, klik, CTR per hari)
       ↓
 13. Auto-Expiry (cron hourly, endDate lewat → nonaktif)
 ```
+
+---
+
+## 7A. HOME_TOP — Video Creative Service
+
+> **Keputusan (28 Juni 2026):** Slot `HOME_TOP` menggunakan model **layanan kreatif**. Advertiser tidak upload video, melainkan **logo + foto**. Tim kreatif BeritaKarya yang memproduksi video iklan.
+
+### 7A.1 Mengapa Model Ini?
+
+| Alasan | Penjelasan |
+|--------|------------|
+| **Mudah dipasarkan** | Marketing cukup bilang: *"Slot paling premium, kami buatkan video iklan Anda, cukup kirim logo dan foto"* |
+| **Kualitas terjamin** | Video dibuat oleh tim internal, bukan tergantung upload advertiser |
+| **Rasio konsisten** | Video didesain khusus untuk 960×240 (desktop), 728×182 (tablet), 360×90 (mobile) — semua 4:1 |
+| **Harga premium terjustifikasi** | Advertiser mendapat produk jadi, bukan slot kosong |
+| **Ringan untuk advertiser** | UMKM tidak perlu punya kemampuan produksi video |
+
+### 7A.2 Alur HOME_TOP (Berbeda dari Slot Banner)
+
+```
+Advertiser buka Ad Studio → Pilih paket HOME_TOP
+        ↓
+Upload LOGO + FOTO (bukan video)
+        ↓
+Isi detail kampanye (nama, URL, tanggal)
+        ↓
+Submit booking + pembayaran
+        ↓
+Admin review → approve
+        ↓
+Tim kreatif produksi video
+        ↓
+Upload video ke sistem → status ACTIVE (langsung tayang)
+        ↓
+Sistem kirim notifikasi + preview link ke advertiser
+        ↓
+Advertiser punya grace period 24-48 jam untuk review
+        ↓
+┌─────────────────────────────────────────────┐
+│ Ada feedback? → Revisi (maks 1x)            │
+│ Tidak ada?    → Dianggap setuju, lanjut     │
+└─────────────────────────────────────────────┘
+```
+
+### 7A.3 Aturan Grace Period & Revisi
+
+| Aturan | Detail |
+|--------|--------|
+| **Grace period** | 24-48 jam setelah notifikasi video ready |
+| **Maks revisi** | 1 kali |
+| **Auto-close** | Jika tidak ada feedback dalam grace period → dianggap setuju |
+| **Revisi berlebih** | Lebih dari 1x → tetap tayang, catatan ditambahkan ke log |
+| **Komunikasi** | Semua via sistem (notifikasi email + in-app), ada jejak |
+
+### 7A.4 Perubahan Database (AdBooking)
+
+Tambah field berikut ke model `AdBooking`:
+
+```prisma
+model AdBooking {
+  // ... field yang ada ...
+  previewUrl     String?    // Link preview video untuk advertiser
+  revisionCount  Int        @default(0) // Jumlah revisi (maks 1)
+  creativeNotes  String?    // Catatan dari tim kreatif untuk advertiser
+}
+```
+
+### 7A.5 Perbedaan Flow HOME_TOP vs Slot Banner
+
+| Aspek | HOME_TOP (Video) | Slot Lain (Banner) |
+|-------|------------------|---------------------|
+| **Upload advertiser** | Logo + foto | Gambar langsung |
+| **Produksi** | Tim kreatif BeritaKarya | Sistem auto-generate variant |
+| **Status saat produksi** | `PENDING_REVIEW` → `ACTIVE` | `PENDING_REVIEW` → `ACTIVE` |
+| **Preview untuk advertiser** | Ya (video preview link) | Ya (cross-slot preview) |
+| **Revisi** | Maks 1x (grace period 24-48 jam) | Tidak ada |
+| **Format akhir** | Video MP4 (kita kontrol) | Gambar WebP (auto-process) |
+
+### 7A.6 Perubahan Komponen Ad Studio
+
+| Komponen | Perubahan |
+|----------|-----------|
+| `StudioCanvas` (Step 3) | Jika slot = `HOME_TOP` → tampilkan form upload **logo + foto** (bukan video) |
+| `StudioCanvas` (Step 4) | Tambah catatan: *"Tim kreatif kami akan membuat video dalam 1-2 hari kerja"* |
+| `AdvertiserAdsView` | Tambah kolom `previewUrl` → tombol "Preview Video" saat grace period |
+| `BookingReviewList` | Tambah info: *"Menunggu produksi video oleh tim kreatif"* |
 
 ---
 
@@ -621,6 +714,9 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 14 | Error handling order flow | ✅ Selesai |
 | 15 | Smart image processing (palette gradient) | ✅ Selesai |
 | 16 | Ad preview semua slot | ✅ Selesai |
+| 17 | HOME_TOP: upload logo+foto (bukan video) | 🔴 Belum (butuh perubahan Ad Studio) |
+| 18 | HOME_TOP: grace period & revisi 1x | 🔴 Belum (butuh field baru + cron) |
+| 19 | HOME_TOP: previewUrl untuk advertiser | 🔴 Belum (butuh field + UI) |
 
 ---
 
@@ -640,6 +736,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 
 | File | Fungsi |
 |------|--------|
+| `apps/api/src/config/ad-slots.ts` | **Konfigurasi slot** — ukuran, format (VIDEO/IMAGE), tier. Satu sumber kebenaran |
 | `apps/api/src/modules/ad/ad.controller.ts` | Semua endpoint ads + `generateVariantsFromUrl` helper |
 | `apps/api/src/modules/ad/ad.repository.ts` | Prisma data access |
 | `apps/api/src/modules/ad/ad.service.ts` | Impresi dedup, booking sync |
@@ -651,7 +748,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard (single upload + preview) |
 | `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card (preview, stats, upload) |
 | `apps/web/components/dashboard/ads/pages/AdsSlotsContent.tsx` | Admin Card Grid layout |
-| `apps/web/lib/constants.ts` | Slot definitions (lines 112-181) |
+| `apps/web/lib/constants.ts` | Slot definitions — ukuran, format, tier (frontend mirror of config) |
 | `apps/web/tests/e2e/ad-booking.spec.ts` | E2E tests |
 
 ---

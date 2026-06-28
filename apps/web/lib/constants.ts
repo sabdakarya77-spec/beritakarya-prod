@@ -77,9 +77,14 @@ export type AdSlotId = 'HOME_TOP' | 'HOME_FEED_1' | 'HOME_FEED_2' | 'ARTICLE_TOP
 
 export type AdPlacementPage = 'homepage' | 'artikel'
 
+export type AdSlotFormat = 'VIDEO' | 'IMAGE'
+export type AdSlotTier = 'PREMIUM' | 'TINGGI' | 'MENENGAH' | 'EKONOMI'
+
 export interface AdSlotDefinition {
   id: AdSlotId;
   name: string;
+  tier: AdSlotTier;
+  format: AdSlotFormat;
   size: string;
   desc: string;
   placementPages: AdPlacementPage[];
@@ -113,91 +118,103 @@ export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
   {
     id: 'HOME_TOP',
     name: 'Hero Banner',
-    size: '970 x 250 px',
+    tier: 'PREMIUM',
+    format: 'VIDEO',
+    size: '960 x 240 px',
     desc: 'Muncul di bagian atas homepage sebagai billboard utama.',
     placementPages: ['homepage'],
-    publicSize: '970 x 250 px / Tablet: 728 x 100 px / Mobile: 320 x 100 px',
+    publicSize: '960 x 240 px / Tablet: 728 x 182 px / Mobile: 360 x 90 px',
     publicBadge: 'Slot Premium',
     publicTitle: 'Hero Banner',
     publicDescription: 'Slot billboard premium yang muncul di bagian atas homepage. Menjadi titik impresi pertama dengan ruang visual besar, cocok untuk kampanye branding dan awareness dengan visibilitas paling tinggi.',
     publicHighlights: [
-      'Ukuran: 970 x 250 px (Desktop) / 728 x 100 px (Tablet) / 320 x 100 px (Mobile)',
-      'Format: Gambar statis, GIF, Video klip, HTML kreatif',
+      'Ukuran: 960 x 240 px (Desktop) / 728 x 182 px (Tablet) / 360 x 90 px (Mobile)',
+      'Format: Video (kami produksikan — cukup kirim logo & foto)',
       'Penempatan: Homepage bagian atas (posisi paling premium)',
     ],
-    publicMockup: '970 x 250 px',
+    publicMockup: '960 x 240 px',
   },
   {
     id: 'HOME_FEED_1',
     name: 'Feed Atas',
-    size: '300 x 250 px',
+    tier: 'TINGGI',
+    format: 'IMAGE',
+    size: '300 x 200 px',
     desc: 'Muncul di tengah feed homepage setelah 6-8 berita.',
     placementPages: ['homepage'],
-    publicSize: '300 x 250 px (Desktop / Tablet / Mobile)',
+    publicSize: '300 x 200 px (Desktop / Tablet / Mobile)',
     publicBadge: 'Slot Feed Utama',
     publicTitle: 'Feed Atas',
     publicDescription: 'Slot iklan yang muncul di tengah feed homepage setelah 6-8 berita. Posisi strategis di alur konten pembaca, cocok untuk promosi native-style.',
     publicHighlights: [
-      'Ukuran: 300 x 250 px (semua device)',
-      'Format: Gambar statis, GIF, Video ringkas',
-      'Penempatan: Feed homepage posisi atas',
-    ],
-    publicMockup: '300 x 250 px',
-  },
-  {
-    id: 'HOME_FEED_2',
-    name: 'Feed Bawah',
-    size: '300 x 250 px',
-    desc: 'Muncul di bawah feed homepage setelah 12-15 berita.',
-    placementPages: ['homepage'],
-    publicSize: '300 x 250 px (Desktop / Tablet / Mobile)',
-    publicBadge: 'Slot Feed Kedua',
-    publicTitle: 'Feed Bawah',
-    publicDescription: 'Slot iklan yang muncul di bawah feed homepage setelah 12-15 berita. Ideal untuk kampanye pendamping atau retargeting pembaca yang sudah melihat konten lebih dalam.',
-    publicHighlights: [
-      'Ukuran: 300 x 250 px (semua device)',
-      'Format: Gambar statis, GIF, Video ringkas',
-      'Penempatan: Feed homepage posisi bawah',
-    ],
-    publicMockup: '300 x 250 px',
-  },
-  {
-    id: 'ARTICLE_TOP',
-    name: 'Artikel Atas',
-    size: '300 x 250 px',
-    desc: 'Muncul di halaman artikel setelah paragraf ke-3.',
-    placementPages: ['artikel'],
-    publicSize: '300 x 250 px (semua device)',
-    publicBadge: 'Slot Artikel',
-    publicTitle: 'Artikel Atas',
-    publicDescription: 'Slot iklan yang muncul di awal artikel setelah paragraf ke-3. Pembaca sudah mulai tertarik dengan konten, sehingga iklan di posisi ini memiliki engagement tinggi.',
-    publicHighlights: [
-      'Ukuran: 300 x 250 px (semua device)',
-      'Format: Gambar statis, GIF, Video ringkas',
-      'Penempatan: Halaman artikel, setelah paragraf ke-3',
-    ],
-    publicMockup: '300 x 250 px',
-  },
-  {
-    id: 'ARTICLE_MIDDLE',
-    name: 'Artikel Tengah',
-    size: '300 x 200 px',
-    desc: 'Muncul di tengah konten artikel setelah paragraf ke-8.',
-    placementPages: ['artikel'],
-    publicSize: '300 x 200 px (semua device)',
-    publicBadge: 'Slot In-Artikel',
-    publicTitle: 'Artikel Tengah',
-    publicDescription: 'Slot iklan native yang muncul di tengah konten artikel setelah paragraf ke-8. Posisi ini menangkap pembaca yang sudah berkomitmen membaca, cocok untuk promosi yang relevan.',
-    publicHighlights: [
       'Ukuran: 300 x 200 px (semua device)',
-      'Format: Gambar statis, GIF, Video ringkas',
-      'Penempatan: Tengah konten artikel',
+      'Format: Gambar statis, GIF',
+      'Penempatan: Feed homepage posisi atas',
     ],
     publicMockup: '300 x 200 px',
   },
   {
+    id: 'HOME_FEED_2',
+    name: 'Feed Bawah',
+    tier: 'MENENGAH',
+    format: 'IMAGE',
+    size: '300 x 150 px',
+    desc: 'Muncul di bawah feed homepage setelah 12-15 berita.',
+    placementPages: ['homepage'],
+    publicSize: '300 x 150 px (Desktop / Tablet / Mobile)',
+    publicBadge: 'Slot Feed Kedua',
+    publicTitle: 'Feed Bawah',
+    publicDescription: 'Slot iklan yang muncul di bawah feed homepage setelah 12-15 berita. Ideal untuk kampanye pendamping atau retargeting pembaca yang sudah melihat konten lebih dalam.',
+    publicHighlights: [
+      'Ukuran: 300 x 150 px (semua device)',
+      'Format: Gambar statis, GIF',
+      'Penempatan: Feed homepage posisi bawah',
+    ],
+    publicMockup: '300 x 150 px',
+  },
+  {
+    id: 'ARTICLE_TOP',
+    name: 'Artikel Atas',
+    tier: 'TINGGI',
+    format: 'IMAGE',
+    size: '300 x 200 px',
+    desc: 'Muncul di halaman artikel setelah paragraf ke-3.',
+    placementPages: ['artikel'],
+    publicSize: '300 x 200 px (semua device)',
+    publicBadge: 'Slot Artikel',
+    publicTitle: 'Artikel Atas',
+    publicDescription: 'Slot iklan yang muncul di awal artikel setelah paragraf ke-3. Pembaca sudah mulai tertarik dengan konten, sehingga iklan di posisi ini memiliki engagement tinggi.',
+    publicHighlights: [
+      'Ukuran: 300 x 200 px (semua device)',
+      'Format: Gambar statis, GIF',
+      'Penempatan: Halaman artikel, setelah paragraf ke-3',
+    ],
+    publicMockup: '300 x 200 px',
+  },
+  {
+    id: 'ARTICLE_MIDDLE',
+    name: 'Artikel Tengah',
+    tier: 'MENENGAH',
+    format: 'IMAGE',
+    size: '300 x 150 px',
+    desc: 'Muncul di tengah konten artikel setelah paragraf ke-8.',
+    placementPages: ['artikel'],
+    publicSize: '300 x 150 px (semua device)',
+    publicBadge: 'Slot In-Artikel',
+    publicTitle: 'Artikel Tengah',
+    publicDescription: 'Slot iklan native yang muncul di tengah konten artikel setelah paragraf ke-8. Posisi ini menangkap pembaca yang sudah berkomitmen membaca, cocok untuk promosi yang relevan.',
+    publicHighlights: [
+      'Ukuran: 300 x 150 px (semua device)',
+      'Format: Gambar statis, GIF',
+      'Penempatan: Tengah konten artikel',
+    ],
+    publicMockup: '300 x 150 px',
+  },
+  {
     id: 'ARTICLE_BOTTOM',
     name: 'Artikel Bawah',
+    tier: 'EKONOMI',
+    format: 'IMAGE',
     size: '300 x 150 px',
     desc: 'Muncul di bawah artikel, sebelum artikel terkait.',
     placementPages: ['artikel'],
@@ -225,6 +242,26 @@ export const AD_SLOT_MAP: Record<AdSlotId, AdSlotDefinition> = AD_SLOT_DEFINITIO
 export function getAdSlotDefinition(slot: string): AdSlotDefinition | null {
   return AD_SLOT_MAP[slot as AdSlotId] || null
 }
+
+/** Ambil format slot (VIDEO/IMAGE) — developer langsung tahu render method */
+export function getAdSlotFormat(slot: string): AdSlotFormat | null {
+  return AD_SLOT_MAP[slot as AdSlotId]?.format || null
+}
+
+/** Ambil tier slot (PREMIUM/TINGGI/MENENGAH/EKONOMI) */
+export function getAdSlotTier(slot: string): AdSlotTier | null {
+  return AD_SLOT_MAP[slot as AdSlotId]?.tier || null
+}
+
+/** Slot yang menggunakan VIDEO */
+export const VIDEO_AD_SLOTS: AdSlotId[] = AD_SLOT_DEFINITIONS
+  .filter(s => s.format === 'VIDEO')
+  .map(s => s.id)
+
+/** Slot yang menggunakan IMAGE */
+export const IMAGE_AD_SLOTS: AdSlotId[] = AD_SLOT_DEFINITIONS
+  .filter(s => s.format === 'IMAGE')
+  .map(s => s.id)
 
 /**
  * @deprecated Hanya untuk fallback/seed. Frontend harus fetch dari API.
