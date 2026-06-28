@@ -12,6 +12,7 @@ import {
   ClipboardList,
   AlertCircle,
   MousePointerClick,
+  Video,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
@@ -71,7 +72,7 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Link
           href={`${basePath}/slots`}
           className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
@@ -79,7 +80,7 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
           <div className="p-3 bg-brand-red/10 text-brand-red rounded-xl"><Target size={20} /></div>
           <div className="flex-1">
             <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Kelola Slot Iklan</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Leaderboard, banner, dan slot aktif</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Banner dan slot aktif</p>
           </div>
           <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
         </Link>
@@ -111,6 +112,17 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
           {verifyingBookings.length > 0 && (
             <span className="px-2 py-0.5 bg-blue-500 text-white text-[8px] font-black rounded-full animate-pulse">{verifyingBookings.length}</span>
           )}
+          <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
+        </Link>
+        <Link
+          href={`${basePath}/production`}
+          className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
+        >
+          <div className="p-3 bg-violet-500/10 text-violet-500 rounded-xl"><Video size={20} /></div>
+          <div className="flex-1">
+            <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Produksi Video</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Buat video iklan HOME TOP</p>
+          </div>
           <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
         </Link>
       </div>
