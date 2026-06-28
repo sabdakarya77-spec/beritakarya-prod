@@ -177,20 +177,24 @@ export function StudioPreview() {
 function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; isEmpty: boolean;
 }) {
-  const dimensions: Record<string, { h: string; label: string }> = {
-    HOME_TOP: { h: 'h-12 sm:h-20 md:h-32', label: '960×240 / 728×182 / 360×90' },
-    HOME_FEED_1: { h: 'h-16 md:h-28', label: '300×200' },
-    HOME_FEED_2: { h: 'h-12 md:h-20', label: '300×150' },
-    ARTICLE_TOP: { h: 'h-16 md:h-28', label: '300×200' },
-    ARTICLE_MIDDLE: { h: 'h-12 md:h-20', label: '300×150' },
-    ARTICLE_BOTTOM: { h: 'h-12 md:h-20', label: '300×150' },
+  const slotDef = getAdSlotDefinition(slot);
+  const sizeLabel = slotDef?.publicMockup || '300×200';
+
+  // Height classes per slot (UI concern, not from config)
+  const heightClass: Record<string, string> = {
+    HOME_TOP: 'h-12 sm:h-20 md:h-32',
+    HOME_FEED_1: 'h-16 md:h-28',
+    HOME_FEED_2: 'h-12 md:h-20',
+    ARTICLE_TOP: 'h-16 md:h-28',
+    ARTICLE_MIDDLE: 'h-12 md:h-20',
+    ARTICLE_BOTTOM: 'h-12 md:h-20',
   };
-  const dim = dimensions[slot] || dimensions.HOME_TOP;
+  const h = heightClass[slot] || 'h-16 md:h-28';
 
   return (
     <div className={cn(
       "relative w-full rounded-lg overflow-hidden border-2 border-dashed transition-all",
-      dim.h,
+      h,
       isEmpty ? 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]' : 'border-brand-red/30 bg-black shadow-lg shadow-brand-red/10'
     )}>
       {previewSrc ? (
@@ -201,7 +205,7 @@ function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
         )
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-          <div className="text-gray-300 dark:text-white/20 text-xs font-black uppercase tracking-wider">{dim.label}</div>
+          <div className="text-gray-300 dark:text-white/20 text-xs font-black uppercase tracking-wider">{sizeLabel}</div>
           <div className="text-gray-200 dark:text-white/10 text-[9px] uppercase tracking-wider">Upload materi iklan</div>
         </div>
       )}

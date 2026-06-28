@@ -649,15 +649,8 @@ export function StudioCanvas() {
 function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
-  const sizeLabels: Record<string, string> = {
-    HOME_TOP: '960×240 / 728×182 / 360×90',
-    HOME_FEED_1: '300×200',
-    HOME_FEED_2: '300×150',
-    ARTICLE_TOP: '300×200',
-    ARTICLE_MIDDLE: '300×150',
-    ARTICLE_BOTTOM: '300×150',
-  };
-  const sizeLabel = sizeLabels[slot] || '300×200 / 300×150';
+  const slotDef = getAdSlotDefinition(slot);
+  const sizeLabel = slotDef?.publicMockup || '300×200';
 
   return (
     <div className="space-y-1">

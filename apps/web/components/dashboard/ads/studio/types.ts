@@ -4,6 +4,7 @@ export interface AdPackage {
   slot: string;
   durationDays: number;
   price: number | string;
+  allowedFormat: string; // 'IMAGE' | 'VIDEO' | 'ALL'
   description: string | null;
   isActive: boolean;
 }
@@ -50,8 +51,6 @@ export interface StudioData {
   // Cross-slot previews (hasil dari /ad-preview — how image looks in OTHER slots)
   crossSlotPreviews: CrossSlotPreview[] | null;
   isLoadingCrossPreviews: boolean;
-  // Animation
-  animationEffect: string;
   // Payment
   receiptFile: File | null;
   receiptFileName: string;

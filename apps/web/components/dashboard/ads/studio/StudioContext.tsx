@@ -20,7 +20,6 @@ const initialData: StudioData = {
   isProcessing: false,
   crossSlotPreviews: null,
   isLoadingCrossPreviews: false,
-  animationEffect: '',
   receiptFile: null,
   receiptFileName: '',
   receiptPreviewUrl: '',
@@ -206,7 +205,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         imageUrlTablet: v.tablet?.url || null,
         imageUrlMobile: v.mobile?.url || null,
         linkUrl: data.linkUrl || '#',
-        animationEffect: null, // Efek animasi dihapus — banner tampil bersih tanpa efek
+        animationEffect: null,
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
       });
