@@ -642,9 +642,11 @@ Advertiser punya grace period 24-48 jam untuk review
 | **Revisi berlebih** | Lebih dari 1x → tetap tayang, catatan ditambahkan ke log |
 | **Komunikasi** | Semua via sistem (notifikasi email + in-app), ada jejak |
 
-### 7A.4 Perubahan Database (AdBooking)
+### 7A.4 Perubahan Database (AdBooking) — DITUNDA
 
-Tambah field berikut ke model `AdBooking`:
+> **Status:** Belum perlu sekarang. Jalankan dulu secara manual, tambah otomatisasi saat volume naik.
+
+Field yang akan ditambah saat diperlukan:
 
 ```prisma
 model AdBooking {
@@ -654,6 +656,8 @@ model AdBooking {
   creativeNotes  String?    // Catatan dari tim kreatif untuk advertiser
 }
 ```
+
+**Kapan perlu:** Booking HOME_TOP > 5/bulan, atau advertiser sering komplain.
 
 ### 7A.5 Perbedaan Flow HOME_TOP vs Slot Banner
 
@@ -674,6 +678,75 @@ model AdBooking {
 | `StudioCanvas` (Step 4) | Tambah catatan: *"Tim kreatif kami akan membuat video dalam 1-2 hari kerja"* |
 | `AdvertiserAdsView` | Tambah kolom `previewUrl` → tombol "Preview Video" saat grace period |
 | `BookingReviewList` | Tambah info: *"Menunggu produksi video oleh tim kreatif"* |
+
+### 7A.7 Roadmap Produksi Video
+
+> **Tool:** Seedance / Kling AI (image-to-video, 10-15 detik per klip)
+
+**Fase 1 — Sekarang (Manual, Validasi)**
+
+```
+Foto + Logo → Seedance/Kling → Review Tim → Upload ke sistem → Publish
+```
+
+- Target: produksi cepat, lihat respons pasar, kumpulkan contoh iklan
+- Tim kreatif proses manual, catat prompt yang dipakai
+- Estimasi biaya: ~Rp 15.000-20.000/video
+
+**Fase 2 — 3-6 Bulan (Template per Kategori)**
+
+```
+Foto → Pilih Template → AI Generate → Review Tim → Publish
+```
+
+Kategori template:
+- Restoran / Kuliner
+- Properti / Real Estate
+- Dealer / Otomotif
+- Event / Hiburan
+- Sekolah / Pendidikan
+- Klinik / Kesehatan
+
+Setiap kategori punya gaya visual dan prompt berbeda. Tim kreatif lebih efisien (template reusable).
+
+**Fase 3 — 6-12 Bulan (Semi-Otomatis)**
+
+```
+Upload Foto + Logo + Teks → AI Pilih Template → AI Generate → Publish
+```
+
+Sebagian besar proses otomatis. Tim kreatif hanya review akhir.
+
+### 7A.8 Prompt Library (Aset Paling Berharga)
+
+> Tool AI bisa diganti (Seedance → Kling → Runway). **Prompt Library tidak bisa diganti.** Ini competitive advantage.
+
+Setiap kali produksi video, catat prompt yang dipakai:
+
+```
+Kategori: Restoran
+Prompt: "Slow zoom into plate of food, warm lighting, professional food photography style..."
+Hasil: ⭐⭐⭐⭐
+Catatan: Klien suka, gerakan lambat lebih elegan
+```
+
+Struktur folder:
+
+```
+prompts/
+├── restoran/
+│   ├── makanan-01.txt
+│   ├── minuman-01.txt
+├── properti/
+│   ├── rumah-01.txt
+│   ├── apartemen-01.txt
+├── otomotif/
+│   ├── mobil-01.txt
+│   ├── motor-01.txt
+└── ...
+```
+
+Kumpulkan dari hari pertama. 6 bulan lagi = library yang tidak dimiliki kompetitor.
 
 ---
 
@@ -733,8 +806,9 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 16 | Ad preview semua slot | ✅ Selesai |
 | 17 | Upscale pipeline (Replicate → Sharp → gradient) | ✅ Selesai |
 | 18 | HOME_TOP: upload logo+foto (bukan video) | 🔴 Belum (butuh perubahan Ad Studio) |
-| 19 | HOME_TOP: grace period & revisi 1x | 🔴 Belum (butuh field baru + cron) |
-| 20 | HOME_TOP: previewUrl untuk advertiser | 🔴 Belum (butuh field + UI) |
+| 19 | HOME_TOP: grace period & revisi 1x | 🟡 Manual dulu (email/WA), otomatisasi nanti |
+| 20 | HOME_TOP: previewUrl untuk advertiser | 🟡 Manual dulu, field DB ditunda |
+| 21 | Video production: Seedance/Kling + Prompt Library | 🟢 Mulai Fase 1 sekarang |
 
 ---
 
