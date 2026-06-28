@@ -20,7 +20,7 @@ const initialData: StudioData = {
   isProcessing: false,
   crossSlotPreviews: null,
   isLoadingCrossPreviews: false,
-  animationEffect: 'ken_burns',
+  animationEffect: '',
   receiptFile: null,
   receiptFileName: '',
   receiptPreviewUrl: '',
@@ -206,7 +206,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         imageUrlTablet: v.tablet?.url || null,
         imageUrlMobile: v.mobile?.url || null,
         linkUrl: data.linkUrl || '#',
-        animationEffect: data.mediaType === 'image' ? data.animationEffect : null,
+        animationEffect: null, // Efek animasi dihapus — banner tampil bersih tanpa efek
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
       });

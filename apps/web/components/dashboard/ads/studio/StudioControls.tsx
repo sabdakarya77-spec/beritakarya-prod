@@ -317,35 +317,6 @@ export function StudioControls() {
             </div>
           )}
 
-          {/* Animation */}
-          {data.mediaType === 'image' && (
-            <div className="pt-1 border-t border-gray-100 dark:border-white/5">
-              <label className="text-[7px] font-black uppercase tracking-widest text-gray-400 block mb-1">Efek Animasi</label>
-              <div className="grid grid-cols-2 gap-1">
-                {[
-                  { value: 'ken_burns', label: 'Ken Burns', icon: '🔍' },
-                  { value: 'fade_slide', label: 'Fade Slide', icon: '↔️' },
-                  { value: 'parallax', label: 'Parallax', icon: '📐' },
-                  { value: 'pulse_scale', label: 'Pulse', icon: '💓' },
-                ].map((effect) => (
-                  <button
-                    key={effect.value}
-                    type="button"
-                    onClick={() => setData(prev => ({ ...prev, animationEffect: effect.value }))}
-                    className={cn(
-                      "p-1.5 border rounded-lg flex items-center gap-1 transition-all text-left",
-                      data.animationEffect === effect.value
-                        ? 'border-brand-red bg-brand-red/[0.03]'
-                        : 'border-gray-100 dark:border-white/5 text-gray-400'
-                    )}
-                  >
-                    <span className="text-[10px]">{effect.icon}</span>
-                    <span className="text-[8px] font-bold uppercase tracking-wider">{effect.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 

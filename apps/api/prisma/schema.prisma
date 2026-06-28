@@ -229,7 +229,7 @@ model Advertisement {
   order       Int      @default(0) // Rotation order for carousel (leaderboard)
   impressions     Int      @default(0) // Tracker for views
   clicks          Int      @default(0) // Tracker for clicks
-  animationEffect String?  // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
+  animationEffect String?  // Deprecated — tidak dipakai di UI, disimpan untuk backward compatibility
   bookingId       String?  // Link ke AdBooking yang membuat slot ini
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -576,7 +576,7 @@ model AdBooking {
   imageUrlTablet  String? // Tablet variant (ukuran dari config)
   imageUrlMobile  String? // Mobile variant (ukuran dari config)
   linkUrl         String? // Tautan target ketika diklik
-  animationEffect String? // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
+  animationEffect String? // Deprecated — tidak dipakai di UI, disimpan untuk backward compatibility
   startDate       DateTime
   endDate        DateTime
   paymentStatus  PaymentStatus @default(PENDING)

@@ -418,36 +418,6 @@ export function StudioCanvas() {
                 </div>
               )}
 
-              {/* Animation */}
-              {data.mediaType === 'image' && (
-                <div className="pt-3 border-t border-gray-100 dark:border-white/5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Efek Animasi</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: 'ken_burns', label: 'Ken Burns', icon: '🔍' },
-                      { value: 'fade_slide', label: 'Fade Slide', icon: '↔️' },
-                      { value: 'parallax', label: 'Parallax', icon: '📐' },
-                      { value: 'pulse_scale', label: 'Pulse', icon: '💓' },
-                    ].map((effect) => (
-                      <button
-                        key={effect.value}
-                        type="button"
-                        onClick={() => setData(prev => ({ ...prev, animationEffect: effect.value }))}
-                        className={cn(
-                          "p-3 border rounded-xl flex items-center gap-2 transition-all text-left",
-                          data.animationEffect === effect.value
-                            ? 'border-brand-red bg-brand-red/[0.03]'
-                            : 'border-gray-200 dark:border-white/10 text-gray-400'
-                        )}
-                      >
-                        <span className="text-sm">{effect.icon}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{effect.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="flex justify-between pt-2">
                 <button
                   type="button"

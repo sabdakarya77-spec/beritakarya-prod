@@ -335,7 +335,7 @@ File: `apps/web/components/ui/AdSpace.tsx`
 | **Impresi** | `POST /api/v1/ads/track/<id>?action=impression` (satu kali per ad ID per page load) |
 | **Klik** | `POST /api/v1/ads/track/<id>?action=click` (via `navigator.sendBeacon`) |
 | **A/B Testing** | Random variant per session (sessionStorage), use `winnerVariant` if set |
-| **Animation** | `ken_burns`, `fade_slide`, `parallax`, `pulse_scale` |
+| **Animation** | Dihapus dari UI — banner tampil bersih tanpa efek. Field `animationEffect` di DB tetap ada (backward compatible) |
 | **Video** | Auto-detect `.mp4/.webm/.ogg/.mov`, render `<video autoPlay loop muted>` |
 | **Script** | Sandboxed iframe `allow-scripts allow-popups` |
 | **Sticky Mobile** | HOME_TOP fixed bottom, closeable after 5 detik |
@@ -460,7 +460,7 @@ model Advertisement {
   variantBUrl       String?
   winnerVariant     String?  // 'A' | 'B'
   linkUrl           String?
-  animationEffect   String?  // 'ken_burns' | 'fade_slide' | 'parallax' | 'pulse_scale'
+  animationEffect   String?  // Deprecated — tidak dipakai di UI, disimpan untuk backward compatibility
   isActive          Boolean  @default(true)
   order             Int      @default(0)  // Rotasi order
   impressions       Int      @default(0)
