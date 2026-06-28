@@ -180,7 +180,9 @@ export function StudioCanvas() {
                           name="ad_package"
                           checked={data.selectedPackage?.id === pkg.id}
                           onChange={() => {
-                            setData(prev => ({ ...prev, selectedPackage: pkg }));
+                            // Set default mediaType berdasarkan allowedFormat
+                            const defaultMediaType = pkg.allowedFormat === 'VIDEO' ? 'video' : 'image';
+                            setData(prev => ({ ...prev, selectedPackage: pkg, mediaType: defaultMediaType }));
                             const end = new Date();
                             end.setDate(end.getDate() + pkg.durationDays);
                             setData(prev => ({ ...prev, endDate: end.toISOString().split('T')[0] }));
@@ -207,11 +209,19 @@ export function StudioCanvas() {
                     ))}
                   </div>
 
-                  {/* Format */}
+                  {/* Format — filter berdasarkan allowedFormat paket */}
                   <div className="pt-3 border-t border-gray-100 dark:border-white/5">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Format</label>
                     <div className="grid grid-cols-2 gap-2">
-                      {(['image', 'video'] as const).map((type) => (
+                      {(['image', 'video'] as const)
+                        .filter(type => {
+                          const fmt = data.selectedPackage?.allowedFormat || 'ALL';
+                          if (fmt === 'ALL') return true;
+                          if (fmt === 'IMAGE') return type === 'image';
+                          if (fmt === 'VIDEO') return type === 'video';
+                          return true;
+                        })
+                        .map((type) => (
                         <button
                           key={type}
                           type="button"

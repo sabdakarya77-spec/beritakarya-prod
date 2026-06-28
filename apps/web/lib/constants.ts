@@ -117,16 +117,16 @@ export interface SiteConfig {
 export const AD_SLOT_DEFINITIONS: AdSlotDefinition[] = [
   {
     id: 'HOME_TOP',
-    name: 'Hero Banner',
+    name: 'HOME TOP',
     tier: 'PREMIUM',
     format: 'VIDEO',
     size: '960 x 240 px',
-    desc: 'Muncul di bagian atas homepage sebagai billboard utama.',
+    desc: 'Video premium di homepage atas. Advertiser kirim logo & foto, tim kreatif produksi video.',
     placementPages: ['homepage'],
     publicSize: '960 x 240 px / Tablet: 728 x 182 px / Mobile: 360 x 90 px',
     publicBadge: 'Slot Premium',
     publicTitle: 'Hero Banner',
-    publicDescription: 'Slot billboard premium yang muncul di bagian atas homepage. Menjadi titik impresi pertama dengan ruang visual besar, cocok untuk kampanye branding dan awareness dengan visibilitas paling tinggi.',
+    publicDescription: 'Slot video premium di bagian atas homepage. Tim kreatif kami produksikan video iklan dari logo & foto Anda. Durasi 10-15 detik, visibilitas paling tinggi.',
     publicHighlights: [
       'Ukuran: 960 x 240 px (Desktop) / 728 x 182 px (Tablet) / 360 x 90 px (Mobile)',
       'Format: Video (kami produksikan — cukup kirim logo & foto)',

@@ -39,7 +39,11 @@ export function HeroBannerManager({
         <div>
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">{slotDef.name} — Carousel</h3>
+            <span className="text-[9px] font-black px-2 py-0.5 bg-amber-500/10 text-amber-600 rounded-full">{slotDef.tier}</span>
             <span className="text-[9px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">{slotDef.size}</span>
+            <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
+              {slotDef.format === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
+            </span>
             <span className="text-[9px] font-black px-2 py-0.5 bg-brand-red/10 text-brand-red rounded-full">{ads.length} Banner</span>
             {slotDef.placementPages?.map(page => (
               <span
