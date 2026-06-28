@@ -219,8 +219,8 @@ export default async function ArticlePage({ params }: Props) {
         <article className="min-h-screen">
           {/* --- RESPONSIVE HERO --- */}
           <section className="relative w-full">
-            {/* Image Container: Aspect-video on mobile, fixed-height/cover on desktop */}
-            <div className="relative w-full aspect-video md:aspect-none md:h-[55vh] lg:h-[60vh] min-h-[200px] md:min-h-[450px] max-h-[600px]">
+            {/* Image Container: Letterbox style — gambar utuh tanpa crop, background gelap */}
+            <div className="relative w-full aspect-video md:aspect-none md:h-[55vh] lg:h-[60vh] min-h-[200px] md:min-h-[450px] max-h-[600px] bg-black">
               <SmartImage
                 src={coverImage}
                 blur={article.featuredImageBlur}
@@ -229,7 +229,8 @@ export default async function ArticlePage({ params }: Props) {
                 alt={article.title}
                 fill
                 priority
-                className="object-cover animate-fade-in"
+                wrapperClassName="!bg-black"
+                className="object-contain animate-fade-in"
               />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
