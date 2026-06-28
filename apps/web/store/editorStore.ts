@@ -509,10 +509,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }
 
     if (s.contentType === 'photo_journalism') {
-      // Foto Jurnalistik: wajib minimal 3 foto di galeri
+      // Foto Jurnalistik: wajib minimal 1 foto di galeri
       const gallery = s.blocks.find(b => b.type === 'gallery')
       const imageCount = (gallery && 'images' in gallery ? gallery.images?.length || 0 : 0)
-      if (imageCount < 3) missing.push(`Galeri foto wajib minimal 3 foto (saat ini: ${imageCount})`)
+      if (imageCount < 1) missing.push(`Galeri foto wajib minimal 1 foto (saat ini: ${imageCount})`)
       // Foto Jurnalistik: wajib minimal 15 kata narasi
       const wc = countWords()
       if (wc < 15) missing.push(`Narasi foto wajib minimal 15 kata (saat ini: ${wc})`)

@@ -3,7 +3,7 @@ const MAX_BLOCKS = 200
 const MAX_WORDS = 100_000
 
 // Photo journalism specific requirements
-const PHOTO_JOURNALISM_MIN_IMAGES = 3
+const PHOTO_JOURNALISM_MIN_IMAGES = 1
 const PHOTO_JOURNALISM_MIN_WORDS = 15
 
 // Video exclusive specific requirements
@@ -56,7 +56,7 @@ export function countGalleryImages(blocks: ArticleBlock[] | undefined): number {
 
 /**
  * Validasi khusus untuk tipe konten foto jurnalistik.
- * - Minimal 3 foto di galeri
+ * - Minimal 1 foto di galeri
  * - Minimal 15 kata (narasi foto)
  */
 export function validatePhotoJournalismRequirements(blocks: ArticleBlock[] | undefined): void {

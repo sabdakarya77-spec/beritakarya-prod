@@ -194,7 +194,7 @@ export function TabSettings() {
           </button>
         </div>
         {contentType === 'photo_journalism' && (
-          <p className="text-[9px] text-panel-text-muted">Min. 3 foto, min. 15 kata narasi • Kategori: Foto Jurnalistik • Badge: Eksklusif</p>
+          <p className="text-[9px] text-panel-text-muted">Min. 1 foto, min. 15 kata narasi • Kategori: Foto Jurnalistik • Badge: Eksklusif</p>
         )}
         {contentType === 'video_exclusive' && (
           <p className="text-[9px] text-panel-text-muted">Kategori: Video • Badge: Eksklusif</p>
