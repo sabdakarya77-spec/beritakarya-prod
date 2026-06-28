@@ -226,15 +226,32 @@ Slot yang berada di bawah fold **tidak boleh dimuat** sampai pengguna mendekati 
 ### 3.1 Pipeline
 
 ```
-Upload gambar (ukuran apapun)
+Upload gambar (JPG/PNG/WebP/GIF)
          │
          ▼
-   Validasi format (JPG/PNG/WebP/GIF)
+   Validasi format (tolak SVG, GIF animasi)
          │
          ▼
+   Cek ukuran — apakah perlu upscale?
+         │
+    ┌────┴────────────────────┐
+    │                         │
+Sudah cukup besar        Perlu upscale
+    │                         │
+    │                    ① Replicate API (AI)
+    │                       ├── Berhasil → pakai
+    │                       └── Gagal ↓
+    │                    ② Sharp (lanczos3, 2×)
+    │                       ├── Berhasil → pakai
+    │                       └── Gagal ↓
+    │                    ③ Pakai gambar asli + gradient
+    │                         │
+    └────────┬────────────────┘
+             │
+             ▼
    Extract dominant color palette
-         │
-         ▼
+             │
+             ▼
    Cek rasio aspek vs target slot
          │
     ┌────┴────────────────────┐
@@ -714,9 +731,10 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 14 | Error handling order flow | ✅ Selesai |
 | 15 | Smart image processing (palette gradient) | ✅ Selesai |
 | 16 | Ad preview semua slot | ✅ Selesai |
-| 17 | HOME_TOP: upload logo+foto (bukan video) | 🔴 Belum (butuh perubahan Ad Studio) |
-| 18 | HOME_TOP: grace period & revisi 1x | 🔴 Belum (butuh field baru + cron) |
-| 19 | HOME_TOP: previewUrl untuk advertiser | 🔴 Belum (butuh field + UI) |
+| 17 | Upscale pipeline (Replicate → Sharp → gradient) | ✅ Selesai |
+| 18 | HOME_TOP: upload logo+foto (bukan video) | 🔴 Belum (butuh perubahan Ad Studio) |
+| 19 | HOME_TOP: grace period & revisi 1x | 🔴 Belum (butuh field baru + cron) |
+| 20 | HOME_TOP: previewUrl untuk advertiser | 🔴 Belum (butuh field + UI) |
 
 ---
 
@@ -791,10 +809,23 @@ pnpm --filter @beritakarya/web exec playwright test tests/e2e/ad-booking.spec.ts
 
 Sistem saat ini (Palette Gradient) sudah **berhasil** — cepat (< 2 detik), gratis, profesional. Sebelum menambah kompleksitas AI, perlu data untuk tahu apakah investasi itu perlu.
 
-### Pipeline Saat Ini
+### Pipeline Saat Ini (Termasuk Upscale)
 
 ```
-Upload gambar → Extract warna → Cek rasio
+Upload gambar → Cek ukuran → Perlu upscale?
+    │                              │
+    │                    ┌─────────┴─────────┐
+    │                    │                   │
+    │              ① Replicate          ② Sharp
+    │              (AI, jika API ada)   (lokal, gratis)
+    │                    │                   │
+    │                    └─────────┬─────────┘
+    │                              │
+    ▼                              ▼
+Extract warna ←──── Gambar (asli atau upscaled)
+    │
+    ▼
+Cek rasio
     │                    │
     ▼                    ▼
 Rasio cocok         Rasio beda
@@ -810,8 +841,8 @@ Smart Crop          Palette Gradient
       Simpan ke MinIO
 ```
 
-**Kelebihan:** Cepat, gratis, konsisten, profesional.
-**Kekurangan:** Gambar sangat kecil (< 200px) bisa sedikit blur setelah upscale biasa.
+**Kelebihan:** Upscale otomatis, fallback chain (AI → Sharp → gradient), gratis jika tanpa Replicate API.
+**Replicate API:** Opsional. Jika `REPLICATE_API_TOKEN` tidak di-set, sistem otomatis pakai Sharp.
 
 ### Fase 0: Kumpulkan Data (Minggu 1-2)
 
@@ -837,35 +868,26 @@ Smart Crop          Palette Gradient
 - Jika < 10% upload bermasalah → **stop**, Palette Gradient sudah cukup
 - Jika > 10% → lanjut Fase 1
 
-### Fase 1: AI Upscale via Replicate API (Minggu 3-4)
+### Fase 1: Upscale Pipeline — ✅ Selesai
 
-**Syarat:** Data Fase 0 menunjukkan > 10% upload gambar kecil.
-
-**Kenapa Replicate (bukan self-hosted):**
-
-| Aspek | Replicate | Self-hosted |
-|-------|-----------|-------------|
-| Setup | Tambah API key | Install Python + PyTorch + weights |
-| Cocok dengan | LXC production | Butuh Docker atau install manual |
-| Performa | 2-5 detik (GPU cloud) | 5-30 detik (CPU) |
-| Biaya | ~Rp 30/gambar | Listrik + RAM server |
-| Maintenance | Zero | Update model, monitor crash |
-
-**Tugas:**
+**Fallback chain (sudah diimplementasikan):**
 
 ```
-[ ] Daftar Replicate → buat API token → pilih model Real-ESRGAN x4plus
-[ ] Tambah fungsi upscale di ad-image-processor.ts
-[ ] Tambah dimensi checker sebelum pipeline rasio
-[ ] Tambah env var: REPLICATE_API_TOKEN
-[ ] Update AdSmartPreview.tsx → badge "AI Upscaled"
+① Replicate API (Real-ESRGAN x4plus) — jika REPLICATE_API_TOKEN ada
+   ├── Berhasil → hasil AI upscale
+   └── Gagal ↓
+② Sharp (lanczos3, 2× lipat) — lokal, gratis
+   ├── Berhasil → hasil sharp upscale
+   └── Gagal ↓
+③ Gambar asli + gradient background (sudah ada)
 ```
 
-**Fallback chain:**
-```
-Replicate API gagal / timeout
-    → Return gambar ASLI (tanpa upscale)
-    → Lanjut pipeline Palette Gradient seperti biasa
+**Konfigurasi:**
+- `REPLICATE_API_TOKEN` — opsional. Tidak di-set = skip Replicate, langsung Sharp
+- Timeout Replicate: 15 detik (request) + 30 detik (polling)
+- Sharp upscale: 2× lipat dari ukuran asli, lanczos3 kernel
+
+**Keputusan:** Implementasi hybrid — Replicate sebagai opsi terbaik, Sharp sebagai fallback gratis. Tidak perlu pilih salah satu.
     → Log warning, tidak block user
 ```
 
@@ -894,30 +916,19 @@ Replicate API gagal / timeout
 ### Ringkasan Timeline
 
 ```
-Sekarang
-   │
-   ▼
-[ Fase 0 ]  Minggu 1-2 — Logging data upload
-   │
-   ▼
-[ Evaluasi ]  Minggu 3 — Analisis data → keputusan lanjut/stop
-   │
-   ├── < 10% bermasalah → STOP
-   └── > 10% bermasalah → lanjut ↓
-        │
-        ▼
-[ Fase 1 ]  Minggu 3-4 — Integrasi Replicate API
-        │
-        ▼
-[ Fase 2 ]  Minggu 5-6 — Evaluasi cost → keputusan final
+[ Fase 0 ]  ✅ Logging data upload (sudah ada)
+[ Fase 1 ]  ✅ Upscale pipeline (Replicate → Sharp → gradient)
+[ Fase 2 ]  Evaluasi cost Replicate → keputusan self-hosted vs cloud
+[ Backlog ] Frequency Capping, Export Reports, Targeting, dll.
 ```
 
 ### Keputusan Teknis
 
 | Keputusan | Pilihan | Alasan |
 |-----------|---------|--------|
-| Cloud vs Self-hosted | **Replicate (cloud)** | Cocok dengan LXC, zero maintenance, cost rendah |
-| Sync vs Async | **Sync** | Volume rendah, 5 detik masih acceptable |
+| Upscale approach | **Hybrid: Replicate → Sharp → gradient** | Best effort: AI jika ada, sharp sebagai fallback gratis |
+| Replicate wajib? | **Tidak (opsional)** | Tanpa API key, sistem tetap jalan pakai sharp |
+| Sync vs Async | **Sync** | Volume rendah, sharp < 1 detik, replicate < 30 detik |
 | Outpainting sekarang? | **Tidak** | Palette Gradient sudah handle rasio beda dengan baik |
 | Docker ditambah? | **Tidak** | Tidak perlu, Replicate via HTTP saja |
 

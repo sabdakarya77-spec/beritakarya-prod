@@ -165,6 +165,147 @@ export function generateGradientSvg(
 const MAX_FILE_SIZE = 200 * 1024 // 200 KB
 const ASPECT_RATIO_TOLERANCE = 0.15 // 15%
 
+// ─── Upscale: Replicate API (AI) + Sharp (Fallback) ─────────────────────────
+
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+const UPSCALE_MIN_WIDTH = 300
+const UPSCALE_MIN_HEIGHT = 200
+const UPSCALE_FACTOR = 4 // Real-ESRGAN x4plus
+
+/**
+ * Upscale gambar menggunakan Replicate API (Real-ESRGAN x4plus).
+ * Mengembalikan null jika API tidak tersedia atau gagal.
+ */
+async function upscaleWithReplicate(buffer: Buffer): Promise<Buffer | null> {
+  if (!REPLICATE_API_TOKEN) return null
+
+  try {
+    const base64 = buffer.toString('base64')
+    const dataUrl = `data:image/webp;base64,${base64}`
+
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${REPLICATE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        version: 'f121d640bd286e1fdc67f9799164c1d5be36ff74576ee11c803ae5b665dd46aa',
+        input: { image: dataUrl },
+      }),
+      signal: AbortSignal.timeout(15000), // 15 detik timeout
+    })
+
+    if (!response.ok) {
+      console.warn(`[ad-upscale] Replicate API error: ${response.status}`)
+      return null
+    }
+
+    const prediction = await response.json()
+
+    // Poll for completion (max 30 detik)
+    const startTime = Date.now()
+    while (Date.now() - startTime < 30000) {
+      const poll = await fetch(prediction.urls.get, {
+        headers: { 'Authorization': `Token ${REPLICATE_API_TOKEN}` },
+        signal: AbortSignal.timeout(10000),
+      })
+      const result = await poll.json()
+
+      if (result.status === 'succeeded' && result.output) {
+        const imgResponse = await fetch(result.output, { signal: AbortSignal.timeout(10000) })
+        if (imgResponse.ok) {
+          const arrayBuffer = await imgResponse.arrayBuffer()
+          return Buffer.from(arrayBuffer)
+        }
+      }
+
+      if (result.status === 'failed') {
+        console.warn('[ad-upscale] Replicate prediction failed')
+        return null
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    console.warn('[ad-upscale] Replicate timeout (30s)')
+    return null
+  } catch (err) {
+    console.warn('[ad-upscale] Replicate error:', err)
+    return null
+  }
+}
+
+/**
+ * Upscale gambar menggunakan sharp (lokal, gratis).
+ * Kualitas lebih rendah dari AI, tapi lebih baik dari gambar kecil di gradient.
+ */
+async function upscaleWithSharp(buffer: Buffer, targetW: number, targetH: number): Promise<Buffer | null> {
+  try {
+    const meta = await sharp(buffer).metadata()
+    if (!meta.width || !meta.height) return null
+
+    // Hitung ukuran target: minimal 2× lipat dari asli, atau targetW/targetH
+    const scaleW = Math.max(targetW, meta.width * 2)
+    const scaleH = Math.max(targetH, meta.height * 2)
+
+    const result = await sharp(buffer)
+      .resize(scaleW, scaleH, {
+        fit: 'cover',
+        position: 'centre',
+        kernel: 'lanczos3', // Kernel terbaik untuk upscale
+      })
+      .toBuffer()
+
+    return result
+  } catch (err) {
+    console.warn('[ad-upscale] Sharp upscale error:', err)
+    return null
+  }
+}
+
+/**
+ * Upscale pipeline: Replicate → Sharp → null (pakai gradient)
+ * Hanya dijalankan jika gambar lebih kecil dari target.
+ */
+async function upscaleIfNeeded(
+  buffer: Buffer,
+  targetW: number,
+  targetH: number
+): Promise<{ buffer: Buffer; method: 'replicate' | 'sharp' | 'none' } | null> {
+  const meta = await sharp(buffer).metadata()
+  if (!meta.width || !meta.height) return null
+
+  // Tidak perlu upscale jika sudah cukup besar
+  if (meta.width >= targetW && meta.height >= targetH) return null
+
+  console.log(JSON.stringify({
+    _type: 'ad_upscale_attempt',
+    originalWidth: meta.width,
+    originalHeight: meta.height,
+    targetWidth: targetW,
+    targetHeight: targetH,
+  }))
+
+  // ① Coba Replicate (AI)
+  const replicateResult = await upscaleWithReplicate(buffer)
+  if (replicateResult) {
+    console.log(JSON.stringify({ _type: 'ad_upscale_used', method: 'replicate' }))
+    return { buffer: replicateResult, method: 'replicate' }
+  }
+
+  // ② Fallback ke Sharp
+  const sharpResult = await upscaleWithSharp(buffer, targetW, targetH)
+  if (sharpResult) {
+    console.log(JSON.stringify({ _type: 'ad_upscale_used', method: 'sharp' }))
+    return { buffer: sharpResult, method: 'sharp' }
+  }
+
+  // ③ Kembalikan null → sistem akan pakai gradient
+  console.log(JSON.stringify({ _type: 'ad_upscale_used', method: 'none' }))
+  return null
+}
+
 // ─── Fase 0: Upload Tracking (Data Collection) ──────────────────────────────
 // Kumpulkan data 2-4 minggu untuk keputusan Fase 1 (AI Upscale)
 
@@ -176,6 +317,7 @@ interface UploadMetrics {
   targetWidth: number
   targetHeight: number
   needsUpscale: boolean
+  upscaleMethod: 'replicate' | 'sharp' | 'none'
   ratioGapPercent: number
   method: string
   outputSizeKB: number
@@ -189,8 +331,9 @@ function logUploadMetrics(metrics: UploadMetrics): void {
 
 /**
  * Proses gambar iklan dengan smart approach:
- * 1. Jika rasio cocok → smart crop (cover)
- * 2. Jika rasio beda → palette gradient background + contain
+ * 1. Upscale jika gambar terlalu kecil (Replicate → Sharp → skip)
+ * 2. Jika rasio cocok → smart crop (cover)
+ * 3. Jika rasio beda → palette gradient background + contain
  *
  * Tidak ada blur. Tidak ada penolakan gambar kecil.
  */
@@ -211,28 +354,38 @@ export async function processAdSmart(
     throw new Error('Gambar tidak memiliki dimensi yang valid')
   }
 
-  // Extract palette
+  // ── Upscale pipeline (jika gambar lebih kecil dari target) ──
+  let workingBuffer = buffer
+  let upscaleMethod: 'replicate' | 'sharp' | 'none' = 'none'
+  const needsUpscale = origW < targetW || origH < targetH
+
+  if (needsUpscale) {
+    const upscaled = await upscaleIfNeeded(buffer, targetW, targetH)
+    if (upscaled) {
+      workingBuffer = upscaled.buffer
+      upscaleMethod = upscaled.method
+    }
+  }
+
+  // Extract palette (dari gambar asli, bukan upscaled — warna lebih akurat)
   const palette = await extractPalette(buffer)
 
-  // Check aspect ratio
+  // Check aspect ratio (gunakan dimensi asli untuk cek rasio)
   const targetRatio = targetW / targetH
   const origRatio = origW / origH
   const ratioDiff = Math.abs(origRatio - targetRatio) / targetRatio
-
-  // Fase 0: Check apakah gambar perlu upscale (data collection)
-  const needsUpscale = origW < targetW || origH < targetH
 
   let result: Buffer
   let method: 'palette_gradient' | 'smart_crop'
 
   if (ratioDiff <= ASPECT_RATIO_TOLERANCE) {
-    result = await sharp(buffer)
+    result = await sharp(workingBuffer)
       .resize(targetW, targetH, { fit: 'cover', position: 'attention' })
       .webp({ quality: 80 })
       .toBuffer()
     method = 'smart_crop'
   } else {
-    result = await createPaletteBanner(buffer, targetW, targetH, palette)
+    result = await createPaletteBanner(workingBuffer, targetW, targetH, palette)
     method = 'palette_gradient'
   }
 
@@ -262,6 +415,7 @@ export async function processAdSmart(
     targetWidth: targetW,
     targetHeight: targetH,
     needsUpscale,
+    upscaleMethod,
     ratioGapPercent: Math.round(ratioDiff * 100),
     method,
     outputSizeKB: Math.round(result.length / 1024),
