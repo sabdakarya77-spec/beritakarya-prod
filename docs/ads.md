@@ -750,6 +750,86 @@ Kumpulkan dari hari pertama. 6 bulan lagi = library yang tidak dimiliki kompetit
 
 ---
 
+## 7B. Video Production — 6 AI Providers
+
+> **Status:** Sudah diimplementasikan (28 Juni 2026)
+> **Halaman:** `/{site}/dashboard/ads/production`
+
+### 7B.1 Provider yang Didukung
+
+| Provider | Tier | Harga/video (10-15s) | Kelebihan |
+|----------|------|---------------------|-----------|
+| **Seedance** (ByteDance) | ⭐ Recommended | $0.50-1.50 | Kualitas terbaik |
+| **Kling** (Kuaishou) | Alternatif | $0.50-1.20 | Solid, terbukti |
+| **Hailuo AI** (MiniMax) | 💰 Budget | $0.20-0.60 | Termurah |
+| **Pika** | Alternatif | $1.00-1.50 | Mudah dipakai |
+| **Luma Dream Machine** | Alternatif | $0.50-1.20 | Gerakan natural |
+| **Runway** | 💎 Premium | $2.00-3.00 | Kualitas tertinggi |
+
+### 7B.2 Arsitektur
+
+```
+Frontend (Production Page)
+├── Settings: input API key per provider (simpan di database)
+├── Dropdown: pilih AI provider
+├── Prompt input
+└── Preview video + publish ke slot
+
+Backend
+├── apps/api/src/lib/video-providers/ — abstraction layer
+│   ├── index.ts — registry + types
+│   ├── base.ts — abstract class (getApiKey dari DB, fallback .env)
+│   ├── seedance.ts, kling.ts, hailuo.ts, pika.ts, luma.ts, runway.ts
+├── VideoProviderConfig model — simpan API key di database
+└── Endpoint:
+    ├── GET /production/providers — daftar provider + status
+    ├── POST /production/providers — simpan API key
+    ├── DELETE /production/providers/:provider — hapus API key
+    ├── POST /production/:bookingId/generate — generate video
+    └── POST /production/:bookingId/publish — publish ke slot
+```
+
+### 7B.3 Alur Produksi Video
+
+```
+① Advertiser → Ad Studio → upload logo + foto → submit booking
+② Admin → booking review → approve
+③ Admin → Production page → pilih provider → input prompt → "Produksi Video"
+④ Backend → panggil AI provider → generate video
+⑤ Admin → preview hasil → rating (1-5) → "Tayangkan"
+⑥ Video → masuk ke HOME_TOP slot → tayang di homepage
+⑦ Prompt tersimpan di Prompt Library (VideoPrompt model)
+```
+
+### 7B.4 API Key Management
+
+API key disimpan di **database** (bukan `.env`), diinput dari **frontend**:
+
+```
+Halaman Produksi → [⚙️ Pengaturan API Key]
+├── Seedance API Key: [________] [💾] [🗑️]
+├── Kling API Key:    [________] [💾] [🗑️]
+├── Hailuo API Key:   [________] [💾] [🗑️]
+├── Pika API Key:     [________] [💾] [🗑️]
+├── Luma API Key:     [________] [💾] [🗑️]
+└── Runway API Key:   [________] [💾] [🗑️]
+```
+
+Provider tanpa API key → otomatis disabled di dropdown.
+
+### 7B.5 Prompt Library
+
+Setiap kali video di-generate, prompt tersimpan di tabel `VideoPrompt`:
+- `bookingId` — booking terkait
+- `prompt` — teks prompt yang dipakai
+- `category` — kategori (restoran, properti, dll)
+- `rating` — rating admin (1-5)
+- `videoUrl` — URL video hasil
+
+Prompt Library adalah **aset paling berharga** — tool AI bisa diganti, prompt tidak.
+
+---
+
 ## 8. Rate Limiting
 
 | Endpoint | Limit | Window |
@@ -799,16 +879,29 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 9 | Rotasi slot non-HERO | ✅ Selesai |
 | 10 | Auto-expiry cron | ✅ Sudah Ada |
 | 11 | Duplicate admin views | ✅ Selesai |
-| 12 | Permission wapimred approve | 🟢 Kecil (0.5 hari) |
+| 12 | Permission wapimred approve | ✅ Selesai |
 | 13 | Rate limit booking creation | ✅ Selesai |
 | 14 | Error handling order flow | ✅ Selesai |
 | 15 | Smart image processing (palette gradient) | ✅ Selesai |
 | 16 | Ad preview semua slot | ✅ Selesai |
 | 17 | Upscale pipeline (Replicate → Sharp → gradient) | ✅ Selesai |
-| 18 | HOME_TOP: upload logo+foto (bukan video) | 🔴 Belum (butuh perubahan Ad Studio) |
-| 19 | HOME_TOP: grace period & revisi 1x | 🟡 Manual dulu (email/WA), otomatisasi nanti |
-| 20 | HOME_TOP: previewUrl untuk advertiser | 🟡 Manual dulu, field DB ditunda |
-| 21 | Video production: Seedance/Kling + Prompt Library | 🟢 Mulai Fase 1 sekarang |
+| 18 | HOME_TOP: upload logo+foto (bukan video) | ✅ Selesai — Ad Studio branch khusus HOME_TOP |
+| 19 | HOME_TOP: grace period & revisi 1x | ✅ Selesai — manual via sistem, field DB ditunda |
+| 20 | HOME_TOP: previewUrl untuk advertiser | ✅ Selesai — Production page |
+| 21 | Video production: 6 AI providers + Prompt Library | ✅ Selesai |
+| 22 | Halaman produksi video (`/dashboard/ads/production`) | ✅ Selesai |
+| 23 | API key input di frontend (database, bukan .env) | ✅ Selesai |
+| 24 | Slot availability check (real capacity) | ✅ Selesai |
+| 25 | Bundle pricing (Homepage/Article/All-In) | ✅ Selesai |
+| 26 | allowedFormat validation (filter format selector) | ✅ Selesai |
+| 27 | Multi-iklan support (AdSlotCard refactor) | ✅ Selesai |
+| 28 | Video preview di AdSlotCard | ✅ Selesai |
+| 29 | Marketing page pre-selection (`?package=`) | ✅ Selesai |
+| 30 | Bank account shared constant | ✅ Selesai |
+| 31 | Advertiser history: paymentStatus column | ✅ Selesai |
+| 32 | wapimred role di /bookings/all | ✅ Selesai |
+| 33 | Animation effect removed from UI | ✅ Selesai |
+| 34 | Carousel: video 12s, banner 7s, random, fade | ✅ Selesai |
 
 ---
 
@@ -829,18 +922,22 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | File | Fungsi |
 |------|--------|
 | `apps/api/src/config/ad-slots.ts` | **Konfigurasi slot** — ukuran, format (VIDEO/IMAGE), tier. Satu sumber kebenaran |
-| `apps/api/src/modules/ad/ad.controller.ts` | Semua endpoint ads + `generateVariantsFromUrl` helper |
-| `apps/api/src/modules/ad/ad.repository.ts` | Prisma data access |
+| `apps/api/src/modules/ad/ad.controller.ts` | Semua endpoint ads + production + bundles |
+| `apps/api/src/modules/ad/ad.repository.ts` | Prisma data access + VideoProviderConfig |
 | `apps/api/src/modules/ad/ad.service.ts` | Impresi dedup, booking sync |
-| `apps/api/src/lib/ad-image-processor.ts` | Smart image processing, video validation, parallel previews |
+| `apps/api/src/modules/ad/bundle-pricing.ts` | Logika bundle pricing (Homepage/Article/All-In) |
+| `apps/api/src/lib/ad-image-processor.ts` | Smart image processing, upscale pipeline, parallel previews |
+| `apps/api/src/lib/video-providers/` | **6 AI video providers** (Seedance, Kling, Hailuo, Pika, Luma, Runway) |
 | `apps/api/src/modules/media/media.controller.ts` | Upload endpoint + `/upload-ad` (single → all variants) |
 | `apps/api/src/cron/ad-expiry.ts` | Auto-expiry cron |
 | `apps/api/src/services/midtrans.service.ts` | Midtrans integration |
-| `apps/web/components/ui/AdSpace.tsx` | Komponen iklan publik |
-| `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard (single upload + preview) |
-| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card (preview, stats, upload) |
+| `apps/web/components/ui/AdSpace.tsx` | Komponen iklan publik — carousel (video 12s, banner 7s), random order |
+| `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard — upload logo+foto untuk HOME_TOP |
+| `apps/web/components/dashboard/ads/production/` | **Halaman produksi video** — AI provider selector, prompt, preview |
+| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card — multi-iklan, video preview |
 | `apps/web/components/dashboard/ads/pages/AdsSlotsContent.tsx` | Admin Card Grid layout |
-| `apps/web/lib/constants.ts` | Slot definitions — ukuran, format, tier (frontend mirror of config) |
+| `apps/web/components/dashboard/ads/pages/AdsOverviewContent.tsx` | Dashboard overview — 4 menu (Slots, Packages, Bookings, Production) |
+| `apps/web/lib/constants.ts` | Slot definitions — ukuran, format, tier, bank accounts |
 | `apps/web/tests/e2e/ad-booking.spec.ts` | E2E tests |
 
 ---
@@ -1008,57 +1105,58 @@ Smart Crop          Palette Gradient
 
 ---
 
-## 16. Plan Selanjutnya: Pricing & Dashboard Admin
+## 16. Pricing & Dashboard Admin — ✅ Selesai
 
-> **Status:** Belum diimplementasikan. Dibutuhkan diskusi harga sebelum eksekusi.
+> **Status:** Sudah diimplementasikan (28 Juni 2026)
 
-### 16.1 Struktur Harga Baru
+### 16.1 Struktur Harga
 
-Saat ini harga iklan di database masih mengikuti slot lama. Perlu ditentukan harga untuk 6 slot baru:
+Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Referensi: `docs/harga.md`
 
-| Slot | Posisi | Estimasi Visibilitas | Harga? |
-|------|--------|---------------------|--------|
-| `HOME_TOP` | Hero banner homepage | Paling tinggi (first fold) | **Perlu diskusi** |
-| `HOME_FEED_1` | Feed homepage atas | Tinggi | **Perlu diskusi** |
-| `HOME_FEED_2` | Feed homepage bawah | Sedang | **Perlu diskusi** |
-| `ARTICLE_TOP` | Atas artikel (paragraf 3) | Tinggi (pembaca sudah engaged) | **Perlu diskusi** |
-| `ARTICLE_MIDDLE` | Tengah artikel (paragraf 8) | Sedang-tinggi | **Perlu diskusi** |
-| `ARTICLE_BOTTOM` | Bawah artikel (sebelum related) | Sedang | **Perlu diskusi** |
+| Tier | Slot | Format | 7 Hari | 14 Hari | 30 Hari | Maks |
+|------|------|--------|--------|---------|---------|------|
+| Premium | `HOME_TOP` | 🎥 Video | Rp 250.000 | Rp 435.000 | Rp 750.000 | 3 |
+| Tinggi | `HOME_FEED_1` | 🖼️ Banner | Rp 175.000 | Rp 305.000 | Rp 525.000 | 3 |
+| Tinggi | `ARTICLE_TOP` | 🖼️ Banner | Rp 175.000 | Rp 305.000 | Rp 525.000 | 3 |
+| Menengah | `HOME_FEED_2` | 🖼️ Banner | Rp 100.000 | Rp 175.000 | Rp 300.000 | 2 |
+| Menengah | `ARTICLE_MIDDLE` | 🖼️ Banner | Rp 100.000 | Rp 175.000 | Rp 300.000 | 2 |
+| Ekonomi | `ARTICLE_BOTTOM` | 🖼️ Banner | Rp 75.000 | Rp 130.000 | Rp 225.000 | 2 |
 
-**Pertimbangan:**
-- Harga berdasarkan durasi (7/14/30 hari) atau berdasarkan impresi (CPM)?
-- Paket bundle (homepage only, article only, all-in)?
-- Diskon untuk paket bulanan?
-- Harga berbeda per slot atau tier (premium/standard/economy)?
+**Diskon otomatis:** 14 hari ~12.5%, 30 hari ~25%
 
-### 16.2 Dashboard Admin yang Perlu Diupdate
+**Bundle:**
+- Homepage Only (HOME_TOP + HOME_FEED_1 + HOME_FEED_2): diskon 19%
+- Article Only (ARTICLE_TOP + ARTICLE_MIDDLE + ARTICLE_BOTTOM): diskon 21%
+- All-In (semua 6 slot): diskon 34%
 
-| Komponen | File | Perubahan |
-|----------|------|-----------|
-| **AdsPackagesContent** | `pages/AdsPackagesContent.tsx` | Slot dropdown sudah update, tapi form & deskripsi paket perlu disesuaikan dengan harga baru |
-| **AdsSlotsContent** | `pages/AdsSlotsContent.tsx` | Layout card grid — pastikan 6 slot cards tampil dengan benar |
-| **AdsOverviewContent** | `pages/AdsOverviewContent.tsx` | Stats cards — mungkin perlu breakdown per slot |
-| **AdSlotCard** | `AdSlotCard.tsx` | Preview & stats per slot — pastikan ukuran preview sesuai slot baru |
-| **HeroBannerManager** | `HeroBannerManager.tsx` | Sudah di-rename, pastikan carousel berfungsi untuk HOME_TOP |
-| **AdsMarketingPage** | `AdsMarketingPage.tsx` | Halaman publik pricing — update deskripsi, harga, dan CTA untuk 6 slot |
-| **StudioCanvas** | `studio/StudioCanvas.tsx` | Preview mockup — sudah update, verifikasi visual |
-| **BookingReviewList** | `BookingReviewList.tsx` | Admin review — pastikan menampilkan slot name baru |
-| **AdvertiserAdsView** | `AdvertiserAdsView.tsx` | Dashboard advertiser — stats per booking |
+### 16.2 Dashboard Admin
+
+| Komponen | Status |
+|----------|--------|
+| AdsPackagesContent | ✅ — form create/edit dengan tier badge |
+| AdsSlotsContent | ✅ — 6 card grid dengan multi-iklan |
+| AdsOverviewContent | ✅ — 4 menu (Slots, Packages, Bookings, Production) |
+| AdSlotCard | ✅ — dynamic aspect ratio, video preview, format/tier badge |
+| HeroBannerManager | ✅ — tier + format badge |
+| AdsMarketingPage | ✅ — tier badge, format display |
+| StudioCanvas | ✅ — upload logo+foto untuk HOME_TOP, availability check |
+| BookingReviewList | ✅ — 5-item checklist |
+| AdvertiserAdsView | ✅ — stats + chart |
 
 ### 16.3 Checklist Eksekusi
 
 ```
-[ ] Diskusi & tentukan harga per slot (7/14/30 hari)
-[ ] Update AdPackage seed data dengan harga baru
-[ ] Update AdsMarketingPage — deskripsi, harga, highlight per slot
-[ ] Update AdsPackagesContent — form create/edit paket
-[ ] Update AdsSlotsContent — verifikasi 6 card grid
-[ ] Update AdSlotCard — preview size sesuai slot
-[ ] Update AdsOverviewContent — stats breakdown
-[ ] E2E test — booking flow dengan slot baru
-[ ] Deploy ke production
+[x] Diskusi & tentukan harga per slot (7/14/30 hari)
+[x] Harga diisi manual lewat dashboard (bukan seed data)
+[x] Update AdsMarketingPage — tier badge, format display
+[x] Update AdsPackagesContent — form create/edit paket
+[x] Update AdsSlotsContent — 6 card grid dengan multi-iklan
+[x] Update AdSlotCard — dynamic aspect ratio, video preview
+[x] Update AdsOverviewContent — 4 menu + stats
+[x] E2E test — booking flow dengan slot baru
+[x] Deploy ke production
 ```
 
 ---
 
-*Dokumentasi terakhir diperbarui: 27 Juni 2026 — update ukuran slot artikel descending (300×250, 300×200, 300×150)*
+*Dokumentasi terakhir diperbarui: 28 Juni 2026 — standarisasi slot (3 varian ukuran), 6 AI video providers, halaman produksi, availability check, bundle pricing*
