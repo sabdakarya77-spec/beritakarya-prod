@@ -48,7 +48,7 @@ export default function LoadMoreArticles({
       const nextPage = page + 1;
       let url = `${API_URL}/api/v1/articles/public?site=${siteId}&page=${nextPage}&limit=10`;
 
-      if (category && category !== 'Terbaru') {
+      if (category && category !== 'terbaru') {
         url += `&category=${encodeURIComponent(category)}`;
       }
       if (search) {
