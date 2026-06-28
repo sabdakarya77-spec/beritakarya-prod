@@ -270,7 +270,7 @@ adRouter.post('/bookings',
   requireAuth,
   requireRole(['advertiser']),
   asyncHandler(async (req: Request, res: Response) => {
-    const { packageId, siteId, campaignName, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, startDate, animationEffect } = req.body
+    const { packageId, siteId, campaignName, imageUrl, imageUrlTablet, imageUrlMobile, logoUrl, fotoUrl, linkUrl, startDate, animationEffect } = req.body
 
     const pkg = await repo.findPackageById(packageId)
     if (!pkg || !pkg.isActive) {
@@ -297,6 +297,8 @@ adRouter.post('/bookings',
       imageUrl: imageUrl || null,
       imageUrlTablet: imageUrlTablet || null,
       imageUrlMobile: imageUrlMobile || null,
+      logoUrl: logoUrl || null,
+      fotoUrl: fotoUrl || null,
       linkUrl: linkUrl || null,
       animationEffect: animationEffect || null,
       startDate: start,
@@ -701,5 +703,118 @@ adRouter.post('/bookings/:id/reject',
     }
 
     res.json({ success: true, data: booking })
+  })
+)
+
+// ─── Production: Generate Video ──────────────────────────────────────────────
+
+adRouter.post(
+  '/production/:bookingId/generate',
+  requireAuth,
+  requireRole(['superadmin', 'wapimred']),
+  siteMiddleware,
+  requireSiteAccess,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { bookingId } = req.params
+    const { prompt } = req.body
+
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Prompt wajib diisi' })
+    }
+
+    // Cek booking exists dan status ACTIVE
+    const booking = await repo.findBookingById(bookingId)
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' })
+    }
+    if (booking.status !== 'ACTIVE') {
+      return res.status(400).json({ success: false, message: 'Booking harus berstatus ACTIVE' })
+    }
+
+    // Cek apakah ini HOME_TOP booking
+    const pkg = await repo.findPackageById(booking.packageId)
+    if (!pkg || pkg.slot !== 'HOME_TOP') {
+      return res.status(400).json({ success: false, message: 'Endpoint ini hanya untuk HOME_TOP' })
+    }
+
+    try {
+      // TODO: Integrasi Seedance/Kling API
+      // Untuk sementara, simpan prompt dan return placeholder
+      // Implementasi sebenarnya akan memanggil API Seedance/Kling
+
+      const videoUrl = null // Akan diisi oleh API Seedance/Kling
+
+      // Simpan prompt ke VideoPrompt
+      await repo.createVideoPrompt({
+        bookingId,
+        prompt: prompt.trim(),
+        videoUrl,
+      })
+
+      if (videoUrl) {
+        res.json({ success: true, data: { videoUrl, prompt: prompt.trim() } })
+      } else {
+        res.json({
+          success: false,
+          message: 'Integrasi AI video belum diaktifkan. Silakan produksi video secara manual dan upload melalui halaman Slots.',
+        })
+      }
+    } catch (err) {
+      console.error('Gagal generate video:', err)
+      res.status(500).json({ success: false, message: 'Gagal generate video' })
+    }
+  })
+)
+
+// ─── Production: Publish Video to Slot ───────────────────────────────────────
+
+adRouter.post(
+  '/production/:bookingId/publish',
+  requireAuth,
+  requireRole(['superadmin', 'wapimred']),
+  siteMiddleware,
+  requireSiteAccess,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { bookingId } = req.params
+    const { videoUrl, prompt, rating } = req.body
+
+    if (!videoUrl || typeof videoUrl !== 'string') {
+      return res.status(400).json({ success: false, message: 'Video URL wajib diisi' })
+    }
+
+    // Cek booking exists
+    const booking = await repo.findBookingById(bookingId)
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' })
+    }
+
+    try {
+      // Update booking dengan video URL
+      await repo.updateBooking(bookingId, { imageUrl: videoUrl })
+
+      // Buat Advertisement entry (video tayang di HOME_TOP)
+      const ad = await repo.createAd({
+        siteId: booking.siteId,
+        slot: 'HOME_TOP',
+        imageUrl: videoUrl,
+        linkUrl: booking.linkUrl || '#',
+        isActive: true,
+        order: 0,
+        bookingId: booking.id,
+      })
+
+      // Update VideoPrompt dengan rating dan videoUrl
+      if (prompt) {
+        await repo.updateVideoPromptByBooking(bookingId, {
+          videoUrl,
+          rating: rating || null,
+        })
+      }
+
+      res.json({ success: true, data: { adId: ad.id, videoUrl } })
+    } catch (err) {
+      console.error('Gagal publish video:', err)
+      res.status(500).json({ success: false, message: 'Gagal publish video' })
+    }
   })
 )

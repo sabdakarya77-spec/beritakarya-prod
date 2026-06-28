@@ -197,18 +197,31 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setError('');
     try {
       const v = data.processedVariants;
-      const bookingRes = await api.post('/ads/bookings', {
+      const isHomeTop = data.selectedPackage?.slot === 'HOME_TOP';
+
+      // Untuk HOME_TOP: kirim logoUrl + fotoUrl (bukan imageUrl)
+      // Untuk slot lain: kirim imageUrl (processed variants)
+      const bookingPayload: Record<string, unknown> = {
         packageId: data.selectedPackage.id,
         siteId: site || 'pusat',
         campaignName: data.campaignName || null,
-        imageUrl: v.desktop?.url || null,
-        imageUrlTablet: v.tablet?.url || null,
-        imageUrlMobile: v.mobile?.url || null,
         linkUrl: data.linkUrl || '#',
         animationEffect: null,
         startDate: new Date(data.startDate).toISOString(),
         endDate: new Date(data.endDate).toISOString(),
-      });
+      };
+
+      if (isHomeTop) {
+        // HOME_TOP: upload file sebagai foto (logo diupload terpisah jika ada)
+        bookingPayload.logoUrl = null; // TODO: upload logo terpisah
+        bookingPayload.fotoUrl = v.desktop?.url || null;
+      } else {
+        bookingPayload.imageUrl = v.desktop?.url || null;
+        bookingPayload.imageUrlTablet = v.tablet?.url || null;
+        bookingPayload.imageUrlMobile = v.mobile?.url || null;
+      }
+
+      const bookingRes = await api.post('/ads/bookings', bookingPayload);
       if (!bookingRes.data?.success) throw new Error(bookingRes.data?.message || 'Gagal membuat pesanan.');
       const bookingId = bookingRes.data.data.id;
 

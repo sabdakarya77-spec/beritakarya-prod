@@ -32,6 +32,8 @@ export interface AdBooking {
   imageUrl: string | null;
   imageUrlTablet?: string | null;
   imageUrlMobile?: string | null;
+  logoUrl?: string | null; // Logo dari advertiser (khusus HOME_TOP)
+  fotoUrl?: string | null; // Foto dari advertiser (khusus HOME_TOP)
   linkUrl: string | null;
   startDate: string;
   endDate: string;

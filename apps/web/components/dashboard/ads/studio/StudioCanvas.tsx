@@ -351,30 +351,81 @@ export function StudioCanvas() {
                   <Upload size={16} className="text-brand-red" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">Upload Materi Iklan</h3>
+                  <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">
+                    {_isHeroBanner ? 'Upload Logo & Foto' : 'Upload Materi Iklan'}
+                  </h3>
                   <p className="text-[10px] text-gray-400">
-                    {data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive'}
+                    {_isHeroBanner
+                      ? 'Tim kreatif kami akan membuat video dalam 1-2 hari kerja'
+                      : (data.selectedPackage ? getSlotDimensions(data.selectedPackage.slot) : 'Responsive')
+                    }
                   </p>
                 </div>
               </div>
 
-              <div>
-                <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-6 text-center rounded-xl bg-gray-50/50 dark:bg-white/[0.02]">
-                  <input
-                    type="file"
-                    accept={data.mediaType === 'image' ? 'image/*,image/gif' : 'video/mp4,video/webm'}
-                    onChange={(e) => handleAdFileChange(e)}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <Upload size={20} className="text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs font-bold text-brand-black dark:text-white">
-                    {data.adFileName || 'Pilih file'}
-                  </p>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Max 10MB
+              {/* HOME_TOP: Upload Logo + Foto */}
+              {_isHeroBanner ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Logo */}
+                    <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-xl bg-gray-50/50 dark:bg-white/[0.02]">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setData(prev => ({ ...prev, adFile: file, adFileName: file.name }));
+                          }
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <ImageIcon size={16} className="text-gray-400 mx-auto mb-1.5" />
+                      <p className="text-[10px] font-bold text-brand-black dark:text-white">Logo</p>
+                      <p className="text-[8px] text-gray-400 mt-0.5">PNG/SVG • Transparan</p>
+                    </div>
+                    {/* Foto */}
+                    <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-4 text-center rounded-xl bg-gray-50/50 dark:bg-white/[0.02]">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setData(prev => ({ ...prev, adFile: file, adFileName: file.name }));
+                          }
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <ImageIcon size={16} className="text-gray-400 mx-auto mb-1.5" />
+                      <p className="text-[10px] font-bold text-brand-black dark:text-white">Foto Produk</p>
+                      <p className="text-[8px] text-gray-400 mt-0.5">JPG/PNG • Min 600px</p>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-gray-400 text-center italic">
+                    Video akan diproduksi oleh tim kreatif kami. Anda akan mendapat notifikasi saat video siap.
                   </p>
                 </div>
-              </div>
+              ) : (
+                /* Slot lain: Upload biasa */
+                <div>
+                  <div className="relative border-2 border-dashed border-gray-200 dark:border-white/10 hover:border-brand-red/50 transition-colors p-6 text-center rounded-xl bg-gray-50/50 dark:bg-white/[0.02]">
+                    <input
+                      type="file"
+                      accept={data.mediaType === 'image' ? 'image/*,image/gif' : 'video/mp4,video/webm'}
+                      onChange={(e) => handleAdFileChange(e)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <Upload size={20} className="text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs font-bold text-brand-black dark:text-white">
+                      {data.adFileName || 'Pilih file'}
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      {data.mediaType === 'image' ? 'WebP, JPG, PNG, GIF' : 'MP4, WebM'} • Max 10MB
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Server-processed preview */}
               {data.isProcessing && (

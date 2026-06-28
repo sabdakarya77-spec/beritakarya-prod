@@ -575,6 +575,8 @@ model AdBooking {
   imageUrl        String? // Desktop variant (ukuran dari config/ad-slots.ts)
   imageUrlTablet  String? // Tablet variant (ukuran dari config)
   imageUrlMobile  String? // Mobile variant (ukuran dari config)
+  logoUrl         String? // Logo dari advertiser (khusus HOME_TOP creative service)
+  fotoUrl         String? // Foto dari advertiser (khusus HOME_TOP creative service)
   linkUrl         String? // Tautan target ketika diklik
   animationEffect String? // Deprecated — tidak dipakai di UI, disimpan untuk backward compatibility
   startDate       DateTime
@@ -595,12 +597,30 @@ model AdBooking {
   package      AdPackage     @relation(fields: [packageId], references: [id])
   advertisements Advertisement[]
   adEventLogs  AdEventLog[]
+  videoPrompts VideoPrompt[]
 
   @@index([userId])
   @@index([siteId])
   @@index([packageId])
   @@index([status])
   @@index([siteId, status, startDate, endDate])
+}
+
+// Prompt Library — simpan prompt yang dipakai untuk produksi video
+model VideoPrompt {
+  id          String    @id @default(uuid())
+  bookingId   String
+  prompt      String    @db.Text
+  category    String?   // restoran, properti, otomotif, dll
+  rating      Int?      // 1-5 (admin rate hasil)
+  videoUrl    String?   // URL video yang dihasilkan
+  createdAt   DateTime  @default(now())
+
+  booking     AdBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([category])
+  @@index([createdAt])
 }
 
 enum PaymentStatus {

@@ -197,6 +197,8 @@ export async function createBooking(data: {
   imageUrl?: string | null
   imageUrlTablet?: string | null
   imageUrlMobile?: string | null
+  logoUrl?: string | null
+  fotoUrl?: string | null
   linkUrl?: string | null
   animationEffect?: string | null
   startDate: Date
@@ -320,4 +322,47 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
       ctr: totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0,
     },
   }
+}
+
+// ─── VideoPrompt (Prompt Library) ────────────────────────────────────────────
+
+export async function createVideoPrompt(data: {
+  bookingId: string
+  prompt: string
+  videoUrl?: string | null
+  category?: string | null
+}) {
+  return prisma.videoPrompt.create({
+    data: {
+      bookingId: data.bookingId,
+      prompt: data.prompt,
+      videoUrl: data.videoUrl || null,
+      category: data.category || null,
+    },
+  })
+}
+
+export async function updateVideoPromptByBooking(
+  bookingId: string,
+  data: { videoUrl?: string; rating?: number | null }
+) {
+  return prisma.videoPrompt.updateMany({
+    where: { bookingId },
+    data: {
+      ...(data.videoUrl && { videoUrl: data.videoUrl }),
+      ...(data.rating !== undefined && { rating: data.rating }),
+    },
+  })
+}
+
+export async function findVideoPromptsByCategory(category: string) {
+  return prisma.videoPrompt.findMany({
+    where: { category },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  })
+}
+
+export async function findVideoPromptById(id: string) {
+  return prisma.videoPrompt.findUnique({ where: { id } })
 }
