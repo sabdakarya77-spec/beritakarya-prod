@@ -54,7 +54,13 @@ export function constructMetadata({
     ? `${baseUrl}/${siteParam}`
     : `${baseUrl}/`
 
-  const imageUrl = image.startsWith('http') ? image : `${baseUrl}${image}`
+  const rawUrl = image.startsWith('http') ? image : `${baseUrl}${image}`
+  // Use Next.js Image Optimization for external images (e.g. MinIO storage).
+  // This produces a properly sized & compressed version for social crawlers.
+  // Internal paths (e.g. /api/og, /logo.png) are kept as-is.
+  const imageUrl = image.startsWith('http')
+    ? `${baseUrl}/_next/image?url=${encodeURIComponent(rawUrl)}&w=1200&q=75`
+    : rawUrl
   const resolvedType = slug ? 'article' : type
 
   return {
