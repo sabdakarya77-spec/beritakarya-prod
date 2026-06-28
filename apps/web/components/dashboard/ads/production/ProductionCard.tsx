@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Image as ImageIcon,
   Wand2,
@@ -8,11 +8,24 @@ import {
   CheckCircle2,
   Star,
   ExternalLink,
+  ChevronDown,
+  Zap,
+  DollarSign,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { api } from '../../../../lib/api';
 import { useToastStore } from '../../../../store/toastStore';
 import type { AdBooking } from '../types';
+
+interface ProviderInfo {
+  id: string;
+  name: string;
+  tier: 'budget' | 'standard' | 'premium';
+  costPerSecond: number;
+  costEstimate10s: string;
+  costEstimate15s: string;
+  available: boolean;
+}
 
 interface Props {
   booking: AdBooking;
@@ -22,15 +35,42 @@ interface Props {
   onRefresh: () => void;
 }
 
+const PROVIDER_BADGES: Record<string, { label: string; color: string }> = {
+  seedance: { label: '⭐ Recommended', color: 'bg-amber-500/10 text-amber-600' },
+  kling: { label: 'Alternatif', color: 'bg-blue-500/10 text-blue-600' },
+  hailuo: { label: '💰 Budget', color: 'bg-emerald-500/10 text-emerald-600' },
+  pika: { label: 'Alternatif', color: 'bg-violet-500/10 text-violet-600' },
+  luma: { label: 'Alternatif', color: 'bg-cyan-500/10 text-cyan-600' },
+  runway: { label: '💎 Premium', color: 'bg-rose-500/10 text-rose-600' },
+};
+
 export function ProductionCard({ booking, site, isProcessing, setProcessingId, onRefresh }: Props) {
   const { addToast } = useToastStore();
   const [prompt, setPrompt] = useState('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [rating, setRating] = useState<number>(0);
+  const [selectedProvider, setSelectedProvider] = useState<string>('seedance');
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
 
   const startDate = new Date(booking.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   const endDate = new Date(booking.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Fetch available providers
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const res = await api.get('/ads/production/providers');
+        if (res.data?.success) {
+          setProviders(res.data.data);
+        }
+      } catch { /* ignore */ }
+    };
+    fetchProviders();
+  }, []);
+
+  const currentProvider = providers.find(p => p.id === selectedProvider);
 
   // Generate video with AI
   const handleGenerate = async () => {
@@ -43,6 +83,7 @@ export function ProductionCard({ booking, site, isProcessing, setProcessingId, o
     try {
       const res = await api.post(`/ads/production/${booking.id}/generate`, {
         prompt: prompt.trim(),
+        provider: selectedProvider,
       });
 
       if (res.data?.success && res.data?.data?.videoUrl) {
@@ -140,6 +181,78 @@ export function ProductionCard({ booking, site, isProcessing, setProcessingId, o
                 </>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* AI Provider Selector */}
+        <div>
+          <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">
+            AI Provider
+          </label>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowProviderDropdown(!showProviderDropdown)}
+              className="w-full flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-xl text-left hover:border-brand-red/30 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <Zap size={14} className="text-brand-red" />
+                <span className="text-xs font-bold text-brand-black dark:text-white">
+                  {providers.find(p => p.id === selectedProvider)?.name || 'Seedance'}
+                </span>
+                {currentProvider && (
+                  <span className={cn("text-[8px] font-black px-1.5 py-0.5 rounded-full", PROVIDER_BADGES[selectedProvider]?.color)}>
+                    {PROVIDER_BADGES[selectedProvider]?.label}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {currentProvider && (
+                  <span className="text-[9px] text-gray-400 flex items-center gap-0.5">
+                    <DollarSign size={10} />
+                    {currentProvider.costEstimate10s}-{currentProvider.costEstimate15s}
+                  </span>
+                )}
+                <ChevronDown size={14} className="text-gray-400" />
+              </div>
+            </button>
+
+            {/* Dropdown */}
+            {showProviderDropdown && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-20 overflow-hidden">
+                {providers.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedProvider(p.id);
+                      setShowProviderDropdown(false);
+                    }}
+                    disabled={!p.available}
+                    className={cn(
+                      "w-full flex items-center justify-between gap-2 p-3 text-left transition-all",
+                      p.available
+                        ? "hover:bg-gray-50 dark:hover:bg-white/[0.03]"
+                        : "opacity-40 cursor-not-allowed",
+                      selectedProvider === p.id && "bg-brand-red/[0.03]"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-brand-black dark:text-white">{p.name}</span>
+                      <span className={cn("text-[8px] font-black px-1.5 py-0.5 rounded-full", PROVIDER_BADGES[p.id]?.color)}>
+                        {PROVIDER_BADGES[p.id]?.label}
+                      </span>
+                      {!p.available && (
+                        <span className="text-[8px] text-red-400">No API Key</span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-gray-400">
+                      {p.costEstimate10s}-{p.costEstimate15s}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

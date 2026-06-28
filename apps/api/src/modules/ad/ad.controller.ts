@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
+import { generateVideo, getProviderList, type VideoProviderId } from '../../lib/video-providers'
 import { adTrackingLimiter, bookingLimiter } from '../../lib/rateLimit'
 import { isDuplicateImpression, syncTrackingToBooking, sanitizeAdCode } from './ad.service'
 import { processAdSmart, AD_VARIANTS } from '../../lib/ad-image-processor'
@@ -706,6 +707,18 @@ adRouter.post('/bookings/:id/reject',
   })
 )
 
+// ─── Production: Get Available Providers ─────────────────────────────────────
+
+adRouter.get(
+  '/production/providers',
+  requireAuth,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(async (_req: Request, res: Response) => {
+    const providers = getProviderList()
+    res.json({ success: true, data: providers })
+  })
+)
+
 // ─── Production: Generate Video ──────────────────────────────────────────────
 
 adRouter.post(
@@ -716,10 +729,16 @@ adRouter.post(
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { bookingId } = req.params
-    const { prompt } = req.body
+    const { prompt, provider = 'seedance' } = req.body
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return res.status(400).json({ success: false, message: 'Prompt wajib diisi' })
+    }
+
+    // Validasi provider
+    const validProviders: VideoProviderId[] = ['seedance', 'kling', 'hailuo', 'pika', 'luma', 'runway']
+    if (!validProviders.includes(provider)) {
+      return res.status(400).json({ success: false, message: `Provider tidak valid. Pilihan: ${validProviders.join(', ')}` })
     }
 
     // Cek booking exists dan status ACTIVE
@@ -738,25 +757,35 @@ adRouter.post(
     }
 
     try {
-      // TODO: Integrasi Seedance/Kling API
-      // Untuk sementara, simpan prompt dan return placeholder
-      // Implementasi sebenarnya akan memanggil API Seedance/Kling
+      // Generate video menggunakan provider yang dipilih
+      const result = await generateVideo(provider, {
+        prompt: prompt.trim(),
+        duration: 12, // 10-15 detik, ambil tengah
+        aspectRatio: '960:240', // Sesuai slot HOME_TOP
+      })
 
-      const videoUrl = null // Akan diisi oleh API Seedance/Kling
-
-      // Simpan prompt ke VideoPrompt
+      // Simpan prompt ke VideoPrompt (selalu, sukses atau tidak)
       await repo.createVideoPrompt({
         bookingId,
         prompt: prompt.trim(),
-        videoUrl,
+        videoUrl: result.videoUrl || null,
       })
 
-      if (videoUrl) {
-        res.json({ success: true, data: { videoUrl, prompt: prompt.trim() } })
+      if (result.success && result.videoUrl) {
+        res.json({
+          success: true,
+          data: {
+            videoUrl: result.videoUrl,
+            prompt: prompt.trim(),
+            provider: result.provider,
+            costEstimate: result.costEstimate,
+          },
+        })
       } else {
         res.json({
           success: false,
-          message: 'Integrasi AI video belum diaktifkan. Silakan produksi video secara manual dan upload melalui halaman Slots.',
+          message: result.error || 'Gagal generate video',
+          provider: result.provider,
         })
       }
     } catch (err) {
