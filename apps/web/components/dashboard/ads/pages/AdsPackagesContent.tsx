@@ -7,7 +7,7 @@ import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
 import { useToastStore } from '../../../../store/toastStore';
 import { cn } from '../../../../lib/utils';
-import { AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
+import { AD_SLOT_DEFINITIONS, getAdSlotDefinition } from '../../../../lib/constants';
 import { Plus, Trash2, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
 import type { AdPackage } from '../types';
 
@@ -195,9 +195,21 @@ export default function AdsPackagesContent() {
               <div key={pkg.id} className="dash-card p-6 flex flex-col justify-between group hover:border-brand-red/30 transition-all">
                 <div>
                   <div className="flex justify-between items-start">
-                    <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider", pkg.isActive ? "bg-emerald-500/10 text-emerald-500" : "bg-gray-200 text-gray-400")}>
-                      {pkg.isActive ? 'AKTIF' : 'NONAKTIF'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider", pkg.isActive ? "bg-emerald-500/10 text-emerald-500" : "bg-gray-200 text-gray-400")}>
+                        {pkg.isActive ? 'AKTIF' : 'NONAKTIF'}
+                      </span>
+                      {(() => {
+                        const slotDef = getAdSlotDefinition(pkg.slot);
+                        return slotDef?.tier ? (
+                          <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                            slotDef.tier === 'PREMIUM' ? 'bg-amber-500/10 text-amber-600' :
+                            slotDef.tier === 'TINGGI' ? 'bg-blue-500/10 text-blue-600' :
+                            'bg-gray-100 dark:bg-white/10 text-gray-500'
+                          )}>{slotDef.tier}</span>
+                        ) : null;
+                      })()}
+                    </div>
                     <span className="text-[9px] font-mono text-gray-400 font-bold uppercase">{pkg.slot}</span>
                   </div>
                   <h4 className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight mt-3">{pkg.name}</h4>

@@ -150,8 +150,19 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
               <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">
                 {slot.name}
               </h3>
+              <span className={cn("text-[8px] font-black px-2 py-0.5 rounded-full",
+                slot.tier === 'PREMIUM' ? 'bg-amber-500/10 text-amber-600' :
+                slot.tier === 'TINGGI' ? 'bg-blue-500/10 text-blue-600' :
+                slot.tier === 'MENENGAH' ? 'bg-gray-100 dark:bg-white/10 text-gray-500' :
+                'bg-gray-50 dark:bg-white/5 text-gray-400'
+              )}>
+                {slot.tier}
+              </span>
               <span className="text-[8px] font-black px-2 py-0.5 bg-gray-100 dark:bg-white/10 text-gray-400 rounded-full font-mono">
                 {slot.publicSize || slot.size}
+              </span>
+              <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
+                {slot.format === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
               </span>
               {isMobileVisible ? (
                 <span className="text-[7px] font-black px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center gap-0.5">

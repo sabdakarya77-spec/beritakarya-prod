@@ -164,6 +164,14 @@ export function StudioPreview() {
           {/* Info bar */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <span className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">{slotName}</span>
+            <span className={cn("px-2.5 py-1 border rounded-full text-[9px] font-black uppercase tracking-widest",
+              slotDef?.tier === 'PREMIUM' ? 'bg-amber-500/10 border-amber-500/20 text-amber-600' :
+              slotDef?.tier === 'TINGGI' ? 'bg-blue-500/10 border-blue-500/20 text-blue-600' :
+              'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-400'
+            )}>{slotDef?.tier || '-'}</span>
+            <span className="px-2.5 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-[9px] font-black uppercase tracking-widest text-purple-600">
+              {slotDef?.format === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
+            </span>
             <span className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">{slotSize}</span>
             <span className="px-2.5 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">{selectedPackage.durationDays} hari</span>
             <span className="px-2.5 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[9px] font-black uppercase tracking-widest text-brand-red">{formatRupiah(selectedPackage.price)}</span>

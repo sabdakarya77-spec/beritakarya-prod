@@ -192,9 +192,16 @@ export function StudioCanvas() {
                             <span className="text-xs font-black text-brand-black dark:text-white">{pkg.name}</span>
                             <span className="text-xs font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
                           </div>
-                          <span className="text-[10px] text-gray-400 uppercase tracking-wider">
-                            {getSlotLabel(pkg.slot)} • {pkg.durationDays} hari
-                          </span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">
+                              {getSlotLabel(pkg.slot)} • {pkg.durationDays} hari
+                            </span>
+                            {pkg.allowedFormat && (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
+                                {pkg.allowedFormat === 'VIDEO' ? '🎥 Video' : pkg.allowedFormat === 'IMAGE' ? '🖼️ Banner' : '🎥+🖼️ All'}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </label>
                     ))}

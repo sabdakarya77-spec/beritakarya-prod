@@ -14,6 +14,7 @@ import {
   MousePointerClick,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
+import { getAdSlotDefinition } from '../../../../lib/constants';
 import type { AdBooking, AdPackage } from '../types';
 
 interface AdsOverviewContentProps {
@@ -129,6 +130,8 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
                 <tr className="border-b border-gray-100 dark:border-white/5">
                   <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Pemesan</th>
                   <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Paket</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Tier</th>
+                  <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Format</th>
                   <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Site</th>
                   <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Status</th>
                   <th className="py-3 px-4 font-black uppercase tracking-widest text-gray-400">Impresi</th>
@@ -136,24 +139,41 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
                 </tr>
               </thead>
               <tbody>
-                {bookings.slice(0, 5).map((b) => (
-                  <tr key={b.id} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
-                    <td className="py-3 px-4 font-semibold text-brand-black dark:text-white">{b.user?.name || '-'}</td>
-                    <td className="py-3 px-4 text-gray-500">{b.package?.name || '-'}</td>
-                    <td className="py-3 px-4 text-gray-500">{b.siteId}</td>
-                    <td className="py-3 px-4">
-                      <span className={cn(
-                        "px-2 py-1 rounded-full text-[9px] font-bold uppercase",
-                        b.paymentStatus === 'PAID' ? "bg-emerald-100 text-emerald-700" :
-                        b.paymentStatus === 'VERIFYING' ? "bg-blue-100 text-blue-700" :
-                        b.paymentStatus === 'REJECTED' ? "bg-red-100 text-red-700" :
-                        "bg-amber-100 text-amber-700"
-                      )}>{b.paymentStatus}</span>
-                    </td>
-                    <td className="py-3 px-4 font-mono">{b.impressions.toLocaleString()}</td>
-                    <td className="py-3 px-4 font-mono">{b.clicks.toLocaleString()}</td>
-                  </tr>
-                ))}
+                {bookings.slice(0, 5).map((b) => {
+                  const slotDef = b.package?.slot ? getAdSlotDefinition(b.package.slot) : null;
+                  return (
+                    <tr key={b.id} className="border-b border-gray-50 dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-semibold text-brand-black dark:text-white">{b.user?.name || '-'}</td>
+                      <td className="py-3 px-4 text-gray-500">{b.package?.name || '-'}</td>
+                      <td className="py-3 px-4">
+                        {slotDef?.tier ? (
+                          <span className={cn("px-2 py-1 rounded-full text-[9px] font-bold uppercase",
+                            slotDef.tier === 'PREMIUM' ? 'bg-amber-100 text-amber-700' :
+                            slotDef.tier === 'TINGGI' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-500'
+                          )}>{slotDef.tier}</span>
+                        ) : '-'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-[9px] font-bold">
+                          {slotDef?.format === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-gray-500">{b.siteId}</td>
+                      <td className="py-3 px-4">
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-[9px] font-bold uppercase",
+                          b.paymentStatus === 'PAID' ? "bg-emerald-100 text-emerald-700" :
+                          b.paymentStatus === 'VERIFYING' ? "bg-blue-100 text-blue-700" :
+                          b.paymentStatus === 'REJECTED' ? "bg-red-100 text-red-700" :
+                          "bg-amber-100 text-amber-700"
+                        )}>{b.paymentStatus}</span>
+                      </td>
+                      <td className="py-3 px-4 font-mono">{b.impressions.toLocaleString()}</td>
+                      <td className="py-3 px-4 font-mono">{b.clicks.toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

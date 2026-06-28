@@ -133,9 +133,16 @@ export function StudioControls() {
                         <span className="text-[10px] font-black text-brand-black dark:text-white truncate">{pkg.name}</span>
                         <span className="text-[9px] font-black text-brand-red whitespace-nowrap">{formatRupiah(pkg.price)}</span>
                       </div>
-                      <span className="text-[7px] text-gray-400 uppercase tracking-wider">
-                        {getSlotLabel(pkg.slot)} • {pkg.durationDays}h
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[7px] text-gray-400 uppercase tracking-wider">
+                          {getSlotLabel(pkg.slot)} • {pkg.durationDays}h
+                        </span>
+                        {pkg.allowedFormat && (
+                          <span className="text-[7px] font-black px-1 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
+                            {pkg.allowedFormat === 'VIDEO' ? '🎥' : pkg.allowedFormat === 'IMAGE' ? '🖼️' : '🎥+🖼️'}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </label>
                 ))}
