@@ -66,3 +66,4 @@ node_modules/
 playwright-report/
 test-results/log.txt
 apps/web/test-results/
+iklan.txt
