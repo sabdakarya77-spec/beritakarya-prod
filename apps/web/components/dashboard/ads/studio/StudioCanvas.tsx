@@ -23,7 +23,7 @@ import { useStudio } from './StudioContext';
 
 
 export function StudioCanvas() {
-  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, uploadAndProcess, activeStep, setActiveStep, availability, checkingAvailability: _checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
+  const { data, setData, packages, loadingPackages, submitting, error, isSuccess, handleSubmit, uploadAndProcess, activeStep, setActiveStep, availability, checkingAvailability, completedBookingId: _completedBookingId, receiptUploadFailed } = useStudio();
 
   const formatRupiah = (val: string | number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(val));

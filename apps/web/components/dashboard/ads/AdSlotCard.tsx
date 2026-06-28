@@ -46,6 +46,12 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     ARTICLE_BOTTOM: 'aspect-[300/150]',
   };
 
+  // Deteksi file video berdasarkan ekstensi
+  const isVideoFile = (url: string): boolean => {
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext));
+  };
+
   // Total stats
   const totalImpressions = ads.reduce((sum, a) => sum + (a.impressions || 0), 0);
   const totalClicks = ads.reduce((sum, a) => sum + (a.clicks || 0), 0);
@@ -265,6 +271,8 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                   <div className="w-full h-full flex items-center justify-center">
                     <CodeIcon size={16} className="text-gray-300" />
                   </div>
+                ) : ad.imageUrl && isVideoFile(ad.imageUrl) ? (
+                  <video src={ad.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                 ) : ad.imageUrl ? (
                   <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-contain" />
                 ) : (
