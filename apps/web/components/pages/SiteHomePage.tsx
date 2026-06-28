@@ -279,17 +279,22 @@ function distributeArticles(articles: HomeArticle[], trendingIds: Set<string> = 
   // 3. Saring artikel umum (non-foto dan non-video) untuk masuk ke feed utama (Hero, Fokus, dll.)
   const generalArticles = articles.filter((a: HomeArticle) => !photoJournalIds.has(a.id) && !videoStoriesIds.has(a.id))
 
-  // Zona 1 — Hero: 4 artikel paling awal dari generalArticles
-  const hero = generalArticles.slice(0, 4)
+  // Adaptive allocation: jika artikel sedikit, kurangi hero/fokusRedaksi
+  // agar feed "Berita Terbaru" tetap terisi
+  const heroCount = generalArticles.length <= 15 ? 2 : 4
+  const fokusMax = generalArticles.length <= 15 ? 2 : 4
+
+  // Zona 1 — Hero
+  const hero = generalArticles.slice(0, heroCount)
   const heroIds = new Set(hero.map((a: HomeArticle) => a.id))
 
   // Zona 2 — Fokus Redaksi: prioritaskan isFeatured/isExclusive yang belum di hero
   const featuredPool = generalArticles
-    .slice(4)
+    .slice(heroCount)
     .filter((a: HomeArticle) => a.isFeatured || a.isExclusive)
-    .slice(0, 4)
+    .slice(0, fokusMax)
   // Fallback ke urutan biasa jika featured tidak cukup
-  const fokusRedaksi = featuredPool.length >= 2 ? featuredPool : generalArticles.slice(4, 8)
+  const fokusRedaksi = featuredPool.length >= 2 ? featuredPool : generalArticles.slice(heroCount, heroCount + fokusMax)
 
   // Kumpulkan semua ID yang sudah dipakai
   const usedIds = new Set([
@@ -300,7 +305,7 @@ function distributeArticles(articles: HomeArticle[], trendingIds: Set<string> = 
   // Artikel sisa yang belum dipakai di hero atau fokusRedaksi
   const remaining = generalArticles.filter((a: HomeArticle) => !usedIds.has(a.id))
 
-  // Zona 4 — Feed utama: 2 horizontal + 6 medium
+  // Zona 4 — Feed utama: 2 horizontal + sisa untuk grid
   const feedFeatured = remaining.slice(0, 2)
   const feedStream = remaining.slice(2, 8)
 
