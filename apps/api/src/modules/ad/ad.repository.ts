@@ -388,3 +388,22 @@ export async function upsertProviderConfig(provider: string, apiKey: string) {
 export async function deleteProviderConfig(provider: string) {
   return prisma.videoProviderConfig.delete({ where: { provider } })
 }
+
+// ─── Slot Availability ───────────────────────────────────────────────────────
+
+export async function countActiveBookingsForSlot(
+  slot: string,
+  siteId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<number> {
+  return prisma.adBooking.count({
+    where: {
+      siteId,
+      status: 'ACTIVE',
+      package: { slot },
+      startDate: { lte: endDate },
+      endDate: { gte: startDate },
+    },
+  })
+}

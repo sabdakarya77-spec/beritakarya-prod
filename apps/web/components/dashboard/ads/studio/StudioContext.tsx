@@ -75,12 +75,40 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [activeStep, setActiveStep] = useState<SectionId>(initialStep);
-  // Semua slot mendukung rotasi — selalu tersedia
-  const availability: AvailabilityStatus = { available: true };
-  const checkingAvailability = false;
-  const checkAvailability = async () => {};
+  const [availability, setAvailability] = useState<AvailabilityStatus | null>(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [completedBookingId, setCompletedBookingId] = useState<string | null>(null);
   const [receiptUploadFailed, setReceiptUploadFailed] = useState(false);
+
+  // Cek ketersediaan slot
+  const checkAvailability = async () => {
+    if (!data.selectedPackage || !data.startDate || !data.endDate) return;
+    setCheckingAvailability(true);
+    try {
+      const res = await api.get('/ads/availability', {
+        params: {
+          slot: data.selectedPackage.slot,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          siteId: site || 'pusat',
+        },
+      });
+      if (res.data?.success) {
+        setAvailability(res.data.data);
+      }
+    } catch {
+      setAvailability({ available: true }); // fallback: assume available
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
+
+  // Cek availability saat paket atau tanggal berubah
+  useEffect(() => {
+    if (data.selectedPackage && data.startDate && data.endDate) {
+      checkAvailability();
+    }
+  }, [data.selectedPackage?.id, data.startDate, data.endDate]);
 
   // Sync activeStep with URL query param on navigation
   useEffect(() => {

@@ -4,6 +4,7 @@ import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { generateVideo, getProviderList, type VideoProviderId } from '../../lib/video-providers'
+import { calculateAllBundles, BUNDLES } from './bundle-pricing'
 import { adTrackingLimiter, bookingLimiter } from '../../lib/rateLimit'
 import { isDuplicateImpression, syncTrackingToBooking, sanitizeAdCode } from './ad.service'
 import { processAdSmart, AD_VARIANTS } from '../../lib/ad-image-processor'
@@ -249,7 +250,38 @@ adRouter.get('/packages',
   })
 )
 
+// 1b. GET /bundles — Public & Advertiser to view bundle options
+adRouter.get('/bundles',
+  asyncHandler(async (req: Request, res: Response) => {
+    const { duration } = req.query
+    const durationDays = parseInt(duration as string) || 30
+
+    // Ambil harga paket dari database
+    const packages = await repo.findActivePackages()
+    const packagePrices: Record<string, number> = {}
+    for (const pkg of packages) {
+      // Ambil harga 7 hari sebagai base
+      if (pkg.durationDays === 7) {
+        packagePrices[pkg.slot] = Number(pkg.price)
+      }
+    }
+
+    const bundles = calculateAllBundles(durationDays, packagePrices)
+    res.json({ success: true, data: bundles })
+  })
+)
+
 // 2. GET /availability — Check if a slot is available for given dates
+// Batas kapasitas per slot (sesuai harga.md)
+const SLOT_MAX_CAPACITY: Record<string, number> = {
+  HOME_TOP: 3,
+  HOME_FEED_1: 3,
+  HOME_FEED_2: 2,
+  ARTICLE_TOP: 3,
+  ARTICLE_MIDDLE: 2,
+  ARTICLE_BOTTOM: 2,
+}
+
 adRouter.get('/availability',
   requireAuth,
   requireRole(['advertiser']),
@@ -260,8 +292,27 @@ adRouter.get('/availability',
       return res.status(400).json({ success: false, message: 'slot, startDate, endDate, siteId wajib diisi' })
     }
 
-    // Semua slot mendukung rotasi — selalu tersedia
-    res.json({ success: true, data: { available: true } })
+    const maxCapacity = SLOT_MAX_CAPACITY[slot] || 3
+
+    // Hitung booking aktif yang overlap dengan tanggal yang diminta
+    const activeBookings = await repo.countActiveBookingsForSlot(slot, siteId, new Date(startDate), new Date(endDate))
+
+    const available = activeBookings < maxCapacity
+    const remaining = Math.max(0, maxCapacity - activeBookings)
+
+    res.json({
+      success: true,
+      data: {
+        available,
+        slot,
+        maxCapacity,
+        activeBookings,
+        remaining,
+        message: available
+          ? `Tersedia ${remaining} slot dari ${maxCapacity}`
+          : `Slot penuh untuk periode ini (${maxCapacity}/${maxCapacity} terisi)`,
+      },
+    })
   })
 )
 

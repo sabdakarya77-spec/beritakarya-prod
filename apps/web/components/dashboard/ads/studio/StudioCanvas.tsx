@@ -317,11 +317,28 @@ export function StudioCanvas() {
                 </div>
               </div>
 
-              {/* Info: semua slot mendukung rotasi */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg">
-                <span className="text-blue-500 text-sm">ℹ</span>
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Semua slot mendukung rotasi multi-iklan</p>
-              </div>
+              {/* Info ketersediaan slot */}
+              {checkingAvailability ? (
+                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-lg">
+                  <RefreshCw size={12} className="animate-spin text-gray-400" />
+                  <p className="text-[10px] text-gray-400">Mengecek ketersediaan...</p>
+                </div>
+              ) : availability && !availability.available ? (
+                <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
+                  <span className="text-red-500 text-sm">✕</span>
+                  <p className="text-[10px] font-bold text-red-600 dark:text-red-400">{availability.message || 'Slot penuh untuk periode ini'}</p>
+                </div>
+              ) : availability ? (
+                <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
+                  <span className="text-emerald-500 text-sm">✓</span>
+                  <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{availability.message || 'Slot tersedia'}</p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg">
+                  <span className="text-blue-500 text-sm">ℹ</span>
+                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Pilih paket dan tanggal untuk cek ketersediaan</p>
+                </div>
+              )}
 
               <div className="flex justify-between pt-2">
                 <button
