@@ -91,8 +91,11 @@ export function HeroBannerRow({
         {/* Thumbnail preview */}
         <div className="w-32 h-16 md:w-48 md:h-20 rounded-lg overflow-hidden bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 flex-shrink-0">
           {ad.imageUrl ? (
-            ad.imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i) ? (
-              <video src={ad.imageUrl} muted className="w-full h-full object-cover" />
+            (() => {
+              try { return new URL(ad.imageUrl).pathname.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
+              catch { return ad.imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
+            })() ? (
+              <video src={ad.imageUrl} muted playsInline className="w-full h-full object-cover" />
             ) : (
               <img src={ad.imageUrl} alt="Banner" className="w-full h-full object-cover" />
             )
@@ -203,7 +206,14 @@ export function HeroBannerRow({
               </div>
               <div className="aspect-[4/1] bg-gray-50 dark:bg-black/20 rounded-xl border border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
                 {imageUrl ? (
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-contain" />
+                  (() => {
+                    try { return new URL(imageUrl).pathname.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
+                    catch { return imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
+                  })() ? (
+                    <video src={imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                  ) : (
+                    <img src={imageUrl} alt="Preview" className="w-full h-full object-contain" />
+                  )
                 ) : (
                   <span className="text-[9px] text-gray-400">Preview</span>
                 )}

@@ -46,10 +46,16 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     ARTICLE_BOTTOM: 'aspect-[300/150]',
   };
 
-  // Deteksi file video berdasarkan ekstensi
+  // Deteksi file video berdasarkan ekstensi di pathname (abaikan query params)
   const isVideoFile = (url: string): boolean => {
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext));
+    try {
+      const pathname = new URL(url).pathname.toLowerCase();
+      return videoExtensions.some(ext => pathname.endsWith(ext));
+    } catch {
+      // URL tidak valid — fallback ke cara lama
+      return videoExtensions.some(ext => url.toLowerCase().endsWith(ext));
+    }
   };
 
   // Total stats
@@ -272,7 +278,22 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                     <CodeIcon size={16} className="text-gray-300" />
                   </div>
                 ) : ad.imageUrl && isVideoFile(ad.imageUrl) ? (
-                  <video src={ad.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  <video
+                    src={ad.imageUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      // Coba reload sekali (mungkin CORS race condition)
+                      if (!el.dataset.retried) {
+                        el.dataset.retried = 'true';
+                        el.load();
+                      }
+                    }}
+                  />
                 ) : ad.imageUrl ? (
                   <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-contain" />
                 ) : (
