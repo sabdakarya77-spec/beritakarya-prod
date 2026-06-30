@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type RefObject } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
+import { Volume2, VolumeX } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 import type { AdSlotId } from '../../lib/constants';
 import BillboardShowcase from './BillboardShowcase';
@@ -65,10 +66,22 @@ function AdSlide({
   label: string;
   onAdClick: (ad: AdItem) => void;
 }) {
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const isVideoFile = (url: string | null) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
     return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setMuted(video.muted);
   };
 
   // A/B testing – use winner if set, otherwise persist a random pick per ad ID
@@ -122,11 +135,21 @@ function AdSlide({
         rel="noopener noreferrer"
         className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
       >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg sm:left-3 sm:text-[10px] sm:tracking-[0.2em]">
+        <span className="absolute right-1.5 top-1.5 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/70">
           {label}
         </span>
         {isVideo ? (
-          <video src={effectiveUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+          <>
+            <video ref={videoRef} src={effectiveUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="absolute bottom-2 right-2 z-10 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+              aria-label={muted ? 'Nyalakan suara' : 'Matikan suara'}
+            >
+              {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
+          </>
         ) : (ad.imageUrlMobile || ad.imageUrlTablet || ad.imageUrlMobileAlt || ad.imageUrlTabletAlt) ? (
           (() => {
             // Pick responsive sources: use alt variants when A/B selected 'B', otherwise primary
@@ -160,7 +183,7 @@ function AdSlide({
 export default function AdSpace({
   type,
   slot,
-  label = "Advertisement",
+  label = "Ad",
   className = ""
 }: AdSpaceProps) {
   const params = useParams();
@@ -321,7 +344,7 @@ export default function AdSpace({
         )}>
           {/* Media (image or video) */}
           {ad.mediaType === 'video' && ad.mediaUrl ? (
-            <video src={ad.mediaUrl} autoPlay loop muted className="w-full h-full object-cover" />
+            <video src={ad.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
           ) : ad.mediaUrl ? (
             <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
           ) : null}
@@ -354,7 +377,7 @@ export default function AdSpace({
           className
         )}
       >
-        <span className="absolute left-2 top-2 z-10 rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg">
+        <span className="absolute right-1.5 top-1.5 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/70">
           {label}
         </span>
         <p className="text-[10px] font-black uppercase tracking-[0.14em] text-brand-text-muted">
