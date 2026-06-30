@@ -7,8 +7,6 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  Monitor,
-  Smartphone,
   BarChart3,
   MousePointerClick,
   Image as ImageIcon,
@@ -17,6 +15,10 @@ import {
   Plus,
   ChevronUp,
   ChevronDown,
+  Pencil,
+  Save,
+  XCircle,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';
@@ -36,6 +38,12 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [targetAdId, setTargetAdId] = useState<string | null>(null);
 
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLinkUrl, setEditLinkUrl] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+
   // Dynamic aspect ratio per slot
   const aspectRatioClass: Record<string, string> = {
     HOME_TOP: 'aspect-[960/240]',
@@ -53,7 +61,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
       const pathname = new URL(url).pathname.toLowerCase();
       return videoExtensions.some(ext => pathname.endsWith(ext));
     } catch {
-      // URL tidak valid — fallback ke cara lama
       return videoExtensions.some(ext => url.toLowerCase().endsWith(ext));
     }
   };
@@ -167,6 +174,40 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     } catch { /* ignore */ }
   };
 
+  // Start editing an ad
+  const handleEditStart = (ad: Ad) => {
+    setEditingId(ad.id);
+    setEditLinkUrl(ad.linkUrl || '');
+    setEditImageUrl(ad.imageUrl || '');
+    setWarnings([]);
+  };
+
+  // Cancel editing
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditLinkUrl('');
+    setEditImageUrl('');
+  };
+
+  // Save edit changes
+  const handleEditSave = async (adId: string) => {
+    setSaving(true);
+    setWarnings([]);
+    try {
+      await api.patch(`/ads/${adId}`, {
+        linkUrl: editLinkUrl || null,
+        imageUrl: editImageUrl || null,
+      });
+      setEditingId(null);
+      onRefresh();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Gagal menyimpan perubahan';
+      setWarnings([msg]);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="dash-card overflow-hidden">
       {/* Header */}
@@ -252,129 +293,257 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
       ) : (
         <div className="divide-y divide-gray-50 dark:divide-white/5">
           {ads.map((ad, index) => (
-            <div key={ad.id} className="p-4 flex items-start gap-3">
-              {/* Reorder buttons */}
-              <div className="flex flex-col gap-0.5">
-                <button
-                  onClick={() => handleReorder('up', index)}
-                  disabled={index === 0}
-                  className={cn("p-1 rounded transition-all", index === 0 ? 'text-gray-200 dark:text-white/10' : 'text-gray-400 hover:text-brand-black dark:hover:text-white')}
-                >
-                  <ChevronUp size={12} />
-                </button>
-                <button
-                  onClick={() => handleReorder('down', index)}
-                  disabled={index === ads.length - 1}
-                  className={cn("p-1 rounded transition-all", index === ads.length - 1 ? 'text-gray-200 dark:text-white/10' : 'text-gray-400 hover:text-brand-black dark:hover:text-white')}
-                >
-                  <ChevronDown size={12} />
-                </button>
-              </div>
+            <div key={ad.id} className={editingId === ad.id ? 'bg-brand-red/[0.02] dark:bg-brand-red/5' : undefined}>
+              {/* Ad row */}
+              <div className="p-4 flex items-start gap-3">
+                {/* Reorder buttons */}
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => handleReorder('up', index)}
+                    disabled={index === 0}
+                    className={cn("p-1 rounded transition-all", index === 0 ? 'text-gray-200 dark:text-white/10' : 'text-gray-400 hover:text-brand-black dark:hover:text-white')}
+                  >
+                    <ChevronUp size={12} />
+                  </button>
+                  <button
+                    onClick={() => handleReorder('down', index)}
+                    disabled={index === ads.length - 1}
+                    className={cn("p-1 rounded transition-all", index === ads.length - 1 ? 'text-gray-200 dark:text-white/10' : 'text-gray-400 hover:text-brand-black dark:hover:text-white')}
+                  >
+                    <ChevronDown size={12} />
+                  </button>
+                </div>
 
-              {/* Preview */}
-              <div className={cn("w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
-                {ad.code ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <CodeIcon size={16} className="text-gray-300" />
+                {/* Preview */}
+                <div className={cn("w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
+                  {ad.code ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <CodeIcon size={16} className="text-gray-300" />
+                    </div>
+                  ) : ad.imageUrl && isVideoFile(ad.imageUrl) ? (
+                    <video
+                      src={ad.imageUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        if (!el.dataset.retried) {
+                          el.dataset.retried = 'true';
+                          el.load();
+                        }
+                      }}
+                    />
+                  ) : ad.imageUrl ? (
+                    <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon size={16} className="text-gray-200 dark:text-white/10" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info & Actions */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={cn(
+                      "text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                      ad.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-100 dark:bg-white/5 text-gray-400"
+                    )}>
+                      {ad.isActive ? '● AKTIF' : '○ NONAKTIF'}
+                    </span>
+                    <span className="text-[8px] font-mono text-gray-400">
+                      #{index + 1}
+                    </span>
                   </div>
-                ) : ad.imageUrl && isVideoFile(ad.imageUrl) ? (
-                  <video
-                    src={ad.imageUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const el = e.currentTarget;
-                      // Coba reload sekali (mungkin CORS race condition)
-                      if (!el.dataset.retried) {
-                        el.dataset.retried = 'true';
-                        el.load();
-                      }
-                    }}
-                  />
-                ) : ad.imageUrl ? (
-                  <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-contain" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ImageIcon size={16} className="text-gray-200 dark:text-white/10" />
+
+                  {/* Link URL info */}
+                  {ad.linkUrl && (
+                    <p className="text-[8px] text-gray-400 mb-1 truncate flex items-center gap-1">
+                      <ExternalLink size={8} />
+                      <span className="truncate">{ad.linkUrl}</span>
+                    </p>
+                  )}
+
+                  {/* Mini stats */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-[8px] text-gray-400">
+                      <span className="font-bold">{(ad.impressions || 0).toLocaleString()}</span> imp
+                    </span>
+                    <span className="text-[8px] text-gray-400">
+                      <span className="font-bold">{(ad.clicks || 0).toLocaleString()}</span> click
+                    </span>
                   </div>
-                )}
-              </div>
 
-              {/* Info & Actions */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={cn(
-                    "text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
-                    ad.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-100 dark:bg-white/5 text-gray-400"
-                  )}>
-                    {ad.isActive ? '● AKTIF' : '○ NONAKTIF'}
-                  </span>
-                  <span className="text-[8px] font-mono text-gray-400">
-                    #{index + 1}
-                  </span>
-                </div>
-
-                {/* Mini stats */}
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-[8px] text-gray-400">
-                    <span className="font-bold">{(ad.impressions || 0).toLocaleString()}</span> imp
-                  </span>
-                  <span className="text-[8px] text-gray-400">
-                    <span className="font-bold">{(ad.clicks || 0).toLocaleString()}</span> click
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5">
-                  <input
-                    ref={targetAdId === ad.id ? fileInputRef : undefined}
-                    type="file"
-                    accept="image/*,video/mp4,video/webm"
-                    onChange={(e) => handleUpload(e, ad.id)}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => {
-                      setTargetAdId(ad.id);
-                      setTimeout(() => fileInputRef.current?.click(), 50);
-                    }}
-                    disabled={uploadingId === ad.id}
-                    className="px-2 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-brand-black dark:hover:text-white rounded text-[8px] font-bold uppercase tracking-wider transition-all flex items-center gap-1"
-                  >
-                    {uploadingId === ad.id ? <RefreshCw size={10} className="animate-spin" /> : <Upload size={10} />}
-                    Upload
-                  </button>
-                  <button
-                    onClick={() => handleToggle(ad.id)}
-                    className={cn(
-                      "p-1.5 rounded transition-all",
-                      ad.isActive
-                        ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600"
-                        : "bg-gray-100 dark:bg-white/5 text-gray-400"
-                    )}
-                    title={ad.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                  >
-                    {ad.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(ad.id)}
-                    className="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-red-500 transition-all"
-                    title="Hapus"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                  <button
-                    onClick={() => handleScriptMode(ad.id)}
-                    className="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-red transition-all"
-                    title="Script Mode"
-                  >
-                    <CodeIcon size={12} />
-                  </button>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      ref={targetAdId === ad.id ? fileInputRef : undefined}
+                      type="file"
+                      accept="image/*,video/mp4,video/webm"
+                      onChange={(e) => handleUpload(e, ad.id)}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => {
+                        setTargetAdId(ad.id);
+                        setTimeout(() => fileInputRef.current?.click(), 50);
+                      }}
+                      disabled={uploadingId === ad.id}
+                      className="px-2 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-brand-black dark:hover:text-white rounded text-[8px] font-bold uppercase tracking-wider transition-all flex items-center gap-1"
+                    >
+                      {uploadingId === ad.id ? <RefreshCw size={10} className="animate-spin" /> : <Upload size={10} />}
+                      Upload
+                    </button>
+                    <button
+                      onClick={() => handleToggle(ad.id)}
+                      className={cn(
+                        "p-1.5 rounded transition-all",
+                        ad.isActive
+                          ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600"
+                          : "bg-gray-100 dark:bg-white/5 text-gray-400"
+                      )}
+                      title={ad.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                    >
+                      {ad.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(ad.id)}
+                      className="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-red-500 transition-all"
+                      title="Hapus"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleScriptMode(ad.id)}
+                      className="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-red transition-all"
+                      title="Script Mode"
+                    >
+                      <CodeIcon size={12} />
+                    </button>
+                    <button
+                      onClick={() => editingId === ad.id ? handleEditCancel() : handleEditStart(ad)}
+                      className={cn(
+                        "p-1.5 rounded transition-all",
+                        editingId === ad.id
+                          ? "bg-brand-red/10 text-brand-red"
+                          : "bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-red"
+                      )}
+                      title="Edit"
+                    >
+                      {editingId === ad.id ? <XCircle size={12} /> : <Pencil size={12} />}
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {/* Edit form (expandable) */}
+              {editingId === ad.id && (
+                <div className="px-4 pb-4 pt-2 border-t border-gray-50 dark:border-white/5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="dash-label mb-1 block">URL Media (Gambar/Video)</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={editImageUrl}
+                            onChange={(e) => setEditImageUrl(e.target.value)}
+                            placeholder="https://... (JPG/PNG/WebP/MP4)"
+                            className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-lg text-xs outline-none focus:border-brand-red transition-all"
+                          />
+                          <input
+                            ref={editingId === ad.id ? fileInputRef : undefined}
+                            type="file"
+                            accept="image/*,video/mp4,video/webm"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setUploadingId(ad.id);
+                              try {
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                const res = await api.post(`/media/upload-ad?slot=${slot.id}`, formData, {
+                                  headers: { 'Content-Type': 'multipart/form-data' },
+                                });
+                                if (res.data?.success) {
+                                  setEditImageUrl(res.data.data.desktop?.url || '');
+                                }
+                              } finally {
+                                setUploadingId(null);
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploadingId === ad.id}
+                            className="p-2 bg-gray-100 dark:bg-white/5 rounded-lg text-gray-500 hover:text-brand-red transition-all disabled:opacity-50"
+                            title="Upload file"
+                          >
+                            {uploadingId === ad.id ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="dash-label mb-1 block">Link Tujuan</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={editLinkUrl}
+                            onChange={(e) => setEditLinkUrl(e.target.value)}
+                            placeholder="https://website-klien.com"
+                            className="w-full px-3 py-2 pr-8 bg-white dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-lg text-xs outline-none focus:border-brand-red transition-all"
+                          />
+                          {editLinkUrl && (
+                            <a
+                              href={editLinkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-red transition-colors"
+                            >
+                              <ExternalLink size={12} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Preview */}
+                    <div className="aspect-video bg-gray-50 dark:bg-black/20 rounded-lg border border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
+                      {editImageUrl ? (
+                        isVideoFile(editImageUrl) ? (
+                          <video src={editImageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                        ) : (
+                          <img src={editImageUrl} alt="Preview" className="w-full h-full object-contain" />
+                        )
+                      ) : (
+                        <span className="text-[9px] text-gray-400">Preview</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 mt-3">
+                    <button
+                      onClick={handleEditCancel}
+                      className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 rounded-lg text-[9px] font-bold uppercase tracking-wider text-gray-500 hover:text-brand-black dark:hover:text-white transition-all"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => handleEditSave(ad.id)}
+                      disabled={saving}
+                      className="px-4 py-1.5 bg-brand-black dark:bg-white text-white dark:text-brand-black rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-lg hover:opacity-90 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      {saving ? <RefreshCw size={10} className="animate-spin" /> : <Save size={10} />}
+                      Simpan
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
