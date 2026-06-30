@@ -78,6 +78,7 @@ const nextConfig = {
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.beritakarya.co https://beritakarya.co wss://*.beritakarya.co https://www.google-analytics.com https://www.googletagmanager.com ws://localhost:*",
+      "media-src 'self' https://media.beritakarya.co https://*.beritakarya.co blob:",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
