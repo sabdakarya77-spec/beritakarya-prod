@@ -83,7 +83,7 @@ export function EditorTitleStage({ isFocusMode = false }: EditorTitleStageProps)
           onChange={(e) => setLocalExcerpt(e.target.value)}
           placeholder="Tambahkan ringkasan singkat artikel (deck)..."
           rows={2}
-          maxLength={300}
+          maxLength={280}
           className={`
             w-full text-lg text-gray-600 dark:text-gray-400
             bg-transparent border-none outline-none resize-none
@@ -95,7 +95,7 @@ export function EditorTitleStage({ isFocusMode = false }: EditorTitleStageProps)
         
         {/* Excerpt Character Count */}
         <div className="mt-1 text-xs text-gray-400">
-          {localExcerpt.length}/300 karakter
+          {localExcerpt.length}/280 karakter
         </div>
       </div>
     </div>
