@@ -389,7 +389,7 @@ export default function AdSpace({
 
   // Sticky + close button wrapper for HOME_TOP on mobile
   const isSticky = type === 'HOME_TOP' && ads.length > 0 && !isStickyClosed;
-  const stickyClasses = isSticky ? 'md:relative fixed bottom-0 left-0 right-0 z-30 md:z-auto' : '';
+  const stickyClasses = isSticky ? 'md:relative fixed bottom-[72px] left-0 right-0 z-30 md:z-auto' : '';
   const stickyBg = isSticky ? 'bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:border-0 md:shadow-none md:bg-transparent' : '';
 
   const adContent = (
