@@ -389,7 +389,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
         )}
 
         {/* ─── AD HOME_TOP — setelah hero agar user disambut konten terlebih dahulu ─── */}
-        <Container className="py-4 md:py-5">
+        <Container className="pt-6 pb-4 md:pt-10 md:pb-6">
           <AdSpace type="HOME_TOP" />
         </Container>
 
