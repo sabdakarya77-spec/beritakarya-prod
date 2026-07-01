@@ -168,11 +168,23 @@ export function AdsMarketingPage({
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-red/5 blur-[120px] rounded-full pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-amber-500/5 blur-[100px] rounded-full pointer-events-none -z-10" />
 
-      <LegalPageHeader
-        title={ADS_PUBLIC_PAGE.title}
-        eyebrow={ADS_PUBLIC_PAGE.eyebrow}
-        subtitle={`Skyrocket Bisnis Anda Melalui Jaringan Pembaca Lokal Terbesar dan Militan di Wilayah ${siteConfig.name}!`}
-      />
+      {/* Premium Centered Hero Section */}
+      <header className="mb-12 md:mb-16 text-center max-w-3xl mx-auto space-y-4">
+        {ADS_PUBLIC_PAGE.eyebrow && (
+          <div className="flex items-center justify-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-red animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-red">
+              {ADS_PUBLIC_PAGE.eyebrow}
+            </span>
+          </div>
+        )}
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-brand-black dark:text-white leading-tight tracking-tight">
+          Layanan Iklan Mandiri
+        </h1>
+        <p className="text-sm md:text-base text-brand-text-muted leading-relaxed max-w-2xl mx-auto">
+          Skyrocket Bisnis Anda Melalui Jaringan Pembaca Lokal Terbesar dan Militan di Wilayah {siteConfig.name}!
+        </p>
+      </header>
 
       <div className="space-y-20 md:space-y-24">
         {/* Value Proposition Section */}
@@ -186,7 +198,7 @@ export function AdsMarketingPage({
               <div className="w-12 h-12 bg-brand-red/10 rounded-xl flex items-center justify-center mb-5 border border-brand-red/20 group-hover:scale-110 transition-transform">
                 <prop.icon size={22} className="text-brand-red" />
               </div>
-              <h3 className="text-base font-black text-brand-black dark:text-white tracking-tight mb-2">
+              <h3 className="text-base font-bold text-brand-black dark:text-white tracking-tight mb-2">
                 {prop.title}
               </h3>
               <p className="text-sm text-brand-text-muted leading-relaxed relative z-10">{prop.desc}</p>
@@ -200,7 +212,7 @@ export function AdsMarketingPage({
             <span className="px-3 py-1 bg-brand-red/10 text-brand-red text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-brand-red/20">
               Interactive Layout Simulator
             </span>
-            <h2 className="text-2xl md:text-3xl font-serif font-black text-brand-black dark:text-white uppercase tracking-tight">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-brand-black dark:text-white tracking-tight">
               Visualisasikan Iklan Anda
             </h2>
             <p className="text-sm text-brand-text-muted">
@@ -602,9 +614,8 @@ export function AdsMarketingPage({
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-widest rounded-full">
                 <Sparkles size={10} /> Exclusive Video Service
               </div>
-              <h2 className="text-2xl md:text-3xl font-serif font-black text-white uppercase tracking-tight leading-none">
-                KIRIM FOTO & LOGO,<br />
-                KAMI BUATKAN VIDEO IKLANNYA
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-white tracking-tight leading-snug">
+                Kirim Foto & Logo, Kami Buatkan Video Iklannya
               </h2>
               <p className="text-sm text-brand-text-muted leading-relaxed">
                 Tidak punya aset video promosi? Tenang saja. Khusus untuk slot <strong className="text-white">HOME_TOP</strong>, Anda cukup mengunggah foto produk utama dan logo bisnis Anda. Tim kreatif kami akan memproses dan merancang video iklan sinematik berkualitas tinggi berdurasi 10-15 detik.
@@ -723,8 +734,8 @@ export function AdsMarketingPage({
                   Katalog Layanan
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-serif font-black text-brand-black dark:text-white uppercase tracking-tight">
-                PILIH TARIF & PENEMPATAN
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-brand-black dark:text-white tracking-tight">
+                Pilihan Tarif & Penempatan Slot Iklan
               </h2>
               <p className="text-[11px] text-brand-text-muted font-semibold uppercase tracking-widest mt-2">
                 PILIHAN DURASI DAN LAYANAN SESUAI KEBUTUHAN PROMOSI BISNIS ANDA
@@ -797,7 +808,7 @@ export function AdsMarketingPage({
                         </div>
                       </div>
 
-                      <h3 className="text-lg font-black text-brand-black dark:text-white tracking-tight mb-2 flex items-center gap-2">
+                      <h3 className="text-base md:text-lg font-bold text-brand-black dark:text-white tracking-tight mb-2 flex items-center gap-2">
                         {activePkg.name}
                         {activePkg.slot === 'HOME_TOP' && (
                           <span className="text-amber-500 text-xs animate-pulse">★</span>
@@ -890,7 +901,7 @@ export function AdsMarketingPage({
           <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-brand-red/10 to-transparent pointer-events-none" />
           <div className="absolute left-1/3 bottom-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none" />
           
-          <h3 className="text-2xl md:text-3xl font-serif font-black text-white uppercase tracking-tight mb-4">
+          <h3 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-white tracking-tight mb-4">
             Siap Meluncurkan Kampanye Iklan Anda?
           </h3>
           <p className="text-sm text-brand-text-muted max-w-xl mx-auto leading-relaxed mb-8">
