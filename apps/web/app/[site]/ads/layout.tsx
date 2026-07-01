@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useParams, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '../../../store/authStore'
+import { api } from '../../../lib/api'
 import {
   LayoutDashboard,
   LogOut,
@@ -53,12 +54,13 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('advertiser-sidebar-collapsed')
-      return saved !== null ? saved === 'true' : true
+      return saved !== null ? saved === 'true' : false
     }
-    return true
+    return false
   })
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [expandedDropdown, setExpandedDropdown] = useState<string | null>(null)
+  const [whatsappNumber, setWhatsappNumber] = useState('628123456789')
   const router = useRouter()
 
   useEffect(() => {
@@ -81,6 +83,20 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
       setExpandedDropdown('iklan-saya')
     }
   }, [pathname, site])
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await api.get('/ads/payment-config', { params: { site } });
+        if (res.data?.success && res.data?.data?.whatsappSupport) {
+          setWhatsappNumber(res.data.data.whatsappSupport);
+        }
+      } catch {
+        // silent
+      }
+    };
+    fetchConfig();
+  }, [site]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -315,7 +331,7 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
           {/* Bantuan — above profile */}
           <div className="mb-3">
             <a
-              href="https://wa.me/628123456789"
+              href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all duration-300 group"
@@ -484,7 +500,7 @@ export default function AdsLayout({ children }: { children: React.ReactNode }) {
           {/* Mobile: Bantuan + Profile + Keluar */}
           <div className="border-t border-white/5 pt-3 mt-3 space-y-1">
             <a
-              href="https://wa.me/628123456789"
+              href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsMobileMenuOpen(false)}

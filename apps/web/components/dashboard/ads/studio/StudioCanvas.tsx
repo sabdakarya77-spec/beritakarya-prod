@@ -392,13 +392,16 @@ export function StudioCanvas() {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            setData(prev => ({ ...prev, adFile: file, adFileName: file.name }));
+                            if (data.logoPreviewUrl) URL.revokeObjectURL(data.logoPreviewUrl);
+                            setData(prev => ({ ...prev, logoFile: file, logoFileName: file.name, logoPreviewUrl: URL.createObjectURL(file) }));
                           }
                         }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       <ImageIcon size={16} className="text-gray-400 mx-auto mb-1.5" />
-                      <p className="text-[10px] font-bold text-brand-black dark:text-white">Logo</p>
+                      <p className="text-[10px] font-bold text-brand-black dark:text-white truncate max-w-full">
+                        {data.logoFileName ? `Logo: ${data.logoFileName}` : 'Logo'}
+                      </p>
                       <p className="text-[8px] text-gray-400 mt-0.5">PNG/SVG • Transparan</p>
                     </div>
                     {/* Foto */}
@@ -407,15 +410,14 @@ export function StudioCanvas() {
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setData(prev => ({ ...prev, adFile: file, adFileName: file.name }));
-                          }
+                          handleAdFileChange(e);
                         }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       <ImageIcon size={16} className="text-gray-400 mx-auto mb-1.5" />
-                      <p className="text-[10px] font-bold text-brand-black dark:text-white">Foto Produk</p>
+                      <p className="text-[10px] font-bold text-brand-black dark:text-white truncate max-w-full">
+                        {data.adFileName ? `Foto: ${data.adFileName}` : 'Foto Produk'}
+                      </p>
                       <p className="text-[8px] text-gray-400 mt-0.5">JPG/PNG • Min 600px</p>
                     </div>
                   </div>

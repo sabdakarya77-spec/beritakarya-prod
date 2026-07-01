@@ -13,6 +13,26 @@ import {
 } from 'lucide-react';
 import type { AdBooking } from '../../../../components/dashboard/ads/types';
 
+const getAdStatusLabel = (status: string) => {
+  switch (status) {
+    case 'ACTIVE': return 'Aktif';
+    case 'PENDING_REVIEW': return 'Menunggu Review';
+    case 'COMPLETED': return 'Selesai';
+    case 'REJECTED': return 'Ditolak';
+    default: return status;
+  }
+};
+
+const getPaymentStatusLabel = (status: string) => {
+  switch (status) {
+    case 'PAID': return 'Lunas';
+    case 'VERIFYING': return 'Menunggu Verifikasi';
+    case 'REJECTED': return 'Ditolak';
+    case 'PENDING': return 'Menunggu Pembayaran';
+    default: return status;
+  }
+};
+
 export default function AdsHistoryPage() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
@@ -106,8 +126,9 @@ export default function AdsHistoryPage() {
                       b.status === 'ACTIVE' ? "bg-emerald-100 text-emerald-700" :
                       b.status === 'PENDING_REVIEW' ? "bg-amber-100 text-amber-700" :
                       b.status === 'REJECTED' ? "bg-red-100 text-red-700" :
+                      b.status === 'COMPLETED' ? "bg-blue-100 text-blue-700" :
                       "bg-gray-100 text-gray-500"
-                    )}>{b.status}</span>
+                    )}>{getAdStatusLabel(b.status)}</span>
                   </td>
                   <td className="py-3 px-4">
                     <span className={cn(
@@ -116,7 +137,7 @@ export default function AdsHistoryPage() {
                       b.paymentStatus === 'VERIFYING' ? "bg-blue-100 text-blue-700" :
                       b.paymentStatus === 'REJECTED' ? "bg-red-100 text-red-700" :
                       "bg-amber-100 text-amber-700"
-                    )}>{b.paymentStatus}</span>
+                    )}>{getPaymentStatusLabel(b.paymentStatus)}</span>
                   </td>
                   <td className="py-3 px-4 font-mono">{b.impressions.toLocaleString()}</td>
                   <td className="py-3 px-4 font-mono">{b.clicks.toLocaleString()}</td>

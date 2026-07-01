@@ -15,6 +15,9 @@ const initialData: StudioData = {
   adFile: null,
   adFileName: '',
   adPreviewUrl: '',
+  logoFile: null,
+  logoFileName: '',
+  logoPreviewUrl: '',
   processedVariants: null,
   processingWarnings: [],
   isProcessing: false,
@@ -247,7 +250,16 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
       if (isHomeTop) {
         // HOME_TOP: upload file sebagai foto (logo diupload terpisah jika ada)
-        bookingPayload.logoUrl = null; // TODO: upload logo terpisah
+        let logoUrl = null;
+        if (data.logoFile) {
+          try {
+            logoUrl = await uploadFile(data.logoFile);
+          } catch (e) {
+            console.error('Failed to upload logo:', e);
+            throw new Error('Gagal mengunggah logo advertiser. Silakan coba lagi.');
+          }
+        }
+        bookingPayload.logoUrl = logoUrl;
         bookingPayload.fotoUrl = v.desktop?.url || null;
       } else {
         bookingPayload.imageUrl = v.desktop?.url || null;

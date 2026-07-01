@@ -11,6 +11,7 @@ import { AppError } from '../../utils/AppError'
 import { logger } from '../../lib/logger'
 import { extractSiteIdFromRequest } from '../../lib/siteFromRequest'
 import bcrypt from 'bcryptjs'
+import { sendNotification } from '../notification/notification.controller'
 
 export const authRouter: Router = Router()
 
@@ -173,6 +174,34 @@ authRouter.post('/upgrade-to-advertiser', requireAuth, asyncHandler(async (req: 
   })
 
   logger.info(`User ${userId} upgraded from reader to advertiser via self-service`)
+
+  // Send notification to superadmins/wapimreds of this site
+  try {
+    const admins = await prisma.user.findMany({
+      where: {
+        role: { in: ['superadmin', 'wapimred'] },
+        OR: [
+          { siteId: updatedUser.siteId },
+          { siteId: null },
+          { siteId: 'pusat' }
+        ]
+      },
+      select: { id: true }
+    })
+
+    for (const admin of admins) {
+      await sendNotification({
+        userId: admin.id,
+        siteId: updatedUser.siteId || 'pusat',
+        type: 'user_upgraded_to_advertiser',
+        title: 'Pengiklan Baru Terdaftar',
+        message: `User ${updatedUser.name} (${updatedUser.email}) telah terdaftar sebagai pengiklan secara mandiri.`,
+        link: `/${updatedUser.siteId || 'pusat'}/dashboard/users`
+      })
+    }
+  } catch (err) {
+    logger.warn('Failed to send upgrade notification to admin:', err)
+  }
 
   res.json({ success: true, data: { user: updatedUser }, message: 'Berhasil menjadi Pengiklan!' })
 }))

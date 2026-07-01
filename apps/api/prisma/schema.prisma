@@ -87,6 +87,7 @@ model Site {
   notifications         Notification[]
   adBookings            AdBooking[]
   siteCategories        SiteCategory[]
+  adPaymentConfig       AdPaymentConfig?
 }
 
 model User {
@@ -632,6 +633,21 @@ model VideoProviderConfig {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Konfigurasi Pembayaran Iklan
+model AdPaymentConfig {
+  id                String   @id @default(uuid())
+  siteId            String   @unique
+  midtransUrl       String?
+  midtransClientKey String?
+  bankAccounts      Json?    @default("[]") // [{ bank: string, number: string, name: string }]
+  qrisImageUrl      String?
+  whatsappSupport   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  site              Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
 }
 
 enum PaymentStatus {

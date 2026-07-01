@@ -42,7 +42,7 @@ export function AdvertiserAdsView({ site, bookings }: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState(14);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
-  const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
+  const activeBookings = bookings.filter(b => b.status === 'ACTIVE' || b.status === 'COMPLETED');
 
   // Fetch stats for active bookings
   useEffect(() => {

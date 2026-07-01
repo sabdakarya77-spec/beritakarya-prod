@@ -40,6 +40,10 @@ export interface StudioData {
   adFile: File | null;
   adFileName: string;
   adPreviewUrl: string;
+  // Creative — HOME_TOP logo upload
+  logoFile: File | null;
+  logoFileName: string;
+  logoPreviewUrl: string;
   // Server-processed variants (hasil dari /upload-ad)
   processedVariants: {
     desktop: ProcessedVariant | null;

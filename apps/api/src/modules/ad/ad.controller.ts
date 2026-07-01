@@ -242,6 +242,34 @@ adRouter.patch('/reorder',
 // 🚀 DYNAMIC AD PACKAGES & BOOKINGS ENDPOINTS
 // ==========================================
 
+// 1c. GET /payment-config — Fetch payment config for a site
+adRouter.get('/payment-config',
+  siteMiddleware,
+  asyncHandler(async (req: Request, res: Response) => {
+    const config = await repo.findPaymentConfigBySite(req.site!)
+    res.json({ success: true, data: config })
+  })
+)
+
+// 1d. PUT /payment-config — Superadmin updates payment config
+adRouter.put('/payment-config',
+  requireAuth,
+  siteMiddleware,
+  requireRole(['superadmin']),
+  requireSiteAccess,
+  asyncHandler(async (req: Request, res: Response) => {
+    const { midtransUrl, midtransClientKey, bankAccounts, qrisImageUrl, whatsappSupport } = req.body
+    const config = await repo.upsertPaymentConfig(req.site!, {
+      midtransUrl,
+      midtransClientKey,
+      bankAccounts,
+      qrisImageUrl,
+      whatsappSupport
+    })
+    res.json({ success: true, data: config })
+  })
+)
+
 // 1. GET /packages — Public & Advertiser to view active packages
 adRouter.get('/packages',
   asyncHandler(async (req: Request, res: Response) => {
@@ -406,7 +434,7 @@ adRouter.post('/bookings/:id/pay',
       return res.status(403).json({ success: false, message: 'Akses ditolak' })
     }
 
-    if (existing.paymentStatus !== 'PENDING') {
+    if (existing.paymentStatus !== 'PENDING' && existing.paymentStatus !== 'REJECTED') {
       return res.status(400).json({ success: false, message: 'Bukti bayar sudah diupload atau booking sudah diproses' })
     }
 
@@ -414,7 +442,34 @@ adRouter.post('/bookings/:id/pay',
       return res.status(400).json({ success: false, message: 'URL bukti bayar wajib diisi' })
     }
 
-    const booking = await repo.updateBooking(id, { paymentProof, paymentStatus: 'VERIFYING' })
+    const booking = await repo.updateBooking(id, {
+      paymentProof,
+      paymentStatus: 'VERIFYING',
+      status: 'PENDING_REVIEW',
+      rejectionNotes: null
+    })
+    res.json({ success: true, data: booking })
+  })
+)
+
+// 4d. POST /bookings/:id/cancel — Advertiser cancels a pending booking
+adRouter.post('/bookings/:id/cancel',
+  requireAuth,
+  requireRole(['advertiser']),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const existing = await repo.findBookingById(id)
+    if (!existing || existing.userId !== req.user!.userId) {
+      return res.status(403).json({ success: false, message: 'Akses ditolak' })
+    }
+    if (existing.paymentStatus !== 'PENDING' && existing.status !== 'PENDING_REVIEW') {
+      return res.status(400).json({ success: false, message: 'Hanya booking yang belum dibayar atau sedang review yang bisa dibatalkan' })
+    }
+    const booking = await repo.updateBooking(id, {
+      paymentStatus: 'REJECTED',
+      status: 'REJECTED',
+      rejectionNotes: 'Dibatalkan oleh pengiklan'
+    })
     res.json({ success: true, data: booking })
   })
 )

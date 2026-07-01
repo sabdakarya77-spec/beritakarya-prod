@@ -407,3 +407,26 @@ export async function countActiveBookingsForSlot(
     },
   })
 }
+
+// ─── AdPaymentConfig ──────────────────────────────────────────────────────────
+
+export async function findPaymentConfigBySite(siteId: string) {
+  return prisma.adPaymentConfig.findUnique({
+    where: { siteId }
+  })
+}
+
+export async function upsertPaymentConfig(siteId: string, data: {
+  midtransUrl?: string | null
+  midtransClientKey?: string | null
+  bankAccounts?: Prisma.InputJsonValue
+  qrisImageUrl?: string | null
+  whatsappSupport?: string | null
+}) {
+  return prisma.adPaymentConfig.upsert({
+    where: { siteId },
+    update: { ...data, updatedAt: new Date() },
+    create: { siteId, ...data }
+  })
+}
+

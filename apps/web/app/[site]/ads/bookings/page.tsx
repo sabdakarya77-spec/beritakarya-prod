@@ -30,8 +30,6 @@ declare global {
 import type { AdBooking } from '../../../../components/dashboard/ads/types';
 import { AD_BANK_ACCOUNTS } from '../../../../lib/constants';
 
-const BANK_ACCOUNTS = AD_BANK_ACCOUNTS;
-
 export default function PaymentsPage() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
@@ -40,6 +38,12 @@ export default function PaymentsPage() {
   const [bookings, setBookings] = useState<AdBooking[]>([]);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+  // Dynamic configurations
+  const [midtransUrl, setMidtransUrl] = useState('');
+  const [midtransClientKey, setMidtransClientKey] = useState('');
+  const [qrisImageUrl, setQrisImageUrl] = useState('');
+  const [bankAccounts, setBankAccounts] = useState<readonly { bank: string; number: string; name: string }[]>(AD_BANK_ACCOUNTS);
 
   const fetchBookings = async (signal?: AbortSignal) => {
     setLoading(true);
@@ -54,20 +58,46 @@ export default function PaymentsPage() {
     }
   };
 
-  // Load Midtrans Snap JS
+  const fetchPaymentConfig = async (signal?: AbortSignal) => {
+    try {
+      const res = await api.get('/ads/payment-config', { params: { site }, signal });
+      if (res.data?.success && res.data?.data) {
+        const config = res.data.data;
+        if (config.midtransUrl) setMidtransUrl(config.midtransUrl);
+        if (config.midtransClientKey) setMidtransClientKey(config.midtransClientKey);
+        if (config.qrisImageUrl) setQrisImageUrl(config.qrisImageUrl);
+        if (config.bankAccounts) {
+          const parsed = typeof config.bankAccounts === 'string'
+            ? JSON.parse(config.bankAccounts)
+            : config.bankAccounts;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setBankAccounts(parsed);
+          }
+        }
+      }
+    } catch {
+      // fallback to defaults
+    }
+  };
+
+  // Load Midtrans Snap JS dynamically
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.snap) {
+      const snapScriptUrl = midtransUrl || process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL || 'https://app.sandbox.midtrans.com/snap/snap.js';
+      const clientKey = midtransClientKey || process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '';
+
       const script = document.createElement('script');
-      script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-      script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '');
+      script.src = snapScriptUrl;
+      script.setAttribute('data-client-key', clientKey);
       script.async = true;
       document.body.appendChild(script);
     }
-  }, []);
+  }, [midtransUrl, midtransClientKey]);
 
   useEffect(() => {
     const controller = new AbortController();
     fetchBookings(controller.signal);
+    fetchPaymentConfig(controller.signal);
     return () => { controller.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -161,7 +191,7 @@ export default function PaymentsPage() {
 
       {/* Bank Accounts & QRIS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {BANK_ACCOUNTS.map(({ bank, number, name }) => (
+        {bankAccounts.map(({ bank, number, name }) => (
           <div key={bank} className="dash-card p-5 space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-brand-red/10 flex items-center justify-center">
@@ -196,11 +226,15 @@ export default function PaymentsPage() {
             </div>
             <span className="text-sm font-black text-brand-black dark:text-white uppercase">QRIS</span>
           </div>
-          <div className="w-full aspect-square max-w-[160px] bg-white rounded-xl border border-gray-200 flex items-center justify-center mx-auto">
-            <div className="text-center p-4">
-              <QrCode size={64} className="text-gray-300 mx-auto mb-2" />
-              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Scan untuk membayar</p>
-            </div>
+          <div className="w-full aspect-square max-w-[160px] bg-white rounded-xl border border-gray-200 flex items-center justify-center mx-auto overflow-hidden">
+            {qrisImageUrl ? (
+              <img src={qrisImageUrl} alt="QRIS Merchant" className="w-full h-full object-contain p-2" />
+            ) : (
+              <div className="text-center p-4">
+                <QrCode size={64} className="text-gray-300 mx-auto mb-2" />
+                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Scan untuk membayar</p>
+              </div>
+            )}
           </div>
           <p className="text-[9px] text-gray-400 text-center font-bold uppercase tracking-wider">Semua bank & e-wallet</p>
         </div>
@@ -301,6 +335,29 @@ export default function PaymentsPage() {
                             }}
                           />
                         </label>
+                      )}
+
+                      {/* Cancel Booking button */}
+                      {(b.paymentStatus === 'PENDING' || b.paymentStatus === 'REJECTED') && (
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Apakah Anda yakin ingin membatalkan pesanan iklan ini?')) return;
+                            setUploadingId(b.id);
+                            try {
+                              await api.post(`/ads/bookings/${b.id}/cancel`);
+                              addToast('Pesanan berhasil dibatalkan', 'success');
+                              await fetchBookings();
+                            } catch {
+                              addToast('Gagal membatalkan pesanan', 'error');
+                            } finally {
+                              setUploadingId(null);
+                            }
+                          }}
+                          disabled={uploadingId === b.id}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all bg-gray-100 dark:bg-white/5 text-gray-500 hover:bg-red-500 hover:text-white"
+                        >
+                          Batalkan
+                        </button>
                       )}
                     </div>
                   </div>
