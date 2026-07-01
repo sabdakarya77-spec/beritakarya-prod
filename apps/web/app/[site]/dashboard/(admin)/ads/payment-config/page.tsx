@@ -321,7 +321,7 @@ export default function AdPaymentConfigPage() {
                 />
               </div>
               <p className="text-[9px] text-gray-400 leading-relaxed">
-                Nomor ini akan dipakai pada tombol "Bantuan" di seluruh dashboard pengiklan. Pastikan menulis tanpa menggunakan spasi, tanda hubung, atau tanda (+).
+                Nomor ini akan dipakai pada tombol &ldquo;Bantuan&rdquo; di seluruh dashboard pengiklan. Pastikan menulis tanpa menggunakan spasi, tanda hubung, atau tanda (+).
               </p>
             </div>
           </div>
