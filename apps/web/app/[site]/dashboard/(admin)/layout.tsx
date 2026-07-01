@@ -461,6 +461,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-slate-900 dark:bg-[#0a0f1a] pt-20 px-4 overflow-y-auto pb-10">
+          {/* Mobile: Site Switcher */}
+          <div className="mb-4 px-1">
+            <SiteSwitcher
+              activeSiteId={site}
+              isCollapsed={false}
+            />
+          </div>
           {navSections.map((section) => {
             const filteredItems = section.items.filter(item => user && item.roles.includes(user.role))
             if (filteredItems.length === 0) return null
