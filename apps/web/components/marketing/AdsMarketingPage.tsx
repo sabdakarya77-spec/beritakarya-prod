@@ -494,7 +494,7 @@ export function AdsMarketingPage({
                 KAMI BUATKAN VIDEO IKLANNYA
               </h2>
               <p className="text-sm text-brand-text-muted leading-relaxed">
-                Tidak punya aset video promosi? Tenang saja. Khusus untuk slot <strong className="text-white">HOME_TOP</strong>, Anda cukup mengunggah foto produk utama dan logo bisnis Anda. Tim kreatif kami yang didukung teknologi generative AI premium (seperti Kling & Seedance) akan mengubahnya menjadi video iklan sinematik berdurasi 10-15 detik.
+                Tidak punya aset video promosi? Tenang saja. Khusus untuk slot <strong className="text-white">HOME_TOP</strong>, Anda cukup mengunggah foto produk utama dan logo bisnis Anda. Tim kreatif kami akan memproses dan merancang video iklan sinematik berkualitas tinggi berdurasi 10-15 detik.
               </p>
               
               <ul className="space-y-3.5 text-xs text-gray-300">
@@ -521,7 +521,7 @@ export function AdsMarketingPage({
                 <div className="relative w-full aspect-[4/1] rounded-xl overflow-hidden bg-slate-950 border border-white/5 flex items-center justify-center shadow-inner group">
                   {playingDemo ? (
                     // ─────────────────────────────────────────────
-                    // CSS SIMULATED AI VIDEO MOVEMENT
+                    // CSS SIMULATED VIDEO MOVEMENT
                     // ─────────────────────────────────────────────
                     <div className="w-full h-full relative overflow-hidden">
                       {/* Panning background image to simulate video camera movement */}
@@ -560,7 +560,7 @@ export function AdsMarketingPage({
                         <Play size={18} className="text-amber-500 ml-0.5 fill-amber-500" />
                       </div>
                       <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">
-                        Klik Play Untuk Lihat Demo Hasil Video AI
+                        Klik Play Untuk Lihat Demo Hasil Video
                       </p>
                     </div>
                   )}
@@ -584,8 +584,8 @@ export function AdsMarketingPage({
                   </div>
                   <div className="bg-white/5 border border-white/5 rounded-lg p-2 relative">
                     <span className="text-[7px] font-bold text-amber-500 block mb-0.5">LANGKAH 2</span>
-                    <span className="text-[9px] font-black text-white block uppercase">AI Produksi</span>
-                    <span className="text-[6px] text-gray-400 block mt-0.5">Kling / Seedance</span>
+                    <span className="text-[9px] font-black text-white block uppercase">Tim Kreatif</span>
+                    <span className="text-[6px] text-gray-400 block mt-0.5">Produksi Video</span>
                     <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 text-gray-500 text-[10px]">&rarr;</div>
                     <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 text-gray-500 text-[10px]">&rarr;</div>
                   </div>
