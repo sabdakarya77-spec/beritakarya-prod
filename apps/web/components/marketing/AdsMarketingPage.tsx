@@ -273,10 +273,10 @@ export function AdsMarketingPage({
 
               {selectedPageType === 'homepage' ? (
                 // ─────────────────────────────────────────────
-                // HOMEPAGE VIEW SIMULATION
+                // REALISTIC HOMEPAGE VIEW SIMULATION (2 COLUMNS)
                 // ─────────────────────────────────────────────
                 <div className="space-y-6">
-                  {/* HOME_TOP Slot */}
+                  {/* HOME_TOP Slot (Full Width above the fold) */}
                   <div
                     onClick={() => handleSlotClick('HOME_TOP')}
                     onMouseEnter={() => setActiveSlotId('HOME_TOP')}
@@ -299,169 +299,282 @@ export function AdsMarketingPage({
                       [HOME_TOP] Hero Banner Video (960 x 240)
                     </p>
                     <p className="text-[8px] text-gray-400 uppercase tracking-widest mt-1">
-                      Tim kreatif kami produksikan video iklan Anda
+                      Tim kreatif kami akan memproses & memproduksi video iklan Anda
                     </p>
                     {activeSlotId === 'HOME_TOP' && (
                       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-amber-500/20 to-amber-500/5 animate-pulse" />
                     )}
                   </div>
 
-                  {/* Mock Hero Bento Section */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-2 bg-gray-100 dark:bg-white/[0.03] p-4 rounded-xl space-y-2">
-                      <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-3/4" />
-                      <div className="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2" />
-                      <div className="h-20 bg-gray-200 dark:bg-white/10 rounded" />
-                    </div>
-                    <div className="bg-gray-100 dark:bg-white/[0.03] p-4 rounded-xl space-y-2 flex flex-col justify-between">
-                      <div>
-                        <div className="h-3 bg-gray-200 dark:bg-white/10 rounded w-3/4" />
-                        <div className="h-10 bg-gray-200 dark:bg-white/10 rounded mt-2" />
+                  {/* Two-Column Grid: Left (Kolom Utama 8/12) + Right (Sidebar 4/12) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Column: News Feed (lg:col-span-8) */}
+                    <div className="lg:col-span-8 space-y-6">
+                      {/* Section Header */}
+                      <div className="border-b border-gray-100 dark:border-white/5 pb-2 flex justify-between items-center">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-black dark:text-white">Berita Terbaru</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-red animate-ping" />
                       </div>
-                      <div className="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2" />
+
+                      {/* 2 Big Horizontal Article Cards (Artikel 1 & 2) */}
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
+                          <div className="flex gap-4">
+                            <div className="w-24 h-16 bg-gray-200 dark:bg-white/10 rounded-lg shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="h-3.5 bg-gray-300 dark:bg-white/20 rounded w-11/12" />
+                              <div className="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-2/3" />
+                              <div className="h-2 bg-gray-200 dark:bg-white/10 rounded w-1/3" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
+                          <div className="flex gap-4">
+                            <div className="w-24 h-16 bg-gray-200 dark:bg-white/10 rounded-lg shrink-0" />
+                            <div className="space-y-2 flex-1">
+                              <div className="h-3.5 bg-gray-300 dark:bg-white/20 rounded w-10/12" />
+                              <div className="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-1/2" />
+                              <div className="h-2 bg-gray-200 dark:bg-white/10 rounded w-1/4" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* HOME_FEED_1 Slot (Full width inside Kolom Utama) */}
+                      <div
+                        onClick={() => handleSlotClick('HOME_FEED_1')}
+                        onMouseEnter={() => setActiveSlotId('HOME_FEED_1')}
+                        onMouseLeave={() => setActiveSlotId(null)}
+                        className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
+                          activeSlotId === 'HOME_FEED_1'
+                            ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+                            : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
+                        }`}
+                      >
+                        <div className="absolute top-2 left-2 flex gap-1">
+                          <span className="px-1.5 py-0.5 bg-brand-red text-white text-[7px] font-black uppercase rounded">
+                            3:2 ASPECT
+                          </span>
+                        </div>
+                        <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
+                          [HOME_FEED_1] Banner Atas Feed (300 x 200)
+                        </p>
+                        <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
+                          Tampil setelah 2 berita utama di feed homepage
+                        </p>
+                      </div>
+
+                      {/* 4 Medium Article Cards Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="bg-gray-50 dark:bg-white/[0.02] p-3 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
+                            <div className="w-full aspect-[16/9] bg-gray-200 dark:bg-white/10 rounded-lg" />
+                            <div className="h-3 bg-gray-300 dark:bg-white/20 rounded w-11/12" />
+                            <div className="h-2 bg-gray-200 dark:bg-white/10 rounded w-2/3" />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* HOME_FEED_2 Slot (Full width inside Kolom Utama) */}
+                      <div
+                        onClick={() => handleSlotClick('HOME_FEED_2')}
+                        onMouseEnter={() => setActiveSlotId('HOME_FEED_2')}
+                        onMouseLeave={() => setActiveSlotId(null)}
+                        className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
+                          activeSlotId === 'HOME_FEED_2'
+                            ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+                            : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
+                        }`}
+                      >
+                        <div className="absolute top-2 left-2 flex gap-1">
+                          <span className="px-1.5 py-0.5 bg-brand-red text-white text-[7px] font-black uppercase rounded">
+                            2:1 ASPECT
+                          </span>
+                        </div>
+                        <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
+                          [HOME_FEED_2] Banner Bawah Feed (300 x 150)
+                        </p>
+                        <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
+                          Tampil di bagian bawah feed setelah artikel grid
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* HOME_FEED_1 Slot */}
-                  <div className="grid grid-cols-3 gap-4 items-center">
-                    <div className="col-span-2 space-y-3">
-                      <div className="h-3 bg-gray-100 dark:bg-white/[0.03] rounded w-1/4" />
-                      <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-11/12" />
-                      <div className="h-12 bg-gray-100 dark:bg-white/[0.03] rounded" />
-                    </div>
+                    {/* Right Column: Sidebar (lg:col-span-4) */}
+                    <div className="lg:col-span-4 space-y-6 border-l border-gray-100 dark:border-white/5 pl-6 hidden lg:block">
+                      {/* Widget Terbaru */}
+                      <div className="space-y-3">
+                        <div className="border-b border-gray-100 dark:border-white/5 pb-1">
+                          <span className="text-[8px] font-black uppercase tracking-wider text-brand-black dark:text-white">Trending / Terbaru</span>
+                        </div>
+                        <div className="space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex gap-2 items-center">
+                              <span className="text-xs font-black text-brand-red">0{i}</span>
+                              <div className="flex-1 space-y-1">
+                                <div className="h-2 bg-gray-300 dark:bg-white/20 rounded w-full" />
+                                <div className="h-1.5 bg-gray-200 dark:bg-white/10 rounded w-2/3" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
 
-                    <div
-                      onClick={() => handleSlotClick('HOME_FEED_1')}
-                      onMouseEnter={() => setActiveSlotId('HOME_FEED_1')}
-                      onMouseLeave={() => setActiveSlotId(null)}
-                      className={`relative aspect-[300/200] rounded-xl flex flex-col items-center justify-center border cursor-pointer transition-all duration-300 ${
-                        activeSlotId === 'HOME_FEED_1'
-                          ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
-                          : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
-                      }`}
-                    >
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[6px] font-black uppercase rounded">
-                        3:2 RATIO
-                      </span>
-                      <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-brand-black dark:text-white text-center px-2">
-                        [HOME_FEED_1] (300 x 200)
-                      </p>
-                      <p className="text-[6px] text-gray-400 uppercase mt-1">Banner Atas Feed</p>
-                    </div>
-                  </div>
+                      {/* Widget Info Pasar */}
+                      <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-3 rounded-xl space-y-2">
+                        <span className="text-[8px] font-black text-brand-black dark:text-white block uppercase">Info Pasar</span>
+                        <div className="space-y-1.5 text-[8px] text-gray-400 font-bold uppercase tracking-wider">
+                          <div className="flex justify-between">
+                            <span>IHSG</span>
+                            <span className="text-emerald-500">5.691,60 (+0,86%)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>USD/IDR</span>
+                            <span className="text-emerald-500">17.957 (+0,18%)</span>
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* More mock content */}
-                  <div className="border-t border-gray-100 dark:border-white/5 pt-4 grid grid-cols-3 gap-3">
-                    <div className="h-20 bg-gray-100 dark:bg-white/[0.03] rounded-xl" />
-                    <div className="h-20 bg-gray-100 dark:bg-white/[0.03] rounded-xl" />
-                    <div className="h-20 bg-gray-100 dark:bg-white/[0.03] rounded-xl" />
-                  </div>
-
-                  {/* HOME_FEED_2 Slot */}
-                  <div className="grid grid-cols-3 gap-4 items-center">
-                    <div
-                      onClick={() => handleSlotClick('HOME_FEED_2')}
-                      onMouseEnter={() => setActiveSlotId('HOME_FEED_2')}
-                      onMouseLeave={() => setActiveSlotId(null)}
-                      className={`relative aspect-[300/150] rounded-xl flex flex-col items-center justify-center border cursor-pointer transition-all duration-300 ${
-                        activeSlotId === 'HOME_FEED_2'
-                          ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
-                          : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
-                      }`}
-                    >
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[6px] font-black uppercase rounded">
-                        2:1 RATIO
-                      </span>
-                      <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-brand-black dark:text-white text-center px-2">
-                        [HOME_FEED_2] (300 x 150)
-                      </p>
-                      <p className="text-[6px] text-gray-400 uppercase mt-1">Banner Bawah Feed</p>
-                    </div>
-
-                    <div className="col-span-2 space-y-3">
-                      <div className="h-3 bg-gray-100 dark:bg-white/[0.03] rounded w-1/4" />
-                      <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-11/12" />
-                      <div className="h-12 bg-gray-100 dark:bg-white/[0.03] rounded" />
+                      {/* Widget Foto Jurnalistik */}
+                      <div className="space-y-2">
+                        <span className="text-[8px] font-black text-brand-black dark:text-white block uppercase">Foto Jurnalistik</span>
+                        <div className="w-full aspect-[4/3] bg-gray-200 dark:bg-white/10 rounded-lg" />
+                        <div className="h-2 bg-gray-200 dark:bg-white/10 rounded w-3/4" />
+                      </div>
                     </div>
                   </div>
                 </div>
               ) : (
                 // ─────────────────────────────────────────────
-                // ARTICLE PAGE VIEW SIMULATION
+                // REALISTIC ARTICLE VIEW SIMULATION (2 COLUMNS)
                 // ─────────────────────────────────────────────
-                <div className="space-y-6">
-                  {/* Article Title */}
-                  <div className="space-y-2">
-                    <span className="text-[8px] font-black text-brand-red uppercase tracking-wider">Energi Terbarukan</span>
-                    <h1 className="text-sm md:text-base font-serif font-black text-brand-black dark:text-white">
-                      Desa Karya Mandiri Sukses Kembangkan Pembangkit Listrik Tenaga Surya Skala Komunitas
-                    </h1>
-                    <div className="flex gap-2 text-[7px] text-gray-400 uppercase font-semibold">
-                      <span>Oleh Penulis Karya</span>
-                      <span>•</span>
-                      <span>1 Juli 2026</span>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Column: Article content (lg:col-span-8) */}
+                  <div className="lg:col-span-8 space-y-6">
+                    {/* Header artikel */}
+                    <div className="space-y-2">
+                      <span className="text-[8px] font-black text-brand-red uppercase tracking-wider">Layanan Publik</span>
+                      <h1 className="text-sm md:text-base font-serif font-black text-brand-black dark:text-white leading-snug">
+                        Desa Karya Mandiri Sukses Kembangkan Pembangkit Listrik Tenaga Surya Skala Komunitas
+                      </h1>
+                      <div className="flex gap-2 text-[7px] text-gray-400 uppercase font-semibold">
+                        <span>Oleh Penulis Karya</span>
+                        <span>•</span>
+                        <span>1 Juli 2026</span>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Body paragraphs with inline ads */}
-                  <div className="text-[10px] leading-relaxed text-brand-text-muted space-y-4">
-                    <p className="h-8 bg-gray-100 dark:bg-white/[0.02] rounded" />
-                    <p className="h-8 bg-gray-100 dark:bg-white/[0.02] rounded w-11/12" />
+                    {/* Cover image mock */}
+                    <div className="w-full aspect-[16/9] bg-gray-200 dark:bg-white/10 rounded-xl" />
 
-                    {/* ARTICLE_TOP Slot */}
+                    {/* Paragraf 1-3 */}
+                    <div className="text-[10px] leading-relaxed text-brand-text-muted space-y-2.5">
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded w-11/12" />
+                    </div>
+
+                    {/* ARTICLE_TOP Slot (Setelah Paragraf 3) */}
                     <div
                       onClick={() => handleSlotClick('ARTICLE_TOP')}
                       onMouseEnter={() => setActiveSlotId('ARTICLE_TOP')}
                       onMouseLeave={() => setActiveSlotId(null)}
-                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer transition-all duration-300 ${
+                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
                         activeSlotId === 'ARTICLE_TOP'
                           ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
                           : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
                       }`}
                     >
-                      <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-brand-black dark:text-white">
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        <span className="px-1.5 py-0.5 bg-brand-red text-white text-[7px] font-black uppercase rounded">
+                          3:2 ASPECT
+                        </span>
+                      </div>
+                      <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
                         [ARTICLE_TOP] Banner Atas Artikel (300 x 200)
                       </p>
-                      <p className="text-[6px] text-gray-400 uppercase mt-0.5">Setelah Paragraf ke-3</p>
+                      <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
+                        Tampil di tengah tulisan setelah paragraf ke-3
+                      </p>
                     </div>
 
-                    <p className="h-8 bg-gray-100 dark:bg-white/[0.02] rounded w-10/12" />
-                    <p className="h-8 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                    {/* Paragraf 4-8 */}
+                    <div className="text-[10px] leading-relaxed text-brand-text-muted space-y-2.5">
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded w-11/12" />
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded w-10/12" />
+                    </div>
 
-                    {/* ARTICLE_MIDDLE Slot */}
+                    {/* ARTICLE_MIDDLE Slot (Setelah Paragraf 8) */}
                     <div
                       onClick={() => handleSlotClick('ARTICLE_MIDDLE')}
                       onMouseEnter={() => setActiveSlotId('ARTICLE_MIDDLE')}
                       onMouseLeave={() => setActiveSlotId(null)}
-                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer transition-all duration-300 ${
+                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
                         activeSlotId === 'ARTICLE_MIDDLE'
                           ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
                           : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
                       }`}
                     >
-                      <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-brand-black dark:text-white">
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        <span className="px-1.5 py-0.5 bg-brand-red text-white text-[7px] font-black uppercase rounded">
+                          2:1 ASPECT
+                        </span>
+                      </div>
+                      <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
                         [ARTICLE_MIDDLE] Banner Tengah Artikel (300 x 150)
                       </p>
-                      <p className="text-[6px] text-gray-400 uppercase mt-0.5">Setelah Paragraf ke-8</p>
+                      <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
+                        Tampil setelah paragraf ke-8 di dalam konten artikel
+                      </p>
                     </div>
 
-                    <p className="h-8 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                    {/* Paragraf Sisa & Tags */}
+                    <div className="text-[10px] leading-relaxed text-brand-text-muted space-y-2.5">
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded" />
+                      <div className="h-3 bg-gray-100 dark:bg-white/[0.02] rounded w-3/4" />
+                    </div>
 
-                    {/* ARTICLE_BOTTOM Slot */}
+                    {/* ARTICLE_BOTTOM Slot (Sebelum artikel terkait) */}
                     <div
                       onClick={() => handleSlotClick('ARTICLE_BOTTOM')}
                       onMouseEnter={() => setActiveSlotId('ARTICLE_BOTTOM')}
                       onMouseLeave={() => setActiveSlotId(null)}
-                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer transition-all duration-300 ${
+                      className={`relative w-full aspect-[300/100] md:aspect-[300/80] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
                         activeSlotId === 'ARTICLE_BOTTOM'
                           ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
                           : 'border-dashed border-gray-300 dark:border-white/10 hover:border-brand-red/50 bg-gray-50 dark:bg-white/[0.02]'
                       }`}
                     >
-                      <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-brand-black dark:text-white">
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        <span className="px-1.5 py-0.5 bg-brand-red text-white text-[7px] font-black uppercase rounded">
+                          2:1 ASPECT
+                        </span>
+                      </div>
+                      <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
                         [ARTICLE_BOTTOM] Banner Bawah Artikel (300 x 150)
                       </p>
-                      <p className="text-[6px] text-gray-400 uppercase mt-0.5">Sebelum Konten Artikel Terkait</p>
+                      <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
+                        Tampil di bagian bawah artikel sebelum rekomendasi berita lainnya
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Sidebar (lg:col-span-4) */}
+                  <div className="lg:col-span-4 space-y-6 border-l border-gray-100 dark:border-white/5 pl-6 hidden lg:block">
+                    {/* Rekomendasi Artikel Widget */}
+                    <div className="space-y-3">
+                      <div className="border-b border-gray-100 dark:border-white/5 pb-1">
+                        <span className="text-[8px] font-black uppercase tracking-wider text-brand-black dark:text-white">Terpopuler Hari Ini</span>
+                      </div>
+                      <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex gap-2.5 items-start">
+                            <div className="w-12 h-9 bg-gray-200 dark:bg-white/10 rounded shrink-0" />
+                            <div className="h-2.5 bg-gray-300 dark:bg-white/20 rounded w-full" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
