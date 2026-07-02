@@ -312,11 +312,11 @@ export default function AdSpace({
 
   const styles: Record<AdSlotId, string> = {
     HOME_TOP:       "w-full h-[90px] min-h-[90px] md:h-[182px] md:min-h-[182px] lg:h-[240px] lg:min-h-[240px] mb-6",
-    HOME_FEED_1:    "w-full h-[200px] min-h-[200px] mb-8",
-    HOME_FEED_2:    "w-full h-[150px] min-h-[150px] mb-8",
-    ARTICLE_TOP:    "w-full h-[200px] min-h-[200px] mb-8",
-    ARTICLE_MIDDLE: "w-full h-[150px] min-h-[150px] mb-12",
-    ARTICLE_BOTTOM: "w-full h-[150px] min-h-[150px] mb-6",
+    HOME_FEED_1:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
+    HOME_FEED_2:    "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-8",
+    ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
+    ARTICLE_MIDDLE: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-12",
+    ARTICLE_BOTTOM: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-6",
   };
 
   // Loading state
