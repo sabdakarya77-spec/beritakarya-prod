@@ -88,8 +88,8 @@ export function HeroBannerRow({
           </button>
         </div>
 
-        {/* Thumbnail preview */}
-        <div className="w-32 h-16 md:w-48 md:h-20 rounded-lg overflow-hidden bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 flex-shrink-0">
+        {/* Thumbnail preview — rasio 4:1 sesuai HOME_TOP (960×240) */}
+        <div className="w-32 aspect-[4/1] md:w-48 rounded-lg overflow-hidden bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 flex-shrink-0">
           {ad.imageUrl ? (
             (() => {
               try { return new URL(ad.imageUrl).pathname.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
