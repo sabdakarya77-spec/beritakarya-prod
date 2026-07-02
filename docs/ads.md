@@ -102,7 +102,7 @@ Semua 6 slot tampil di **semua device** (desktop, tablet, mobile) — yang berbe
 | ARTICLE_MIDDLE | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
 | ARTICLE_BOTTOM | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
 
-> **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, rasio beda di-handle dengan palette gradient background.
+> **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, **semua rasio gambar selalu di-crop secara cerdas** (`object-cover + position: attention`) agar memenuhi slot dengan profesional — tanpa sisa ruang di kiri/kanan.
 
 ### 2.5 Responsive Rendering di Frontend
 
@@ -118,7 +118,7 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 `HOME_TOP` juga **sticky di mobile** (fixed bottom viewport, closeable setelah 5 detik).
 
-> **`object-fit: cover`** — Semua komponen preview dan published menggunakan `object-cover` agar gambar mengisi container tanpa letterbox. Preview di Ad Studio **konsisten** dengan yang tayang. Receipt/payment proof tetap pakai `object-contain` agar terlihat utuh.
+> **`object-fit: cover`** — Semua komponen preview dan published menggunakan `object-cover` agar gambar mengisi container tanpa letterbox. Preview di Ad Studio **konsisten** dengan yang tayang. Container menggunakan `aspect-ratio` yang sesuai — tidak ada fixed height. Receipt/payment proof tetap pakai `object-contain` agar terlihat utuh.
 
 ### 2.6 Strategi Slot Mobile — Penamaan Berbasis Lokasi
 
@@ -134,8 +134,6 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 | `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
 | `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
 | `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Ekonomi |
-
-> **Manfaat:** Paket iklan yang dijual tetap 6 slot. Sistem secara otomatis menampilkan ukuran yang sesuai untuk desktop atau mobile. Pengelolaan, pelaporan, dan penjualan jadi jauh lebih mudah.
 
 #### Layout Homepage Mobile
 
@@ -236,26 +234,22 @@ Upload gambar (JPG/PNG/WebP/GIF)
          ▼
    Cek ukuran — apakah perlu upscale?
          │
-    ┌────┴────────────────────┐
-    │                         │
-Sudah cukup besar        Perlu upscale
-    │                         │
-    │                    ① Replicate API (AI)
-    │                       ├── Berhasil → pakai
-    │                       └── Gagal ↓
-    │                    ② Sharp (lanczos3, 2×)
-    │                       ├── Berhasil → pakai
-    │                       └── Gagal ↓
-    │                    ③ Pakai gambar asli + gradient
-    │                         │
-    └────────┬────────────────┘
-             │
-             ▼
+     ┌────┴────────────────────┐
+     │                         │
+ Sudah cukup besar        Perlu upscale
+     │                         │
+     │                    ① Replicate API (AI)
+     │                       ├── Berhasil → pakai
+     │                       └── Gagal ↓
+     │                    ② Sharp (lanczos3, 2×)
+     │                       ├── Berhasil → pakai
+     │                       └── Gagal ↓
+     │                    ③ Pakai gambar asli + gradient
+     │                         │
+     └────────┬────────────────┘
+              │
+              ▼
    Extract dominant color palette
-             │
-             ▼
-   Cek rasio aspek vs target slot
-         │
     ┌────┴────────────────────┐
     │                         │
 Rasio cocok              Rasio beda
@@ -275,15 +269,27 @@ Smart Crop              Palette Gradient
       Simpan ke storage
 ```
 
-### 3.2 Palette Gradient Background
+### 3.2 Smart Crop — Selalu Aktif (Diperbarui 2 Juli 2026)
 
-Saat rasio gambar berbeda dengan slot, sistem:
-1. Extract warna dominan dari gambar (sampling 50×50 px)
-2. Generate gradient SVG (radial: terang di tengah, gelap di pinggir)
-3. Resize gambar proporsional (contain) dengan padding 5%
-4. Composite gambar di atas gradient
+`ASPECT_RATIO_TOLERANCE` dinaikkan dari `0.15` (15%) menjadi `1.0` (100%) di `ad-image-processor.ts`. Efeknya:
 
-Hasil: banner profesional yang terlihat disengaja, bukan blur workaround.
+- **Semua gambar**, berapa pun rasio aslinya, selalu diproses dengan mode `smart_crop` (`fit: cover, position: attention`).
+- Sistem otomatis mendeteksi area paling penting dari gambar (teks, wajah, logo) dan menjaga area tersebut tetap tampil di slot.
+- Mode `palette_gradient` (yang menyisakan ruang kosong di kiri/kanan) **tidak akan pernah lagi digunakan**.
+
+**Sebelum (masalah):**
+```
+Gambar 300×200 (3:2) → slot 300×150 (2:1)
+Selisih rasio: 25% > 15% → palette_gradient → sisa kiri-kanan ❌
+```
+
+**Sesudah (solusi):**
+```
+Gambar 300×200 (3:2) → slot 300×150 (2:1)
+Selisih rasio: 25% < 100% → smart_crop → memenuhi penuh ✅
+```
+
+> **Manfaat untuk user:** Pengiklan tidak perlu pusing soal ukuran gambar. Upload gambar apa pun — sistem akan selalu mengisi penuh slot iklan secara profesional.
 
 ### 3.3 File Lokasi
 
@@ -334,6 +340,7 @@ File: `apps/web/components/ui/AdSpace.tsx`
 | **Props** | `type: 'HOME_TOP' \| 'HOME_FEED_1' \| 'HOME_FEED_2' \| 'ARTICLE_TOP' \| 'ARTICLE_MIDDLE' \| 'ARTICLE_BOTTOM'`, `slot?`, `label?`, `className?` |
 | **Fetch** | `GET /api/v1/ads/public?site=<siteId>`, filter by `slotName` di client |
 | **Carousel** | Auto-rotate — HOME_TOP (video) 12 detik, slot banner 7 detik. Random order, fade transition, tanpa indikator. Pause on hover |
+| **Container** | Semua slot menggunakan `aspect-ratio` (bukan fixed height). `HOME_TOP`: `max-w-[960px] aspect-[4/1] mx-auto rounded-xl`. Banner feed/artikel: `max-w-[360px] aspect-[3/2]` atau `aspect-[2/1] mx-auto rounded-lg` |
 | **Impresi** | `POST /api/v1/ads/track/<id>?action=impression` (satu kali per ad ID per page load) |
 | **Klik** | `POST /api/v1/ads/track/<id>?action=click` (via `navigator.sendBeacon`) |
 | **A/B Testing** | Random variant per session (sessionStorage), use `winnerVariant` if set |
@@ -919,6 +926,9 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 38 | Preview konsisten: object-contain → object-cover (7 file) | ✅ Selesai |
 | 39 | HeroBannerRow view mode: aspect ratio 2:1 → 4:1 (match HOME_TOP) | ✅ Selesai |
 | 40 | AdSlotCard: klik thumbnail → modal preview ukuran penuh (seperti HOME_TOP) | ✅ Selesai |
+| 41 | Banner terpotong di halaman live — container fixed height → `aspect-ratio` dinamis | ✅ Selesai — `AdSpace.tsx` styles map diperbarui |
+| 42 | HOME_TOP: container fixed-height → `max-w-[960px] aspect-[4/1] mx-auto rounded-xl` | ✅ Selesai — responsif di semua lebar layar termasuk ultra-wide |
+| 43 | Sisa kiri-kanan pada banner 2:1 saat upload gambar 3:2 — `ASPECT_RATIO_TOLERANCE` 15% → 100% | ✅ Selesai — sistem selalu `smart_crop` (cover+attention), user bebas upload gambar ukuran apapun |
 
 ---
 
@@ -1016,11 +1026,11 @@ Extract warna ←──── Gambar (asli atau upscaled)
 Cek rasio
     │                    │
     ▼                    ▼
-Rasio cocok         Rasio beda
+Rasio cocok         Rasio SELALU cocok (toleransi 100%)
     │                    │
     ▼                    ▼
-Smart Crop          Palette Gradient
-(fit: cover)        (warna brand → gradient)
+Smart Crop          Smart Crop
+(fit: cover)        (fit: cover, position: attention)
     │                    │
     └────────┬───────────┘
              ▼
@@ -1176,4 +1186,6 @@ Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Refer
 
 ---
 
-*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format), preview konsisten object-fit cover, HeroBannerRow aspect ratio 4:1, AdSlotCard modal preview*
+---
+
+*Dokumentasi terakhir diperbarui: **2 Juli 2026** — perbaiki banner terpotong (container fixed height → aspect-ratio dinamis untuk semua slot), HOME_TOP responsive `max-w-[960px] aspect-[4/1]`, smart crop selalu aktif untuk semua rasio gambar (`ASPECT_RATIO_TOLERANCE` 0.15 → 1.0), user bebas upload gambar berukuran apa pun tanpa sisa kiri-kanan*

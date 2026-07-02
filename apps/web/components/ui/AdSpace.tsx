@@ -233,10 +233,10 @@ export default function AdSpace({
   }, [site, slotName]);
 
   // Carousel: auto-rotate (only if multiple ads)
-  // HOME_TOP (video): 12 detik (video kita produksi, durasi 10-15 detik)
+  // HOME_TOP (video): 15 detik (video durasi 10-15 detik + buffer 3 detik agar video selesai penuh)
   // Slot banner lainnya: 7 detik
   const isCarousel = ads.length > 1;
-  const CAROUSEL_INTERVAL = type === 'HOME_TOP' ? 12000 : 7000;
+  const CAROUSEL_INTERVAL = type === 'HOME_TOP' ? 15000 : 7000;
 
   const stopRotation = useCallback(() => {
     if (intervalRef.current) {
