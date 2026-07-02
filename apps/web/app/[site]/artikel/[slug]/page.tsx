@@ -218,7 +218,7 @@ export default async function ArticlePage({ params }: Props) {
       <ImageLightboxWrapper>
         <article className="min-h-screen">
           {/* --- RESPONSIVE HERO --- */}
-          <section className="relative w-full max-w-container mx-auto md:my-6 md:rounded-2xl overflow-hidden shadow-md">
+          <section className="relative w-full">
             {/* Image Container: Aspect-video on all viewports */}
             <div className="relative w-full aspect-video">
               <SmartImage
