@@ -337,7 +337,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                       }}
                     />
                   ) : ad.imageUrl ? (
-                    <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-contain" />
+                    <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <ImageIcon size={16} className="text-gray-200 dark:text-white/10" />
@@ -516,9 +516,9 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                     <div className="aspect-video bg-gray-50 dark:bg-black/20 rounded-lg border border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
                       {editImageUrl ? (
                         isVideoFile(editImageUrl) ? (
-                          <video src={editImageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                          <video src={editImageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                         ) : (
-                          <img src={editImageUrl} alt="Preview" className="w-full h-full object-contain" />
+                          <img src={editImageUrl} alt="Preview" className="w-full h-full object-cover" />
                         )
                       ) : (
                         <span className="text-[9px] text-gray-400">Preview</span>

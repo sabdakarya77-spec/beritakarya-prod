@@ -188,28 +188,29 @@ function AdSlotMockup({ slot, previewSrc, mediaType, isEmpty }: {
   const slotDef = getAdSlotDefinition(slot);
   const sizeLabel = slotDef?.publicMockup || '300×200';
 
-  // Height classes per slot (UI concern, not from config)
-  const heightClass: Record<string, string> = {
+  // Container classes per slot — samakan rasio dengan published AdSpace
+  // agar preview konsisten dengan yang tayang (object-cover tidak memotong berbeda)
+  const containerClass: Record<string, string> = {
     HOME_TOP: 'h-12 sm:h-20 md:h-32',
-    HOME_FEED_1: 'h-16 md:h-28',
-    HOME_FEED_2: 'h-12 md:h-20',
-    ARTICLE_TOP: 'h-16 md:h-28',
-    ARTICLE_MIDDLE: 'h-12 md:h-20',
-    ARTICLE_BOTTOM: 'h-12 md:h-20',
+    HOME_FEED_1: 'aspect-[3/2]',
+    HOME_FEED_2: 'aspect-[2/1]',
+    ARTICLE_TOP: 'aspect-[3/2]',
+    ARTICLE_MIDDLE: 'aspect-[2/1]',
+    ARTICLE_BOTTOM: 'aspect-[2/1]',
   };
-  const h = heightClass[slot] || 'h-16 md:h-28';
+  const container = containerClass[slot] || 'aspect-[3/2]';
 
   return (
     <div className={cn(
       "relative w-full rounded-lg overflow-hidden border-2 border-dashed transition-all",
-      h,
+      container,
       isEmpty ? 'border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02]' : 'border-brand-red/30 bg-black shadow-lg shadow-brand-red/10'
     )}>
       {previewSrc ? (
         mediaType === 'video' ? (
-          <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+          <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-cover" />
         ) : (
-          <img src={previewSrc} alt="Preview" className="w-full h-full object-contain" />
+          <img src={previewSrc} alt="Preview" className="w-full h-full object-cover" />
         )
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">

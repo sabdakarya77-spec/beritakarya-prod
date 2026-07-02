@@ -292,7 +292,7 @@ export function StudioControls() {
                 ].map(({ name, v }) => v && (
                   <div key={name} className="text-center">
                     <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 mb-0.5">
-                      <img src={v.url} alt={name} className="w-full h-full object-contain" />
+                      <img src={v.url} alt={name} className="w-full h-full object-cover" />
                     </div>
                     <p className="text-[7px] font-bold text-gray-500">{name}</p>
                     <p className="text-[6px] font-mono text-gray-400">{v.width}×{v.height}</p>
@@ -323,7 +323,7 @@ export function StudioControls() {
                 {data.crossSlotPreviews.map((p) => (
                   <div key={`${p.slot}-${p.variant || ''}`} className="flex-shrink-0 w-20 text-center">
                     <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-md overflow-hidden border border-gray-200 dark:border-white/10 mb-0.5">
-                      <img src={p.url} alt={p.slot} className="w-full h-full object-contain" />
+                      <img src={p.url} alt={p.slot} className="w-full h-full object-cover" />
                     </div>
                     <p className="text-[7px] font-bold text-gray-500 capitalize">{p.slot.replace('_', ' ')}</p>
                     <p className="text-[6px] font-mono text-gray-400">{p.width}×{p.height}</p>

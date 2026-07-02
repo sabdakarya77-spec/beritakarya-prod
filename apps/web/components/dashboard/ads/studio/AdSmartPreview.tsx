@@ -271,7 +271,7 @@ export function AdSmartPreview({ file, previewUrl: _previewUrl, mediaType }: AdS
                   <img
                     src={p.url}
                     alt={`Preview ${p.slot}`}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-cover"
                     style={{ maxHeight: '200px' }}
                   />
                 </div>
@@ -330,7 +330,7 @@ function PreviewGroup({
                 <img
                   src={p.url}
                   alt={SLOT_LABELS[p.slot + (p.variant ? `_${p.variant}` : '')] || p.slot}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="px-1.5 py-1 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5">

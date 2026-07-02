@@ -210,9 +210,9 @@ export function HeroBannerRow({
                     try { return new URL(imageUrl).pathname.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
                     catch { return imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/); }
                   })() ? (
-                    <video src={imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                    <video src={imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                   ) : (
-                    <img src={imageUrl} alt="Preview" className="w-full h-full object-contain" />
+                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                   )
                 ) : (
                   <span className="text-[9px] text-gray-400">Preview</span>

@@ -464,7 +464,7 @@ export function StudioCanvas() {
                     ].map(({ name, v }) => v && (
                       <div key={name} className="text-center">
                         <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 mb-1">
-                          <img src={v.url} alt={name} className="w-full h-full object-contain" />
+                          <img src={v.url} alt={name} className="w-full h-full object-cover" />
                         </div>
                         <p className="text-[9px] font-bold text-gray-500">{name}</p>
                         <p className="text-[8px] font-mono text-gray-400">{v.width}×{v.height}</p>
@@ -495,7 +495,7 @@ export function StudioCanvas() {
                     {data.crossSlotPreviews.map((p) => (
                       <div key={`${p.slot}-${p.variant || ''}`} className="flex-shrink-0 w-28 text-center">
                         <div className="aspect-[4/3] bg-gray-100 dark:bg-white/5 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 mb-1">
-                          <img src={p.url} alt={p.slot} className="w-full h-full object-contain" />
+                          <img src={p.url} alt={p.slot} className="w-full h-full object-cover" />
                         </div>
                         <p className="text-[9px] font-bold text-gray-500 capitalize">{p.slot.replace('_', ' ')}</p>
                         <p className="text-[8px] font-mono text-gray-400">{p.width}×{p.height}</p>
@@ -753,9 +753,9 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
       >
         {previewSrc ? (
           mediaType === 'video' ? (
-            <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+            <video src={previewSrc} autoPlay loop muted playsInline className="w-full h-full object-cover" />
           ) : (
-            <img src={previewSrc} alt="Preview" className="w-full h-full object-contain" />
+            <img src={previewSrc} alt="Preview" className="w-full h-full object-cover" />
           )
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">

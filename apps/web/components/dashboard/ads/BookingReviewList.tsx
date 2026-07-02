@@ -190,9 +190,9 @@ export default function BookingReviewList({ bookings, loading, onApprove, onReje
                   <div className="h-[120px] bg-gray-50 dark:bg-black/20 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
                     {b.imageUrl ? (
                       b.imageUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/i) || b.imageUrl.toLowerCase().includes('video') ? (
-                        <video src={b.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-contain" />
+                        <video src={b.imageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                       ) : (
-                        <img src={b.imageUrl} alt="Banner" className="w-full h-full object-contain" />
+                        <img src={b.imageUrl} alt="Banner" className="w-full h-full object-cover" />
                       )
                     ) : (
                       <span className="text-[9px] text-gray-400">Tidak ada materi</span>
