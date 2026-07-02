@@ -379,7 +379,7 @@ File: `apps/web/components/dashboard/ads/studio/`
 | Komponen | File | Fungsi |
 |----------|------|--------|
 | `AdsSlotsContent` | `dashboard/ads/pages/AdsSlotsContent.tsx` | **Card Grid layout** — 6 slot cards dengan preview, stats, single upload |
-| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | **Production card** — preview iklan aktif per slot (HOME_TOP, HOME_FEED_1, dst.), stats (impresi/klik/CTR), upload → auto-generate, device badge |
+| `AdSlotCard` | `dashboard/ads/AdSlotCard.tsx` | **Production card** — preview iklan aktif per slot, **klik thumbnail → modal preview ukuran penuh** (rasio sesuai slot, `object-cover`), stats, upload → auto-generate |
 | `HeroBannerManager` | `dashboard/ads/HeroBannerManager.tsx` | Carousel banner management (HOME_TOP) |
 | `BookingReviewList` | `dashboard/ads/BookingReviewList.tsx` | Review queue + 5-item content checklist |
 | `AdPerformanceChart` | `dashboard/ads/AdPerformanceChart.tsx` | Recharts area chart |
@@ -918,6 +918,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 37 | Dokumentasi ads.md sinkron dengan codebase | ✅ Selesai |
 | 38 | Preview konsisten: object-contain → object-cover (7 file) | ✅ Selesai |
 | 39 | HeroBannerRow view mode: aspect ratio 2:1 → 4:1 (match HOME_TOP) | ✅ Selesai |
+| 40 | AdSlotCard: klik thumbnail → modal preview ukuran penuh (seperti HOME_TOP) | ✅ Selesai |
 
 ---
 
@@ -1175,4 +1176,4 @@ Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Refer
 
 ---
 
-*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format), preview konsisten object-fit cover, HeroBannerRow aspect ratio 4:1*
+*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format), preview konsisten object-fit cover, HeroBannerRow aspect ratio 4:1, AdSlotCard modal preview*

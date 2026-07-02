@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Upload,
   Trash2,
@@ -19,6 +19,8 @@ import {
   Save,
   XCircle,
   ExternalLink,
+  X,
+  Maximize2,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { api } from '../../../lib/api';
@@ -43,6 +45,16 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
   const [editLinkUrl, setEditLinkUrl] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Preview modal state
+  const [previewAd, setPreviewAd] = useState<Ad | null>(null);
+  const closePreview = useCallback(() => setPreviewAd(null), []);
+  useEffect(() => {
+    if (!previewAd) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closePreview(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [previewAd, closePreview]);
 
   // Dynamic aspect ratio per slot
   const aspectRatioClass: Record<string, string> = {
@@ -314,8 +326,16 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                   </button>
                 </div>
 
-                {/* Preview */}
-                <div className={cn("w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
+                {/* Preview — klik untuk buka modal */}
+                <button
+                  type="button"
+                  onClick={() => ad.imageUrl && setPreviewAd(ad)}
+                  className={cn(
+                    "w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden relative group cursor-pointer",
+                    aspectRatioClass[slot.id] || 'aspect-[300/200]',
+                    !ad.imageUrl && 'cursor-default'
+                  )}
+                >
                   {ad.code ? (
                     <div className="w-full h-full flex items-center justify-center">
                       <CodeIcon size={16} className="text-gray-300" />
@@ -343,7 +363,13 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                       <ImageIcon size={16} className="text-gray-200 dark:text-white/10" />
                     </div>
                   )}
-                </div>
+                  {/* Hover overlay */}
+                  {ad.imageUrl && (
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                      <Maximize2 size={14} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+                    </div>
+                  )}
+                </button>
 
                 {/* Info & Actions */}
                 <div className="flex-1 min-w-0">
@@ -555,6 +581,84 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
           <div className="text-center">
             <RefreshCw size={20} className="animate-spin text-brand-red mx-auto mb-2" />
             <p className="text-[10px] font-bold text-brand-black dark:text-white">Memproses...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewAd && previewAd.imageUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+          onClick={closePreview}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          {/* Content */}
+          <div
+            className="relative w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">{slot.name}</span>
+                <span className={cn(
+                  "text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider",
+                  previewAd.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-gray-100 dark:bg-white/5 text-gray-400"
+                )}>
+                  {previewAd.isActive ? '● AKTIF' : '○ NONAKTIF'}
+                </span>
+              </div>
+              <button
+                onClick={closePreview}
+                className="p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-black dark:hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            {/* Image — rasio sesuai slot, object-cover match published */}
+            <div className={cn("w-full", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
+              {isVideoFile(previewAd.imageUrl) ? (
+                <video
+                  src={previewAd.imageUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={previewAd.imageUrl}
+                  alt={slot.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            {/* Footer info */}
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-white/5 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                {previewAd.linkUrl && (
+                  <a
+                    href={previewAd.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[9px] text-gray-400 hover:text-brand-red truncate flex items-center gap-1 transition-colors"
+                  >
+                    <ExternalLink size={10} />
+                    <span className="truncate">{previewAd.linkUrl}</span>
+                  </a>
+                )}
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <span className="text-[9px] text-gray-400">
+                  <span className="font-bold">{(previewAd.impressions || 0).toLocaleString()}</span> impresi
+                </span>
+                <span className="text-[9px] text-gray-400">
+                  <span className="font-bold">{(previewAd.clicks || 0).toLocaleString()}</span> klik
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
