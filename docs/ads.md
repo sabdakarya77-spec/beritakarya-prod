@@ -110,13 +110,15 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 ```html
 <picture>
-  <source media="(max-width: 768px)" srcset="...mobile.webp" />
-  <source media="(max-width: 1024px)" srcset="...tablet.webp" />
-  <img src="...desktop.webp" />
+  <source media="(max-width: 639px)" srcSet="...mobile.webp" />
+  <source media="(max-width: 767px)" srcSet="...tablet.webp" />
+  <img src="...desktop.webp" class="object-cover" />
 </picture>
 ```
 
 `HOME_TOP` juga **sticky di mobile** (fixed bottom viewport, closeable setelah 5 detik).
+
+> **`object-fit: cover`** — Semua komponen preview dan published menggunakan `object-cover` agar gambar mengisi container tanpa letterbox. Preview di Ad Studio **konsisten** dengan yang tayang. Receipt/payment proof tetap pakai `object-contain` agar terlihat utuh.
 
 ### 2.6 Strategi Slot Mobile — Penamaan Berbasis Lokasi
 
@@ -369,6 +371,8 @@ File: `apps/web/components/dashboard/ads/studio/`
 5. Frontend tampilkan preview (3 gambar berdampingan)
 6. Background: fetch cross-slot preview untuk slot lain
 7. Submit booking dengan semua variant URLs
+
+> **Preview Konsisten:** Semua komponen preview (`StudioPreview`, `StudioCanvas`, `StudioControls`, `AdSmartPreview`) menggunakan `object-cover` — sama persis dengan `AdSpace` yang tayang. Advertiser melihat hasil yang sama sebelum dan sesudah publish. Container preview menggunakan `aspect-ratio` yang sesuai (3:2 untuk Sedang, 2:1 untuk Kecil) agar rasio konsisten.
 
 ### 4.4 Admin Components
 
@@ -912,6 +916,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 35 | HOME_TOP: kirim semua variant (desktop/tablet/mobile) saat booking | ✅ Selesai |
 | 36 | Approve handler: fallback fotoUrl untuk booking lama HOME_TOP | ✅ Selesai |
 | 37 | Dokumentasi ads.md sinkron dengan codebase | ✅ Selesai |
+| 38 | Preview konsisten: object-contain → object-cover (7 file) | ✅ Selesai |
 
 ---
 
@@ -1169,4 +1174,4 @@ Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Refer
 
 ---
 
-*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format)*
+*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format), preview konsisten object-fit cover*
