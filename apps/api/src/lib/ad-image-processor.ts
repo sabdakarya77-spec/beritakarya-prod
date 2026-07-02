@@ -163,7 +163,7 @@ export function generateGradientSvg(
 // ─── Smart Image Processing ──────────────────────────────────────────────────
 
 const MAX_FILE_SIZE = 200 * 1024 // 200 KB
-const ASPECT_RATIO_TOLERANCE = 0.15 // 15%
+const ASPECT_RATIO_TOLERANCE = 1.0 // 100% — selalu gunakan smart_crop (cover+attention) untuk semua rasio
 
 // ─── Upscale: Replicate API (AI) + Sharp (Fallback) ─────────────────────────
 
