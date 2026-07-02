@@ -218,9 +218,9 @@ export default async function ArticlePage({ params }: Props) {
       <ImageLightboxWrapper>
         <article className="min-h-screen">
           {/* --- RESPONSIVE HERO --- */}
-          <section className="relative w-full">
-            {/* Image Container: Aspect-video on mobile, fixed-height/cover on desktop */}
-            <div className="relative w-full aspect-video md:aspect-none md:h-[55vh] lg:h-[60vh] min-h-[200px] md:min-h-[450px] max-h-[600px]">
+          <section className="relative w-full max-w-container mx-auto md:my-6 md:rounded-2xl overflow-hidden shadow-md">
+            {/* Image Container: Aspect-video on all viewports */}
+            <div className="relative w-full aspect-video">
               <SmartImage
                 src={coverImage}
                 blur={article.featuredImageBlur}
@@ -229,7 +229,7 @@ export default async function ArticlePage({ params }: Props) {
                 alt={article.title}
                 fill
                 priority
-                className="object-contain animate-fade-in"
+                className="object-cover animate-fade-in"
               />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
@@ -756,7 +756,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
               context="article_block"
               alt={block.alt || 'Post image'}
               fill
-              className="object-contain"
+              className="object-cover"
             />
           </div>
           {block.caption && (
@@ -781,7 +781,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="article_block"
                   alt={img.alt || `Grid image ${i + 1}`}
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
               {img.caption && (
@@ -881,7 +881,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="media_text"
                   alt={block.alt || 'Post image'}
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
               {block.caption && (
