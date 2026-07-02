@@ -61,7 +61,7 @@ export default function MobileMenu({
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0 }}
             transition={shouldReduceMotion ? { duration: 0 } : undefined}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
           />
 
           {/* Menu Content */}
@@ -70,7 +70,7 @@ export default function MobileMenu({
             animate={{ x: 0 }}
             exit={shouldReduceMotion ? { x: 0 } : { x: '-100%' }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 left-0 bottom-0 z-[101] flex w-[82%] max-w-sm flex-col bg-white shadow-2xl dark:bg-slate-950 md:hidden"
+            className="fixed top-0 left-0 bottom-0 z-[101] flex w-[82%] max-w-sm flex-col bg-white shadow-2xl dark:bg-slate-950"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5 dark:border-white/5">
