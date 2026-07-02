@@ -210,7 +210,7 @@ export default async function ArticlePage({ params }: Props) {
   const sidebarLabelClass = 'flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted'
 
   return (
-    <PublicSiteLayout siteConfig={siteConfig} initialCategory={primaryCategorySlug || 'terbaru'}>
+    <PublicSiteLayout siteConfig={siteConfig} initialCategory={primaryCategorySlug || 'terbaru'} hideTicker={true}>
       <JsonLd id="ld-article" data={articleSchema} />
       <JsonLd id="ld-breadcrumb" data={breadcrumbSchema} />
       <ReadingProgress />

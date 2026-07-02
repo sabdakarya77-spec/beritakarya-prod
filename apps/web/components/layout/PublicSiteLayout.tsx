@@ -22,9 +22,15 @@ interface PublicSiteLayoutProps {
   children: React.ReactNode;
   siteConfig: SiteConfig;
   initialCategory?: string;
+  hideTicker?: boolean;
 }
 
-export default function PublicSiteLayout({ children, siteConfig, initialCategory = 'terbaru' }: PublicSiteLayoutProps) {
+export default function PublicSiteLayout({ 
+  children, 
+  siteConfig, 
+  initialCategory = 'terbaru',
+  hideTicker = false
+}: PublicSiteLayoutProps) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -86,11 +92,13 @@ export default function PublicSiteLayout({ children, siteConfig, initialCategory
         Langsung ke konten
       </a>
 
-      <div className="border-b border-black/5 bg-brand-black text-white shadow-[0_16px_32px_rgba(2,6,23,0.18)] dark:border-white/5 dark:bg-[#020617]">
-        <Container>
-          <BreakingNewsTicker />
-        </Container>
-      </div>
+      {!hideTicker && (
+        <div className="border-b border-black/5 bg-brand-black text-white shadow-[0_16px_32px_rgba(2,6,23,0.18)] dark:border-white/5 dark:bg-[#020617]">
+          <Container>
+            <BreakingNewsTicker />
+          </Container>
+        </div>
+      )}
 
       <Navbar 
         siteConfig={siteConfig}
