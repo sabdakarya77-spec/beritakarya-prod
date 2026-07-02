@@ -124,14 +124,14 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 #### Konvensi Penamaan Slot
 
-| Slot Name | Deskripsi | Desktop | Mobile | Varian |
-|-----------|-----------|---------|--------|--------|
-| `HOME_TOP` | Hero banner homepage | 960 × 240 | 360 × 90 | Besar |
-| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 300 × 200 | 300 × 200 | Sedang |
-| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 300 × 150 | 300 × 150 | Kecil |
-| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 300 × 200 | 300 × 200 | Sedang |
-| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 300 × 150 | 300 × 150 | Kecil |
-| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 300 × 150 | 300 × 150 | Kecil |
+| Slot Name | Deskripsi | Format | Desktop | Tablet | Mobile | Tier |
+|-----------|-----------|--------|---------|--------|--------|------|
+| `HOME_TOP` | Hero banner homepage | 🎥 Video | 960 × 240 | 728 × 182 | 360 × 90 | Premium |
+| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
+| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
+| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
+| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Ekonomi |
 
 > **Manfaat:** Paket iklan yang dijual tetap 6 slot. Sistem secara otomatis menampilkan ukuran yang sesuai untuk desktop atau mobile. Pengelolaan, pelaporan, dan penjualan jadi jauh lebih mudah.
 
@@ -346,11 +346,9 @@ File: `apps/web/components/ui/AdSpace.tsx`
 | Komponen | File | Slot |
 |----------|------|------|
 | `BillboardShowcase` | `components/ui/BillboardShowcase.tsx` | HOME_TOP |
-| `FeedShowcase1` | `components/ui/FeedShowcase1.tsx` | HOME_FEED_1 |
-| `FeedShowcase2` | `components/ui/FeedShowcase2.tsx` | HOME_FEED_2 |
-| `ArticleTopShowcase` | `components/ui/ArticleTopShowcase.tsx` | ARTICLE_TOP |
-| `ArticleMiddleShowcase` | `components/ui/ArticleMiddleShowcase.tsx` | ARTICLE_MIDDLE |
-| `ArticleBottomShowcase` | `components/ui/ArticleBottomShowcase.tsx` | ARTICLE_BOTTOM |
+| `InFeedShowcase` | `components/ui/InFeedShowcase.tsx` | HOME_FEED_1, HOME_FEED_2, ARTICLE_TOP, ARTICLE_MIDDLE, ARTICLE_BOTTOM |
+
+> **Catatan:** Semua slot in-feed dan artikel menggunakan satu komponen `InFeedShowcase` yang menerima prop `slot` untuk menyesuaikan konten. CMS fallback juga tersedia via `GET /api/v1/ads/fallback?slot=HOME_TOP`.
 
 ### 4.3 Ad Studio (Booking Wizard)
 
@@ -494,19 +492,21 @@ model AdBooking {
   siteId          String
   packageId       String
   campaignName    String?
-  imageUrl        String?
-  imageUrlTablet  String?
-  imageUrlMobile  String?
+  imageUrl        String?       // Desktop variant
+  imageUrlTablet  String?       // Tablet variant
+  imageUrlMobile  String?       // Mobile variant
+  logoUrl         String?       // Logo advertiser (khusus HOME_TOP)
+  fotoUrl         String?       // Foto advertiser (khusus HOME_TOP)
   linkUrl         String?
-  animationEffect String?
+  animationEffect String?       // Deprecated — tidak dipakai di UI
   startDate       DateTime
   endDate         DateTime
   paymentStatus   PaymentStatus @default(PENDING)
   paymentProof    String?
   snapToken       String?
-  externalOrderId String?
+  externalOrderId String?       @unique
   status          AdStatus      @default(PENDING_REVIEW)
-  rejectionNotes  String?
+  rejectionNotes  String?       @db.Text
   impressions     Int           @default(0)
   clicks          Int           @default(0)
   previewUrl      String?       // Link preview video (khusus HOME_TOP)
@@ -554,10 +554,10 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
       ↓
 5. Upload 1 File (gambar atau video)
       ↓
-   🎨 Backend auto-generate semua variant:
-   → Desktop (970×250 / 300×250 / 300×200 / 300×150)
-   → Tablet (728×100 / 300×250 / 300×200 / 300×150)
-   → Mobile (320×100 / 300×250 / 300×200 / 300×150)
+   🎨 Backend auto-generate semua variant (POST /upload-ad?slot=...):
+   → HOME_TOP: 960×240 (desktop) / 728×182 (tablet) / 360×90 (mobile)
+   → HOME_FEED_1 / ARTICLE_TOP: 300×200 (semua device)
+   → HOME_FEED_2 / ARTICLE_MIDDLE / ARTICLE_BOTTOM: 300×150 (semua device)
    → Return semua URL + warnings
       ↓
    📐 Preview muncul otomatis:
@@ -565,41 +565,39 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
    → Cross-slot preview ("Juga cocok untuk slot lain")
    → Warning jika gambar kecil / rasio beda
       ↓
-6. Pilih Efek Animasi (Ken Burns / Fade Slide / Parallax / Pulse)
+6. Submit Booking (dengan semua variant URLs)
       ↓
-7. Submit Booking (dengan semua variant URLs)
-      ↓
-8. Pembayaran (opsional saat submit):
+7. Pembayaran (opsional saat submit):
    - Midtrans Snap (VA, e-wallet, QRIS, kartu kredit)
    - Manual transfer + upload bukti
       ↓
-9. Admin Review (5-item checklist):
+8. Admin Review (5-item checklist):
    - [ ] Tidak misleading
    - [ ] Tidak SARA/prohibited
    - [ ] Ukuran sesuai
    - [ ] URL aktif
    - [ ] Tidak melanggar hak cipta
       ↓
-10. Approve → Auto-generate variant (jika belum ada) → Auto-sync ke Advertisement → Notifikasi email + in-app
+9. Approve → Auto-sync ke Advertisement → Notifikasi email + in-app
       ↓
-11. Iklan Tayang — HOME_TOP: video 12 detik, banner: rotasi 7 detik (random, fade, tanpa indikator)
+10. Iklan Tayang — HOME_TOP: video 12 detik, banner: rotasi 7 detik (random, fade, tanpa indikator)
       ↓
-12. Analytics (impresi, klik, CTR per hari)
+11. Analytics (impresi, klik, CTR per hari)
       ↓
-13. Auto-Expiry (cron hourly, endDate lewat → nonaktif)
+12. Auto-Expiry (cron hourly, endDate lewat → nonaktif)
 ```
 
 ---
 
 ## 7A. HOME_TOP — Video Creative Service
 
-> **Keputusan (28 Juni 2026):** Slot `HOME_TOP` menggunakan model **layanan kreatif**. Advertiser tidak upload video, melainkan **logo + foto**. Tim kreatif BeritaKarya yang memproduksi video iklan.
+> **Keputusan (28 Juni 2026):** Slot `HOME_TOP` menggunakan model **layanan kreatif**. Advertiser upload **foto + logo** (opsional). Backend auto-generate variant gambar (desktop/tablet/mobile). Tim kreatif BeritaKarya memproduksi video iklan dari foto+logo tersebut.
 
 ### 7A.1 Mengapa Model Ini?
 
 | Alasan | Penjelasan |
 |--------|------------|
-| **Mudah dipasarkan** | Marketing cukup bilang: *"Slot paling premium, kami buatkan video iklan Anda, cukup kirim logo dan foto"* |
+| **Mudah dipasarkan** | Marketing cukup bilang: *"Slot paling premium, kami buatkan video iklan Anda, cukup kirim foto dan logo"* |
 | **Kualitas terjamin** | Video dibuat oleh tim internal, bukan tergantung upload advertiser |
 | **Rasio konsisten** | Video didesain khusus untuk 960×240 (desktop), 728×182 (tablet), 360×90 (mobile) — semua 4:1 |
 | **Harga premium terjustifikasi** | Advertiser mendapat produk jadi, bukan slot kosong |
@@ -610,15 +608,19 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 ```
 Advertiser buka Ad Studio → Pilih paket HOME_TOP
         ↓
-Upload LOGO + FOTO (bukan video)
+Upload FOTO (1 file) + LOGO (opsional, terpisah)
+        ↓
+Backend auto-generate 3 variant (960×240 / 728×182 / 360×90)
+→ POST /upload-ad?slot=HOME_TOP
+→ Simpan ke processedVariants { desktop, tablet, mobile }
         ↓
 Isi detail kampanye (nama, URL, tanggal)
         ↓
-Submit booking + pembayaran
+Submit booking (kirim imageUrl + imageUrlTablet + imageUrlMobile + logoUrl + fotoUrl)
         ↓
 Admin review → approve
         ↓
-Tim kreatif produksi video
+Tim kreatif produksi video (dari foto + logo advertiser)
         ↓
 Upload video ke sistem → status ACTIVE (langsung tayang)
         ↓
@@ -631,6 +633,8 @@ Advertiser punya grace period 24-48 jam untuk review
 │ Tidak ada?    → Dianggap setuju, lanjut     │
 └─────────────────────────────────────────────┘
 ```
+
+> **Catatan Teknis:** Saat approve, backend cek `booking.imageUrl`. Jika null (booking lama), fallback ke `fotoUrl`. Jika tablet/mobile variant belum ada, auto-generate via `generateVariantsFromUrl()`. Lihat `ad.controller.ts` approve handler.
 
 ### 7A.3 Aturan Grace Period & Revisi
 
@@ -663,8 +667,10 @@ model AdBooking {
 
 | Aspek | HOME_TOP (Video) | Slot Lain (Banner) |
 |-------|------------------|---------------------|
-| **Upload advertiser** | Logo + foto | Gambar langsung |
-| **Produksi** | Tim kreatif BeritaKarya | Sistem auto-generate variant |
+| **Upload advertiser** | Foto (1 file) + Logo (opsional) | Gambar langsung |
+| **Backend processing** | Auto-generate 3 variant gambar (desktop/tablet/mobile) | Auto-generate 3 variant gambar (desktop/tablet/mobile) |
+| **Booking payload** | `imageUrl` + `imageUrlTablet` + `imageUrlMobile` + `logoUrl` + `fotoUrl` | `imageUrl` + `imageUrlTablet` + `imageUrlMobile` |
+| **Produksi tambahan** | Tim kreatif produksi video dari foto+logo | Tidak ada |
 | **Status saat produksi** | `PENDING_REVIEW` → `ACTIVE` | `PENDING_REVIEW` → `ACTIVE` |
 | **Preview untuk advertiser** | Ya (video preview link) | Ya (cross-slot preview) |
 | **Revisi** | Maks 1x (grace period 24-48 jam) | Tidak ada |
@@ -674,7 +680,8 @@ model AdBooking {
 
 | Komponen | Perubahan |
 |----------|-----------|
-| `StudioCanvas` (Step 3) | Jika slot = `HOME_TOP` → tampilkan form upload **logo + foto** (bukan video) |
+| `StudioContext` | HOME_TOP: kirim `imageUrl` + `imageUrlTablet` + `imageUrlMobile` + `logoUrl` + `fotoUrl` (semua variant) |
+| `StudioCanvas` (Step 3) | Jika slot = `HOME_TOP` → tampilkan form upload **foto + logo** (bukan video) |
 | `StudioCanvas` (Step 4) | Tambah catatan: *"Tim kreatif kami akan membuat video dalam 1-2 hari kerja"* |
 | `AdvertiserAdsView` | Tambah kolom `previewUrl` → tombol "Preview Video" saat grace period |
 | `BookingReviewList` | Tambah info: *"Menunggu produksi video oleh tim kreatif"* |
@@ -902,6 +909,9 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | 32 | wapimred role di /bookings/all | ✅ Selesai |
 | 33 | Animation effect removed from UI | ✅ Selesai |
 | 34 | Carousel: video 12s, banner 7s, random, fade | ✅ Selesai |
+| 35 | HOME_TOP: kirim semua variant (desktop/tablet/mobile) saat booking | ✅ Selesai |
+| 36 | Approve handler: fallback fotoUrl untuk booking lama HOME_TOP | ✅ Selesai |
+| 37 | Dokumentasi ads.md sinkron dengan codebase | ✅ Selesai |
 
 ---
 
@@ -1159,4 +1169,4 @@ Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Refer
 
 ---
 
-*Dokumentasi terakhir diperbarui: 28 Juni 2026 — standarisasi slot (3 varian ukuran), 6 AI video providers, halaman produksi, availability check, bundle pricing*
+*Dokumentasi terakhir diperbarui: 2 Juli 2026 — perbaiki alur HOME_TOP (kirim semua variant), sinkronisasi dokumentasi dengan codebase, tabel slot lengkap (Desktop/Tablet/Mobile/Tier/Format)*
