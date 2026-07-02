@@ -249,7 +249,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       };
 
       if (isHomeTop) {
-        // HOME_TOP: upload file sebagai foto (logo diupload terpisah jika ada)
+        // HOME_TOP: upload logo + foto, kirim semua variant agar approve langsung punya
         let logoUrl = null;
         if (data.logoFile) {
           try {
@@ -261,6 +261,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         }
         bookingPayload.logoUrl = logoUrl;
         bookingPayload.fotoUrl = v.desktop?.url || null;
+        // Kirim semua variant agar backend tidak perlu generate ulang saat approve
+        bookingPayload.imageUrl = v.desktop?.url || null;
+        bookingPayload.imageUrlTablet = v.tablet?.url || null;
+        bookingPayload.imageUrlMobile = v.mobile?.url || null;
       } else {
         bookingPayload.imageUrl = v.desktop?.url || null;
         bookingPayload.imageUrlTablet = v.tablet?.url || null;

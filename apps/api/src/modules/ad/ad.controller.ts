@@ -712,7 +712,7 @@ adRouter.post('/bookings/:id/approve',
     }
     const booking = _booking as unknown as {
       id: string; siteId: string; userId: string; status: string; paymentStatus: string;
-      startDate: Date; endDate: Date; imageUrl: string | null; imageUrlTablet: string | null; imageUrlMobile: string | null; linkUrl: string | null;
+      startDate: Date; endDate: Date; imageUrl: string | null; imageUrlTablet: string | null; imageUrlMobile: string | null; fotoUrl: string | null; linkUrl: string | null;
       animationEffect: string | null;
       package: { slot: string; name: string };
       user: { email: string; name: string };
@@ -734,8 +734,13 @@ adRouter.post('/bookings/:id/approve',
     let finalTabletUrl = booking.imageUrlTablet || null
     let finalMobileUrl = booking.imageUrlMobile || null
 
-    if (booking.imageUrl && (!finalTabletUrl || !finalMobileUrl)) {
-      const generated = await generateVariantsFromUrl(booking.imageUrl, booking.package.slot)
+    // Backward compatibility: booking lama HOME_TOP mungkin hanya punya fotoUrl
+    if (!finalImageUrl && booking.fotoUrl) {
+      finalImageUrl = booking.fotoUrl
+    }
+
+    if (finalImageUrl && (!finalTabletUrl || !finalMobileUrl)) {
+      const generated = await generateVariantsFromUrl(finalImageUrl, booking.package.slot)
       if (generated) {
         finalImageUrl = generated.imageUrl
         finalTabletUrl = generated.imageUrlTablet
