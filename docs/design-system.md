@@ -220,12 +220,7 @@ shadow-[0_20px_60px_rgba(0,0,0,0.28)]      — floating tools
 
 ### Ad Animation Keyframes
 
-| Nama | Class | Durasi | Deskripsi |
-|------|-------|--------|-----------|
-| `ad-ken-burns` | `.ad-ken-burns` | 8s infinite alternate | Scale 1.0→1.12 |
-| `ad-fade-slide` | `.ad-fade-slide` | 10s infinite | TranslateX + opacity |
-| `ad-pulse-scale` | `.ad-pulse-scale` | 6s infinite | Pulse scale 1.0→1.05 |
-| `ad-parallax` | `.ad-parallax` | 12s infinite | Scale + translateY |
+> **Catatan:** Animasi iklan dihapus dari UI (lihat `docs/ads.md`). Keyframe berikut mungkin masih ada di CSS tapi tidak aktif digunakan.
 
 ### Transition Patterns
 
@@ -341,12 +336,16 @@ Auto-dismiss: 5 detik. Position: `fixed bottom-6 right-6 z-[100]`
 
 **File:** `components/ui/AdSpace.tsx`
 
-| Slot | Mobile Height | Desktop Height | Margin Bottom |
-|------|:---:|:---:|:---:|
-| `leaderboard` | 100px | 250px | 24px |
-| `rectangle` | 100px | 250px | 32px |
-| `rectangle_secondary` | 100px | 250px | 32px |
-| `in-feed` | 100px | 250px | 48px |
+> Lihat `docs/ads.md` untuk dokumentasi lengkap sistem iklan (slot, ukuran, API, pricing).
+
+| Slot ID | Nama Lokasi | Desktop | Tablet | Mobile | Rasio |
+|---------|-------------|---------|--------|--------|-------|
+| `HOME_TOP` | Hero Banner | 960×240 | 728×182 | 360×90 | 4:1 |
+| `HOME_FEED_1` | Feed Atas | 300×200 | 300×200 | 300×200 | 3:2 |
+| `HOME_FEED_2` | Feed Bawah | 300×150 | 300×150 | 300×150 | 2:1 |
+| `ARTICLE_TOP` | Artikel Atas | 300×200 | 300×200 | 300×200 | 3:2 |
+| `ARTICLE_MIDDLE` | Artikel Tengah | 300×150 | 300×150 | 300×150 | 2:1 |
+| `ARTICLE_BOTTOM` | Artikel Bawah | 300×150 | 300×150 | 300×150 | 2:1 |
 
 Label badge: `rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg`
 

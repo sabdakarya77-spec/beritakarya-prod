@@ -659,207 +659,34 @@ pnpm ts-node test-database-readiness.ts
 ```
 
 
-### **Daftar Alokasi IP & VLAN (Opsi A)**
+### Daftar Alokasi IP & VLAN
 
-Sebelum memulai, berikut adalah acuan subnet dan IP yang akan kita konfigurasikan:
-*   **VLAN 10 (Admin/LAN)**: Subnet `192.168.10.0/24`, Gateway `192.168.10.1`, range DHCP `192.168.10.100 - .254`.
-*   **VLAN 20 (Server/SRV)**: Subnet `10.0.0.0/24`, Gateway `10.0.0.1`, IP Static.
-*   **Perangkat**:
-    *   **Proxmox Host (Web UI)**: `192.168.10.50` (VLAN 10)
-    *   **CT 101 (Database)**: `10.0.0.11` (VLAN 20)
-    *   **CT 102 (App Stack)**: `10.0.0.12` (VLAN 20)
-    *   **CT 103 (Monitor)**: `10.0.0.13` (VLAN 20)
+Lihat [Konfigurasi MikroTik & Proxmox VE](#konfigurasi-mikrotik--proxmox-ve) di bawah untuk topologi lengkap.
+
+
 
 ---
 
-### **Langkah 1: Konfigurasi MikroTik (RouterOS)**
+## Konfigurasi MikroTik & Proxmox VE
 
-Buka terminal MikroTik (melalui Winbox -> New Terminal atau SSH) dan jalankan perintah-perintah berikut secara berurutan:
+Konfigurasi jaringan (MikroTik RouterOS, Proxmox VE, VLAN, firewall) tidak termasuk dalam panduan ini. Lihat dokumentasi terpisah:
 
-#### **1.1. Inisialisasi Bridge & Pembagian Port**
-Kita buat bridge lokal baru dan mendaftarkan port fisik.
-*   `ether2`: Port trunk mengarah ke Proxmox Host.
-*   `ether3`, `ether4`, `ether5`: Port akses langsung untuk Admin PC/Laptop (VLAN 10).
+→ **[mikrotik-tutorial-expanded.md](./mikrotik-tutorial-expanded.md)** — Panduan lengkap setup MikroTik dari nol (VLAN, bridge, DHCP, firewall) dan Proxmox VE (VLAN-aware bridge, LXC container creation).
 
-```routeros
-# Buat Bridge utama (belum mengaktifkan vlan-filtering)
-/interface bridge
-add name=bridge-local vlan-filtering=no comment="Bridge Utama"
+**Ringkasan Topologi:**
 
-# Daftarkan port fisik ke Bridge
-/interface bridge port
-add bridge=bridge-local interface=ether2 comment="Ke Proxmox Host (Trunk)"
-add bridge=bridge-local interface=ether3 pvid=10 comment="Ke PC/AP Admin (Access)"
-add bridge=bridge-local interface=ether4 pvid=10
-add bridge=bridge-local interface=ether5 pvid=10
-```
+| VLAN | Subnet | Gateway | Kegunaan |
+|------|--------|---------|----------|
+| VLAN 10 (Admin) | `192.168.10.0/24` | `192.168.10.1` | Admin PC/Laptop, Proxmox Web UI |
+| VLAN 20 (Server) | `10.0.0.0/24` | `10.0.0.1` | CT 101, CT 102, CT 103 |
 
-#### **1.2. Membuat Interface VLAN pada MikroTik**
-Interface ini memungkinkan MikroTik bertindak sebagai gateway (memiliki IP Address) di masing-masing VLAN.
-
-```routeros
-/interface vlan
-add interface=bridge-local name=vlan10-LAN vlan-id=10
-add interface=bridge-local name=vlan20-SRV vlan-id=20
-```
-
-#### **1.3. Konfigurasi IP Address & DHCP Server**
-Kita berikan IP ke interface VLAN dan mengatur DHCP Server khusus untuk VLAN 10. VLAN 20 (Server) akan menggunakan IP statis demi konsistensi.
-
-```routeros
-# 1. Assign IP Gateway ke Interface VLAN
-/ip address
-add address=192.168.10.1/24 interface=vlan10-LAN network=192.168.10.0
-add address=10.0.0.1/24 interface=vlan20-SRV network=10.0.0.0
-
-# 2. Buat IP Pool untuk DHCP VLAN 10
-/ip pool
-add name=pool-vlan10 ranges=192.168.10.100-192.168.10.254
-
-# 3. Setup DHCP Server di VLAN 10
-/ip dhcp-server
-add address-pool=pool-vlan10 disabled=no interface=vlan10-LAN name=dhcp-vlan10
-
-# 4. Daftarkan konfigurasi network (DNS & Gateway) untuk DHCP
-/ip dhcp-server network
-add address=192.168.10.0/24 dns-server=1.1.1.1,8.8.8.8 gateway=192.168.10.1
-```
-
-#### **1.4. Menentukan Aturan VLAN Table (Bridge VLAN)**
-Di sini kita mendefinisikan port mana saja yang membawa tag VLAN (*tagged*) dan mana yang melepas tag VLAN (*untagged*).
-
-```routeros
-/interface bridge vlan
-# VLAN 10: Tagged di bridge-local & ether2. Untagged di ether3, ether4, ether5.
-add bridge=bridge-local tagged=bridge-local,ether2 untagged=ether3,ether4,ether5 vlan-ids=10
-
-# VLAN 20: Tagged di bridge-local & ether2.
-add bridge=bridge-local tagged=bridge-local,ether2 vlan-ids=20
-```
-
-#### **1.5. Mengaktifkan VLAN Filtering (Krusial)**
-> [!WARNING]
-> Pastikan PC Anda terhubung ke port `ether3`, `ether4`, atau `ether5` sebelum menjalankan perintah ini agar tidak terputus (*lockout*) dari router.
-
-```routeros
-/interface bridge set bridge-local vlan-filtering=yes
-```
-
-#### **1.6. Konfigurasi Koneksi Internet & NAT (Modem di Ether1)**
-```routeros
-# DHCP Client di port WAN (ether1)
-/ip dhcp-client
-add disabled=no interface=ether1 use-peer-dns=yes use-peer-ntp=yes
-
-# NAT Masquerade agar semua VLAN bisa internetan
-/ip firewall nat
-add action=masquerade chain=srcnat out-interface=ether1 comment="NAT ke Internet"
-```
+| Perangkat | IP | VLAN |
+|-----------|-----|------|
+| Proxmox Host | `192.168.10.50` | 10 |
+| CT 101 (Database) | `10.0.0.11` | 20 |
+| CT 102 (App Stack) | `10.0.0.12` | 20 |
+| CT 103 (Monitor) | `10.0.0.13` | 20 |
 
 ---
 
-### **Langkah 2: Konfigurasi Proxmox VE Host**
-
-Setelah MikroTik mengirimkan VLAN Tagged melalui `ether2`, Proxmox Host harus dikonfigurasi agar mengenali VLAN tersebut.
-
-#### **2.1. Konfigurasi Bridge default Proxmox (`vmbr0`)**
-Ada 2 cara yang bisa Anda lakukan:
-
-##### **Opsi A.1: Via Web UI Proxmox**
-1. Masuk ke Web UI Proxmox, buka **Proxmox Node** -> **System** -> **Network**.
-2. Pilih `vmbr0` (bridge utama Anda), klik **Edit**.
-3. Centang opsi **VLAN Aware**, lalu klik **OK**.
-4. Buat interface manajemen Proxmox untuk VLAN 10:
-   * Klik **Create** -> **Linux VLAN**.
-   * **Name**: `vmbr0.10`
-   * **IPv4/CIDR**: `192.168.10.50/24`
-   * **Gateway**: `192.168.10.1`
-   * **Comment**: `Proxmox Host Management`
-5. Klik **Apply Configuration**.
-
-##### **Opsi A.2: Via CLI Proxmox (Mengedit `/etc/network/interfaces`)**
-Buka file konfigurasi network Proxmox dan sesuaikan strukturnya menjadi seperti berikut:
-```text
-auto lo
-iface lo inet loopback
-
-iface enp3s0 inet manual
-# Interface fisik server yang terhubung ke MikroTik Ether2
-
-auto vmbr0
-iface vmbr0 inet manual
-        bridge-ports enp3s0
-        bridge-stp off
-        bridge-fd 0
-        bridge-vlanaware yes
-# Bridge utama yang sekarang aware terhadap VLAN tags
-
-auto vmbr0.10
-iface vmbr0.10 inet static
-        address 192.168.10.50/24
-        gateway 192.168.10.1
-# Interface manajemen Proxmox di VLAN 10
-```
-Terapkan perubahan dengan menjalankan perintah:
-```bash
-ifreload -a
-```
-
-#### **2.2. Menghubungkan LXC Container ke VLAN 20**
-Lakukan langkah ini pada setiap container (`CT 101`, `CT 102`, `CT 103`):
-1. Pilih Container di Web UI Proxmox.
-2. Pergi ke menu **Network**.
-3. Pilih interface `net0`, klik **Edit**.
-4. Konfigurasikan parameter berikut:
-   * **Bridge**: `vmbr0`
-   * **VLAN Tag**: `20`
-   * **IPv4**: Static
-   * **IPv4/CIDR & Gateway**:
-     * **CT 101**: IP `10.0.0.11/24`, Gateway `10.0.0.1`
-     * **CT 102**: IP `10.0.0.12/24`, Gateway `10.0.0.1`
-     * **CT 103**: IP `10.0.0.13/24`, Gateway `10.0.0.1`
-5. Klik **Save** dan **Restart** container tersebut.
-
----
-
-### **Langkah 3: Konfigurasi Kebijakan Firewall di MikroTik**
-
-Untuk mengamankan database dan server aplikasi, jalankan perintah firewall berikut di MikroTik:
-
-```routeros
-/ip firewall filter
-# 1. Izinkan koneksi Established & Related
-add action=accept chain=forward connection-state=established,related comment="Accept established, related"
-
-# 2. Blokir paket Invalid
-add action=drop chain=forward connection-state=invalid comment="Drop invalid packets"
-
-# 3. Blokir akses Internet keluar untuk Database (CT 101)
-add action=drop chain=forward src-address=10.0.0.11 out-interface=ether1 comment="Block DB Container from accessing Internet"
-
-# 4. Izinkan VLAN 10 (Admin) mengakses VLAN 20 (Server) secara penuh
-add action=accept chain=forward src-address=192.168.10.0/24 dst-address=10.0.0.0/24 comment="Allow Admin to Server"
-
-# 5. Blokir inisiasi koneksi baru dari VLAN 20 (Server) ke VLAN 10 (Admin)
-add action=drop chain=forward connection-state=new src-address=10.0.0.0/24 dst-address=192.168.10.0/24 comment="Block Server to Admin LAN (Prevent Lateral Movement)"
-
-# 6. Izinkan VLAN 20 mengakses internet keluar (misal untuk cloudflared tunnel/update)
-add action=accept chain=forward src-address=10.0.0.0/24 out-interface=ether1 comment="Allow Server to Internet"
-```
-
----
-
-### **Langkah 4: Verifikasi & Pengujian Koneksi**
-
-1.  **Pengujian di Proxmox Host (`192.168.10.50`)**:
-    *   Pastikan bisa ping gateway MikroTik: `ping 192.168.10.1`
-    *   Pastikan bisa akses internet: `ping google.com`
-2.  **Pengujian di CT 102 (App Stack - `10.0.0.12`)**:
-    *   Pastikan gateway merespons: `ping 10.0.0.1`
-    *   Pastikan internet aktif untuk Cloudflare Tunnel: `ping cloudflare.com`
-3.  **Pengujian Isolasi Database (CT 101 - `10.0.0.11`)**:
-    *   Pastikan **TIDAK BISA** ping internet: `ping google.com` (seharusnya diblokir oleh Firewall Rule #3).
-    *   Pastikan **BISA** berkomunikasi dengan CT 102 (App): `ping 10.0.0.12` (harus sukses).
-
-
-Dengan langkah-langkah di atas yang telah teruji dan terverifikasi secara penuh, infrastruktur LXC, Database PostgreSQL/Redis/Meilisearch, Aplikasi NestJS/Next.js, serta Monitoring Prometheus/Grafana milik BeritaKarya kini siap dideploy sepenuhnya untuk melayani trafik pengguna secara aman dan andal di lingkungan produksi.
+Dengan seluruh konfigurasi di atas, infrastruktur LXC, Database PostgreSQL/Redis/Meilisearch, Aplikasi Express/Next.js, serta Monitoring Prometheus/Grafana milik BeritaKarya kini siap dideploy untuk melayani trafik pengguna secara aman dan andal di lingkungan produksi.

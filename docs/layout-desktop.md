@@ -314,29 +314,18 @@ Referensi dimensi layout untuk viewport **xl+ (1280px+)** kecuali ditandai lain.
 
 **File:** `components/ui/AdSpace.tsx`
 
-| Slot | Width | Height (md+) | Min Height | Margin Bottom |
-|------|-------|-------------|------------|---------------|
-| `leaderboard` | 100% | **250px** | 250px | `mb-6` (24px) |
-| `rectangle` | 100% | **250px** | 250px | `mb-8` (32px) |
-| `rectangle_secondary` | 100% | **250px** | 250px | `mb-8` (32px) |
-| `in-feed` | 100% | **250px** | 250px | `mb-12` (48px) |
+> Lihat `docs/ads.md` untuk dokumentasi lengkap sistem iklan.
 
-**Ukuran gambar iklan (dihasilkan backend):**
+| Slot ID | Nama Lokasi | Desktop | Tablet | Mobile | Rasio |
+|---------|-------------|---------|--------|--------|-------|
+| `HOME_TOP` | Hero Banner | 960×240 px | 728×182 px | 360×90 px | 4:1 |
+| `HOME_FEED_1` | Feed Atas | 300×200 px | 300×200 px | 300×200 px | 3:2 |
+| `HOME_FEED_2` | Feed Bawah | 300×150 px | 300×150 px | 300×150 px | 2:1 |
+| `ARTICLE_TOP` | Artikel Atas | 300×200 px | 300×200 px | 300×200 px | 3:2 |
+| `ARTICLE_MIDDLE` | Artikel Tengah | 300×150 px | 300×150 px | 300×150 px | 2:1 |
+| `ARTICLE_BOTTOM` | Artikel Bawah | 300×150 px | 300×150 px | 300×150 px | 2:1 |
 
-| Slot | Desktop | Tablet | Mobile |
-|------|---------|--------|--------|
-| Leaderboard | 970×250 | 728×100 | 320×100 |
-| Rectangle | 300×250 | — | 300×100 |
-| In-Feed | 300×250 | — | 300×100 |
-
-**Visibilitas:**
-
-| Slot | Desktop (xl+) | Tablet | Mobile |
-|------|:---:|:---:|:---:|
-| Leaderboard | ✅ | ✅ | ✅ |
-| In-Feed | ✅ | ✅ | ✅ |
-| Rectangle (sidebar) | ✅ | ❌ | ❌ |
-| Rectangle Secondary | ✅ | ❌ | ❌ |
+**Visibilitas:** Semua 6 slot tampil di **semua device** (desktop, tablet, mobile). Tidak ada slot sidebar — semua iklan berada di dalam alur konten.
 
 ---
 

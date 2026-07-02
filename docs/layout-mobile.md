@@ -332,30 +332,20 @@ Referensi dimensi layout untuk viewport **< 640px (mobile)** kecuali ditandai la
 
 **File:** `components/ui/AdSpace.tsx`
 
-| Slot | Width | Height | Min Height | Margin Bottom |
-|------|-------|--------|------------|---------------|
-| `leaderboard` | 100% | **100px** | 100px | `mb-6` (24px) |
-| `rectangle` | 100% | **100px** | 100px | `mb-8` (32px) |
-| `rectangle_secondary` | 100% | **100px** | 100px | `mb-8` (32px) |
-| `in-feed` | 100% | **100px** | 100px | `mb-12` (48px) |
+> Lihat `docs/ads.md` untuk dokumentasi lengkap sistem iklan.
 
-**Responsive image source:**
-- `<source media="(max-width: 639px)">` → mobile variant (320×100 / 300×100)
+| Slot ID | Nama Lokasi | Mobile Size | Rasio |
+|---------|-------------|-------------|-------|
+| `HOME_TOP` | Hero Banner | 360×90 px | 4:1 |
+| `HOME_FEED_1` | Feed Atas | 300×200 px | 3:2 |
+| `HOME_FEED_2` | Feed Bawah | 300×150 px | 2:1 |
+| `ARTICLE_TOP` | Artikel Atas | 300×200 px | 3:2 |
+| `ARTICLE_MIDDLE` | Artikel Tengah | 300×150 px | 2:1 |
+| `ARTICLE_BOTTOM` | Artikel Bawah | 300×150 px | 2:1 |
 
-**Leaderboard sticky:**
-- `fixed bottom-0 left-0 right-0 z-30`
-- Close button muncul setelah 5 detik
+**Visibilitas di mobile:** Semua 6 slot tampil di mobile. Tidak ada slot sidebar.
 
-**Visibilitas di mobile:**
-
-| Slot | Terlihat? |
-|------|-----------|
-| Leaderboard | ✅ |
-| In-Feed | ✅ |
-| Rectangle (sidebar) | ❌ (sidebar `hidden xl:block`) |
-| Rectangle Secondary | ❌ (sidebar `hidden xl:block`) |
-
-→ **Total slot iklan di mobile: 2** (homepage), **2** (artikel)
+→ **Total slot iklan di mobile: 3** (homepage), **3** (artikel)
 
 ---
 
