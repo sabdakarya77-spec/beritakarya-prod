@@ -951,7 +951,7 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | `apps/web/components/ui/AdSpace.tsx` | Komponen iklan publik — carousel (video 12s, banner 7s), random order |
 | `apps/web/components/dashboard/ads/studio/` | Ad Studio wizard — upload logo+foto untuk HOME_TOP |
 | `apps/web/components/dashboard/ads/production/` | **Halaman produksi video** — AI provider selector, prompt, preview |
-| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card — multi-iklan, video preview |
+| `apps/web/components/dashboard/ads/AdSlotCard.tsx` | Admin production card — multi-iklan, video preview, **klik thumbnail → modal preview ukuran penuh** |
 | `apps/web/components/dashboard/ads/pages/AdsSlotsContent.tsx` | Admin Card Grid layout |
 | `apps/web/components/dashboard/ads/pages/AdsOverviewContent.tsx` | Dashboard overview — 4 menu (Slots, Packages, Bookings, Production) |
 | `apps/web/lib/constants.ts` | Slot definitions — ukuran, format, tier, bank accounts |
@@ -1153,7 +1153,7 @@ Harga diisi manual oleh superadmin lewat `/{site}/dashboard/ads/packages`. Refer
 | AdsPackagesContent | ✅ — form create/edit dengan tier badge |
 | AdsSlotsContent | ✅ — 6 card grid dengan multi-iklan |
 | AdsOverviewContent | ✅ — 4 menu (Slots, Packages, Bookings, Production) |
-| AdSlotCard | ✅ — dynamic aspect ratio, video preview, format/tier badge |
+| AdSlotCard | ✅ — dynamic aspect ratio, video preview, format/tier badge, **modal preview** |
 | HeroBannerManager | ✅ — tier + format badge |
 | AdsMarketingPage | ✅ — tier badge, format display |
 | StudioCanvas | ✅ — upload logo+foto untuk HOME_TOP, availability check |
