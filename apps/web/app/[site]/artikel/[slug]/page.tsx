@@ -229,7 +229,7 @@ export default async function ArticlePage({ params }: Props) {
                 alt={article.title}
                 fill
                 priority
-                className="object-cover animate-fade-in"
+                className="object-contain animate-fade-in"
               />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
@@ -756,7 +756,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
               context="article_block"
               alt={block.alt || 'Post image'}
               fill
-              className="object-cover"
+              className="object-contain"
             />
           </div>
           {block.caption && (
@@ -781,7 +781,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="article_block"
                   alt={img.alt || `Grid image ${i + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
               {img.caption && (
@@ -881,7 +881,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="media_text"
                   alt={block.alt || 'Post image'}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
               {block.caption && (
