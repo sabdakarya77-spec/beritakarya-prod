@@ -311,7 +311,7 @@ export default function AdSpace({
   };
 
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full h-[90px] min-h-[90px] md:h-[182px] md:min-h-[182px] lg:h-[240px] lg:min-h-[240px] mb-6",
+    HOME_TOP:       "w-full max-w-[960px] aspect-[4/1] mx-auto rounded-xl overflow-hidden mb-6",
     HOME_FEED_1:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
     HOME_FEED_2:    "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-8",
     ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
@@ -339,7 +339,8 @@ export default function AdSpace({
       const ad = fallbackAds[0];
       return (
         <div className={cn(
-          "relative w-full h-[90px] min-h-[90px] md:h-[182px] md:min-h-[182px] lg:h-[240px] lg:min-h-[240px] overflow-hidden rounded-xl",
+          "relative overflow-hidden",
+          styles[type],
           className
         )}>
           {/* Media (image or video) */}
