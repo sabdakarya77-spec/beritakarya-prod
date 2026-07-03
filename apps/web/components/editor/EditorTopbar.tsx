@@ -20,6 +20,7 @@ import { cn } from '../../lib/utils'
 import type { ArticleStatus } from '@beritakarya/types'
 import { STATUS_CONFIG, getStatusConfig } from '@beritakarya/config'
 import { useEditorStore } from '../../store/editorStore'
+import { useAuthStore } from '../../store/authStore'
 
 interface EditorTopbarProps {
   siteId: string
@@ -53,6 +54,7 @@ export function EditorTopbar({
   const router = useRouter()
   const [showStatusMenu, setShowStatusMenu] = useState(false)
   const { isSidebarOpen, toggleSidebar, activeTab, setActiveTab } = useEditorStore()
+  const { user } = useAuthStore()
 
   const statusConfig = getStatusConfig(status)
   const isSettingsPanelOpen = isSidebarOpen && activeTab === 'settings'
@@ -208,14 +210,16 @@ export function EditorTopbar({
           <span className="hidden sm:inline">Submit</span>
         </button>
         
-        {/* Publish Button (dropdown) */}
-        <button
-          onClick={onPublish}
-          className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs font-bold bg-brand-red hover:bg-red-700 text-white transition-all"
-        >
-          <Globe size={14} />
-          <span className="hidden sm:inline">Publish</span>
-        </button>
+        {/* Publish Button — superadmin only */}
+        {user?.role === 'superadmin' && (
+          <button
+            onClick={onPublish}
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs font-bold bg-brand-red hover:bg-red-700 text-white transition-all"
+          >
+            <Globe size={14} />
+            <span className="hidden sm:inline">Publish</span>
+          </button>
+        )}
       </div>
     </div>
   )
