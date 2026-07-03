@@ -257,7 +257,7 @@ export default async function ArticlePage({ params }: Props) {
               article.coverLayout === 'left-top' ? 'md:items-start' :
               'md:items-end'
             )}>
-              <Container>
+              <Container className={cn(article.coverLayout !== 'center' && 'md:mx-0')}>
                 <div className={cn(
                   "max-w-4xl",
                   article.coverLayout === 'center' ? 'md:mx-auto md:text-center' :
