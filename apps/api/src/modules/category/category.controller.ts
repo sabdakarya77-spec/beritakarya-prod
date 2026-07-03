@@ -5,6 +5,21 @@ import { requireAuth, requireRole } from '../../middleware/auth.middleware'
 import { siteMiddleware, requireSiteAccess } from '../../middleware/site.middleware'
 import { publicLimiter } from '../../lib/rateLimit'
 import { asyncHandler } from '../../utils/asyncHandler'
+import { prisma } from '../../db/client'
+
+async function assertWapimredCanManageCategories(siteId: string) {
+  const site = await prisma.site.findUnique({
+    where: { id: siteId },
+    select: { wapimredSettings: true }
+  })
+  const settings = (site?.wapimredSettings as Record<string, boolean>) || {}
+  if (!settings.canManageCategories) {
+    throw new AppError(
+      'Wapimred tidak memiliki izin untuk mengelola kategori. Hubungi Pimred.',
+      403
+    )
+  }
+}
 
 export const categoryRouter: Router = Router()
 
@@ -34,15 +49,15 @@ categoryRouter.post('/sync-all',
   asyncHandler(syncAllSites))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin']),
+  requireRole(['superadmin', 'wapimred']),
   asyncHandler(createCategory))
 categoryRouter.put('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin']),
+  requireRole(['superadmin', 'wapimred']),
   asyncHandler(updateCategory))
 categoryRouter.delete('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin']),
+  requireRole(['superadmin', 'wapimred']),
   asyncHandler(deleteCategory))
 
 /**
@@ -188,6 +203,14 @@ export async function createCategory(req: Request, res: Response) {
     const user = req.user
     const actorUserId = user!.userId
 
+    // Cek toggle canManageCategories untuk wapimred
+    if (user?.role === 'wapimred') {
+      const effectiveSiteId = siteId || req.site
+      if (effectiveSiteId) {
+        await assertWapimredCanManageCategories(effectiveSiteId)
+      }
+    }
+
     // Validation: non-superadmin cannot create global categories
     if (siteId === null || siteId === undefined) {
       if (!user || user.role !== 'superadmin') {
@@ -238,7 +261,16 @@ export async function updateCategory(req: Request, res: Response) {
   try {
     const { id } = req.params
     const { name, description, siteId, parentId, order, color } = req.body
-    const actorUserId = req.user!.userId
+    const user = req.user
+    const actorUserId = user!.userId
+
+    // Cek toggle canManageCategories untuk wapimred
+    if (user?.role === 'wapimred') {
+      const effectiveSiteId = siteId || req.site
+      if (effectiveSiteId) {
+        await assertWapimredCanManageCategories(effectiveSiteId)
+      }
+    }
 
     const category = await categoryService.updateCategory(
       id,
@@ -292,7 +324,16 @@ export async function deleteCategory(req: Request, res: Response) {
   try {
     const { id } = req.params
     const { view } = req.query
-    const actorUserId = req.user!.userId
+    const user = req.user
+    const actorUserId = user!.userId
+
+    // Cek toggle canManageCategories untuk wapimred
+    if (user?.role === 'wapimred') {
+      const effectiveSiteId = req.site
+      if (effectiveSiteId) {
+        await assertWapimredCanManageCategories(effectiveSiteId)
+      }
+    }
 
     // Allow global category deletion only from Global View
     const allowGlobal = view === 'global'

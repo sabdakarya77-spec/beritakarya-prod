@@ -193,12 +193,12 @@ Wapimred review → approved → terbitkan → published ✅
 - [ ] Testing: wapimred tidak bisa terbitkan saat toggle OFF
 
 ### Phase 2: Ekspansi
-- [ ] Implementasi toggle: `wapimred_can_delete_published`
-- [ ] Implementasi toggle: `wapimred_can_manage_categories`
-- [ ] Implementasi toggle: `wapimred_can_transfer_user`
-- [ ] Implementasi toggle: `wapimred_can_delete_user`
-- [ ] Implementasi toggle: `wapimred_can_schedule`
-- [ ] Implementasi toggle: `wapimred_can_force_publish`
+- [x] Implementasi toggle: `wapimred_can_delete_published`
+- [x] Implementasi toggle: `wapimred_can_manage_categories`
+- [x] Implementasi toggle: `wapimred_can_transfer_user`
+- [x] Implementasi toggle: `wapimred_can_delete_user`
+- [x] Implementasi toggle: `wapimred_can_schedule`
+- [x] Implementasi toggle: `wapimred_can_force_publish`
 
 ### Phase 3: Notifikasi & Polish
 - [ ] Implementasi toggle notifikasi pimred

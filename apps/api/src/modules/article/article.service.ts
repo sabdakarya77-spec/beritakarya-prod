@@ -311,6 +311,21 @@ export async function updateArticle(
      }
   }
 
+  // Cek toggle canSchedule untuk wapimred
+  if (user.role === 'wapimred' && input.status === 'scheduled') {
+    const siteForToggle = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { wapimredSettings: true }
+    })
+    const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
+    if (!wapimredSettings.canSchedule) {
+      throw new AppError(
+        'Wapimred tidak memiliki izin untuk menjadwalkan artikel. Hubungi Pimred.',
+        403
+      )
+    }
+  }
+
   if (input.blocks) {
     const requireMinWords = input.status === 'submitted'
     try {
@@ -504,6 +519,13 @@ export async function publishArticle(
         403
       )
     }
+    // Cek toggle canForcePublish jika menggunakan forcePublish
+    if (options?.forcePublish && !wapimredSettings.canForcePublish) {
+      throw new AppError(
+        'Wapimred tidak memiliki izin untuk force-publish. Hubungi Pimred.',
+        403
+      )
+    }
   }
 
   assertCanPublish(article, user, options?.forcePublish)
@@ -579,7 +601,17 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
     allowed = true
   } else if (isWapimred) {
     if (isPublished) {
-      denyReason = 'Wapimred tidak dapat menghapus post yang sudah diterbitkan. Hubungi Superadmin.'
+      // Cek toggle canDeletePublished dari site settings
+      const site = await prisma.site.findUnique({
+        where: { id: siteId },
+        select: { wapimredSettings: true }
+      })
+      const wapimredSettings = (site?.wapimredSettings as Record<string, boolean>) || {}
+      if (wapimredSettings.canDeletePublished) {
+        allowed = true
+      } else {
+        denyReason = 'Wapimred tidak dapat menghapus post yang sudah diterbitkan. Hubungi Superadmin.'
+      }
     } else {
       allowed = true
     }

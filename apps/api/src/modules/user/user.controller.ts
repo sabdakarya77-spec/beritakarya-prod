@@ -551,7 +551,17 @@ userRouter.put('/:id/role',
     const updateData: Prisma.UserUncheckedUpdateInput = { role }
 
     // Only superadmin can assign/change branches (siteId)
-    if (req.user!.role === 'superadmin') {
+    // Wapimred can do so only if canTransferUser toggle is ON
+    let canTransferSiteId = req.user!.role === 'superadmin'
+    if (req.user!.role === 'wapimred' && siteId !== undefined && siteId !== '') {
+      const siteForToggle = await prisma.site.findUnique({
+        where: { id: currentRequestSiteId || '' },
+        select: { wapimredSettings: true }
+      })
+      const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
+      canTransferSiteId = !!wapimredSettings.canTransferUser
+    }
+    if (canTransferSiteId) {
       if (siteId === '' || siteId === null || siteId === undefined) {
         updateData.siteId = null
       } else {
@@ -641,10 +651,25 @@ userRouter.delete('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin']),
+  requireRole(['superadmin', 'wapimred']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
+
+    // Cek toggle canDeleteUser untuk wapimred
+    if (req.user!.role === 'wapimred') {
+      const siteForToggle = await prisma.site.findUnique({
+        where: { id: siteId || '' },
+        select: { wapimredSettings: true }
+      })
+      const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
+      if (!wapimredSettings.canDeleteUser) {
+        return res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Wapimred tidak memiliki izin untuk menghapus user. Hubungi Pimred.' }
+        })
+      }
+    }
 
     if (id === req.user!.userId) {
       return res.status(400).json({
