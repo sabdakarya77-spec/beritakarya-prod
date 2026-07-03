@@ -327,10 +327,8 @@ export default async function ArticlePage({ params }: Props) {
               {/* Main Content */}
               <div className="min-w-0 xl:grid xl:grid-cols-[4.25rem_minmax(0,40rem)] xl:gap-8 2xl:grid-cols-[4.5rem_minmax(0,42rem)]">
                 <div className="hidden xl:block relative z-30">
-                  <div className="-mt-[0.75rem]">
-                    <div className="sticky top-32">
-                      <ArticleFloatingTools title={article.title} url={articleUrl} />
-                    </div>
+                  <div className="sticky top-32">
+                    <ArticleFloatingTools title={article.title} url={articleUrl} />
                   </div>
                 </div>
                 <div className="min-w-0">
@@ -506,8 +504,7 @@ export default async function ArticlePage({ params }: Props) {
 
               {/* Sidebar */}
               <aside className="hidden xl:block">
-                <div className="pt-[0.35rem]">
-                  <div className="sticky top-32 space-y-4">
+                <div className="sticky top-32 space-y-4">
                   <div className={cn(sidebarCardClass, 'space-y-3.5')}>
                     <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted">
                       Bagikan & Simpan
@@ -686,7 +683,6 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
                   )}
 
-                  </div>
                 </div>
               </aside>
             </div>
