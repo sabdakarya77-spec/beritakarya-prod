@@ -281,21 +281,24 @@ export function TabSettings() {
       </div>
 
       {/* Cover Credit (Kredit Foto) */}
-      {featuredImage && (
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">
-            <Camera size={12} />
-            Kredit Foto
-          </label>
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">
+          <Camera size={12} />
+          Kredit Foto
+        </label>
+        <div className="flex items-center rounded-lg border border-panel-border bg-panel-surface overflow-hidden focus-within:border-panel-accent transition-all">
+          <span className="px-3 py-2 text-xs font-bold text-panel-text-secondary bg-panel-surface/50 border-r border-panel-border select-none shrink-0">
+            BeritaKarya/
+          </span>
           <input
             type="text"
-            value={featuredImageCredit}
-            onChange={(e) => updateArticleData({ featuredImageCredit: e.target.value })}
-            placeholder="Contoh: Redaksi/Nama Fotografer"
-            className="w-full px-3 py-2 rounded-lg border border-panel-border bg-panel-surface text-xs font-medium text-panel-text-primary focus:outline-none focus:border-panel-accent transition-all placeholder-panel-text-muted"
+            value={featuredImageCredit.startsWith('BeritaKarya/') ? featuredImageCredit.slice(12) : featuredImageCredit}
+            onChange={(e) => updateArticleData({ featuredImageCredit: `BeritaKarya/${e.target.value}` })}
+            placeholder="Nama Fotografer"
+            className="flex-1 px-3 py-2 bg-transparent text-xs font-medium text-panel-text-primary outline-none placeholder-panel-text-muted"
           />
         </div>
-      )}
+      </div>
 
       {/* Layout Jumbotron */}
       <div className="space-y-2">
