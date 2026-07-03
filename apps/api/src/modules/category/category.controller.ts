@@ -182,6 +182,9 @@ export async function getCategoryTree(req: Request, res: Response) {
       categories = await categoryService.getCategoryTree(siteId)
     }
 
+    // Cache: 1 jam di browser, 1 jam di CDN/proxy. Categories jarang berubah.
+    res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600')
+    res.set('Vary', 'Accept-Encoding')
     res.json({ success: true, data: categories })
   } catch (error: unknown) {
     const statusCode = getErrorStatus(error)

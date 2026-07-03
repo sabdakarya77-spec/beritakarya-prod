@@ -5,6 +5,7 @@ import './lib/envValidation'
 import express from 'express'
 import cors, { type CorsOptions } from 'cors'
 import helmet from 'helmet'
+import compression from 'compression'
 import swaggerUi from 'swagger-ui-express'
 import { specs } from './swagger'
 import { authRouter } from './modules/auth/auth.controller'
@@ -67,6 +68,12 @@ if (env.SENTRY_DSN) {
 
 export const app = express()
 app.set('trust proxy', env.TRUST_PROXY || 'loopback, linklocal, uniquelocal')
+
+// Gzip/Brotli compression — reduces response size for JSON/HTML/CSS
+app.use(compression({
+  threshold: 1024, // only compress responses > 1 KB
+  level: 6,        // balanced speed/ratio
+}))
 
 // Request timeout (30s) — for long-running endpoints
 app.use(timeout('30s'))
