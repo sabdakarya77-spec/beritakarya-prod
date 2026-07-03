@@ -264,7 +264,7 @@ export default async function ArticlePage({ params }: Props) {
                   article.coverLayout === 'left-top' ? 'md:pt-12' :
                   'md:pb-12'
                 )}>
-                  <div className="flex flex-wrap items-center gap-2.5 mb-4">
+                  <div className={cn("flex flex-wrap items-center gap-2.5 mb-4", article.coverLayout === 'center' && 'md:justify-center')}>
                     {badgeVariant && (
                       <EditorialBadge
                         variant={badgeVariant}
@@ -288,12 +288,12 @@ export default async function ArticlePage({ params }: Props) {
                   </h1>
 
                   {article.excerpt && (
-                    <p className="text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl line-clamp-3 md:line-clamp-none">
+                    <p className={cn("text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl line-clamp-3 md:line-clamp-none", article.coverLayout === 'center' && 'md:mx-auto md:text-center')}>
                       {article.excerpt}
                     </p>
                   )}
 
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                  <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5", article.coverLayout === 'center' && 'md:justify-center')}>
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 backdrop-blur-sm text-sm font-sans font-bold text-white">
                         {article.author?.avatarUrl ? (
