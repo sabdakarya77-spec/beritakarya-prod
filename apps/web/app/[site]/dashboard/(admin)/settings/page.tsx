@@ -27,6 +27,7 @@ import {
   Eye as EyeIcon,
   Download,
   FileText,
+  Lock as LockIcon,
 } from 'lucide-react'
 import { api } from '../../../../../lib/api'
 import { useAuthStore } from '../../../../../store/authStore'
