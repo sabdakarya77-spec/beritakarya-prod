@@ -653,7 +653,7 @@ export function StudioCanvas() {
                       slot="HOME_TOP"
                       previewSrc={previewSrc}
                       mediaType={data.mediaType}
-                      aspectRatio={960 / 240}
+                      aspectRatio={800 / 200}
                       label="Hero Banner"
                     />
                   )}
@@ -673,7 +673,7 @@ export function StudioCanvas() {
                           slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
-                          aspectRatio={selectedPackage.slot === 'HOME_FEED_1' ? 300 / 200 : 300 / 150}
+                          aspectRatio={3}
                           label={slotName}
                         />
                       )}
@@ -701,7 +701,7 @@ export function StudioCanvas() {
                           slot={selectedPackage.slot}
                           previewSrc={previewSrc}
                           mediaType={data.mediaType}
-                          aspectRatio={selectedPackage.slot === 'ARTICLE_TOP' ? 300 / 200 : 300 / 150}
+                          aspectRatio={3}
                           label={slotName}
                         />
                       )}
@@ -734,7 +734,7 @@ function AdSlotPreview({ slot, previewSrc, mediaType, aspectRatio, label }: {
   slot: string; previewSrc: string | null; mediaType: 'image' | 'video'; aspectRatio: number; label: string;
 }) {
   const slotDef = getAdSlotDefinition(slot);
-  const sizeLabel = slotDef?.publicMockup || '300×200';
+  const sizeLabel = slotDef?.publicMockup || '300×100';
 
   return (
     <div className="space-y-1">

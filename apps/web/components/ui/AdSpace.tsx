@@ -311,13 +311,15 @@ export default function AdSpace({
     }
   };
 
+  // Ad slot sizing — 2 ratios: 4:1 (HOME_TOP) and 3:1 (others)
+  // Mobile-first, desktop max-width constrains while aspect-ratio maintains proportion
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full aspect-[4/1] rounded-xl overflow-hidden",
-    HOME_FEED_1:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
-    HOME_FEED_2:    "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-8",
-    ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
-    ARTICLE_MIDDLE: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-12",
-    ARTICLE_BOTTOM: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-6",
+    HOME_TOP:       "w-full aspect-[4/1] md:max-w-[800px] mx-auto rounded-xl overflow-hidden",
+    HOME_FEED_1:    "w-full aspect-[3/1] max-w-[210px] md:max-w-[300px] mx-auto rounded-lg overflow-hidden mb-8",
+    HOME_FEED_2:    "w-full aspect-[3/1] max-w-[180px] md:max-w-[210px] mx-auto rounded-lg overflow-hidden mb-8",
+    ARTICLE_TOP:    "w-full aspect-[3/1] max-w-[210px] md:max-w-[300px] mx-auto rounded-lg overflow-hidden mb-8",
+    ARTICLE_MIDDLE: "w-full aspect-[3/1] max-w-[180px] md:max-w-[210px] mx-auto rounded-lg overflow-hidden mb-12",
+    ARTICLE_BOTTOM: "w-full aspect-[3/1] max-w-[180px] md:max-w-[210px] mx-auto rounded-lg overflow-hidden mb-6",
   };
 
   // Loading state

@@ -334,14 +334,14 @@ Referensi dimensi layout untuk viewport **< 640px (mobile)** kecuali ditandai la
 
 > Lihat `docs/ads.md` untuk dokumentasi lengkap sistem iklan.
 
-| Slot ID | Nama Lokasi | Mobile Size | Rasio |
-|---------|-------------|-------------|-------|
-| `HOME_TOP` | Hero Banner | 360×90 px | 4:1 |
-| `HOME_FEED_1` | Feed Atas | 300×200 px | 3:2 |
-| `HOME_FEED_2` | Feed Bawah | 300×150 px | 2:1 |
-| `ARTICLE_TOP` | Artikel Atas | 300×200 px | 3:2 |
-| `ARTICLE_MIDDLE` | Artikel Tengah | 300×150 px | 2:1 |
-| `ARTICLE_BOTTOM` | Artikel Bawah | 300×150 px | 2:1 |
+| Slot ID | Nama Lokasi | Mobile Size | Desktop Size | Rasio |
+|---------|-------------|-------------|--------------|-------|
+| `HOME_TOP` | Hero Banner | 320×80 px | 800×200 px | 4:1 |
+| `HOME_FEED_1` | Feed Atas | 210×70 px | 300×100 px | 3:1 |
+| `HOME_FEED_2` | Feed Bawah | 180×60 px | 210×70 px | 3:1 |
+| `ARTICLE_TOP` | Artikel Atas | 210×70 px | 300×100 px | 3:1 |
+| `ARTICLE_MIDDLE` | Artikel Tengah | 180×60 px | 210×70 px | 3:1 |
+| `ARTICLE_BOTTOM` | Artikel Bawah | 180×60 px | 210×70 px | 3:1 |
 
 **Visibilitas di mobile:** Semua 6 slot tampil di mobile. Tidak ada slot sidebar.
 

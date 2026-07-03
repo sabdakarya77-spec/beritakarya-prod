@@ -50,9 +50,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'PREMIUM',
     format: 'VIDEO',
     dimensions: {
-      desktop: { width: 960, height: 240, minWidth: 300, minHeight: 80 },
-      tablet:  { width: 728, height: 182, minWidth: 250, minHeight: 60 },
-      mobile:  { width: 360, height: 90,  minWidth: 200, minHeight: 50 },
+      desktop: { width: 800, height: 200, minWidth: 400, minHeight: 100 },
+      tablet:  { width: 800, height: 200, minWidth: 300, minHeight: 75 },
+      mobile:  { width: 320, height: 80,  minWidth: 200, minHeight: 50 },
     },
   },
   HOME_FEED_1: {
@@ -61,9 +61,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'TINGGI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+      desktop: { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+      tablet:  { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+      mobile:  { width: 210, height: 70,  minWidth: 105, minHeight: 35 },
     },
   },
   HOME_FEED_2: {
@@ -72,9 +72,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'MENENGAH',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      tablet:  { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      mobile:  { width: 180, height: 60, minWidth: 90,  minHeight: 30 },
     },
   },
   ARTICLE_TOP: {
@@ -83,9 +83,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'TINGGI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+      desktop: { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+      tablet:  { width: 300, height: 100, minWidth: 150, minHeight: 50 },
+      mobile:  { width: 210, height: 70,  minWidth: 105, minHeight: 35 },
     },
   },
   ARTICLE_MIDDLE: {
@@ -94,9 +94,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'MENENGAH',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      tablet:  { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      mobile:  { width: 180, height: 60, minWidth: 90,  minHeight: 30 },
     },
   },
   ARTICLE_BOTTOM: {
@@ -105,9 +105,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'EKONOMI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      tablet:  { width: 210, height: 70, minWidth: 105, minHeight: 35 },
+      mobile:  { width: 180, height: 60, minWidth: 90,  minHeight: 30 },
     },
   },
 }

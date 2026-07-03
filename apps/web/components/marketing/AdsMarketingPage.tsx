@@ -293,7 +293,7 @@ export function AdsMarketingPage({
                     onClick={() => handleSlotClick('HOME_TOP')}
                     onMouseEnter={() => setActiveSlotId('HOME_TOP')}
                     onMouseLeave={() => setActiveSlotId(null)}
-                    className={`relative w-full aspect-[960/240] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
+                    className={`relative w-full aspect-[4/1] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
                       activeSlotId === 'HOME_TOP'
                         ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
                         : 'border-dashed border-gray-300 dark:border-white/10 hover:border-amber-500/50 bg-gray-50 dark:bg-white/[0.02]'
@@ -308,7 +308,7 @@ export function AdsMarketingPage({
                       </span>
                     </div>
                     <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                      [HOME_TOP] Hero Banner Video (960 x 240)
+                      [HOME_TOP] Hero Banner Video (800 x 200)
                     </p>
                     <p className="text-[8px] text-gray-400 uppercase tracking-widest mt-1">
                       Tim kreatif kami akan memproses & memproduksi video iklan Anda
@@ -369,7 +369,7 @@ export function AdsMarketingPage({
                           </span>
                         </div>
                         <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                          [HOME_FEED_1] Banner Atas Feed (300 x 200)
+                          [HOME_FEED_1] Banner Atas Feed (300 x 100)
                         </p>
                         <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
                           Tampil setelah 2 berita utama di feed homepage
@@ -404,7 +404,7 @@ export function AdsMarketingPage({
                           </span>
                         </div>
                         <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                          [HOME_FEED_2] Banner Bawah Feed (300 x 150)
+                          [HOME_FEED_2] Banner Bawah Feed (210 x 70)
                         </p>
                         <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
                           Tampil di bagian bawah feed setelah artikel grid
@@ -503,7 +503,7 @@ export function AdsMarketingPage({
                         </span>
                       </div>
                       <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                        [ARTICLE_TOP] Banner Atas Artikel (300 x 200)
+                        [ARTICLE_TOP] Banner Atas Artikel (300 x 100)
                       </p>
                       <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
                         Tampil di tengah tulisan setelah paragraf ke-3
@@ -534,7 +534,7 @@ export function AdsMarketingPage({
                         </span>
                       </div>
                       <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                        [ARTICLE_MIDDLE] Banner Tengah Artikel (300 x 150)
+                        [ARTICLE_MIDDLE] Banner Tengah Artikel (210 x 70)
                       </p>
                       <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
                         Tampil setelah paragraf ke-8 di dalam konten artikel
@@ -564,7 +564,7 @@ export function AdsMarketingPage({
                         </span>
                       </div>
                       <p className="text-[9px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                        [ARTICLE_BOTTOM] Banner Bawah Artikel (300 x 150)
+                        [ARTICLE_BOTTOM] Banner Bawah Artikel (210 x 70)
                       </p>
                       <p className="text-[7px] text-gray-400 uppercase tracking-widest mt-0.5">
                         Tampil di bagian bawah artikel sebelum rekomendasi berita lainnya
