@@ -221,16 +221,21 @@ export default async function ArticlePage({ params }: Props) {
           <section className="relative w-full">
             {/* Image Container: Aspect-video on all viewports */}
             <div className="relative w-full aspect-video">
-              <SmartImage
-                src={coverImage}
-                blur={article.featuredImageBlur}
-                dominantColor={article.featuredImageColor}
-                context="hero_lead"
-                alt={article.title}
-                fill
-                priority
-                className="object-cover animate-fade-in"
-              />
+              <div
+                className="absolute inset-0 p-3 md:p-4"
+                style={{ backgroundColor: article.featuredImageColor || '#f1f5f9' }}
+              >
+                <SmartImage
+                  src={coverImage}
+                  blur={article.featuredImageBlur}
+                  dominantColor={article.featuredImageColor}
+                  context="hero_lead"
+                  alt={article.title}
+                  fill
+                  priority
+                  className="object-cover animate-fade-in rounded-lg"
+                />
+              </div>
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
             </div>
