@@ -14,31 +14,27 @@ import Image, { ImageProps } from 'next/image'
  * Values are based on common container widths and content areas
  */
 const SIZES_MAP = {
-  // Hero images - optimized for large featured content
-  // Lead hero gets more width, side heroes get less
-  hero_lead: '(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 800px',
-  hero_side: '(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 400px',
-  
-  // Card images - optimized for grid layouts
-  // Mobile: full width, Tablet: 50%, Desktop: 33% (3-column) or 400px max
-  card: '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px',
-  card_horizontal: '(max-width: 640px) 40vw, 200px',
-  
+  // Hero images — mobile: max 640px (bukan 100vw yang bisa request 1080px+)
+  hero_lead: '(max-width: 640px) 640px, (max-width: 1024px) 90vw, 800px',
+  hero_side: '(max-width: 640px) 640px, (max-width: 1024px) 45vw, 400px',
+
+  // Card images — mobile viewport biasanya ~360px, 480px cukup untuk 2x DPR
+  card: '(max-width: 640px) 480px, (max-width: 768px) 384px, (max-width: 1024px) 340px, 400px',
+  card_horizontal: '(max-width: 640px) 160px, 200px',
+
   // Article images
-  // Article cover: optimized for readability, max 800px
-  article_cover: '(max-width: 640px) 100vw, (max-width: 1024px) 85vw, 800px',
-  // Article inline blocks: slightly smaller for content flow
-  article_block: '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 600px',
-  
+  article_cover: '(max-width: 640px) 640px, (max-width: 1024px) 85vw, 800px',
+  article_block: '(max-width: 640px) 640px, (max-width: 1024px) 80vw, 600px',
+
   // Gallery
   gallery_thumb: '(max-width: 640px) 80px, 56px',
   gallery_full: '100vw',
 
   // Other
-  media_text: '(max-width: 640px) 100vw, (max-width: 768px) 50vw, 380px',
+  media_text: '(max-width: 640px) 640px, (max-width: 768px) 50vw, 380px',
   logo: '200px',
 
-  // New additions for consistency
+  // Avatars & thumbnails — kecil, tidak perlu besar
   avatar: '(max-width: 640px) 48px, (max-width: 768px) 56px, 64px',
   thumbnail: '(max-width: 640px) 120px, (max-width: 768px) 160px, 200px',
 }
