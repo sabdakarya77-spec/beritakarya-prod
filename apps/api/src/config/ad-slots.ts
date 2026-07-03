@@ -50,9 +50,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'PREMIUM',
     format: 'VIDEO',
     dimensions: {
-      desktop: { width: 960, height: 240, minWidth: 300, minHeight: 80 },
+      desktop: { width: 880, height: 220, minWidth: 300, minHeight: 80 },
       tablet:  { width: 728, height: 182, minWidth: 250, minHeight: 60 },
-      mobile:  { width: 360, height: 90,  minWidth: 200, minHeight: 50 },
+      mobile:  { width: 320, height: 80,  minWidth: 200, minHeight: 50 },
     },
   },
   HOME_FEED_1: {

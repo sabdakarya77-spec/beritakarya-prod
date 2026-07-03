@@ -312,7 +312,7 @@ export default function AdSpace({
   };
 
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full aspect-[4/1] rounded-xl overflow-hidden",
+    HOME_TOP:       "w-full max-w-[880px] aspect-[4/1] mx-auto rounded-xl overflow-hidden",
     HOME_FEED_1:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
     HOME_FEED_2:    "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-8",
     ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",

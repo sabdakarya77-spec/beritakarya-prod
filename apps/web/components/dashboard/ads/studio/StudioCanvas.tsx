@@ -653,7 +653,7 @@ export function StudioCanvas() {
                       slot="HOME_TOP"
                       previewSrc={previewSrc}
                       mediaType={data.mediaType}
-                      aspectRatio={960 / 240}
+                      aspectRatio={880 / 220}
                       label="Hero Banner"
                     />
                   )}

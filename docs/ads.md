@@ -46,7 +46,7 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 | Slot | Desktop | Tablet | Mobile | Rasio | Varian |
 |------|---------|--------|--------|-------|--------|
-| **HOME_TOP** | 960 × 240 px | 728 × 182 px | 360 × 90 px | 4:1 | Besar |
+| **HOME_TOP** | 880 × 220 px | 728 × 182 px | 320 × 80 px | 4:1 | Besar |
 | **HOME_FEED_1** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
 | **HOME_FEED_2** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
 | **ARTICLE_TOP** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
@@ -128,7 +128,7 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 | Slot Name | Deskripsi | Format | Desktop | Tablet | Mobile | Tier |
 |-----------|-----------|--------|---------|--------|--------|------|
-| `HOME_TOP` | Hero banner homepage | 🎥 Video | 960 × 240 | 728 × 182 | 360 × 90 | Premium |
+| `HOME_TOP` | Hero banner homepage | 🎥 Video | 880 × 220 | 728 × 182 | 320 × 80 | Premium |
 | `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
 | `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
 | `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
@@ -143,7 +143,7 @@ Header
 ────────────────────
 
 Hero Banner (HOME_TOP)
-360 × 90
+320 × 80
 
 Headline
 
@@ -566,7 +566,7 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 5. Upload 1 File (gambar atau video)
       ↓
    🎨 Backend auto-generate semua variant (POST /upload-ad?slot=...):
-   → HOME_TOP: 960×240 (desktop) / 728×182 (tablet) / 360×90 (mobile)
+   → HOME_TOP: 880×220 (desktop) / 728×182 (tablet) / 320×80 (mobile)
    → HOME_FEED_1 / ARTICLE_TOP: 300×200 (semua device)
    → HOME_FEED_2 / ARTICLE_MIDDLE / ARTICLE_BOTTOM: 300×150 (semua device)
    → Return semua URL + warnings
@@ -610,7 +610,7 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 |--------|------------|
 | **Mudah dipasarkan** | Marketing cukup bilang: *"Slot paling premium, kami buatkan video iklan Anda, cukup kirim foto dan logo"* |
 | **Kualitas terjamin** | Video dibuat oleh tim internal, bukan tergantung upload advertiser |
-| **Rasio konsisten** | Video didesain khusus untuk 960×240 (desktop), 728×182 (tablet), 360×90 (mobile) — semua 4:1 |
+| **Rasio konsisten** | Video didesain khusus untuk 880×220 (desktop), 728×182 (tablet), 320×80 (mobile) — semua 4:1 |
 | **Harga premium terjustifikasi** | Advertiser mendapat produk jadi, bukan slot kosong |
 | **Ringan untuk advertiser** | UMKM tidak perlu punya kemampuan produksi video |
 
@@ -621,7 +621,7 @@ Advertiser buka Ad Studio → Pilih paket HOME_TOP
         ↓
 Upload FOTO (1 file) + LOGO (opsional, terpisah)
         ↓
-Backend auto-generate 3 variant (960×240 / 728×182 / 360×90)
+Backend auto-generate 3 variant (880×220 / 728×182 / 320×80) [4:1]
 → POST /upload-ad?slot=HOME_TOP
 → Simpan ke processedVariants { desktop, tablet, mobile }
         ↓

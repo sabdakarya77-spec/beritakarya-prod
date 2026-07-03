@@ -58,7 +58,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
 
   // Dynamic aspect ratio per slot
   const aspectRatioClass: Record<string, string> = {
-    HOME_TOP: 'aspect-[960/240]',
+    HOME_TOP: 'aspect-[4/1]',
     HOME_FEED_1: 'aspect-[300/200]',
     ARTICLE_TOP: 'aspect-[300/200]',
     HOME_FEED_2: 'aspect-[300/150]',

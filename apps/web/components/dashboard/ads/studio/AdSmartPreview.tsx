@@ -49,9 +49,9 @@ const SLOT_LABELS: Record<string, string> = {
 };
 
 const SLOT_SIZES: Record<string, string> = {
-  HOME_TOP_desktop: '960×240',
+  HOME_TOP_desktop: '880×220',
   HOME_TOP_tablet: '728×182',
-  HOME_TOP_mobile: '360×90',
+  HOME_TOP_mobile: '320×80',
   HOME_FEED_1_desktop: '300×200',
   HOME_FEED_1_tablet: '300×200',
   HOME_FEED_1_mobile: '300×200',

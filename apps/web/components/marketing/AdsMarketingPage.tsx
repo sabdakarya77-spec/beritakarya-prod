@@ -293,7 +293,7 @@ export function AdsMarketingPage({
                     onClick={() => handleSlotClick('HOME_TOP')}
                     onMouseEnter={() => setActiveSlotId('HOME_TOP')}
                     onMouseLeave={() => setActiveSlotId(null)}
-                    className={`relative w-full aspect-[960/240] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
+                    className={`relative w-full aspect-[4/1] rounded-xl flex flex-col items-center justify-center border cursor-pointer overflow-hidden transition-all duration-300 ${
                       activeSlotId === 'HOME_TOP'
                         ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
                         : 'border-dashed border-gray-300 dark:border-white/10 hover:border-amber-500/50 bg-gray-50 dark:bg-white/[0.02]'
@@ -308,7 +308,7 @@ export function AdsMarketingPage({
                       </span>
                     </div>
                     <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-brand-black dark:text-white">
-                      [HOME_TOP] Hero Banner Video (960 x 240)
+                      [HOME_TOP] Hero Banner Video (880 x 220)
                     </p>
                     <p className="text-[8px] text-gray-400 uppercase tracking-widest mt-1">
                       Tim kreatif kami akan memproses & memproduksi video iklan Anda

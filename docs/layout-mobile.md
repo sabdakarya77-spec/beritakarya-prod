@@ -336,7 +336,7 @@ Referensi dimensi layout untuk viewport **< 640px (mobile)** kecuali ditandai la
 
 | Slot ID | Nama Lokasi | Mobile Size | Rasio |
 |---------|-------------|-------------|-------|
-| `HOME_TOP` | Hero Banner | 360×90 px | 4:1 |
+| `HOME_TOP` | Hero Banner | 320×80 px | 4:1 |
 | `HOME_FEED_1` | Feed Atas | 300×200 px | 3:2 |
 | `HOME_FEED_2` | Feed Bawah | 300×150 px | 2:1 |
 | `ARTICLE_TOP` | Artikel Atas | 300×200 px | 3:2 |
