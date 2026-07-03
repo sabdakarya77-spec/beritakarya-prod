@@ -201,8 +201,8 @@ Wapimred review → approved → terbitkan → published ✅
 - [x] Implementasi toggle: `wapimred_can_force_publish`
 
 ### Phase 3: Notifikasi & Polish
-- [ ] Implementasi toggle notifikasi pimred
-- [ ] UI polish: toast notification, loading state, error handling
+- [x] Implementasi toggle notifikasi pimred
+- [x] UI polish: toast notification, loading state, error handling
 - [ ] Dokumentasi API Swagger
 - [ ] E2E testing
 

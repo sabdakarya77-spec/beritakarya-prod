@@ -96,7 +96,12 @@ export default function SettingsPage() {
     canPublish: false,
     canSchedule: false,
     canForcePublish: false,
-    canDeletePublished: false
+    canDeletePublished: false,
+    canManageCategories: false,
+    canTransferUser: false,
+    canDeleteUser: false,
+    notifyPimredOnSubmit: true,
+    notifyPimredOnApprove: true
   })
   const [wapimredSaving, setWapimredSaving] = useState(false)
   
@@ -238,7 +243,12 @@ export default function SettingsPage() {
           canPublish: data.data.canPublish ?? false,
           canSchedule: data.data.canSchedule ?? false,
           canForcePublish: data.data.canForcePublish ?? false,
-          canDeletePublished: data.data.canDeletePublished ?? false
+          canDeletePublished: data.data.canDeletePublished ?? false,
+          canManageCategories: data.data.canManageCategories ?? false,
+          canTransferUser: data.data.canTransferUser ?? false,
+          canDeleteUser: data.data.canDeleteUser ?? false,
+          notifyPimredOnSubmit: data.data.notifyPimredOnSubmit ?? true,
+          notifyPimredOnApprove: data.data.notifyPimredOnApprove ?? true
         })
       }
     } catch (err) {
@@ -1198,6 +1208,9 @@ Penasihat Hukum:
                     { key: 'canSchedule' as const, label: 'Boleh Jadwalkan Artikel', desc: 'Wapimred bisa menjadwalkan artikel untuk terbit otomatis pada waktu tertentu.' },
                     { key: 'canForcePublish' as const, label: 'Boleh Force-Publish', desc: 'Wapimred bisa menerbitkan artikel dari status apapun (skip workflow). Berisiko tinggi.' },
                     { key: 'canDeletePublished' as const, label: 'Boleh Hapus Post Terbit', desc: 'Wapimred bisa menghapus artikel yang sudah tayang di publik. Berisiko tinggi.' },
+                    { key: 'canManageCategories' as const, label: 'Boleh Kelola Kategori', desc: 'Wapimred bisa membuat, mengedit, dan menghapus kategori di situs ini.' },
+                    { key: 'canTransferUser' as const, label: 'Boleh Pindah Cabang User', desc: 'Wapimred bisa memindahkan user ke situs lain.' },
+                    { key: 'canDeleteUser' as const, label: 'Boleh Hapus User', desc: 'Wapimred bisa menghapus (soft-delete) user di situs ini.' },
                   ].map((item) => (
                     <div
                       key={item.key}
@@ -1225,6 +1238,49 @@ Penasihat Hukum:
                       </button>
                     </div>
                   ))}
+                </div>
+
+                <hr className="border-gray-200 dark:border-gray-800" />
+
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
+                    <AlertCircle size={14} className="text-brand-red" /> Notifikasi Pimred
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    Atur notifikasi yang dikirim ke Pimred saat Wapimred melakukan aksi editorial.
+                  </p>
+                  <div className="space-y-4">
+                    {[
+                      { key: 'notifyPimredOnSubmit' as const, label: 'Notif saat artikel masuk antrian', desc: 'Pimred mendapat notifikasi setiap ada artikel baru yang diajukan penulis.' },
+                      { key: 'notifyPimredOnApprove' as const, label: 'Notif saat Wapimred approve artikel', desc: 'Pimred mendapat notifikasi saat Wapimred menyetujui artikel (siap terbit).' },
+                    ].map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5"
+                      >
+                        <div className="flex-1 mr-4">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white">{item.label}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.desc}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setWapimredSettings({
+                              ...wapimredSettings,
+                              [item.key]: !wapimredSettings[item.key]
+                            })
+                          }
+                          className={`px-5 py-2.5 text-sm font-medium border rounded-lg transition-all ${
+                            wapimredSettings[item.key]
+                              ? 'bg-emerald-500 text-white border-emerald-600'
+                              : 'bg-gray-100 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700'
+                          }`}
+                        >
+                          {wapimredSettings[item.key] ? 'AKTIF' : 'NONAKTIF'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex justify-end">

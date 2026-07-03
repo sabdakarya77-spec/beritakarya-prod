@@ -610,7 +610,12 @@ export class SiteService {
       canPublish: false,
       canSchedule: false,
       canForcePublish: false,
-      canDeletePublished: false
+      canDeletePublished: false,
+      canManageCategories: false,
+      canTransferUser: false,
+      canDeleteUser: false,
+      notifyPimredOnSubmit: true,
+      notifyPimredOnApprove: true
     }
 
     const settings = (site.wapimredSettings as Record<string, boolean>) || {}
@@ -630,7 +635,7 @@ export class SiteService {
       throw Object.assign(new Error('Site not found'), { statusCode: 404 })
     }
 
-    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished']
+    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished', 'canManageCategories', 'canTransferUser', 'canDeleteUser', 'notifyPimredOnSubmit', 'notifyPimredOnApprove']
     const filtered: Record<string, boolean> = {}
     for (const key of allowedKeys) {
       if (data[key] !== undefined) {

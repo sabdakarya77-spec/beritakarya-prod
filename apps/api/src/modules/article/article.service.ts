@@ -433,8 +433,22 @@ export async function updateArticle(
     })
     const userName = userData?.name || 'User'
 
+    // Ambil toggle notifikasi pimred
+    const siteData = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { wapimredSettings: true }
+    })
+    const wapimredSettings = (siteData?.wapimredSettings as Record<string, boolean>) || {}
+    const notifyPimredOnSubmit = wapimredSettings.notifyPimredOnSubmit !== false // default true
+
+    // Filter editor berdasarkan toggle
+    const editorRoles: string[] = ['wapimred']
+    if (notifyPimredOnSubmit) {
+      editorRoles.push('superadmin')
+    }
+
     const editors = await prisma.user.findMany({
-      where: { siteId, role: { in: ['superadmin', 'wapimred'] } },
+      where: { siteId, role: { in: editorRoles as any[] } },
       select: { id: true }
     })
     for (const editor of editors) {
@@ -446,6 +460,35 @@ export async function updateArticle(
         message: `${userName} baru saja mengirim post "${updated.title}" untuk di-review.`,
         link: `/${siteId}/dashboard/review`
       })
+    }
+  } else if (input.status === 'approved') {
+    // Notifikasi ke pimred saat wapimred approve artikel
+    if (user.role === 'wapimred') {
+      const siteData = await prisma.site.findUnique({
+        where: { id: siteId },
+        select: { wapimredSettings: true }
+      })
+      const wapimredSettings = (siteData?.wapimredSettings as Record<string, boolean>) || {}
+      if (wapimredSettings.notifyPimredOnApprove !== false) {
+        const superadmins = await prisma.user.findMany({
+          where: { siteId, role: 'superadmin' },
+          select: { id: true }
+        })
+        const approverName = (await prisma.user.findUnique({
+          where: { id: user.userId },
+          select: { name: true }
+        }))?.name || 'Wapimred'
+        for (const sa of superadmins) {
+          await sendNotification({
+            userId: sa.id,
+            siteId,
+            type: 'post_approved',
+            title: 'Artikel Disetujui Wapimred',
+            message: `${approverName} menyetujui post "${updated.title}". Siap untuk diterbitkan.`,
+            link: `/${siteId}/dashboard/review?tab=approved`
+          })
+        }
+      }
     }
   } else if (input.status === 'revision') {
     await sendNotification({
