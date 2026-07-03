@@ -9,7 +9,7 @@ const envSchema = z.object({
   DIRECT_URL: z.string().url().optional(),
 
   // ── Security ──────────────────────────────────────────────────────────────
-  JWT_SECRET: z.string(),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET minimal 32 karakter untuk keamanan'),
   JWT_ACCESS_EXPIRES: z.string().default('1h'),
   RESET_SECRET: z.string().min(32).optional(),
   EMAIL_VERIFICATION_SECRET: z.string().min(32).optional(),

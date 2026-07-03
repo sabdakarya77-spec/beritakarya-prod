@@ -1,3 +1,6 @@
+# ⚠️ LOCAL DEVELOPMENT ONLY — Jangan gunakan untuk production.
+# Production menggunakan LXC native (tanpa Docker), lihat docs/panduan_produksi_lxc.md
+# Kredensial di bawah adalah default lemah yang hanya aman untuk mesin lokal.
 version: '3.8'
 
 services:
