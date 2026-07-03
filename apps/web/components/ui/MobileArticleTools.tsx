@@ -284,7 +284,7 @@ export default function MobileArticleTools({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -60, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2 rounded-[1.5rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            className="fixed left-3 top-40 z-40 flex flex-col items-center gap-2 rounded-[1.5rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
             role="toolbar"
             aria-label="Alat artikel"
           >

@@ -327,7 +327,7 @@ export default async function ArticlePage({ params }: Props) {
               {/* Main Content */}
               <div className="min-w-0 xl:grid xl:grid-cols-[4.25rem_minmax(0,40rem)] xl:gap-8 2xl:grid-cols-[4.5rem_minmax(0,42rem)]">
                 <div className="hidden xl:block relative z-30">
-                  <div className="sticky top-24">
+                  <div className="sticky top-40">
                     <ArticleFloatingTools title={article.title} url={articleUrl} />
                   </div>
                 </div>
