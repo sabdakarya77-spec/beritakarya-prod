@@ -922,7 +922,7 @@ adRouter.post(
       const result = await generateVideo(provider, {
         prompt: prompt.trim(),
         duration: 12, // 10-15 detik, ambil tengah
-        aspectRatio: '800:200', // Sesuai slot HOME_TOP (4:1)
+        aspectRatio: '960:240', // Sesuai slot HOME_TOP
       })
 
       // Simpan prompt ke VideoPrompt (selalu, sukses atau tidak)

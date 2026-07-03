@@ -46,14 +46,14 @@ Dokumen tunggal yang merangkum seluruh sistem periklanan BeritaKarya: arsitektur
 
 | Slot | Desktop | Tablet | Mobile | Rasio | Varian |
 |------|---------|--------|--------|-------|--------|
-| **HOME_TOP** | 800 × 200 px | 800 × 200 px | 320 × 80 px | 4:1 | Besar |
-| **HOME_FEED_1** | 300 × 100 px | 300 × 100 px | 210 × 70 px | 3:1 | Sedang |
-| **HOME_FEED_2** | 210 × 70 px | 210 × 70 px | 180 × 60 px | 3:1 | Kecil |
-| **ARTICLE_TOP** | 300 × 100 px | 300 × 100 px | 210 × 70 px | 3:1 | Sedang |
-| **ARTICLE_MIDDLE** | 210 × 70 px | 210 × 70 px | 180 × 60 px | 3:1 | Kecil |
-| **ARTICLE_BOTTOM** | 210 × 70 px | 210 × 70 px | 180 × 60 px | 3:1 | Kecil |
+| **HOME_TOP** | 960 × 240 px | 728 × 182 px | 360 × 90 px | 4:1 | Besar |
+| **HOME_FEED_1** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
+| **HOME_FEED_2** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
+| **ARTICLE_TOP** | 300 × 200 px | 300 × 200 px | 300 × 200 px | 3:2 | Sedang |
+| **ARTICLE_MIDDLE** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
+| **ARTICLE_BOTTOM** | 300 × 150 px | 300 × 150 px | 300 × 150 px | 2:1 | Kecil |
 
-> **2 Rasio Konsisten:** 4:1 untuk HOME_TOP (hero banner), 3:1 untuk semua slot lainnya. Ukuran berbeda per breakpoint — mobile lebih kecil agar tidak menyerupai news card. Slot **Sedang** (HOME_FEED_1, ARTICLE_TOP) lebih prominent. Slot **Kecil** (HOME_FEED_2, ARTICLE_MIDDLE, ARTICLE_BOTTOM) lebih ringan.
+> **3 Varian Ukuran:** Banner dipecah menjadi 3 varian (Besar/Sedang/Kecil) agar advertiser bisa membuat 1 desain untuk beberapa slot sekaligus. Slot dengan varian **Sedang** (HOME_FEED_1, ARTICLE_TOP) memiliki visibilitas lebih tinggi. Slot **Kecil** (HOME_FEED_2, ARTICLE_MIDDLE, ARTICLE_BOTTOM) lebih ringan dan konsisten.
 
 ### 2.3 Visibilitas Slot Per Device
 
@@ -93,15 +93,14 @@ Semua 6 slot tampil di **semua device** (desktop, tablet, mobile) — yang berbe
 
 | Slot | Variant | Min Width | Min Height | Catatan |
 |------|---------|-----------|------------|---------|
-| HOME_TOP | Desktop | 400 px | 100 px | 4:1, sistem akan upscale + gradient jika kecil |
-| HOME_TOP | Mobile | 200 px | 50 px | 4:1, sistem akan upscale + gradient jika kecil |
-| HOME_FEED_1 | Desktop | 150 px | 50 px | 3:1, sistem akan upscale + gradient jika kecil |
-| HOME_FEED_1 | Mobile | 105 px | 35 px | 3:1, sistem akan upscale + gradient jika kecil |
-| HOME_FEED_2 | Desktop | 105 px | 35 px | 3:1, sistem akan upscale + gradient jika kecil |
-| HOME_FEED_2 | Mobile | 90 px | 30 px | 3:1, sistem akan upscale + gradient jika kecil |
-| ARTICLE_TOP | Desktop | 150 px | 50 px | 3:1, sistem akan upscale + gradient jika kecil |
-| ARTICLE_MIDDLE | Desktop | 105 px | 35 px | 3:1, sistem akan upscale + gradient jika kecil |
-| ARTICLE_BOTTOM | Desktop | 105 px | 35 px | 3:1, sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Desktop | 300 px | 80 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Tablet | 250 px | 60 px | Sistem akan upscale + gradient jika kecil |
+| HOME_TOP | Mobile | 200 px | 50 px | Sistem akan upscale + gradient jika kecil |
+| HOME_FEED_1 | Semua | 150 px | 100 px | Varian Sedang (3:2), sistem akan upscale + gradient jika kecil |
+| HOME_FEED_2 | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
+| ARTICLE_TOP | Semua | 150 px | 100 px | Varian Sedang (3:2), sistem akan upscale + gradient jika kecil |
+| ARTICLE_MIDDLE | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
+| ARTICLE_BOTTOM | Semua | 150 px | 75 px | Varian Kecil (2:1), sistem akan upscale + gradient jika kecil |
 
 > **Prinsip**: Tidak ada gambar yang ditolak. Gambar kecil di-upscale, **semua rasio gambar selalu di-crop secara cerdas** (`object-cover + position: attention`) agar memenuhi slot dengan profesional — tanpa sisa ruang di kiri/kanan.
 
@@ -127,14 +126,14 @@ Komponen `AdSpace` menggunakan `<picture>` element untuk responsive images:
 
 #### Konvensi Penamaan Slot
 
-| Slot Name | Deskripsi | Format | Desktop | Tablet | Mobile | Rasio | Tier |
-|-----------|-----------|--------|---------|--------|--------|-------|------|
-| `HOME_TOP` | Hero banner homepage | 🎥 Video | 800 × 200 | 800 × 200 | 320 × 80 | 4:1 | Premium |
-| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 🖼️ Banner | 300 × 100 | 300 × 100 | 210 × 70 | 3:1 | Tinggi |
-| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 🖼️ Banner | 210 × 70 | 210 × 70 | 180 × 60 | 3:1 | Menengah |
-| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 🖼️ Banner | 300 × 100 | 300 × 100 | 210 × 70 | 3:1 | Tinggi |
-| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 🖼️ Banner | 210 × 70 | 210 × 70 | 180 × 60 | 3:1 | Menengah |
-| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 🖼️ Banner | 210 × 70 | 210 × 70 | 180 × 60 | 3:1 | Ekonomi |
+| Slot Name | Deskripsi | Format | Desktop | Tablet | Mobile | Tier |
+|-----------|-----------|--------|---------|--------|--------|------|
+| `HOME_TOP` | Hero banner homepage | 🎥 Video | 960 × 240 | 728 × 182 | 360 × 90 | Premium |
+| `HOME_FEED_1` | Di tengah feed (setelah 6-8 berita) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
+| `HOME_FEED_2` | Di bawah feed (setelah 12-15 berita) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
+| `ARTICLE_TOP` | Atas artikel (setelah paragraf ke-3) | 🖼️ Banner | 300 × 200 | 300 × 200 | 300 × 200 | Tinggi |
+| `ARTICLE_MIDDLE` | Tengah artikel (setelah paragraf ke-8) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Menengah |
+| `ARTICLE_BOTTOM` | Bawah artikel (sebelum artikel terkait) | 🖼️ Banner | 300 × 150 | 300 × 150 | 300 × 150 | Ekonomi |
 
 #### Layout Homepage Mobile
 
@@ -144,7 +143,7 @@ Header
 ────────────────────
 
 Hero Banner (HOME_TOP)
-320 × 80 [4:1]
+360 × 90
 
 Headline
 
@@ -152,13 +151,13 @@ Berita 1
 Berita 2
 
 Banner (HOME_FEED_1)
-210 × 70 [3:1]
+300 × 200 [Sedang]
 
 Berita 3
 Berita 4
 
 Banner (HOME_FEED_2)
-180 × 60 [3:1]
+300 × 150 [Kecil]
 
 Berita 5
 Berita 6
@@ -181,7 +180,7 @@ Paragraf 2
 Paragraf 3
 
 Banner (ARTICLE_TOP)
-210 × 70 [3:1]
+300 × 200 [Sedang]
 
 Paragraf 4
 Paragraf 5
@@ -190,13 +189,13 @@ Paragraf 7
 Paragraf 8
 
 Banner (ARTICLE_MIDDLE)
-180 × 60 [3:1]
+300 × 150 [Kecil]
 
 Paragraf 9
 Paragraf 10
 
 Banner (ARTICLE_BOTTOM)
-180 × 60 [3:1]
+300 × 150 [Kecil]
 
 Artikel Terkait
 Footer
@@ -341,7 +340,7 @@ File: `apps/web/components/ui/AdSpace.tsx`
 | **Props** | `type: 'HOME_TOP' \| 'HOME_FEED_1' \| 'HOME_FEED_2' \| 'ARTICLE_TOP' \| 'ARTICLE_MIDDLE' \| 'ARTICLE_BOTTOM'`, `slot?`, `label?`, `className?` |
 | **Fetch** | `GET /api/v1/ads/public?site=<siteId>`, filter by `slotName` di client |
 | **Carousel** | Auto-rotate — HOME_TOP (video) 12 detik, slot banner 7 detik. Random order, fade transition, tanpa indikator. Pause on hover |
-| **Container** | Semua slot menggunakan `aspect-ratio` (bukan fixed height). `HOME_TOP`: `md:max-w-[800px] aspect-[4/1] mx-auto rounded-xl`. Banner feed/artikel: `aspect-[3/1]` dengan `max-w` per breakpoint (`max-w-[210px] md:max-w-[300px]` untuk Sedang, `max-w-[180px] md:max-w-[210px]` untuk Kecil) |
+| **Container** | Semua slot menggunakan `aspect-ratio` (bukan fixed height). `HOME_TOP`: `max-w-[960px] aspect-[4/1] mx-auto rounded-xl`. Banner feed/artikel: `max-w-[360px] aspect-[3/2]` atau `aspect-[2/1] mx-auto rounded-lg` |
 | **Impresi** | `POST /api/v1/ads/track/<id>?action=impression` (satu kali per ad ID per page load) |
 | **Klik** | `POST /api/v1/ads/track/<id>?action=click` (via `navigator.sendBeacon`) |
 | **A/B Testing** | Random variant per session (sessionStorage), use `winnerVariant` if set |
@@ -567,9 +566,9 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 5. Upload 1 File (gambar atau video)
       ↓
    🎨 Backend auto-generate semua variant (POST /upload-ad?slot=...):
-   → HOME_TOP: 800×200 (desktop) / 320×80 (mobile) [4:1]
-   → HOME_FEED_1 / ARTICLE_TOP: 300×100 (desktop) / 210×70 (mobile) [3:1]
-   → HOME_FEED_2 / ARTICLE_MIDDLE / ARTICLE_BOTTOM: 210×70 (desktop) / 180×60 (mobile) [3:1]
+   → HOME_TOP: 960×240 (desktop) / 728×182 (tablet) / 360×90 (mobile)
+   → HOME_FEED_1 / ARTICLE_TOP: 300×200 (semua device)
+   → HOME_FEED_2 / ARTICLE_MIDDLE / ARTICLE_BOTTOM: 300×150 (semua device)
    → Return semua URL + warnings
       ↓
    📐 Preview muncul otomatis:
@@ -611,7 +610,7 @@ enum AdStatus      { PENDING_REVIEW, ACTIVE, COMPLETED, REJECTED }
 |--------|------------|
 | **Mudah dipasarkan** | Marketing cukup bilang: *"Slot paling premium, kami buatkan video iklan Anda, cukup kirim foto dan logo"* |
 | **Kualitas terjamin** | Video dibuat oleh tim internal, bukan tergantung upload advertiser |
-| **Rasio konsisten** | Video didesain khusus untuk 800×200 (desktop), 320×80 (mobile) — semua 4:1 |
+| **Rasio konsisten** | Video didesain khusus untuk 960×240 (desktop), 728×182 (tablet), 360×90 (mobile) — semua 4:1 |
 | **Harga premium terjustifikasi** | Advertiser mendapat produk jadi, bukan slot kosong |
 | **Ringan untuk advertiser** | UMKM tidak perlu punya kemampuan produksi video |
 
@@ -622,7 +621,7 @@ Advertiser buka Ad Studio → Pilih paket HOME_TOP
         ↓
 Upload FOTO (1 file) + LOGO (opsional, terpisah)
         ↓
-Backend auto-generate 2 variant (800×200 desktop / 320×80 mobile) [4:1]
+Backend auto-generate 3 variant (960×240 / 728×182 / 360×90)
 → POST /upload-ad?slot=HOME_TOP
 → Simpan ke processedVariants { desktop, tablet, mobile }
         ↓

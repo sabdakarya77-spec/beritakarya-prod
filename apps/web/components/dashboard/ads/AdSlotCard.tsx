@@ -56,14 +56,14 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [previewAd, closePreview]);
 
-  // Dynamic aspect ratio per slot — 2 ratios: 4:1 (HOME_TOP), 3:1 (others)
+  // Dynamic aspect ratio per slot
   const aspectRatioClass: Record<string, string> = {
-    HOME_TOP: 'aspect-[4/1]',
-    HOME_FEED_1: 'aspect-[3/1]',
-    ARTICLE_TOP: 'aspect-[3/1]',
-    HOME_FEED_2: 'aspect-[3/1]',
-    ARTICLE_MIDDLE: 'aspect-[3/1]',
-    ARTICLE_BOTTOM: 'aspect-[3/1]',
+    HOME_TOP: 'aspect-[960/240]',
+    HOME_FEED_1: 'aspect-[300/200]',
+    ARTICLE_TOP: 'aspect-[300/200]',
+    HOME_FEED_2: 'aspect-[300/150]',
+    ARTICLE_MIDDLE: 'aspect-[300/150]',
+    ARTICLE_BOTTOM: 'aspect-[300/150]',
   };
 
   // Deteksi file video berdasarkan ekstensi di pathname (abaikan query params)
@@ -332,7 +332,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                   onClick={() => ad.imageUrl && setPreviewAd(ad)}
                   className={cn(
                     "w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden relative group cursor-pointer",
-                    aspectRatioClass[slot.id] || 'aspect-[3/1]',
+                    aspectRatioClass[slot.id] || 'aspect-[300/200]',
                     !ad.imageUrl && 'cursor-default'
                   )}
                 >

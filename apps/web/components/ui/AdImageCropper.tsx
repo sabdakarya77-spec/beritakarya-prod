@@ -7,7 +7,7 @@ import { X, Check, ZoomIn, AlertCircle } from 'lucide-react';
 
 interface AdImageCropperProps {
   file: File;
-  aspectRatio: number; // width / height, e.g. 800/200 = 4.0
+  aspectRatio: number; // width / height, e.g. 960/240 = 4.0
   minWidth?: number;
   minHeight?: number;
   onComplete: (blob: Blob) => void;

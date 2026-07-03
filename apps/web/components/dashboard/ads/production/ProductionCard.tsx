@@ -326,7 +326,7 @@ export function ProductionCard({ booking, site, isProcessing, setProcessingId, o
               </a>
             </div>
 
-            <div className="aspect-[4/1] bg-black rounded-xl overflow-hidden">
+            <div className="aspect-[960/240] bg-black rounded-xl overflow-hidden">
               <video
                 src={videoUrl}
                 controls

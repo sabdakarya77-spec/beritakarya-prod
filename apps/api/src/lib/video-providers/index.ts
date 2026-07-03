@@ -21,7 +21,7 @@ export interface VideoGenerateRequest {
   prompt: string
   imageUrl?: string // Image-to-video (optional)
   duration?: number // Detik, default 10
-  aspectRatio?: string // Misal: '800:200' (4:1) atau '16:9'
+  aspectRatio?: string // Misal: '960:240' atau '16:9'
 }
 
 export interface VideoGenerateResponse {
