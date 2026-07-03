@@ -309,7 +309,7 @@ export function TabSettings() {
         <div className="grid grid-cols-3 gap-2">
           {([
             { value: 'left-bottom', label: 'Kiri Bawah', icon: '◧' },
-            { value: 'left-center', label: 'Kiri Tengah', icon: '◨' },
+            { value: 'left-top', label: 'Kiri Atas', icon: '◧' },
             { value: 'center', label: 'Tengah', icon: '⊡' }
           ] as const).map((option) => (
             <button

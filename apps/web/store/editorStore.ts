@@ -26,7 +26,7 @@ export interface EditorState {
   tags: string[]
   featuredImage: string
   featuredImageCredit: string
-  coverLayout: 'left-bottom' | 'left-center' | 'center'
+  coverLayout: 'left-bottom' | 'left-top' | 'center'
   isBreaking: boolean
   isExclusive: boolean
   isFeatured: boolean

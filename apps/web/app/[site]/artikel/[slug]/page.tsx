@@ -253,12 +253,16 @@ export default async function ArticlePage({ params }: Props) {
             {/* Absolute positioning on desktop, relative flow with background on mobile */}
             <div className={cn(
               "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0",
-              article.coverLayout === 'center' ? 'md:items-center' : 'md:items-end'
+              article.coverLayout === 'center' ? 'md:items-center' :
+              article.coverLayout === 'left-top' ? 'md:items-start' :
+              'md:items-end'
             )}>
               <Container>
                 <div className={cn(
                   "max-w-4xl",
-                  article.coverLayout === 'center' ? 'md:mx-auto md:text-center' : 'md:pb-12'
+                  article.coverLayout === 'center' ? 'md:mx-auto md:text-center' :
+                  article.coverLayout === 'left-top' ? 'md:pt-12' :
+                  'md:pb-12'
                 )}>
                   <div className="flex flex-wrap items-center gap-2.5 mb-4">
                     {badgeVariant && (

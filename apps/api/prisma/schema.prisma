@@ -286,7 +286,7 @@ model Article {
   featuredImageBlur   String? // Base64 blur hash (10x10 webp)
   featuredImageColor  String? // Hex dominant color
   featuredImageCredit String? // Kredit foto (contoh: "Redaksi/Fotografer" atau "Getty Images")
-  coverLayout         String?  @default("left-bottom") // left-bottom | left-center | center
+  coverLayout         String?  @default("left-bottom") // left-bottom | left-top | center
 
   // Article Metadata
   wordCount      Int? // Jumlah kata
