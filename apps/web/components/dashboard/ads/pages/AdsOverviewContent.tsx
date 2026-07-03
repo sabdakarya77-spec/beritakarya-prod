@@ -13,11 +13,9 @@ import {
   AlertCircle,
   MousePointerClick,
   Video,
-  CreditCard,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { getAdSlotDefinition } from '../../../../lib/constants';
-import { useAuthStore } from '../../../../store/authStore';
 import type { AdBooking, AdPackage } from '../types';
 
 interface AdsOverviewContentProps {
@@ -27,7 +25,6 @@ interface AdsOverviewContentProps {
 }
 
 export default function AdsOverviewContent({ basePath, bookings, packages }: AdsOverviewContentProps) {
-  const { user } = useAuthStore();
   const totalImpressions = bookings.reduce((acc, b) => acc + b.impressions, 0);
   const totalClicks = bookings.reduce((acc, b) => acc + b.clicks, 0);
   const activeBookings = bookings.filter(b => b.status === 'ACTIVE');
@@ -128,19 +125,6 @@ export default function AdsOverviewContent({ basePath, bookings, packages }: Ads
           </div>
           <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
         </Link>
-        {user?.role === 'superadmin' && (
-          <Link
-            href={`${basePath}/payment-config`}
-            className="dash-card p-5 flex items-center gap-4 group hover:border-brand-red/30 transition-all"
-          >
-            <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl"><CreditCard size={20} /></div>
-            <div className="flex-1">
-              <p className="text-xs font-black text-brand-black dark:text-white uppercase tracking-tight">Setelan Pembayaran</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Rekening bank, QRIS, Midtrans</p>
-            </div>
-            <ArrowRight size={16} className="text-gray-300 group-hover:text-brand-red transition-colors" />
-          </Link>
-        )}
       </div>
 
       {/* Recent Bookings */}
