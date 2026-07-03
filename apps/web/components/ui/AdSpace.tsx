@@ -69,12 +69,38 @@ function AdSlide({
 }) {
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [videoInView, setVideoInView] = useState(false);
 
   const isVideoFile = (url: string | null) => {
     if (!url) return false;
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
     return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
   };
+
+  // Lazy load video: only start loading when container is near viewport
+  useEffect(() => {
+    const container = videoContainerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVideoInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-play when video enters view, pause when it leaves
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoInView) return;
+    video.play().catch(() => {});
+  }, [videoInView]);
 
   const toggleMute = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -141,7 +167,17 @@ function AdSlide({
         </span>
         {isVideo ? (
           <>
-            <video ref={videoRef} src={effectiveUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+            <div ref={videoContainerRef} className="w-full h-full">
+              <video
+                ref={videoRef}
+                src={videoInView ? effectiveUrl : undefined}
+                loop
+                muted
+                playsInline
+                preload="none"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <button
               type="button"
               onClick={toggleMute}
@@ -179,6 +215,49 @@ function AdSlide({
     );
   }
   return null;
+}
+
+/** Lazy‑loading video wrapper for fallback ads. Only loads src when near viewport. */
+function FallbackVideo({ src }: { src: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (inView && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [inView]);
+
+  return (
+    <div ref={containerRef} className="w-full h-full">
+      <video
+        ref={videoRef}
+        src={inView ? src : undefined}
+        loop
+        muted
+        playsInline
+        preload="none"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
 }
 
 export default function AdSpace({
@@ -363,7 +442,7 @@ export default function AdSpace({
             )}>
               {/* Media (image or video) */}
               {ad.mediaType === 'video' && ad.mediaUrl ? (
-                <video src={ad.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                <FallbackVideo src={ad.mediaUrl} />
               ) : ad.mediaUrl ? (
                 <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
               ) : null}
