@@ -4,18 +4,20 @@ import AdSpace from '../ui/AdSpace'
 import Link from 'next/link'
 import { TrendingUp, Zap, Star, Clock, Mail, ArrowRight, Play } from 'lucide-react'
 import { SiTelegram, SiWhatsapp } from '../ui/SocialIcons'
-import LoadMoreArticles from '../ui/LoadMoreArticles'
-import SavedArticlesFeed from '../ui/SavedArticlesFeed'
-import VideoWidget from '../ui/VideoWidget'
 import { SmartImage } from '../ui/SmartImage'
 import { MagazineBentoHero } from '../berita/MagazineBentoHero'
 import { notFound } from 'next/navigation'
 import ScrollAnimate from '../ui/ScrollAnimate'
 import { Container } from '../layout/Container'
-import MarketWidget from '../ui/MarketWidget'
-import PhotoJournalWidget from '../ui/PhotoJournalWidget'
 import { API_URL } from '../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../lib/siteSettings'
+import {
+  LoadMoreArticles,
+  SavedArticlesFeed,
+  MarketWidget,
+  PhotoJournalWidget,
+  VideoWidget,
+} from './LazyWidgets'
 
 // ─────────────────────────────────────────────
 // Types for API-fetched data
