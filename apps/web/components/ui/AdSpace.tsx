@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, type RefObject } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
 import { Volume2, VolumeX } from 'lucide-react';
@@ -8,6 +8,7 @@ import { API_URL } from '../../lib/api';
 import type { AdSlotId } from '../../lib/constants';
 import BillboardShowcase from './BillboardShowcase';
 import InFeedShowcase from './InFeedShowcase';
+import { Container } from '../layout/Container';
 
 interface AdSpaceProps {
   type: AdSlotId;
@@ -311,7 +312,7 @@ export default function AdSpace({
   };
 
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full max-w-[960px] aspect-[4/1] mx-auto rounded-xl overflow-hidden mb-6",
+    HOME_TOP:       "w-full aspect-[4/1] rounded-xl overflow-hidden",
     HOME_FEED_1:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
     HOME_FEED_2:    "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-8",
     ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
@@ -321,6 +322,21 @@ export default function AdSpace({
 
   // Loading state
   if (loading) {
+    if (type === 'HOME_TOP') {
+      return (
+        <section className="py-8 md:py-12">
+          <Container>
+            <div className={cn(
+              "bg-gray-50/50 dark:bg-white/[0.02] animate-pulse border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center relative overflow-hidden",
+              styles[type],
+              className
+            )}>
+              <span className="text-[10px] font-black tracking-widest text-brand-text-muted uppercase">MEMUAT IKLAN...</span>
+            </div>
+          </Container>
+        </section>
+      );
+    }
     return (
       <div className={cn(
         "bg-gray-50/50 dark:bg-white/[0.02] animate-pulse border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center relative overflow-hidden",
@@ -338,30 +354,40 @@ export default function AdSpace({
     if (type === 'HOME_TOP' && fallbackAds.length > 0) {
       const ad = fallbackAds[0];
       return (
-        <div className={cn(
-          "relative overflow-hidden",
-          styles[type],
-          className
-        )}>
-          {/* Media (image or video) */}
-          {ad.mediaType === 'video' && ad.mediaUrl ? (
-            <video src={ad.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-          ) : ad.mediaUrl ? (
-            <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
-          ) : null}
-          {/* Simple overlay with headline */}
-          {ad.headline && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <h3 className="text-white text-center text-lg md:text-2xl font-black">{ad.headline}</h3>
+        <section className="py-8 md:py-12">
+          <Container>
+            <div className={cn(
+              "relative overflow-hidden",
+              styles[type],
+              className
+            )}>
+              {/* Media (image or video) */}
+              {ad.mediaType === 'video' && ad.mediaUrl ? (
+                <video src={ad.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+              ) : ad.mediaUrl ? (
+                <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
+              ) : null}
+              {/* Simple overlay with headline */}
+              {ad.headline && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                  <h3 className="text-white text-center text-lg md:text-2xl font-black">{ad.headline}</h3>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </Container>
+        </section>
       );
     }
 
     // Default static fallback for HOME_TOP when no CMS data
     if (type === 'HOME_TOP') {
-      return <BillboardShowcase site={site || 'pusat'} className={className} />;
+      return (
+        <section className="py-8 md:py-12">
+          <Container>
+            <BillboardShowcase site={site || 'pusat'} className={className} />
+          </Container>
+        </section>
+      );
     }
 
     // In-feed style slots: native content-style showcase
@@ -392,6 +418,41 @@ export default function AdSpace({
   const isSticky = type === 'HOME_TOP' && ads.length > 0 && !isStickyClosed;
   const stickyClasses = isSticky ? 'md:relative fixed bottom-[72px] left-0 right-0 z-30 md:z-auto' : '';
   const stickyBg = isSticky ? 'bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:border-0 md:shadow-none md:bg-transparent' : '';
+
+  // For HOME_TOP: wrap ad in a Container with balanced internal padding (desktop only, sticky handles mobile)
+  const homeTopAdBox = (
+    <>
+      {/* Single ad — render directly (no carousel) */}
+      {!isCarousel ? (
+        <div
+          className={cn("relative overflow-hidden", styles[type], className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          <AdSlide ad={ads[0]} type={type} label={label} onAdClick={handleAdClick} />
+        </div>
+      ) : (
+        /* Multiple ads — carousel */
+        <div
+          className={cn("relative overflow-hidden", styles[type], className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          {ads.map((ad, index) => (
+            <div
+              key={ad.id}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              )}
+            >
+              <AdSlide ad={ad} type={type} label={label} onAdClick={handleAdClick} />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
 
   const adContent = (
     <>
@@ -429,7 +490,41 @@ export default function AdSpace({
     </>
   );
 
-  // Wrap with sticky container for mobile HOME_TOP
+  // HOME_TOP active ad — wrap in section with balanced padding and Container
+  if (type === 'HOME_TOP') {
+    return (
+      <>
+        {/* Desktop/tablet inline block — hidden on mobile when sticky is active */}
+        <section className={cn("py-8 md:py-12", isSticky && "hidden md:block")}>
+          <Container>
+            {homeTopAdBox}
+          </Container>
+        </section>
+
+        {/* Sticky bar — mobile only */}
+        {isSticky && (
+          <div className={cn(stickyClasses, stickyBg, "md:hidden")}>
+            <div className="relative">
+              {adContent}
+              {/* Close button — appears after 5s */}
+              {showCloseBtn && (
+                <button
+                  type="button"
+                  onClick={handleStickyClose}
+                  className="absolute top-1 right-1 z-20 w-6 h-6 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                  aria-label="Tutup iklan"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  // Wrap with sticky container for mobile HOME_TOP (legacy fallback, shouldn't reach here for HOME_TOP)
   if (isSticky) {
     return (
       <div className={cn(stickyClasses, stickyBg)}>

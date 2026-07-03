@@ -388,10 +388,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           </section>
         )}
 
-        {/* ─── AD HOME_TOP — setelah hero agar user disambut konten terlebih dahulu ─── */}
-        <Container className="pt-10 pb-4 md:pt-14 md:pb-8">
-          <AdSpace type="HOME_TOP" />
-        </Container>
+        {/* ─── AD HOME_TOP — setelah hero, spacing dihandle internal oleh AdSpace ─── */}
+        <AdSpace type="HOME_TOP" />
 
         {/* ════════════════════════════════════════════════════════
             ZONA 2 — FOKUS REDAKSI  (Full Width, Grid Asimetris)
@@ -400,7 +398,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             Sidebar: TIDAK ADA — butuh ruang penuh untuk dampak visual
         ════════════════════════════════════════════════════════ */}
         {showFokusRedaksi && (
-          <Container className="py-4 md:py-6">
+          <Container className="pt-2 pb-6 md:pt-0 md:pb-8">
             <ScrollAnimate>
               {/* Section header */}
               <div className="mb-5 flex items-center gap-2">
