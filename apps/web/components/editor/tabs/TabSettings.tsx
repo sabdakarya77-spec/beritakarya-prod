@@ -287,7 +287,7 @@ export function TabSettings() {
           Kredit Foto
         </label>
         <div className="flex items-center rounded-lg border border-panel-border bg-panel-surface overflow-hidden focus-within:border-panel-accent transition-all">
-          <span className="px-3 py-2 text-xs font-bold text-panel-text-secondary bg-panel-surface/50 border-r border-panel-border select-none shrink-0">
+          <span className="px-3 py-2 text-xs font-bold text-panel-text-primary bg-panel-surface/50 border-r border-panel-border select-none shrink-0">
             BeritaKarya/
           </span>
           <input
