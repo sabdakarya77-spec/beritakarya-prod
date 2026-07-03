@@ -195,7 +195,7 @@ export default function MobileArticleTools({
             animate={{ x: 0, opacity: 1, scale: 1 }}
             exit={{ x: -15, opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="fixed left-20 top-1/2 -translate-y-1/2 z-50 w-[15rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            className="fixed left-16 top-1/2 -translate-y-1/2 z-50 w-[13.5rem] rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
           >
             <div className="mb-3 flex items-center justify-between">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-text-muted">
@@ -230,7 +230,7 @@ export default function MobileArticleTools({
             animate={{ x: 0, opacity: 1, scale: 1 }}
             exit={{ x: -15, opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="fixed left-20 top-1/2 -translate-y-1/2 z-50 w-[11.5rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            className="fixed left-16 top-1/2 -translate-y-1/2 z-50 w-[10.5rem] rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3 shadow-[0_15px_40px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
           >
             <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted text-left">
               Ukuran Teks
@@ -268,7 +268,7 @@ export default function MobileArticleTools({
             type="button"
             onClick={() => setIsCollapsed(false)}
             aria-label="Tampilkan alat artikel"
-            className="fixed left-0 top-1/2 -translate-y-1/2 z-40 flex h-14 w-6 items-center justify-center rounded-r-2xl border-y border-r border-white/10 bg-[rgba(7,15,33,0.85)] text-gray-300 shadow-md backdrop-blur-xl md:hidden"
+            className="fixed left-0 top-1/2 -translate-y-1/2 z-40 flex h-12 w-5 items-center justify-center rounded-r-2xl border-y border-r border-white/10 bg-[rgba(7,15,33,0.85)] text-gray-300 shadow-md backdrop-blur-xl md:hidden"
           >
             <ChevronRight size={14} className="animate-pulse" />
           </motion.button>
@@ -284,7 +284,7 @@ export default function MobileArticleTools({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -60, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
+            className="fixed left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2 rounded-[1.5rem] border border-white/10 bg-[rgba(7,15,33,0.8)] p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-xl md:hidden"
             role="toolbar"
             aria-label="Alat artikel"
           >
@@ -298,9 +298,9 @@ export default function MobileArticleTools({
               }}
               aria-label="Sembunyikan alat artikel"
               title="Sembunyikan"
-              className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white active:scale-95 transition-all"
+              className="flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white active:scale-95 transition-all"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={14} />
             </button>
 
             {/* Slim divider line */}
@@ -314,13 +314,13 @@ export default function MobileArticleTools({
               aria-label="Bagikan artikel"
               title="Bagikan artikel"
               className={cn(
-                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                'flex h-9 w-9 items-center justify-center rounded-2xl border text-gray-300 transition-all',
                 isShareSheetOpen
                   ? 'border-brand-red/40 bg-brand-red text-white'
                   : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
               )}
             >
-              <Share2 size={16} />
+              <Share2 size={14} />
             </button>
 
             {/* Font Size button */}
@@ -334,13 +334,13 @@ export default function MobileArticleTools({
               aria-label="Atur ukuran teks"
               title="Atur ukuran teks"
               className={cn(
-                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                'flex h-9 w-9 items-center justify-center rounded-2xl border text-gray-300 transition-all',
                 isFontPanelOpen
                   ? 'border-brand-red/40 bg-brand-red text-white'
                   : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
               )}
             >
-              <Type size={16} />
+              <Type size={14} />
             </button>
 
             {/* Bookmark button */}
@@ -351,13 +351,13 @@ export default function MobileArticleTools({
               aria-label={isSaved ? 'Hapus dari artikel tersimpan' : 'Simpan artikel'}
               title={isSaved ? 'Tersimpan' : 'Simpan artikel'}
               className={cn(
-                'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+                'flex h-9 w-9 items-center justify-center rounded-2xl border text-gray-300 transition-all',
                 isSaved
                   ? 'border-brand-red/40 bg-brand-red text-white'
                   : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white active:scale-95'
               )}
             >
-              <Bookmark size={16} className={isSaved ? 'fill-current' : undefined} />
+              <Bookmark size={14} className={isSaved ? 'fill-current' : undefined} />
             </button>
           </motion.div>
         )}

@@ -119,20 +119,20 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
 
   return (
     <div ref={rootRef} className={cn('relative z-40 hidden md:block', className)}>
-      <div className="flex w-[4rem] flex-col items-center gap-2 rounded-[1.75rem] border border-white/10 bg-[rgba(7,15,33,0.78)] p-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+      <div className="flex w-[3.25rem] flex-col items-center gap-1.5 rounded-[1.5rem] border border-white/10 bg-[rgba(7,15,33,0.78)] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setActivePanel((current) => (current === 'font' ? null : 'font'))}
           aria-label="Atur ukuran teks"
           title={`Ukuran teks: ${currentFontLabel}`}
           className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+            'flex h-9 w-9 items-center justify-center rounded-2xl border text-gray-300 transition-all',
             activePanel === 'font'
               ? 'border-brand-red/40 bg-brand-red/10 text-brand-red'
               : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white'
           )}
         >
-          <Type size={16} />
+          <Type size={14} />
         </button>
 
         <button
@@ -140,9 +140,9 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
           onClick={handleScrollToComments}
           aria-label="Lihat komentar"
           title="Lihat komentar"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-300 transition-all hover:border-brand-red/30 hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-300 transition-all hover:border-brand-red/30 hover:text-white"
         >
-          <MessageCircle size={16} />
+          <MessageCircle size={14} />
         </button>
 
         <button
@@ -151,13 +151,13 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
           aria-label="Bagikan artikel"
           title="Bagikan artikel"
           className={cn(
-            'flex h-11 w-11 items-center justify-center rounded-2xl border text-gray-300 transition-all',
+            'flex h-9 w-9 items-center justify-center rounded-2xl border text-gray-300 transition-all',
             activePanel === 'share'
               ? 'border-brand-red/40 bg-brand-red/10 text-brand-red'
               : 'border-white/10 bg-white/[0.03] hover:border-brand-red/30 hover:text-white'
           )}
         >
-          <Share2 size={16} />
+          <Share2 size={14} />
         </button>
 
         <button
@@ -165,9 +165,9 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
           onClick={handlePrint}
           aria-label="Cetak artikel"
           title="Cetak artikel"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-300 transition-all hover:border-brand-red/30 hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-gray-300 transition-all hover:border-brand-red/30 hover:text-white"
         >
-          <Printer size={16} />
+          <Printer size={14} />
         </button>
       </div>
 
@@ -178,7 +178,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -6, scale: 0.98 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute left-full top-0 z-30 ml-4 w-[12.25rem] rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+            className="absolute left-full top-0 z-30 ml-3 w-[11rem] rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
           >
             <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
               Ukuran Teks
@@ -211,7 +211,7 @@ export default function ArticleFloatingTools({ title, url, className }: ArticleF
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -6, scale: 0.98 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="absolute left-full top-1/2 z-30 ml-4 w-[17rem] -translate-y-1/2 rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+            className="absolute left-full top-1/2 z-30 ml-3 w-[15rem] -translate-y-1/2 rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,33,0.95)] p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
           >
             <div className="px-1 pb-2.5 pt-1">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted">
