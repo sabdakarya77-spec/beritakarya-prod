@@ -181,8 +181,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <aside className="hidden md:flex w-64 flex-shrink-0 flex-col border-r border-gray-200/80 bg-white/95 dark:border-white/5 dark:bg-[#050a15]">
             <div className="border-b border-gray-100 px-6 py-6 dark:border-white/5">
               <Link href={articleListHref} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-red text-sm font-black text-white shadow-lg shadow-brand-red/30">
-                  BK
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-red shadow-lg shadow-brand-red/30 overflow-hidden">
+                  <img src="/logos/logo.png" alt="BeritaKarya" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
@@ -293,8 +293,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo Section */}
         <div className="p-6 border-b border-white/5">
           <Link href={`/${site}/dashboard`} className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-brand-red rounded-lg flex items-center justify-center shadow-lg shadow-brand-red/30">
-              <span className="text-white text-sm font-black">BK</span>
+            <div className="w-9 h-9 bg-brand-red rounded-lg flex items-center justify-center shadow-lg shadow-brand-red/30 overflow-hidden">
+              <img src="/logos/logo.png" alt="BeritaKarya" className="w-full h-full object-contain" />
             </div>
             {!isSidebarCollapsed && (
               <div className="flex flex-col">
@@ -442,8 +442,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-brand-red rounded-md flex items-center justify-center">
-              <span className="text-white text-[10px] font-black">BK</span>
+            <div className="w-7 h-7 bg-brand-red rounded-md flex items-center justify-center overflow-hidden">
+              <img src="/logos/logo.png" alt="BeritaKarya" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-sm font-black uppercase tracking-tight">Admin</h2>
           </div>
