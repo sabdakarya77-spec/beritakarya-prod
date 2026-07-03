@@ -27,7 +27,6 @@ import {
   Eye as EyeIcon,
   Download,
   FileText,
-  Lock as LockIcon,
 } from 'lucide-react'
 import { api } from '../../../../../lib/api'
 import { useAuthStore } from '../../../../../store/authStore'
@@ -36,7 +35,7 @@ import { LegalRichTextEditor } from '../../../../../components/dashboard/setting
 import { useRequireRole } from '../../../../../hooks/useRequireRole'
 import axios from 'axios'
 
-type SettingsTab = 'basic' | 'contact' | 'google' | 'info' | 'trending' | 'wapimred'
+type SettingsTab = 'basic' | 'contact' | 'google' | 'info' | 'trending'
 type LegalFieldKey =
   | 'aboutUs'
   | 'codeOfEthics'
@@ -92,19 +91,6 @@ export default function SettingsPage() {
     gscSiteUrl: ''
   })
 
-  const [wapimredSettings, setWapimredSettings] = useState({
-    canPublish: false,
-    canSchedule: false,
-    canForcePublish: false,
-    canDeletePublished: false,
-    canManageCategories: false,
-    canTransferUser: false,
-    canDeleteUser: false,
-    notifyPimredOnSubmit: true,
-    notifyPimredOnApprove: true
-  })
-  const [wapimredSaving, setWapimredSaving] = useState(false)
-  
   const [originalSettings, setOriginalSettings] = useState<typeof settings | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [activeTab, setActiveTab] = useState<SettingsTab>('basic')
@@ -235,32 +221,8 @@ export default function SettingsPage() {
     }
   }
 
-  const fetchWapimredSettings = async () => {
-    try {
-      const { data } = await api.get('/sites/wapimred-settings')
-      if (data.success) {
-        setWapimredSettings({
-          canPublish: data.data.canPublish ?? false,
-          canSchedule: data.data.canSchedule ?? false,
-          canForcePublish: data.data.canForcePublish ?? false,
-          canDeletePublished: data.data.canDeletePublished ?? false,
-          canManageCategories: data.data.canManageCategories ?? false,
-          canTransferUser: data.data.canTransferUser ?? false,
-          canDeleteUser: data.data.canDeleteUser ?? false,
-          notifyPimredOnSubmit: data.data.notifyPimredOnSubmit ?? true,
-          notifyPimredOnApprove: data.data.notifyPimredOnApprove ?? true
-        })
-      }
-    } catch (err) {
-      console.error('Failed to fetch wapimred settings', err)
-    }
-  }
-
   useEffect(() => {
     fetchSettings()
-    if (user?.role === 'superadmin') {
-      fetchWapimredSettings()
-    }
   }, [site])
 
   const handleSave = async () => {
@@ -336,9 +298,8 @@ export default function SettingsPage() {
     { id: 'google', label: 'Google Search API', icon: ShieldAlert, desc: 'Konfigurasi otomatis indeks artikel Google' },
     { id: 'info', label: 'Halaman Legal', icon: BookOpen, desc: 'Tentang Kami, Kode Etik, Redaksi, Iklan, Privasi, Syarat' },
     { id: 'trending', label: 'Topik Hangat', icon: Flame, desc: 'Manajemen kata kunci trending di navigasi depan' },
-    { id: 'wapimred', label: 'Hak Akses Wapimred', icon: LockIcon, desc: 'Atur wewenang Wapimred: terbitkan, jadwalkan, hapus post' }
   ] as const
-  const tabs = allTabs.filter((t) => isSuperadmin || (t.id !== 'google' && t.id !== 'info' && t.id !== 'wapimred'))
+  const tabs = allTabs.filter((t) => isSuperadmin || (t.id !== 'google' && t.id !== 'info'))
 
   const contrastAdvice = getContrastAdvice(settings.appearance.primaryColor)
 
@@ -1177,137 +1138,6 @@ Penasihat Hukum:
                       <p className="text-xs text-gray-400 mt-1">Situs depan akan menggunakan topik default pusat</p>
                     </div>
                   )}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 6: HAK AKSES WAPIMRED */}
-            {activeTab === 'wapimred' && isSuperadmin && (
-              <div className="space-y-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      <LockIcon size={18} className="text-brand-red" /> Hak Akses Wapimred
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Atur wewenang Wapimred di situs ini. Perubahan berlaku instan tanpa restart.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 flex items-start gap-3">
-                  <AlertCircle size={18} className="text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                    Saat toggle <strong>OFF</strong>, Wapimred tidak bisa menjalankan aksi tersebut. Tombol terkait akan dinonaktifkan di dashboard.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    { key: 'canPublish' as const, label: 'Boleh Terbitkan Artikel', desc: 'Wapimred bisa menerbitkan artikel yang sudah disetujui (approved) langsung ke publik.' },
-                    { key: 'canSchedule' as const, label: 'Boleh Jadwalkan Artikel', desc: 'Wapimred bisa menjadwalkan artikel untuk terbit otomatis pada waktu tertentu.' },
-                    { key: 'canForcePublish' as const, label: 'Boleh Force-Publish', desc: 'Wapimred bisa menerbitkan artikel dari status apapun (skip workflow). Berisiko tinggi.' },
-                    { key: 'canDeletePublished' as const, label: 'Boleh Hapus Post Terbit', desc: 'Wapimred bisa menghapus artikel yang sudah tayang di publik. Berisiko tinggi.' },
-                    { key: 'canManageCategories' as const, label: 'Boleh Kelola Kategori', desc: 'Wapimred bisa membuat, mengedit, dan menghapus kategori di situs ini.' },
-                    { key: 'canTransferUser' as const, label: 'Boleh Pindah Cabang User', desc: 'Wapimred bisa memindahkan user ke situs lain.' },
-                    { key: 'canDeleteUser' as const, label: 'Boleh Hapus User', desc: 'Wapimred bisa menghapus (soft-delete) user di situs ini.' },
-                  ].map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5"
-                    >
-                      <div className="flex-1 mr-4">
-                        <p className="text-sm font-bold text-gray-900 dark:text-white">{item.label}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.desc}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setWapimredSettings({
-                            ...wapimredSettings,
-                            [item.key]: !wapimredSettings[item.key]
-                          })
-                        }
-                        className={`px-5 py-2.5 text-sm font-medium border rounded-lg transition-all ${
-                          wapimredSettings[item.key]
-                            ? 'bg-emerald-500 text-white border-emerald-600'
-                            : 'bg-gray-100 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700'
-                        }`}
-                      >
-                        {wapimredSettings[item.key] ? 'AKTIF' : 'NONAKTIF'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <hr className="border-gray-200 dark:border-gray-800" />
-
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-1">
-                    <AlertCircle size={14} className="text-brand-red" /> Notifikasi Pimred
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    Atur notifikasi yang dikirim ke Pimred saat Wapimred melakukan aksi editorial.
-                  </p>
-                  <div className="space-y-4">
-                    {[
-                      { key: 'notifyPimredOnSubmit' as const, label: 'Notif saat artikel masuk antrian', desc: 'Pimred mendapat notifikasi setiap ada artikel baru yang diajukan penulis.' },
-                      { key: 'notifyPimredOnApprove' as const, label: 'Notif saat Wapimred approve artikel', desc: 'Pimred mendapat notifikasi saat Wapimred menyetujui artikel (siap terbit).' },
-                    ].map((item) => (
-                      <div
-                        key={item.key}
-                        className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5"
-                      >
-                        <div className="flex-1 mr-4">
-                          <p className="text-sm font-bold text-gray-900 dark:text-white">{item.label}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.desc}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setWapimredSettings({
-                              ...wapimredSettings,
-                              [item.key]: !wapimredSettings[item.key]
-                            })
-                          }
-                          className={`px-5 py-2.5 text-sm font-medium border rounded-lg transition-all ${
-                            wapimredSettings[item.key]
-                              ? 'bg-emerald-500 text-white border-emerald-600'
-                              : 'bg-gray-100 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700'
-                          }`}
-                        >
-                          {wapimredSettings[item.key] ? 'AKTIF' : 'NONAKTIF'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={async () => {
-                      setWapimredSaving(true)
-                      try {
-                        const { data } = await api.patch('/sites/wapimred-settings', wapimredSettings)
-                        if (data.success) {
-                          setWapimredSettings(data.data)
-                          setMessage({ type: 'success', text: 'Hak akses Wapimred berhasil diperbarui!' })
-                        }
-                      } catch (err: unknown) {
-                        setMessage({
-                          type: 'error',
-                          text: (axios.isAxiosError(err) ? err.response?.data?.error?.message : undefined) || 'Gagal menyimpan pengaturan'
-                        })
-                      } finally {
-                        setWapimredSaving(false)
-                      }
-                    }}
-                    disabled={wapimredSaving}
-                    className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 text-sm font-medium transition-all rounded-lg shadow-lg disabled:opacity-50"
-                  >
-                    {wapimredSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-                    {wapimredSaving ? 'Menyimpan...' : 'Simpan Pengaturan Wapimred'}
-                  </button>
                 </div>
               </div>
             )}

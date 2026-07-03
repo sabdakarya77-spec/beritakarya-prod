@@ -147,6 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: 'Superadmin',
       items: [
         { name: 'Manajemen Situs', href: `/${site}/dashboard/admin`, icon: Settings, roles: ['superadmin'] },
+        { name: 'Hak Akses', href: `/${site}/dashboard/admin/wapimred-permissions`, icon: Lock, roles: ['superadmin'] },
         { name: 'AI Dashboard', href: `/${site}/dashboard/admin/ai-usage`, icon: Activity, roles: ['superadmin'] },
         { name: 'Setelan Iklan', href: `/${site}/dashboard/ads/payment-config`, icon: Settings, roles: ['superadmin'] },
       ]
