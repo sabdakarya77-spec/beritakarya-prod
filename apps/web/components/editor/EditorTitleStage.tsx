@@ -58,7 +58,7 @@ export function EditorTitleStage({ isFocusMode = false }: EditorTitleStageProps)
           onChange={(e) => setLocalTitle(e.target.value)}
           placeholder="Ketik judul di sini..."
           className={`
-            w-full text-3xl sm:text-4xl md:text-5xl font-black tracking-tight
+            w-full text-3xl sm:text-4xl md:text-5xl font-serif font-black tracking-tight
             bg-transparent border-none outline-none
             text-gray-900 dark:text-white
             placeholder:text-gray-300 dark:placeholder:text-gray-600

@@ -25,6 +25,8 @@ export interface EditorState {
   categoryIds: string[]
   tags: string[]
   featuredImage: string
+  featuredImageCredit: string
+  coverLayout: 'left-bottom' | 'left-center' | 'center'
   isBreaking: boolean
   isExclusive: boolean
   isFeatured: boolean
@@ -108,6 +110,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   categoryIds: [],
   tags: [],
   featuredImage: '',
+  featuredImageCredit: '',
+  coverLayout: 'left-bottom',
   isBreaking: false,
   isExclusive: false,
   isFeatured: false,
@@ -356,6 +360,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         categoryIds,
         tags: article.tags || [],
         featuredImage: article.featuredImage || '',
+        featuredImageCredit: article.featuredImageCredit || '',
+        coverLayout: article.coverLayout || 'left-bottom',
         isBreaking: article.isBreaking || false,
         isExclusive: article.isExclusive || false,
         isFeatured: article.isFeatured || false,
@@ -392,6 +398,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         categoryIds: s.categoryIds,
         tags: s.tags,
         featuredImage: s.featuredImage || undefined,
+        featuredImageCredit: s.featuredImageCredit || undefined,
+        coverLayout: s.coverLayout || undefined,
         isBreaking: s.isBreaking,
         isExclusive: s.isExclusive,
         isFeatured: s.isFeatured
@@ -486,7 +494,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     excerpt: '',
     saving: false, saveError: null, lastSaved: null, isDirty: false, isLoading: false, undoStack: [],
     metaTitle: '', metaDescription: '', categoryIds: [], tags: [],
-    featuredImage: '', isBreaking: false, isExclusive: false, isFeatured: false,
+    featuredImage: '', featuredImageCredit: '', coverLayout: 'left-bottom', isBreaking: false, isExclusive: false, isFeatured: false,
     isSidebarOpen: false, activeTab: 'content', contentType: 'article'
   }),
 

@@ -68,7 +68,7 @@ export async function findArticlesBySite(
         id: true, title: true, slug: true, excerpt: true, status: true,
         siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
         isBreaking: true, isExclusive: true, isFeatured: true,
-        featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+        featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
         viewCount: true, wordCount: true, readingTimeMin: true,
         blocks: true, tags: true, metaTitle: true, metaDescription: true,
         contentType: true,
@@ -104,7 +104,7 @@ export async function findArticlesByIds(
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
@@ -141,7 +141,7 @@ export async function findArticleById(id: string, siteId: string) {
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
@@ -158,7 +158,7 @@ export async function findArticleBySlug(slug: string, siteId: string) {
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
@@ -175,7 +175,7 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
@@ -192,6 +192,8 @@ export async function createArticle(data: {
   metaTitle?: string; metaDescription?: string
   isBreaking?: boolean; isExclusive?: boolean; isFeatured?: boolean;
   featuredImage?: string;
+  featuredImageCredit?: string | null;
+  coverLayout?: string;
 }) {
   const { categoryIds, ...rest } = data
   return prisma.article.create({
@@ -208,7 +210,7 @@ export async function createArticle(data: {
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
@@ -229,6 +231,7 @@ export async function updateArticle(
     scheduledAt: Date | null;
     reviewNotes: string; reviewedBy: string; reviewedAt: Date;
     featuredImage: string; featuredImageBlur?: string | null; featuredImageColor?: string | null;
+    featuredImageCredit?: string | null; coverLayout?: string;
   }>
 ) {
   return prisma.article.update({
@@ -238,7 +241,7 @@ export async function updateArticle(
       id: true, title: true, slug: true, excerpt: true, status: true,
       siteId: true, authorId: true, publishedAt: true, createdAt: true, updatedAt: true,
       isBreaking: true, isExclusive: true, isFeatured: true,
-      featuredImage: true, featuredImageBlur: true, featuredImageColor: true,
+      featuredImage: true, featuredImageBlur: true, featuredImageColor: true, featuredImageCredit: true, coverLayout: true,
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,

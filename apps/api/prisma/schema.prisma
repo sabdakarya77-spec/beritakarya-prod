@@ -282,9 +282,11 @@ model Article {
   // SEO
   metaTitle          String?
   metaDescription    String?
-  featuredImage      String? // URL gambar utama
-  featuredImageBlur  String? // Base64 blur hash (10x10 webp)
-  featuredImageColor String? // Hex dominant color
+  featuredImage       String? // URL gambar utama
+  featuredImageBlur   String? // Base64 blur hash (10x10 webp)
+  featuredImageColor  String? // Hex dominant color
+  featuredImageCredit String? // Kredit foto (contoh: "Redaksi/Fotografer" atau "Getty Images")
+  coverLayout         String?  @default("left-bottom") // left-bottom | left-center | center
 
   // Article Metadata
   wordCount      Int? // Jumlah kata

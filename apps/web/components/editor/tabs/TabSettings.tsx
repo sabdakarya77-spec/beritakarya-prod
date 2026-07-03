@@ -6,7 +6,7 @@ import { CATEGORIES_CONFIG, CategoryItem } from '../../../lib/constants'
 import { api } from '../../../lib/api'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
-import { Image as ImageIconIcon, Tag, Zap, Star, Sparkles, ChevronDown, Upload, X, FolderOpen, FileText, Camera, Video } from 'lucide-react'
+import { Image as ImageIconIcon, Tag, Zap, Star, Sparkles, ChevronDown, Upload, X, FolderOpen, FileText, Camera, Video, Layout } from 'lucide-react'
 import { useImageUpload } from '../../../hooks/useImageUpload'
 import { cn } from '../../../lib/utils'
 
@@ -21,6 +21,8 @@ export function TabSettings() {
     categoryIds,
     tags,
     featuredImage,
+    featuredImageCredit,
+    coverLayout,
     isBreaking,
     isExclusive,
     isFeatured,
@@ -276,6 +278,53 @@ export function TabSettings() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Cover Credit (Kredit Foto) */}
+      {featuredImage && (
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">
+            <Camera size={12} />
+            Kredit Foto
+          </label>
+          <input
+            type="text"
+            value={featuredImageCredit}
+            onChange={(e) => updateArticleData({ featuredImageCredit: e.target.value })}
+            placeholder="Contoh: Redaksi/Nama Fotografer"
+            className="w-full px-3 py-2 rounded-lg border border-panel-border bg-panel-surface text-xs font-medium text-panel-text-primary focus:outline-none focus:border-panel-accent transition-all placeholder-panel-text-muted"
+          />
+        </div>
+      )}
+
+      {/* Layout Jumbotron */}
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-panel-text-secondary">
+          <Layout size={12} />
+          Layout Jumbotron
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            { value: 'left-bottom', label: 'Kiri Bawah', icon: '◧' },
+            { value: 'left-center', label: 'Kiri Tengah', icon: '◨' },
+            { value: 'center', label: 'Tengah', icon: '⊡' }
+          ] as const).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => updateArticleData({ coverLayout: option.value })}
+              className={cn(
+                "flex flex-col items-center gap-1 px-2 py-2 rounded-lg border text-[10px] font-semibold transition-all",
+                coverLayout === option.value
+                  ? "border-panel-accent bg-panel-accent/10 text-panel-accent"
+                  : "border-panel-border bg-panel-surface text-panel-text-secondary hover:border-panel-accent/50"
+              )}
+            >
+              <span className="text-lg leading-none">{option.icon}</span>
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Category Multi-Select (maks 3) */}

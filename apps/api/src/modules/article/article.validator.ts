@@ -120,6 +120,8 @@ export const createArticleSchema = z.object({
   isExclusive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   featuredImage: z.string().optional(),
+  featuredImageCredit: z.string().max(100).optional(),
+  coverLayout: z.enum(['left-bottom', 'left-center', 'center']).optional(),
 }).transform((data) => {
   // Konsolidasikan categoryId (legacy) dan categoryIds (baru)
   const categoryIds = [...data.categoryIds]
@@ -157,6 +159,8 @@ export const updateArticleSchema = z.object({
   isExclusive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   featuredImage: z.string().optional(),
+  featuredImageCredit: z.string().max(100).optional(),
+  coverLayout: z.enum(['left-bottom', 'left-center', 'center']).optional(),
   reviewNotes: z.string().optional(),
   reviewedBy: z.string().optional(),
 }).transform((data) => {

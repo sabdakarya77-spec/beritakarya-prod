@@ -162,6 +162,8 @@ export async function createArticle(
     isExclusive?: boolean;
     isFeatured?: boolean;
     featuredImage?: string;
+    featuredImageCredit?: string;
+    coverLayout?: string;
   },
   user: JWTPayload, siteId: string
 ) {
@@ -222,7 +224,9 @@ export async function createArticle(
       isBreaking: input.isBreaking ?? false,
       isExclusive: input.isExclusive ?? false,
       isFeatured: input.isFeatured ?? false,
-      featuredImage: input.featuredImage ?? ''
+      featuredImage: input.featuredImage ?? '',
+      featuredImageCredit: input.featuredImageCredit ?? null,
+      coverLayout: input.coverLayout ?? 'left-bottom'
     })
 
     await repo.createAuditLog({

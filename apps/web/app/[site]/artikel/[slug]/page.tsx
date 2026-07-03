@@ -238,13 +238,28 @@ export default async function ArticlePage({ params }: Props) {
               </div>
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
               <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+
+              {/* Cover Credit */}
+              {article.featuredImageCredit && (
+                <div className="absolute bottom-3 right-3 z-10 max-w-[220px] text-right">
+                  <p className="text-[10px] font-sans uppercase tracking-[0.12em] text-white/70 drop-shadow leading-tight">
+                    {article.featuredImageCredit}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Text Overlay / Metadata Container */}
             {/* Absolute positioning on desktop, relative flow with background on mobile */}
-            <div className="relative md:absolute md:inset-0 md:flex md:items-end bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0">
+            <div className={cn(
+              "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0",
+              article.coverLayout === 'center' ? 'md:items-center' : 'md:items-end'
+            )}>
               <Container>
-                <div className="max-w-4xl md:pb-12">
+                <div className={cn(
+                  "max-w-4xl",
+                  article.coverLayout === 'center' ? 'md:mx-auto md:text-center' : 'md:pb-12'
+                )}>
                   <div className="flex flex-wrap items-center gap-2.5 mb-4">
                     {badgeVariant && (
                       <EditorialBadge
@@ -264,9 +279,15 @@ export default async function ArticlePage({ params }: Props) {
                     </span>
                   </div>
 
-                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-sans font-extrabold text-white leading-[1.1] tracking-tight mb-5 md:mb-6 drop-shadow-lg">
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-extrabold text-white leading-[1.1] tracking-tight mb-5 md:mb-6 drop-shadow-lg">
                     {article.title}
                   </h1>
+
+                  {article.excerpt && (
+                    <p className="text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl line-clamp-3 md:line-clamp-none">
+                      {article.excerpt}
+                    </p>
+                  )}
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
                     <div className="flex items-center gap-3">
@@ -319,7 +340,7 @@ export default async function ArticlePage({ params }: Props) {
                     {coverImageCaption}
                   </p>
                   <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-brand-text-muted shrink-0">
-                    Foto / Dokumentasi Redaksi
+                    {article.featuredImageCredit || 'Foto / Dokumentasi Redaksi'}
                   </span>
                 </div>
               </Container>
