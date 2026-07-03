@@ -206,6 +206,11 @@ describe('publishArticle', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as unknown as User)
+    vi.mocked(prisma.site.findUnique).mockResolvedValue({
+      id: 'bandung',
+      domain: 'bandung.beritakarya.co',
+      wapimredSettings: { canPublish: true, canSchedule: true, canForcePublish: true }
+    } as any)
     vi.mocked(repo.getNextVersionNumber).mockResolvedValue(1)
     vi.mocked(repo.createVersion).mockResolvedValue({ id: 'v-1' } as unknown as CreateVersionReturn)
   })
