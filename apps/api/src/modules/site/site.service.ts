@@ -423,7 +423,8 @@ export class SiteService {
       trendingTopics: site.trendingTopics,
       googleIndexingConfig: site.googleIndexingConfig,
       ga4PropertyId: site.ga4PropertyId,
-      gscSiteUrl: site.gscSiteUrl
+      gscSiteUrl: site.gscSiteUrl,
+      wapimredSettings: site.wapimredSettings
     }
   }
 
@@ -457,7 +458,7 @@ export class SiteService {
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
       'socialLinks', 'appearance', 'trendingTopics',
-      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl'
+      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl', 'wapimredSettings'
     ]
 
     for (const field of allowedFields) {
@@ -589,6 +590,68 @@ export class SiteService {
     })
 
     return updatedUser
+  }
+
+  /**
+   * GET wapimred settings for a site.
+   * Returns defaults if not yet set.
+   */
+  async getWapimredSettings(siteId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { wapimredSettings: true }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const defaults = {
+      canPublish: false,
+      canSchedule: false,
+      canForcePublish: false,
+      canDeletePublished: false
+    }
+
+    const settings = (site.wapimredSettings as Record<string, boolean>) || {}
+    return { ...defaults, ...settings }
+  }
+
+  /**
+   * UPDATE wapimred settings for a site (superadmin-only).
+   * Merges with existing settings.
+   */
+  async updateWapimredSettings(siteId: string, data: Record<string, boolean>, actorUserId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished']
+    const filtered: Record<string, boolean> = {}
+    for (const key of allowedKeys) {
+      if (data[key] !== undefined) {
+        filtered[key] = data[key]
+      }
+    }
+
+    const current = (site.wapimredSettings as Record<string, boolean>) || {}
+    const merged = { ...current, ...filtered }
+
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { wapimredSettings: merged }
+    })
+
+    await this.logAudit(actorUserId, 'site.wapimred_settings_updated', {
+      siteId,
+      changes: filtered
+    })
+
+    return merged
   }
 
   private async logAudit(

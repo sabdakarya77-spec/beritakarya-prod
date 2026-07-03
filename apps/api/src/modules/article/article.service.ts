@@ -290,7 +290,7 @@ export async function updateArticle(
     submitted: ['draft', 'approved', 'rejected', 'review', 'revision'],
     review: ['revision', 'approved', 'rejected'],
     revision: ['submitted', 'draft'],
-    approved: ['published', 'scheduled', 'draft'],
+    approved: ['published', 'scheduled', 'draft', 'revision'],
     scheduled: ['published', 'draft'],
     published: ['archived', 'draft'],
     archived: ['published', 'draft'],
@@ -489,6 +489,21 @@ export async function publishArticle(
 
   if (!['superadmin', 'wapimred'].includes(user.role)) {
     throw new AppError('Akses ditolak: Hanya Wapimred dan Superadmin yang dapat mem-publish post', 403)
+  }
+
+  // Cek toggle wapimred_can_publish dari site settings
+  if (user.role === 'wapimred') {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { wapimredSettings: true }
+    })
+    const wapimredSettings = (site?.wapimredSettings as Record<string, boolean>) || {}
+    if (!wapimredSettings.canPublish) {
+      throw new AppError(
+        'Wapimred tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.',
+        403
+      )
+    }
   }
 
   assertCanPublish(article, user, options?.forcePublish)

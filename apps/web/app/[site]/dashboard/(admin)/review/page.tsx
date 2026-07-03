@@ -472,14 +472,27 @@ export default function ReviewQueuePage() {
                           </>
                         )}
                         {activeTab === 'approved' && (
-                          <button
-                            onClick={() => handleAction(article.id, 'publish')}
-                            disabled={!!actionLoading}
-                            className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
-                          >
-                            {actionLoading === article.id + 'publish' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-                            {getPrimaryActionLabel()}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleAction(article.id, 'publish')}
+                              disabled={!!actionLoading}
+                              className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
+                            >
+                              {actionLoading === article.id + 'publish' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
+                              {getPrimaryActionLabel()}
+                            </button>
+                            <button
+                              onClick={() => handleAction(article.id, 'request_revision')}
+                              disabled={!!actionLoading}
+                              className="flex items-center justify-center gap-1.5 px-2.5 md:px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-orange-100 transition-all disabled:opacity-50"
+                            >
+                              {actionLoading === article.id + 'request_revision'
+                                ? <Loader2 size={12} className="animate-spin" />
+                                : <MessageSquare size={12} />
+                              }
+                              Revisi
+                            </button>
+                          </>
                         )}
                         {activeTab === 'revision' && (
                           <Link

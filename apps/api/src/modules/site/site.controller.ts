@@ -16,6 +16,14 @@ siteRouter.patch('/settings',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin', 'wapimred']),
   asyncHandler(updateSiteSettings))
+siteRouter.get('/wapimred-settings',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred']),
+  asyncHandler(getWapimredSettings))
+siteRouter.patch('/wapimred-settings',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin']),
+  asyncHandler(updateWapimredSettings))
 siteRouter.post('/',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(createSite))
@@ -169,6 +177,57 @@ export async function updateSiteSettings(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'SITE_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/sites/wapimred-settings
+ * Get wapimred permission settings for current site
+ */
+export async function getWapimredSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+
+    const settings = await siteService.getWapimredSettings(siteId)
+    res.json({ success: true, data: settings })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'WAPIMRED_SETTINGS_FETCH_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * PATCH /api/v1/sites/wapimred-settings
+ * Update wapimred permission settings (superadmin-only)
+ */
+export async function updateWapimredSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+
+    const actorUserId = req.user!.userId
+    const settings = await siteService.updateWapimredSettings(siteId, req.body, actorUserId)
+    res.json({ success: true, data: settings })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'WAPIMRED_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }

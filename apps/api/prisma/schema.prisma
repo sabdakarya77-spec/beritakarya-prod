@@ -66,6 +66,7 @@ model Site {
   appearance           Json?     @default("{\"primaryColor\":\"#e11d48\"}")
   trendingTopics       Json?     @default("[]")
   googleIndexingConfig Json?     @default("{}")
+  wapimredSettings     Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false}")
   ga4PropertyId        String?   // e.g. "properties/123456789"
   gscSiteUrl           String?   // e.g. "sc-domain:beritakarya.co" or "https://beritakarya.co/"
   deletedAt            DateTime?
