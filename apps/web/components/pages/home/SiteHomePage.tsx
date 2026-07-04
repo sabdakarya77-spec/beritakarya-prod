@@ -223,11 +223,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     : articlesList.slice(0, 8)
 
   // DEBUG — hapus setelah selesai debug
-  // Cek: apakah articlesList benar2 punya semua artikel?
-  const uniqueApiIds = new Set(articlesList.map((a: HomeArticle) => a.id)).size
   const debugInfo = {
     apiTotal: articlesList.length,
-    uniqueApiIds,
+    uniqueIds: new Set(articlesList.map((a: HomeArticle) => a.id)).size,
     hero: heroArticles.length,
     fokus: fokusRedaksi.length,
     feedFeatured: feedFeatured.length,
@@ -238,8 +236,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     photo: photoJournal.length,
     video: videoStories.length,
     trending: trending.length,
-    // Hitung: sisa artikel yang tidak masuk zona manapun
-    unaccounted: articlesList.length - heroArticles.length - fokusRedaksi.length - feedArticles.length - editorChoice.length - opinionArticles.length - photoJournal.length - videoStories.length,
+    totalUsed: heroArticles.length + fokusRedaksi.length + feedArticles.length + editorChoice.length + opinionArticles.length + photoJournal.length + videoStories.length,
   }
 
   // ── Popular untuk fallback trending interstitial ──

@@ -64,20 +64,12 @@ export function FeedSection({
 
       {/* DEBUG — hapus setelah selesai */}
       <div className="mb-4 rounded-lg bg-yellow-100 p-3 text-xs font-mono dark:bg-yellow-900/30">
-        <strong>DEBUG Distribution:</strong><br />
-        API total: {debugInfo?.apiTotal ?? '?'} |
-        Hero: {debugInfo?.hero ?? '?'} |
-        Fokus: {debugInfo?.fokus ?? '?'} |
-        FeedFeatured: {debugInfo?.feedFeatured ?? '?'} |
-        FeedStream: {debugInfo?.feedStream ?? '?'} |
-        <strong>FeedTotal: {feedArticles.length}</strong><br />
-        EditorChoice: {debugInfo?.editorChoice ?? '?'} |
-        Opinion: {debugInfo?.opinion ?? '?'} |
-        Photo: {debugInfo?.photo ?? '?'} |
-        Video: {debugInfo?.video ?? '?'} |
-        Trending: {trending.length}<br />
-        <strong>Rows: {rows.length}</strong> |
-        {rows.map((r, i) => `[${i}:${r.pattern}×${r.articles.length}]`).join(' ')}
+        <strong>DEBUG Distribution Engine:</strong><br />
+        API: {debugInfo?.apiTotal ?? '?'} articles (unique: {debugInfo?.uniqueIds ?? '?'})<br />
+        Hero: {debugInfo?.hero} | Fokus: {debugInfo?.fokus} | Feed: {debugInfo?.feedTotal} (featured:{debugInfo?.feedFeatured} + stream:{debugInfo?.feedStream})<br />
+        Editor: {debugInfo?.editorChoice} | Opinion: {debugInfo?.opinion} | Photo: {debugInfo?.photo} | Video: {debugInfo?.video} | Trending: {trending.length}<br />
+        <strong>TOTAL USED: {debugInfo?.totalUsed ?? '?'}</strong> | <strong>UNACCOUNTED: {(debugInfo?.apiTotal ?? 0) - (debugInfo?.totalUsed ?? 0)}</strong><br />
+        Feed rows: {rows.length} | {rows.map((r, i) => `[${i}:${r.pattern}×${r.articles.length}]`).join(' ')}
       </div>
       {/* END DEBUG */}
 
