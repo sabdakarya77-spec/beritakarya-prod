@@ -6,10 +6,12 @@
 // This file only provides shared background, font, and global modals.
 
 import { AIConsentModal } from '../../../components/editor/AIConsentModal'
+import { AuthInit } from '../../../components/AuthInit'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <AuthInit />
       {children}
       <AIConsentModal />
     </>

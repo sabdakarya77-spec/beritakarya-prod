@@ -14,15 +14,24 @@ import { resolveArticleBadge } from '../../../../lib/resolveArticleBadge'
 import { getCategoryColor } from '../../../../lib/constants'
 import { BookOpen, CalendarDays, Flame, Printer, Sparkles, Tags, User2 } from 'lucide-react'
 import { Metadata } from 'next'
-import CommentSection from '../../../../components/ui/CommentSection'
+import dynamic from 'next/dynamic'
 import ImageLightboxWrapper from '../../../../components/ui/ImageLightboxWrapper'
 import { Container } from '../../../../components/layout/Container'
 import ArticleShareActions from '../../../../components/ui/ArticleShareActions'
 import ArticleBookmarkButton from '../../../../components/ui/ArticleBookmarkButton'
-import ArticleFloatingTools from '../../../../components/ui/ArticleFloatingTools'
-import MobileArticleTools from '../../../../components/ui/MobileArticleTools'
 import FadeInOnScroll from '../../../../components/ui/FadeInOnScroll'
 import { YouTubeEmbed } from '../../../../components/ui/YouTubeEmbed'
+
+const CommentSection = dynamic(() => import('../../../../components/ui/CommentSection'), {
+  ssr: false,
+  loading: () => <div className="mt-8 h-32 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/5" />,
+})
+const ArticleFloatingTools = dynamic(() => import('../../../../components/ui/ArticleFloatingTools'), {
+  ssr: false,
+})
+const MobileArticleTools = dynamic(() => import('../../../../components/ui/MobileArticleTools'), {
+  ssr: false,
+})
 
 interface Props {
   params: { site: string; slug: string }

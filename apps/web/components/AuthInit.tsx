@@ -4,16 +4,33 @@ import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../lib/api';
 
+/**
+ * Lightweight auth check — only verifies session, no heartbeat.
+ * Used on public pages to minimize JS overhead for anonymous users.
+ */
+export function AuthCheck() {
+  const { checkAuth } = useAuthStore();
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+    checkAuth();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return null;
+}
+
+/**
+ * Full auth init with heartbeat — for dashboard pages only.
+ */
 export function AuthInit() {
   const { user, isLoading, checkAuth } = useAuthStore();
   const hasChecked = useRef(false);
 
   useEffect(() => {
-    // Hanya jalankan checkAuth SEKALI saat initial mount
-    // Gunakan ref untuk mencegah double-call di React StrictMode
     if (hasChecked.current) return;
     hasChecked.current = true;
-    
     checkAuth();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -25,23 +42,17 @@ export function AuthInit() {
       try {
         await api.post('/users/heartbeat');
       } catch (e: unknown) {
-        // Jika 401, stop heartbeat dan trigger re-auth check
         const axiosErr = e as { response?: { status?: number } };
         if (axiosErr.response?.status === 401) {
           console.warn('[AUTH] Heartbeat received 401, checking session...')
           checkAuth();
         }
-        // Silently ignore other errors (network issues, etc)
       }
     };
 
-    // Send immediately on load/login
     sendHeartbeat();
-
-    // Then every 30 seconds
     const interval = setInterval(sendHeartbeat, 30000);
 
-    // Listen for session expired event from api.ts
     const handleSessionExpired = () => {
       clearInterval(interval);
       checkAuth();

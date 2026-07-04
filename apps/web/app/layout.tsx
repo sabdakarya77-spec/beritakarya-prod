@@ -15,7 +15,7 @@ export const viewport: Viewport = {
 export const metadata = constructMetadata()
 
 import { Toaster } from '../components/ui/Toaster'
-import { AuthInit } from '../components/AuthInit'
+import { AuthCheck } from '../components/AuthInit'
 import ScrollReset from '../components/layout/ScrollReset'
 import { SwRegister } from './SwRegister'
 
@@ -54,7 +54,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${plusJakartaSans.variable} ${playfair.variable} font-sans antialiased overflow-x-hidden`}>
-        <AuthInit />
+        <AuthCheck />
         <ScrollReset />
         {children}
         <Toaster />
