@@ -41,6 +41,17 @@ export function FeedSection({
   const rows = chunkIntoRows(feedArticles as (HomeArticle & { [key: string]: unknown })[], DEFAULT_PATTERN_ROTATION)
   const trendingForList = trending.length > 0 ? trending : popular
 
+  // DEBUG — hapus setelah selesai debug
+  if (typeof window !== 'undefined') {
+    console.log('[FeedSection DEBUG]', {
+      feedArticlesCount: feedArticles.length,
+      rowsCount: rows.length,
+      rowsSummary: rows.map((r, i) => ({ index: i, pattern: r.pattern, articleCount: r.articles.length })),
+      trendingCount: trending.length,
+      popularCount: popular.length,
+    })
+  }
+
   return (
     <Container className="py-4 md:py-6">
       {/* Section Header */}

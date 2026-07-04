@@ -222,6 +222,19 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     ? [...feedFeatured, ...feedStream]
     : articlesList.slice(0, 8)
 
+  // DEBUG — hapus setelah selesai debug
+  console.log('[SiteHomePage DEBUG]', {
+    articlesListCount: articlesList.length,
+    heroCount: heroArticles.length,
+    fokusCount: fokusRedaksi.length,
+    feedFeaturedCount: feedFeatured.length,
+    feedStreamCount: feedStream.length,
+    feedArticlesCount: feedArticles.length,
+    editorChoiceCount: editorChoice.length,
+    opinionCount: opinionArticles.length,
+    trendingCount: trending.length,
+  })
+
   // ── Popular untuk fallback trending interstitial ──
   const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
 
