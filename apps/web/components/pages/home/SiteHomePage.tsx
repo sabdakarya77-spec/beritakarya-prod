@@ -223,17 +223,19 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     : articlesList.slice(0, 8)
 
   // DEBUG — hapus setelah selesai debug
-  console.log('[SiteHomePage DEBUG]', {
-    articlesListCount: articlesList.length,
-    heroCount: heroArticles.length,
-    fokusCount: fokusRedaksi.length,
-    feedFeaturedCount: feedFeatured.length,
-    feedStreamCount: feedStream.length,
-    feedArticlesCount: feedArticles.length,
-    editorChoiceCount: editorChoice.length,
-    opinionCount: opinionArticles.length,
-    trendingCount: trending.length,
-  })
+  const debugInfo = {
+    apiTotal: articlesList.length,
+    hero: heroArticles.length,
+    fokus: fokusRedaksi.length,
+    feedFeatured: feedFeatured.length,
+    feedStream: feedStream.length,
+    feedTotal: feedArticles.length,
+    editorChoice: editorChoice.length,
+    opinion: opinionArticles.length,
+    photo: photoJournal.length,
+    video: videoStories.length,
+    trending: trending.length,
+  }
 
   // ── Popular untuk fallback trending interstitial ──
   const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
@@ -294,6 +296,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           siteSettings={siteSettings}
           siteConfigId={siteConfig.id}
           resolveCategoryName={resolveCategoryName}
+          debugInfo={debugInfo}
         />
 
         {/* ZONA 5+ — EDITORIAL EXTRAS */}

@@ -28,13 +28,14 @@ interface FeedSectionProps {
   siteSettings?: { featuredVideo?: { title: string; thumbnail: string; duration: string } }
   siteConfigId: string
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
+  debugInfo?: Record<string, number>
 }
 
 export function FeedSection({
   feedArticles, trending, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
   whatsappUrl, telegramUrl, reportUrl, siteName, marketData, photoJournal, showPhotoSection, siteSettings,
-  siteConfigId, resolveCategoryName,
+  siteConfigId, resolveCategoryName, debugInfo,
 }: FeedSectionProps) {
   const { LoadMoreArticles, SavedArticlesFeed } = require('../LazyWidgets')
 
@@ -63,9 +64,20 @@ export function FeedSection({
 
       {/* DEBUG — hapus setelah selesai */}
       <div className="mb-4 rounded-lg bg-yellow-100 p-3 text-xs font-mono dark:bg-yellow-900/30">
-        <strong>DEBUG FeedSection:</strong> feedArticles={feedArticles.length} | rows={rows.length} |
-        trending={trending.length} | popular={popular.length} |
-        rows: {rows.map((r, i) => `[${i}:${r.pattern}×${r.articles.length}]`).join(' ')}
+        <strong>DEBUG Distribution:</strong><br />
+        API total: {debugInfo?.apiTotal ?? '?'} |
+        Hero: {debugInfo?.hero ?? '?'} |
+        Fokus: {debugInfo?.fokus ?? '?'} |
+        FeedFeatured: {debugInfo?.feedFeatured ?? '?'} |
+        FeedStream: {debugInfo?.feedStream ?? '?'} |
+        <strong>FeedTotal: {feedArticles.length}</strong><br />
+        EditorChoice: {debugInfo?.editorChoice ?? '?'} |
+        Opinion: {debugInfo?.opinion ?? '?'} |
+        Photo: {debugInfo?.photo ?? '?'} |
+        Video: {debugInfo?.video ?? '?'} |
+        Trending: {trending.length}<br />
+        <strong>Rows: {rows.length}</strong> |
+        {rows.map((r, i) => `[${i}:${r.pattern}×${r.articles.length}]`).join(' ')}
       </div>
       {/* END DEBUG */}
 
