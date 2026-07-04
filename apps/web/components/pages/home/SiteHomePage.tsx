@@ -215,22 +215,20 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const photoJournal = dist?.photoJournal || []
   const videoStories = dist?.videoStories || []
   const sidebarPopular = dist?.popular || []
+  const trending = dist?.trending || []
 
-  // ── Feed untuk halaman kategori/pencarian ──
-  const catFeedFeatured = articlesList.slice(0, 2)
-  const catFeedStream = articlesList.slice(2, 8)
-  const catPopular = articlesList.slice(0, 5)
+  // ── Feed: gabungkan featured + stream untuk pattern rotation ──
+  const feedArticles = isHomepage
+    ? [...feedFeatured, ...feedStream]
+    : articlesList.slice(0, 8)
 
-  // Pilih antara homepage feed atau kategori/cari feed
-  const mainFeedFeatured = isHomepage ? feedFeatured : catFeedFeatured
-  const mainFeedStream = isHomepage ? feedStream : catFeedStream
-  const popular = isHomepage ? sidebarPopular : catPopular
+  // ── Popular untuk fallback trending interstitial ──
+  const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
 
   // ── Conditional flags ──
   const showHomepageHero = isHomepage && heroArticles.length > 0
   const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
   const showTrending = isHomepage && trendingArticles.length > 0
-  const showInlineSponsor = mainFeedFeatured.length > 0 || mainFeedStream.length > 0
   const showEditorChoice = isHomepage && editorChoice.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1
@@ -262,10 +260,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           <TrendingSection articles={trendingArticles as HomeArticle[]} site={siteParam} />
         )}
 
-        {/* ZONA 4 — FEED + SIDEBAR */}
+        {/* ZONA 4 — FEED (pattern rotation + interstitials) */}
         <FeedSection
-          feedFeatured={mainFeedFeatured}
-          feedStream={mainFeedStream}
+          feedArticles={feedArticles}
+          trending={trending}
           popular={popular}
           site={siteParam}
           searchQuery={searchQuery}
@@ -273,10 +271,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           categoryFilter={categoryFilter}
           categoriesTree={categoriesTree}
           showSavedFeed={showSavedFeed}
-          showInlineSponsor={showInlineSponsor}
           whatsappUrl={whatsappUrl}
           telegramUrl={telegramUrl}
           reportUrl={reportUrl}
+          siteName={siteConfig.name}
           marketData={marketData}
           photoJournal={photoJournal}
           showPhotoSection={showPhotoSection}
