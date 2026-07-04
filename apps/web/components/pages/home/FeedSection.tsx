@@ -41,9 +41,8 @@ export function FeedSection({
   const rows = chunkIntoRows(feedArticles as (HomeArticle & { [key: string]: unknown })[], DEFAULT_PATTERN_ROTATION)
   const trendingForList = trending.length > 0 ? trending : popular
 
-  // Split rows: 3 pertama = BERITA TERBARU, sisanya = BERITA LAINNYA
-  const mainRows = rows.slice(0, 3)
-  const continuedRows = rows.slice(3)
+  // Tentukan titik split: Row 1-3 = BERITA TERBARU, Row 4+ = BERITA LAINNYA
+  const SPLIT_INDEX = 3
 
   return (
     <Container className="py-4 md:py-6">
@@ -68,52 +67,48 @@ export function FeedSection({
       {showSavedFeed ? (
         <SavedArticlesFeed site={site} />
       ) : rows.length > 0 ? (
-        <>
-          {/* ═══════════════════════════════════════
-              BERITA TERBARU — Row 1-3
-              Row 1: hero_pair → Row 2: triplet → HOME_FEED_1 → Row 3: asymmetric
-          ═══════════════════════════════════════ */}
-          <div className="space-y-6 md:space-y-8">
-            {mainRows.map((row, i) => (
-              <div key={`main-${i}`}>
-                <FeedRow articles={row.articles as HomeArticle[]} pattern={row.pattern} site={site} rowIndex={row.rowIndex} />
-                {/* HOME_FEED_1 setelah Row 2 (triplet) */}
-                {i === 1 && <AdSpace type="HOME_FEED_1" />}
-              </div>
-            ))}
-          </div>
+        <div className="space-y-6 md:space-y-8">
+          {rows.map((row, i) => {
+            const elements: React.ReactNode[] = []
 
-          {/* Paling Dibaca — setelah Row 3 */}
-          <PalingDibaca articles={trendingForList} site={site} />
+            // ── Feed Row ──
+            elements.push(
+              <FeedRow key={`row-${i}`} articles={row.articles as HomeArticle[]} pattern={row.pattern} site={site} rowIndex={row.rowIndex} />
+            )
 
-          {/* ═══════════════════════════════════════
-              BERITA LAINNYA — Row 4+
-              Row 4: text_heavy → Row 5: compact_triplet → HOME_FEED_2 → lanjutan
-          ═══════════════════════════════════════ */}
-          {continuedRows.length > 0 && (
-            <div className="mt-8">
-              <div className="mb-5 flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-black dark:text-white">
-                  Berita Lainnya
-                </h3>
-              </div>
+            // ── Interstitials sesuai Design F ──
 
-              <div className="space-y-6 md:space-y-8">
-                {continuedRows.map((row, i) => (
-                  <div key={`cont-${i}`}>
-                    <FeedRow articles={row.articles as HomeArticle[]} pattern={row.pattern} site={site} rowIndex={row.rowIndex} />
-                    {/* HOME_FEED_2 setelah Row 5 (compact_triplet) — index 1 di continuedRows */}
-                    {i === 1 && <AdSpace type="HOME_FEED_2" />}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            // HOME_FEED_1: setelah Row 2 (triplet), index 1
+            if (i === 1) {
+              elements.push(<AdSpace key="ad-home-feed-1" type="HOME_FEED_1" />)
+            }
 
-          {/* ═══════════════════════════════════════
-              INTERSTITIALS setelah feed
-          ═══════════════════════════════════════ */}
+            // Paling Dibaca: setelah Row 3 (asymmetric), index 2
+            if (i === 2) {
+              elements.push(<PalingDibaca key="paling-dibaca" articles={trendingForList} site={site} />)
+            }
+
+            // BERITA LAINNYA header: sebelum Row 4 (text_heavy), index 3
+            if (i === SPLIT_INDEX) {
+              elements.unshift(
+                <div key="berita-lainnya-header" className="mb-2 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-black dark:text-white">
+                    Berita Lainnya
+                  </h3>
+                </div>
+              )
+            }
+
+            // HOME_FEED_2: setelah Row 5 (compact_triplet), index 4
+            if (i === 4) {
+              elements.push(<AdSpace key="ad-home-feed-2" type="HOME_FEED_2" />)
+            }
+
+            return elements
+          })}
+
+          {/* ═══ Interstitials setelah semua feed rows ═══ */}
           <AksesRedaksi whatsappUrl={whatsappUrl} telegramUrl={telegramUrl} reportUrl={reportUrl} siteName={siteName} />
           <InfoPasar data={marketData} />
 
@@ -122,7 +117,7 @@ export function FeedSection({
 
           {/* Video Widget */}
           {siteSettings?.featuredVideo && (
-            <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
+            <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
               <div className="mb-4">
                 <span className={`${sectionEyebrowClass} text-brand-red`}>Pilihan Visual</span>
               </div>
@@ -133,7 +128,7 @@ export function FeedSection({
               />
             </div>
           )}
-        </>
+        </div>
       ) : (
         <div className="mb-12 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-center dark:border-white/10 dark:bg-white/[0.02]">
           <p className="text-sm md:text-base font-sans font-bold text-brand-black dark:text-white">
