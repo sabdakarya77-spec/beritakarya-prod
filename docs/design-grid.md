@@ -244,9 +244,11 @@ Sidebar dihapus → interstitial sections.
 │  (300×200, 3:2)          │
 ├──────────────────────────┤
 │  ░░░ PALING DIBACA ░░░   │
-│  01  Judul...  5 min     │
-│  02  Judul...  3 min     │
-│  03  Judul...  4 min     │
+│  ┌──────┬──────┬──────┐  │
+│  │01    │02    │03    │  │ ← horizontal scroll
+│  │[IMG] │[IMG] │[IMG] │  │
+│  │Judul │Judul │Judul │  │
+│  └──────┴──────┴──────┘  │
 ├──────────────────────────┤
 │                          │
 │  BERITA LAINNYA          │
@@ -685,9 +687,11 @@ Informasi padat. Hero split per kategori. Trending jadi ticker berjalan. Cocok u
 │  (300×200, 3:2)          │
 ├──────────────────────────┤
 │  ░░░ PALING DIBACA ░░░   │
-│  01  Judul...  5 min     │
-│  02  Judul...  3 min     │
-│  03  Judul...  4 min     │
+│  ┌──────┬──────┬──────┐  │
+│  │01    │02    │03    │  │ ← horizontal scroll
+│  │[IMG] │[IMG] │[IMG] │  │
+│  │Judul │Judul │Judul │  │
+│  └──────┴──────┴──────┘  │
 ├──────────────────────────┤
 │  BERITA LAINNYA          │
 │  (lanjutan)              │
@@ -1099,9 +1103,11 @@ Foto-forward, immersive. Hero dual besar, trending dengan konteks "kenapa trendi
 │  (300×200, 3:2)          │
 ├──────────────────────────┤
 │  ░░░ PALING DIBACA ░░░   │
-│  01  Judul...  5 min     │
-│  02  Judul...  3 min     │
-│  03  Judul...  4 min     │
+│  ┌──────┬──────┬──────┐  │
+│  │01    │02    │03    │  │ ← horizontal scroll
+│  │[IMG] │[IMG] │[IMG] │  │
+│  │Judul │Judul │Judul │  │
+│  └──────┴──────┴──────┘  │
 ├──────────────────────────┤
 │  BERITA LAINNYA          │
 │  (lanjutan)              │
@@ -1233,15 +1239,14 @@ Kombinasi kurasi elemen terbaik dari Design A, B, dan C. Menjadi **rekomendasi d
 │  ╚══════════════════════════════════════════════════════════════════════════════╝ │
 │                                                                                  │
 │  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│  │  INTERSTITIAL: PALING DIBACA                                                │ │
+│  │  INTERSTITIAL: PALING DIBACA (horizontal cards, scrollable)                 │ │
 │  │  bg: brand-grey/30, full-width, rounded-2xl                                 │ │
-│  │  ┌──────────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ 01  Judul Artikel Pertama                    Redaksi · 5 min baca   │   │ │
-│  │  │ 02  Judul Artikel Kedua                      Redaksi · 3 min baca   │   │ │
-│  │  │ 03  Judul Artikel Ketiga                     Redaksi · 4 min baca   │   │ │
-│  │  │ 04  Judul Artikel Keempat                    Redaksi · 2 min baca   │   │ │
-│  │  │ 05  Judul Artikel Kelima                     Redaksi · 6 min baca   │   │ │
-│  │  └──────────────────────────────────────────────────────────────────────┘   │ │
+│  │  ┌────────┬────────┬────────┬────────┬────────┐                             │ │
+│  │  │ 01     │ 02     │ 03     │ 04     │ 05     │                             │ │
+│  │  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │                             │ │
+│  │  │ Judul  │ Judul  │ Judul  │ Judul  │ Judul  │                             │ │
+│  │  │ 5 min  │ 3 min  │ 4 min  │ 2 min  │ 6 min  │                             │ │
+│  │  └────────┴────────┴────────┴────────┴────────┘                             │ │
 │  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
 │                                                                                  │
 │  ╔══════════════════════════════════════════════════════════════════════════════╗ │
@@ -1383,9 +1388,11 @@ Kombinasi kurasi elemen terbaik dari Design A, B, dan C. Menjadi **rekomendasi d
 │  (300×200, 3:2)          │
 ├──────────────────────────┤
 │  ░░░ PALING DIBACA ░░░   │
-│  01  Judul...  5 min     │
-│  02  Judul...  3 min     │
-│  03  Judul...  4 min     │
+│  ┌──────┬──────┬──────┐  │
+│  │01    │02    │03    │  │ ← horizontal scroll
+│  │[IMG] │[IMG] │[IMG] │  │
+│  │Judul │Judul │Judul │  │
+│  └──────┴──────┴──────┘  │
 ├──────────────────────────┤
 │                          │
 │  BERITA LAINNYA          │
