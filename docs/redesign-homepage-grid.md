@@ -960,6 +960,7 @@ Ini adalah **Design F (Best of)** — default layout yang bisa dikonfigurasi per
 │  ║  │ Author·Date  │ Author·Date  │ Author·Date  │                          ║ │
 │  ║  └──────────────┴──────────────┴──────────────┘                          ║ │
 │  ║                                                                          ║ │
+│  ║  ── Ad: HOME_FEED_2 (300×150, 2:1) ───────────────────────────────────  ║ │
 │  ╚══════════════════════════════════════════════════════════════════════════╝ │
 │                                                                              │
 │  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐ │
@@ -1106,6 +1107,9 @@ Ini adalah **Design F (Best of)** — default layout yang bisa dikonfigurasi per
 │  │ Judul              │  │
 │  └────────────────────┘  │
 │                          │
+├──────────────────────────┤
+│  AD: HOME_FEED_2         │
+│  (300×150, 2:1)          │
 ├──────────────────────────┤
 │  ░░░ AKSES REDAKSI ░░░   │  ← INTERSTITIAL
 │  [WhatsApp] [Telegram]   │

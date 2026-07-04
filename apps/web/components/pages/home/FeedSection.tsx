@@ -45,8 +45,8 @@ const INTERSTITIAL_AFTER_ROWS = {
   palingDibaca: 1,   // setelah hero_pair
   ad1: 2,             // setelah triplet
   aksesRedaksi: 3,    // setelah asymmetric
-  ad2: 4,             // setelah text_heavy
-  infoPasar: 5,       // setelah compact_triplet
+  infoPasar: 4,       // setelah text_heavy
+  ad2: 5,             // setelah compact_triplet (HOME_FEED_2)
 }
 
 export function FeedSection({
