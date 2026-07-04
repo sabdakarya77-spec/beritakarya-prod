@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import AdSpace from '../../ui/AdSpace'
 import { Container } from '../../layout/Container'
-import { PhotoJournalWidget, VideoWidget } from '../LazyWidgets'
+import { MarketWidget, PhotoJournalWidget, VideoWidget } from '../LazyWidgets'
 import type { HomeArticle } from './utils/distribution'
 import { chunkIntoRows, DEFAULT_PATTERN_ROTATION } from './utils/feedPatterns'
 import { FeedRow } from './FeedRow'
-import { PalingDibaca, AksesRedaksi, InfoPasar } from './interstitials'
+import { PalingDibaca, AksesRedaksi } from './interstitials'
 import { sectionTitleClass, sectionEyebrowClass } from './constants'
 
 interface FeedSectionProps {
@@ -109,7 +109,9 @@ export function FeedSection({
 
           {/* ═══ Interstitials setelah semua feed rows ═══ */}
           <AksesRedaksi whatsappUrl={whatsappUrl} telegramUrl={telegramUrl} reportUrl={reportUrl} siteName={siteName} />
-          <InfoPasar data={marketData} />
+          <div className="my-8">
+            <MarketWidget initialData={marketData as never} />
+          </div>
 
           {/* Foto Jurnalistik */}
           {showPhotoSection && <PhotoJournalWidget articles={photoJournal} site={site} />}
