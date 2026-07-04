@@ -10,7 +10,7 @@ interface FeedRowProps {
   rowIndex: number
 }
 
-function useSafePattern(pattern: RowPattern, articles: HomeArticle[]): RowPattern {
+function getSafePattern(pattern: RowPattern, articles: HomeArticle[]): RowPattern {
   if (articles.length >= PATTERN_REQUIREMENTS[pattern]) return pattern
   if (articles.length >= 1) return 'single_feature'
   return pattern
@@ -19,7 +19,7 @@ function useSafePattern(pattern: RowPattern, articles: HomeArticle[]): RowPatter
 export function FeedRow({ articles, pattern: intendedPattern, site, rowIndex }: FeedRowProps) {
   if (articles.length === 0) return null
 
-  const pattern = useSafePattern(intendedPattern, articles)
+  const pattern = getSafePattern(intendedPattern, articles)
 
   if (process.env.NODE_ENV !== 'production' && pattern !== intendedPattern) {
     console.warn(
