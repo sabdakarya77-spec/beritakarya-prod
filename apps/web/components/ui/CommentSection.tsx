@@ -159,7 +159,7 @@ export default function CommentSection({ articleId }: { articleId: string }) {
                 <User size={14} />
               </div>
               <p className="text-xs text-brand-text-muted">
-                Untuk ikut berdiskusi, silakan <Link href={loginHref} className="font-bold text-brand-red hover:underline">Masuk</Link> atau <Link href={registerHref} className="font-bold text-brand-red hover:underline">Daftar</Link> terlebih dahulu.
+                Untuk ikut berdiskusi, silakan <Link href={loginHref} rel="nofollow" className="font-bold text-brand-red hover:underline">Masuk</Link> atau <Link href={registerHref} rel="nofollow" className="font-bold text-brand-red hover:underline">Daftar</Link> terlebih dahulu.
               </p>
             </div>
             <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-brand-text-muted sm:text-right">

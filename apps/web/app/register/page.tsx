@@ -221,7 +221,7 @@ function RegisterForm() {
           <div className="mt-6 text-center border-t border-gray-100 dark:border-slate-800 pt-4">
             <p className="text-xs text-brand-text-muted font-bold uppercase tracking-widest">
               Sudah punya akun?{' '}
-              <Link href="/login" className="text-brand-red hover:text-brand-black dark:hover:text-white transition-colors">
+              <Link href="/login" rel="nofollow" className="text-brand-red hover:text-brand-black dark:hover:text-white transition-colors">
                 Masuk di sini
               </Link>
             </p>

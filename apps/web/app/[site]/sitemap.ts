@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { API_URL } from '../../lib/api'
+import { ALL_LEGAL_PAGES } from '../../lib/legalPages'
 
 const SITEMAP_MAX_PAGES = 50 // Safety cap
 const DEFAULT_IMAGE = '/logo.png'
@@ -94,12 +95,28 @@ export default async function sitemap({ params }: { params: { site: string } }):
     },
   ]
 
-  // Legal page
+  // Legal pages
   entries.push({
     url: `${siteUrl}/kebijakan-privasi`,
     lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.3,
+  })
+  entries.push({
+    url: `${siteUrl}/cookies`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.3,
+  })
+
+  // Legal/info pages (/p/*)
+  ALL_LEGAL_PAGES.forEach((page) => {
+    entries.push({
+      url: `${baseUrl}${page.href(site)}`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    })
   })
 
   // Authors index

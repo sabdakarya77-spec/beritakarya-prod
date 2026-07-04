@@ -46,6 +46,7 @@ export async function generateMetadata({
       image: ogImageUrl,
       icons: faviconUrl,
       siteParam,
+      canonicalPath: `/${siteParam}/p/${slug}`,
     })
   }
 
@@ -55,6 +56,7 @@ export async function generateMetadata({
       image: ogImageUrl,
       icons: faviconUrl,
       siteParam,
+      canonicalPath: `/${siteParam}/p/${slug}`,
     })
   }
 
@@ -63,6 +65,7 @@ export async function generateMetadata({
     image: ogImageUrl,
     icons: faviconUrl,
     siteParam,
+    canonicalPath: `/${siteParam}/p/${slug}`,
   })
 }
 

@@ -6,7 +6,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return constructMetadata({
     title: 'BeritaKarya — Portal Berita Terpercaya',
     description: 'BeritaKarya pusat: informasi terkini dari seluruh Nusantara tanpa perlu menambahkan /pusat di URL.',
-    siteParam: ''
+    siteParam: '',
+    canonicalPath: '/pusat',
   })
 }
 

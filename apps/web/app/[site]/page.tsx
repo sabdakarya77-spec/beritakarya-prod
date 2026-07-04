@@ -5,15 +5,17 @@ import { SiteHomePage } from '../../components/pages/SiteHomePage'
 import { JsonLd } from '../../components/ui/JsonLd'
 import { buildOrganization, buildWebsite } from '../../lib/structuredData'
 
-export async function generateMetadata({ params }: { params: { site: string } }): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: { params: { site: string }; searchParams: { cat?: string; q?: string } }): Promise<Metadata> {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const siteParam = resolvedParams?.site || 'pusat';
-  
+  const hasCategoryFilter = Boolean(resolvedSearchParams?.cat);
+
   let siteName = siteParam.charAt(0).toUpperCase() + siteParam.slice(1);
   let description = `Portal berita resmi ${siteName}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`;
   let faviconUrl = '/favicon.ico';
   let ogImageUrl = '/logo.png';
-  
+
   try {
     const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
     if (res.ok) {
@@ -34,7 +36,8 @@ export async function generateMetadata({ params }: { params: { site: string } })
     description,
     image: ogImageUrl,
     icons: faviconUrl,
-    siteParam
+    siteParam,
+    noIndex: hasCategoryFilter,
   })
 }
 

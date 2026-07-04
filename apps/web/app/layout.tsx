@@ -27,7 +27,6 @@ export default function RootLayout({
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#B91C1C" />
         <script
           dangerouslySetInnerHTML={{

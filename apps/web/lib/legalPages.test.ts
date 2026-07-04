@@ -35,12 +35,12 @@ describe('prepareLegalDocumentContent', () => {
 })
 
 describe('ALL_LEGAL_PAGES', () => {
-  it('memiliki konfigurasi lengkap untuk 6 halaman legal', () => {
+  it('memiliki konfigurasi lengkap untuk 7 halaman legal', () => {
     expect(ALL_LEGAL_PAGES).toBeDefined()
-    expect(ALL_LEGAL_PAGES.length).toBe(6)
+    expect(ALL_LEGAL_PAGES.length).toBe(7)
 
-    const expectedSlugs = ['about', 'editorial', 'ethics', 'kebijakan-privasi', 'media-siber', 'terms']
-    const expectedKeys = ['aboutUs', 'editorial', 'codeOfEthics', 'privacyPolicy', 'mediaSiber', 'termsOfService']
+    const expectedSlugs = ['about', 'editorial', 'ethics', 'kebijakan-privasi', 'media-siber', 'terms', 'cookies']
+    const expectedKeys = ['aboutUs', 'editorial', 'codeOfEthics', 'privacyPolicy', 'mediaSiber', 'termsOfService', 'cookiePolicy']
 
     ALL_LEGAL_PAGES.forEach((page: LegalPageConfig) => {
       expect(page.id).toBeDefined()

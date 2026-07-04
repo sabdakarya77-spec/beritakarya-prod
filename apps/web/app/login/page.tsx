@@ -248,7 +248,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center border-t border-gray-100 dark:border-slate-800 pt-4">
             <p className="text-xs text-brand-text-muted font-bold uppercase tracking-widest">
               Belum punya akun?{' '}
-              <Link href="/register" className="text-brand-red hover:text-brand-black dark:hover:text-white transition-colors">
+              <Link href="/register" rel="nofollow" className="text-brand-red hover:text-brand-black dark:hover:text-white transition-colors">
                 Daftar di sini
               </Link>
             </p>

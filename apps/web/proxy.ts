@@ -34,7 +34,7 @@ export function proxy(req: NextRequest) {
   // Path root yang BUKAN site prefix (login, register, dll) di-skip.
   const RESERVED_ROOT_SEGMENTS = new Set([
     'login', 'register', 'forgot-password', 'reset-password',
-    'sitemap.xml', 'robots.txt', 'dashboard',
+    'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'dashboard',
     'api', '_next', 'favicon.ico',
   ])
   const SITE_SUBPATHS = new Set([
@@ -80,11 +80,37 @@ export function proxy(req: NextRequest) {
   }
 
   // Sanitize siteId: only alphanumeric and hyphens allowed to prevent issues like 'pusat:1'
+  const rawSiteId = siteId
   siteId = siteId.replace(/[^a-zA-Z0-9-]/g, '') || 'pusat'
+
+  const pathname = url.pathname
+
+  // Redirect known alternative root paths to proper site-scoped paths.
+  // Prevents Google from indexing /privacy, /terms, /cookies etc. as noindex pages.
+  const ROOT_REDIRECTS: Record<string, string> = {
+    'privacy': 'kebijakan-privasi',
+    'terms': 'p/terms',
+    'cookies': 'cookies',
+  }
+  const firstSegment = pathname.split('/').filter(Boolean)[0]?.toLowerCase()
+  if (firstSegment && ROOT_REDIRECTS[firstSegment] && !subdomain) {
+    const target = `/${siteId}/${ROOT_REDIRECTS[firstSegment]}`
+    return NextResponse.redirect(new URL(target, req.url), 301)
+  }
+
+  // Reject paths with encoded special characters (e.g. /%26, /%24, /&).
+  // These get sanitized away in siteId but still render pages Google shouldn't index.
+  if (rawSiteId !== siteId || /[^a-zA-Z0-9\-/]/.test(pathname)) {
+    const decoded = decodeURIComponent(pathname).replace(/\/+$/, '')
+    const decodedFirst = decoded.split('/').filter(Boolean)[0] || ''
+    if (/[^a-zA-Z0-9-]/.test(decodedFirst) || rawSiteId !== siteId) {
+      const notFoundUrl = new URL(`/${siteId}/404-not-found`, req.url)
+      return NextResponse.rewrite(notFoundUrl)
+    }
+  }
 
   // Guard both `/dashboard` and `/{site}/dashboard` URLs before they reach the app.
   const token = req.cookies.get('accessToken')?.value
-  const pathname = url.pathname
   const isDashboardRoute =
     pathname === '/dashboard' ||
     pathname.startsWith('/dashboard/') ||
