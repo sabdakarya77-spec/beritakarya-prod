@@ -1,4 +1,4 @@
-import { SiteHomePage } from '../components/pages/SiteHomePage'
+import { SiteHomePage } from '../components/pages/home/SiteHomePage'
 import type { Metadata } from 'next'
 import { constructMetadata } from '../lib/metadata'
 

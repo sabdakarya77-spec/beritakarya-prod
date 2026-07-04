@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { API_URL } from '../../lib/api'
 import { constructMetadata } from '../../lib/metadata'
-import { SiteHomePage } from '../../components/pages/SiteHomePage'
+import { SiteHomePage } from '../../components/pages/home/SiteHomePage'
 import { JsonLd } from '../../components/ui/JsonLd'
 import { buildOrganization, buildWebsite } from '../../lib/structuredData'
 

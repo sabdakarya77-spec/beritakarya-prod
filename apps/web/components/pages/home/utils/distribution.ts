@@ -21,20 +21,28 @@
  */
 
 // ---------------------------------------------------------------------------
-// Types
+// Types — disesuaikan dengan HomeArticle yang ada di SiteHomePage.tsx
 // ---------------------------------------------------------------------------
 
 export interface HomeArticle {
   id: string
   title: string
   slug: string
-  publishedAt: string | Date | null
-  createdAt: string | Date
-  viewCount?: number
+  excerpt?: string
+  featuredImage?: string
+  contentType?: string
+  publishedAt?: string
+  createdAt?: string
   isFeatured?: boolean
   isExclusive?: boolean
   isBreaking?: boolean
-  categories?: { slug: string }[]
+  viewCount?: number
+  readingTimeMin?: number
+  wordCount?: number
+  author?: { name: string; avatarUrl?: string | null }
+  category?: { name: string; slug?: string; parentSlug?: string } // legacy
+  categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
+  blocks?: Array<{ type: string; url?: string; embedType?: string; images?: { url: string }[] }>
 }
 
 export interface ScoringWeights {
@@ -96,6 +104,7 @@ export interface DistributionResult {
   photoJournal: HomeArticle[]
   videoStories: HomeArticle[]
   trending: HomeArticle[]
+  popular: HomeArticle[]
   /** Breaking news yang tidak kebagian slot hero — untuk logging/observability. */
   overflowBreakingCount: number
 }
@@ -111,7 +120,7 @@ function hoursSince(date: Date): number {
 }
 
 function getPublishedDate(article: HomeArticle): Date {
-  return new Date(article.publishedAt || article.createdAt)
+  return new Date(article.publishedAt || article.createdAt || Date.now())
 }
 
 /** Exponential decay: <6 jam ≈ 1.0, 24 jam ≈ 0.7, 72 jam ≈ 0.3, >168 jam → floor 0.1 */
@@ -141,9 +150,24 @@ function calcEditorial(article: HomeArticle): number {
   return Math.min(1, score)
 }
 
+// Helper: ambil semua slug kategori dari artikel (multi-category aware)
+function getCategorySlugs(article: HomeArticle): string[] {
+  const slugs: string[] = []
+  // categories array (baru)
+  if (article.categories) {
+    for (const c of article.categories) {
+      if (c.category?.slug) slugs.push(c.category.slug.toLowerCase())
+    }
+  }
+  // category legacy
+  if (article.category?.slug) slugs.push(article.category.slug.toLowerCase())
+  if (article.category?.parentSlug) slugs.push(article.category.parentSlug.toLowerCase())
+  return slugs
+}
+
 function calcRelevance(article: HomeArticle, targetCategorySlugs: string[] = []): number {
   if (targetCategorySlugs.length === 0) return 0.5
-  const slugs = (article.categories ?? []).map(c => c.slug)
+  const slugs = getCategorySlugs(article)
   return slugs.some(s => targetCategorySlugs.includes(s)) ? 1.0 : 0.3
 }
 
@@ -273,6 +297,12 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const videoStories = takeUnused(pools.videoPool, 3)
   const trending = takeUnused(pools.trending, 5)
 
+  // 7. Popular: untuk sidebar — non-hero, non-trending
+  const trendingIds = new Set(trending.map(a => a.id))
+  const popular = articles
+    .filter(a => !heroIds.has(a.id) && !trendingIds.has(a.id))
+    .slice(0, 5)
+
   return {
     hero,
     fokusRedaksi,
@@ -283,6 +313,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     photoJournal,
     videoStories,
     trending,
+    popular,
     overflowBreakingCount: overflowBreaking.length,
   }
 }
