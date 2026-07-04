@@ -287,14 +287,16 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     breakingCount: breaking.length,
     nonBreakingCount: nonBreaking.length,
     heroCount: hero.length,
-    heroIds: [...heroIds],
     remainingAfterHeroCount: remainingAfterHero.length,
     editorialFlaggedCount: editorialFlagged.length,
     fokusRedaksiCount: fokusRedaksi.length,
-    fokusIds: [...fokusIds],
     feedPoolCount: feedPool.length,
     feedFeaturedCount: feedFeatured.length,
     feedStreamCount: feedStream.length,
+    // Cek: apakah ada artikel duplikat?
+    uniqueIds: new Set(articles.map(a => a.id)).size,
+    // Cek: sisa setelah hero+fokus+feed
+    usedInZones: hero.length + fokusRedaksi.length + feedFeatured.length + feedStream.length,
   })
 
   // 6. Editorial extras — dedup PROGRESIF. Urutan sengaja: editorial dulu,
