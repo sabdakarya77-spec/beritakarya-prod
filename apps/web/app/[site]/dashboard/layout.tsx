@@ -5,6 +5,7 @@
 // Ads chrome lives in (ads)/layout.tsx.
 // This file only provides shared background, font, and global modals.
 
+import './dashboard.css'
 import { AIConsentModal } from '../../../components/editor/AIConsentModal'
 import { AuthInit } from '../../../components/AuthInit'
 
