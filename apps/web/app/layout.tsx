@@ -3,8 +3,19 @@ import './globals.css'
 import { constructMetadata } from '../lib/metadata'
 import type { Viewport } from 'next'
 
-const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-plus-jakarta-sans' })
-const playfair = Playfair_Display({ subsets: ['latin'], weight: ['800', '900'], variable: '--font-playfair' })
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+  adjustFontFallback: true,
+})
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['800', '900'],
+  variable: '--font-playfair',
+  display: 'swap',
+  adjustFontFallback: true,
+})
 
 export const viewport: Viewport = {
   width: 'device-width',

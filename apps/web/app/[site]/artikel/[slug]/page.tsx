@@ -241,6 +241,7 @@ export default async function ArticlePage({ params }: Props) {
                   context="hero_lead"
                   alt={article.title}
                   fill
+                  sizes="100vw"
                   priority
                   className="object-cover animate-fade-in rounded-lg"
                 />
@@ -422,6 +423,7 @@ export default async function ArticlePage({ params }: Props) {
                                           context="card"
                                           alt={rel.title}
                                           fill
+                                          sizes="(max-width: 768px) 112px, 144px"
                                           className="object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                       </div>
@@ -795,6 +797,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
               context="article_block"
               alt={block.alt || 'Post image'}
               fill
+              sizes="(max-width: 768px) 100vw, 640px"
               className="object-cover"
             />
           </div>
@@ -820,6 +823,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="article_block"
                   alt={img.alt || `Grid image ${i + 1}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover"
                 />
               </div>
@@ -843,6 +847,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="gallery_thumb"
                   alt={img.alt || `Gallery image ${i + 1}`}
                   fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
                   className="object-cover cursor-pointer hover:scale-110 transition-transform"
                 />
               </div>
@@ -920,6 +925,7 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
                   context="media_text"
                   alt={block.alt || 'Post image'}
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                 />
               </div>

@@ -132,13 +132,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           <article
             className="relative h-full min-h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl"
           >
-            <SmartImage 
-              src={imageUrl} 
+            <SmartImage
+              src={imageUrl}
               blur={article.featuredImageBlur}
               dominantColor={article.featuredImageColor}
               context="hero_lead"
-              alt={article.title} 
+              alt={article.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 60vw"
               className={heroImageClass}
               priority
             />
@@ -226,13 +227,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="flex-1 flex gap-4">
           <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
-            <SmartImage 
-              src={imageUrl} 
+            <SmartImage
+              src={imageUrl}
               blur={article.featuredImageBlur}
               dominantColor={article.featuredImageColor}
               context="card_horizontal"
-              alt={article.title} 
+              alt={article.title}
               fill
+              sizes="(max-width: 768px) 112px, 144px"
               className={horizontalImageClass}
               priority={priority}
             />
@@ -282,13 +284,14 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           className="relative flex cursor-pointer flex-col gap-2 md:gap-3"
         >
           <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
-            <SmartImage 
-              src={imageUrl} 
+            <SmartImage
+              src={imageUrl}
               blur={article.featuredImageBlur}
               dominantColor={article.featuredImageColor}
               context="card"
-              alt={article.title} 
+              alt={article.title}
               fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className={defaultImageClass}
               priority={priority}
             />
