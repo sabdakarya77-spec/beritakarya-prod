@@ -4,7 +4,6 @@ import React from 'react';
 import { Home, Search, Menu, Bookmark, User, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useSavedArticles } from '../../hooks/useSavedArticles';
 
@@ -94,16 +93,11 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
           const isActive = item.active;
 
           const content = (
-            <motion.div
-              whileTap={{ scale: 0.9 }}
-              className="relative flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-2.5 py-1"
+            <div
+              className="relative flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-2.5 py-1 transition-transform active:scale-90"
             >
               {isActive && (
-                <motion.div
-                  layoutId="activeTabGlow"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  className="absolute inset-0 bg-brand-red/10 dark:bg-brand-red/20 rounded-xl -z-10"
-                />
+                <div className="absolute inset-0 rounded-xl bg-brand-red/10 dark:bg-brand-red/20 -z-10 transition-all duration-200" />
               )}
               <Icon
                 size={18}
@@ -121,7 +115,7 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
                   {savedArticlesCount}
                 </span>
               )}
-            </motion.div>
+            </div>
           );
 
           if (item.kind === 'link') {

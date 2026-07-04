@@ -1,8 +1,7 @@
 'use client';
 
 import { Search, User as UserIcon, Moon, Sun, Bookmark } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '../ui/SmartImage';
 import { cn } from '../../lib/utils';
@@ -39,6 +38,7 @@ export default function Navbar({
   const [keyboardExpanded, setKeyboardExpanded] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export default function Navbar({
       router.push(`/${activeSite}?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
-  
+
   const { user, logout } = useAuthStore();
   const activeSite = siteConfig?.id || pathname.split('/')[1] || 'pusat';
   const isArticlePage = pathname.includes('/artikel/');
@@ -78,6 +78,18 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname, isArticlePage]);
 
+  // Close profile menu on outside click
+  useEffect(() => {
+    if (!isProfileOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [isProfileOpen]);
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
@@ -87,9 +99,47 @@ export default function Navbar({
 
   const handleCategoryClick = (cat: string) => {
     setSelectedCategory(cat);
-    // Navigate to homepage with category param
     router.push(`/${activeSite}?cat=${encodeURIComponent(cat)}`);
   };
+
+  // Profile dropdown component to avoid duplication
+  const ProfileDropdown = () => (
+    <div
+      role="menu"
+      aria-label="Menu profil"
+      className={cn(
+        'absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827] transition-all duration-150 origin-top-right',
+        isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+      )}
+    >
+      <div className="border-b border-gray-100 p-4 dark:border-white/10">
+        <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user!.name}</p>
+        <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user!.email}</p>
+      </div>
+      <div className="p-2" role="none">
+        {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user!.role) && (
+          <Link
+            href={`/${activeSite}/dashboard`}
+            role="menuitem"
+            className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
+            onClick={() => setIsProfileOpen(false)}
+          >
+            Dashboard
+          </Link>
+        )}
+        <button
+          role="menuitem"
+          onClick={() => {
+            setIsProfileOpen(false);
+            logout();
+          }}
+          className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
+        >
+          Keluar
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/98 backdrop-blur-sm text-gray-900 shadow-sm dark:border-white/10 dark:bg-[#0a0f1a]/98 dark:text-white dark:shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
@@ -121,10 +171,10 @@ export default function Navbar({
             <Link href={`/${activeSite}`} className="flex flex-col items-center group">
               {siteConfig?.logoUrl ? (
                 <div className="relative h-7 w-[6.5rem] sm:h-8 sm:w-[8rem]">
-                  <SmartImage 
-                    src={siteConfig.logoUrl} 
-                    alt={siteConfig.name} 
-                    fill 
+                  <SmartImage
+                    src={siteConfig.logoUrl}
+                    alt={siteConfig.name}
+                    fill
                     context="logo"
                     className="object-contain dark:brightness-0 dark:invert"
                     priority
@@ -150,7 +200,7 @@ export default function Navbar({
             </button>
 
             {user ? (
-              <div className="relative">
+              <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   aria-haspopup="menu"
@@ -169,49 +219,10 @@ export default function Navbar({
                     {user.name.split(' ')[0]}
                   </span>
                 </button>
-
-                <AnimatePresence>
-                  {isProfileOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      role="menu"
-                      aria-label="Menu profil"
-                      className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827]"
-                    >
-                      <div className="border-b border-gray-100 p-4 dark:border-white/10">
-                        <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user.name}</p>
-                        <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user.email}</p>
-                      </div>
-                      <div className="p-2" role="none">
-                        {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user.role) && (
-                          <Link
-                            href={`/${activeSite}/dashboard`}
-                            role="menuitem"
-                            className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Dashboard
-                          </Link>
-                        )}
-                        <button
-                          role="menuitem"
-                          onClick={() => {
-                            setIsProfileOpen(false);
-                            logout();
-                          }}
-                          className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
-                        >
-                          Keluar
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <ProfileDropdown />
               </div>
             ) : (
-              <Link 
+              <Link
                 href="/login"
                 className="flex items-center gap-1.5 rounded-full p-1.5 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
               >
@@ -233,10 +244,10 @@ export default function Navbar({
               <Link href={`/${activeSite}`} className="flex flex-col items-start group">
                 {siteConfig?.logoUrl ? (
                   <div className="relative h-7 w-[6.5rem] sm:h-8 sm:w-[8rem]">
-                    <SmartImage 
-                      src={siteConfig.logoUrl} 
-                      alt={siteConfig.name} 
-                      fill 
+                    <SmartImage
+                      src={siteConfig.logoUrl}
+                      alt={siteConfig.name}
+                      fill
                       context="logo"
                       className="object-contain dark:brightness-0 dark:invert"
                       priority
@@ -300,7 +311,7 @@ export default function Navbar({
               </button>
 
               {user ? (
-                <div className="relative">
+                <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     aria-haspopup="menu"
@@ -319,49 +330,10 @@ export default function Navbar({
                       {user.name.split(' ')[0]}
                     </span>
                   </button>
-
-                  <AnimatePresence>
-                    {isProfileOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        role="menu"
-                        aria-label="Menu profil"
-                        className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827]"
-                      >
-                        <div className="border-b border-gray-100 p-4 dark:border-white/10">
-                          <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user.name}</p>
-                          <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user.email}</p>
-                        </div>
-                        <div className="p-2" role="none">
-                          {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user.role) && (
-                            <Link
-                              href={`/${activeSite}/dashboard`}
-                              role="menuitem"
-                              className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
-                              onClick={() => setIsProfileOpen(false)}
-                            >
-                              Dashboard
-                            </Link>
-                          )}
-                          <button
-                            role="menuitem"
-                            onClick={() => {
-                              setIsProfileOpen(false);
-                              logout();
-                            }}
-                            className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
-                          >
-                            Keluar
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <ProfileDropdown />
                 </div>
               ) : (
-                <Link 
+                <Link
                   href="/login"
                   className="flex items-center gap-1.5 rounded-full p-1.5 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
                 >
@@ -391,7 +363,7 @@ export default function Navbar({
               ? "h-8 gap-3"
               : "h-10 gap-5"
           )}>
-            {categories.map((cat, index) => {
+            {categories.map((cat) => {
             const isActive = selectedCategory === cat.slug || cat.subCategories?.some(sub =>
               sub.slug === selectedCategory || sub.subCategories?.some(s => s.slug === selectedCategory)
             );
@@ -403,10 +375,7 @@ export default function Navbar({
                 onMouseEnter={() => { setHoveredCategory(cat.name); setKeyboardExpanded(null); }}
                 onMouseLeave={() => setHoveredCategory(null)}
               >
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.05 }}
+                <button
                   onClick={() => handleCategoryClick(cat.slug)}
                   onKeyDown={(e) => {
                     if (hasSub && (e.key === 'Enter' || e.key === ' ')) {
@@ -425,12 +394,12 @@ export default function Navbar({
                   )}
                 >
                   {cat.slug === 'tersimpan' && (
-                    <Bookmark 
-                      size={11} 
+                    <Bookmark
+                      size={11}
                       className={cn(
                         "transition-colors",
                         isActive ? "text-brand-red fill-brand-red/20" : "text-gray-400 group-hover:text-gray-900 dark:text-white/60 dark:group-hover:text-white"
-                      )} 
+                      )}
                     />
                   )}
                   <span>{cat.name}</span>
@@ -439,84 +408,73 @@ export default function Navbar({
                       {savedArticlesCount}
                     </span>
                   )}
-                  {isActive && (
-                    <motion.span 
-                      layoutId="activeCategoryLine"
-                      className="absolute -bottom-[0.67rem] left-0 h-0.5 w-full bg-brand-red"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  {!isActive && (
-                    <span className="absolute -bottom-[0.67rem] left-0 h-0.5 w-0 bg-brand-red transition-all duration-300 group-hover:w-full" />
-                  )}
-                </motion.button>
+                  <span className={cn(
+                    "absolute -bottom-[0.67rem] left-0 h-0.5 bg-brand-red transition-all duration-200",
+                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                  )} />
+                </button>
 
-                <AnimatePresence>
-                  {(hoveredCategory === cat.name || keyboardExpanded === cat.name) && hasSub && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.12, ease: "easeOut" }}
-                      className="absolute left-1/2 top-full z-50 mt-1 flex min-w-[200px] -translate-x-1/2 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#111827]"
-                    >
-                      {cat.subCategories?.map((sub) => {
-                        const isSubActive = selectedCategory === sub.slug;
-                        const hasSubSub = sub.subCategories && sub.subCategories.length > 0;
-                        return (
-                          <div key={sub.slug}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCategoryClick(sub.slug);
-                                setHoveredCategory(null);
-                                setKeyboardExpanded(null);
-                              }}
-                              className={cn(
-                                "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10",
-                                isSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
-                              )}
-                            >
-                              <span>{sub.name}</span>
-                              <span className={cn(
-                                "w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
-                                isSubActive ? "scale-100" : ""
-                              )} />
-                            </button>
-                            {hasSubSub && (
-                              <div className="ml-3 border-l border-gray-200 pl-2 py-0.5 dark:border-white/10">
-                                {sub.subCategories!.map((subsub) => {
-                                  const isSubSubActive = selectedCategory === subsub.slug;
-                                  return (
-                                    <button
-                                      key={subsub.slug}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleCategoryClick(subsub.slug);
-                                        setHoveredCategory(null);
-                                        setKeyboardExpanded(null);
-                                      }}
-                                      className={cn(
-                                        "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10 w-full",
-                                        isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
-                                      )}
-                                    >
-                                      <span>{subsub.name}</span>
-                                      <span className={cn(
-                                        "w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
-                                        isSubSubActive ? "scale-100" : ""
-                                      )} />
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                {/* Subcategory dropdown */}
+                {(hoveredCategory === cat.name || keyboardExpanded === cat.name) && hasSub && (
+                  <div
+                    className="absolute left-1/2 top-full z-50 mt-1 flex min-w-[200px] -translate-x-1/2 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#111827] transition-all duration-150 opacity-100 translate-y-0"
+                  >
+                    {cat.subCategories?.map((sub) => {
+                      const isSubActive = selectedCategory === sub.slug;
+                      const hasSubSub = sub.subCategories && sub.subCategories.length > 0;
+                      return (
+                        <div key={sub.slug}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCategoryClick(sub.slug);
+                              setHoveredCategory(null);
+                              setKeyboardExpanded(null);
+                            }}
+                            className={cn(
+                              "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10",
+                              isSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
                             )}
-                          </div>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          >
+                            <span>{sub.name}</span>
+                            <span className={cn(
+                              "w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
+                              isSubActive ? "scale-100" : ""
+                            )} />
+                          </button>
+                          {hasSubSub && (
+                            <div className="ml-3 border-l border-gray-200 pl-2 py-0.5 dark:border-white/10">
+                              {sub.subCategories!.map((subsub) => {
+                                const isSubSubActive = selectedCategory === subsub.slug;
+                                return (
+                                  <button
+                                    key={subsub.slug}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCategoryClick(subsub.slug);
+                                      setHoveredCategory(null);
+                                      setKeyboardExpanded(null);
+                                    }}
+                                    className={cn(
+                                      "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10 w-full",
+                                      isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
+                                    )}
+                                  >
+                                    <span>{subsub.name}</span>
+                                    <span className={cn(
+                                      "w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
+                                      isSubSubActive ? "scale-100" : ""
+                                    )} />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
             })}
@@ -548,8 +506,8 @@ export default function Navbar({
                 )}
               >
                 {cat.slug === 'tersimpan' && (
-                  <Bookmark 
-                    size={9} 
+                  <Bookmark
+                    size={9}
                     className={isActive ? "text-brand-red fill-brand-red/20" : "text-gray-400 dark:text-white/60"}
                   />
                 )}
