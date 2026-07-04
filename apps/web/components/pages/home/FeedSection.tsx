@@ -150,7 +150,7 @@ export function FeedSection({
       {/* Load More */}
       {!showSavedFeed && (
         <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
-          <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={1} />
+          <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={Math.ceil(feedArticles.length / 10)} />
         </div>
       )}
     </Container>
