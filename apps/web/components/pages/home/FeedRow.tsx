@@ -71,12 +71,12 @@ export function FeedRow({ articles, pattern: intendedPattern, site, rowIndex }: 
         </div>
       )
 
-    // Design F Row 5: 3 kartu compact, image di atas
+    // Design F Row 5: 3 kartu compact, ukuran lebih kecil dari triplet
     case 'compact_triplet':
       return (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
           {articles.slice(0, 3).map(a => (
-            <NewsCard key={a.id} article={a} variant="medium" imagePosition="top" site={site} />
+            <NewsCard key={a.id} article={a} variant="compact" site={site} />
           ))}
         </div>
       )

@@ -41,7 +41,7 @@ interface NewsCardArticle {
 
 interface NewsCardProps {
   article: NewsCardArticle;
-  variant?: 'large' | 'medium' | 'minimal' | 'horizontal';
+  variant?: 'large' | 'medium' | 'compact' | 'minimal' | 'horizontal';
   imagePosition?: 'top' | 'left' | 'right' | 'background' | 'none';
   site?: string;
   priority?: boolean;
@@ -311,6 +311,47 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
                 <span>{authorName}</span>
                 <span className="opacity-30">•</span>
                 <span>{date}</span>
+              </div>
+            </div>
+          </article>
+        </Link>
+      </div>
+    );
+  }
+
+  // compact: kartu kecil — image aspect-4/3, title line-clamp-1, no excerpt
+  if (variant === 'compact') {
+    return (
+      <div className="group relative transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01]">
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
+          <article className="relative flex cursor-pointer flex-col gap-1.5">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
+              <SmartImage
+                src={imageUrl}
+                blur={article.featuredImageBlur}
+                dominantColor={article.featuredImageColor}
+                context="card"
+                alt={article.title}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className={defaultImageClass}
+                priority={priority}
+              />
+              <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1">
+                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 px-0.5">
+              <span className="text-[10px] font-black uppercase tracking-[0.12em] text-brand-red">
+                {primaryCategoryName || 'UMUM'}
+              </span>
+              <h3 className="line-clamp-1 font-sans text-xs font-bold leading-tight tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white sm:text-sm">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-1.5 text-[10px] text-brand-text-muted">
+                <span className="truncate">{authorName}</span>
+                <span className="opacity-30">·</span>
+                <span>{readTime}</span>
               </div>
             </div>
           </article>
