@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 import { Volume2, VolumeX } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 import type { AdSlotId } from '../../lib/constants';
+import { SmartImage } from './SmartImage';
 import BillboardShowcase from './BillboardShowcase';
 import InFeedShowcase from './InFeedShowcase';
 import { Container } from '../layout/Container';
@@ -58,7 +59,7 @@ const ANIM_CLASS_MAP: Record<string, string> = {
  */
 function AdSlide({
   ad,
-  type: _type,
+  type,
   label,
   onAdClick,
 }: {
@@ -187,28 +188,22 @@ function AdSlide({
               {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
           </>
-        ) : (ad.imageUrlMobile || ad.imageUrlTablet || ad.imageUrlMobileAlt || ad.imageUrlTabletAlt) ? (
-          (() => {
-            // Pick responsive sources: use alt variants when A/B selected 'B', otherwise primary
-            const useAlt = selectedVariant === 'B';
-            const mobileSrc = useAlt ? (ad.imageUrlMobileAlt || ad.imageUrlMobile) : ad.imageUrlMobile;
-            const tabletSrc = useAlt ? (ad.imageUrlTabletAlt || ad.imageUrlTablet) : ad.imageUrlTablet;
-            return (
-              <picture>
-                {mobileSrc && <source media="(max-width: 639px)" srcSet={mobileSrc} />}
-                {tabletSrc && <source media="(max-width: 767px)" srcSet={tabletSrc} />}
-                <img src={effectiveUrl} alt={label} className={cn(
-                  "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-                  ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
-                )} />
-              </picture>
-            );
-          })()
         ) : (
-          <img src={effectiveUrl} alt={label} className={cn(
-            "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105",
-            ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
-          )} />
+          <SmartImage
+            src={effectiveUrl}
+            context={type === 'HOME_TOP' ? 'hero_lead' : 'card'}
+            alt={label}
+            fill
+            priority={type === 'HOME_TOP'}
+            sizes={type === 'HOME_TOP'
+              ? '(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 880px'
+              : '(max-width: 640px) 100vw, 360px'
+            }
+            className={cn(
+              "transition-transform duration-700 group-hover:scale-105",
+              ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
+            )}
+          />
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
       </a>
@@ -444,7 +439,14 @@ export default function AdSpace({
               {ad.mediaType === 'video' && ad.mediaUrl ? (
                 <FallbackVideo src={ad.mediaUrl} />
               ) : ad.mediaUrl ? (
-                <img src={ad.mediaUrl} alt={ad.headline || 'Iklan'} className="w-full h-full object-cover" />
+                <SmartImage
+                  src={ad.mediaUrl}
+                  context="hero_lead"
+                  alt={ad.headline || 'Iklan'}
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 880px"
+                />
               ) : null}
               {/* Simple overlay with headline */}
               {ad.headline && (

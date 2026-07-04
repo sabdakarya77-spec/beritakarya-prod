@@ -1,0 +1,13 @@
+Temuan: gambar iklan (kemungkinan besar LCP element di homepage) tidak lewat optimasi Next.js
+File: components/ui/AdSpace.tsx.
+Konten artikel (NewsCard.tsx) sudah bagus — pakai komponen SmartImage custom yang dibangun di atas next/image, dengan breakpoint AVIF/WebP yang sudah dikonfigurasi rapi di next.config.js (cache 30 hari, format modern, breakpoint device yang masuk akal). Ini semua sudah benar.
+Tapi gambar iklan sendiri (ad.imageUrl dkk) dirender pakai <img> HTML biasa, bukan SmartImage/next/image:
+tsx<img src={effectiveUrl} alt={label} className="w-full h-full object-cover..." />
+Konsekuensinya untuk mobile LCP:
+
+Tidak ada fetchpriority="high" — kalau ad HOME_TOP ada di atas layar (sangat mungkin, itu namanya juga "top"), browser tidak tahu ini elemen prioritas, jadi bisa telat dimuat dibanding gambar lain.
+Tidak lewat pipeline optimasi Next.js (resize sesuai device, srcset multi-resolusi otomatis) — yang ada cuma <picture> manual dengan breakpoint kasar (mobile/tablet), bukan varian resolusi per kepadatan piksel layar (1x/2x/3x). Untuk HP modern (kebanyakan trafik Indonesia = mobile), ini artinya sering mengirim gambar lebih besar dari yang perlu.
+Tidak ada dimensi eksplisit (width/height atau aspect-ratio pasti) langsung di elemen <img>-nya — kalau parent container-nya tidak strict fixed-size, ini penyebab klasik CLS (elemen lain "loncat" saat gambar iklan baru selesai load).
+
+Ini sangat konsisten dengan gejala umum skor "Performance" mobile jelek gara-gara LCP — banner iklan di atas fold adalah kandidat LCP paling umum untuk situs berita, dan justru inilah satu-satunya tempat di kode yang saya temukan masih pakai <img> mentah untuk gambar besar/above-the-fold (bukan avatar kecil seperti di NewsCard.tsx yang dampaknya kecil).
+Rekomendasi konkret: ganti <img> di AdSpace.tsx jadi SmartImage/next/image, dengan priority khusus untuk slot yang posisinya di atas layar (HOME_TOP), supaya dapat fetchpriority="high" + preload otomatis + resize sesuai device.
