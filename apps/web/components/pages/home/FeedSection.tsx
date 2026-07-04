@@ -39,15 +39,10 @@ interface FeedSectionProps {
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
 }
 
-// Interstitial placement: muncul setelah berapa baris feed (1-indexed)
-// Dengan 16 artikel → 7 baris: hero_pair, triplet, asymmetric, text_heavy, compact_triplet, single_feature, hero_pair
-const INTERSTITIAL_AFTER_ROWS = {
-  palingDibaca: 1,   // setelah hero_pair
-  ad1: 2,             // setelah triplet
-  aksesRedaksi: 3,    // setelah asymmetric
-  infoPasar: 4,       // setelah text_heavy
-  ad2: 5,             // setelah compact_triplet (HOME_FEED_2)
-}
+// Layout Design F:
+// BERITA TERBARU: Row 1 (hero_pair) → PalingDibaca → Row 2 (triplet) → HOME_FEED_1 → Row 3 (asymmetric)
+// AKSES REDAKSI interstitial
+// BERITA LAINNYA: Row 4 (text_heavy) → InfoPasar → Row 5 (compact_triplet) → HOME_FEED_2 → Row 6+ lanjutan
 
 export function FeedSection({
   feedArticles, trending, popular, site,
@@ -88,9 +83,9 @@ export function FeedSection({
         <SavedArticlesFeed site={site} />
       ) : rows.length > 0 ? (
         <div className="space-y-6 md:space-y-8">
-          {rows.map((row, index) => (
+          {/* ═══ BERITA TERBARU (Row 1-3) ═══ */}
+          {rows.slice(0, 3).map((row, index) => (
             <div key={`row-${index}`}>
-              {/* Feed Row */}
               <FeedRow
                 articles={row.articles as HomeArticle[]}
                 pattern={row.pattern}
@@ -98,37 +93,61 @@ export function FeedSection({
                 rowIndex={row.rowIndex}
               />
 
-              {/* Interstitial: Paling Dibaca — setelah baris ke-N */}
-              {index + 1 === INTERSTITIAL_AFTER_ROWS.palingDibaca && (
+              {/* Interstitial: Paling Dibaca — setelah Row 1 (hero_pair) */}
+              {index + 1 === 1 && (
                 <PalingDibaca articles={trendingForList} site={site} />
               )}
 
-              {/* Ad: HOME_FEED_1 */}
-              {index + 1 === INTERSTITIAL_AFTER_ROWS.ad1 && (
+              {/* Ad: HOME_FEED_1 — setelah Row 2 (triplet) */}
+              {index + 1 === 2 && (
                 <AdSpace type="HOME_FEED_1" />
-              )}
-
-              {/* Interstitial: Akses Redaksi */}
-              {index + 1 === INTERSTITIAL_AFTER_ROWS.aksesRedaksi && (
-                <AksesRedaksi
-                  whatsappUrl={whatsappUrl}
-                  telegramUrl={telegramUrl}
-                  reportUrl={reportUrl}
-                  siteName={siteName}
-                />
-              )}
-
-              {/* Interstitial: Info Pasar */}
-              {index + 1 === INTERSTITIAL_AFTER_ROWS.infoPasar && (
-                <InfoPasar data={marketData} />
-              )}
-
-              {/* Ad: HOME_FEED_2 */}
-              {index + 1 === INTERSTITIAL_AFTER_ROWS.ad2 && (
-                <AdSpace type="HOME_FEED_2" />
               )}
             </div>
           ))}
+
+          {/* ═══ Interstitial: Akses Redaksi — antara BERITA TERBARU dan BERITA LAINNYA ═══ */}
+          <AksesRedaksi
+            whatsappUrl={whatsappUrl}
+            telegramUrl={telegramUrl}
+            reportUrl={reportUrl}
+            siteName={siteName}
+          />
+
+          {/* ═══ BERITA LAINNYA (Row 4+) — continued feed ═══ */}
+          <div>
+            <div className="mb-5 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
+              <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-black dark:text-white">
+                Berita Lainnya
+              </h3>
+            </div>
+
+            <div className="space-y-6 md:space-y-8">
+              {rows.slice(3).map((row, index) => {
+                const globalIndex = index + 3
+                return (
+                  <div key={`row-${globalIndex}`}>
+                    <FeedRow
+                      articles={row.articles as HomeArticle[]}
+                      pattern={row.pattern}
+                      site={site}
+                      rowIndex={row.rowIndex}
+                    />
+
+                    {/* Interstitial: Info Pasar — setelah Row 4 (text_heavy) */}
+                    {index + 1 === 1 && (
+                      <InfoPasar data={marketData} />
+                    )}
+
+                    {/* Ad: HOME_FEED_2 — setelah Row 5 (compact_triplet) */}
+                    {index + 1 === 2 && (
+                      <AdSpace type="HOME_FEED_2" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
 
           {/* Foto Jurnalistik — interstitial di akhir feed */}
           {showPhotoSection && (
