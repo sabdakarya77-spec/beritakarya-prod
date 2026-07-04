@@ -39,10 +39,9 @@ interface FeedSectionProps {
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
 }
 
-// Layout Design F:
-// BERITA TERBARU: Row 1 (hero_pair) → PalingDibaca → Row 2 (triplet) → HOME_FEED_1 → Row 3 (asymmetric)
-// AKSES REDAKSI interstitial
-// BERITA LAINNYA: Row 4 (text_heavy) → InfoPasar → Row 5 (compact_triplet) → HOME_FEED_2 → Row 6+ lanjutan
+// Layout Design F (sesuai blueprint design-grid.md):
+// BERITA TERBARU: Row 1 (hero_pair) → Row 2 (triplet) → HOME_FEED_1 → Row 3 (asymmetric) → PalingDibaca
+// BERITA LAINNYA: Row 4 (text_heavy) → Row 5 (compact_triplet) → HOME_FEED_2 → AksesRedaksi → InfoPasar
 
 export function FeedSection({
   feedArticles, trending, popular, site,
@@ -84,36 +83,24 @@ export function FeedSection({
       ) : rows.length > 0 ? (
         <div className="space-y-6 md:space-y-8">
           {/* ═══ BERITA TERBARU (Row 1-3) ═══ */}
-          {rows.slice(0, 3).map((row, index) => (
-            <div key={`row-${index}`}>
-              <FeedRow
-                articles={row.articles as HomeArticle[]}
-                pattern={row.pattern}
-                site={site}
-                rowIndex={row.rowIndex}
-              />
+          {/* Row 1: hero_pair */}
+          {rows[0] && (
+            <FeedRow articles={rows[0].articles as HomeArticle[]} pattern={rows[0].pattern} site={site} rowIndex={0} />
+          )}
+          {/* Row 2: triplet */}
+          {rows[1] && (
+            <FeedRow articles={rows[1].articles as HomeArticle[]} pattern={rows[1].pattern} site={site} rowIndex={1} />
+          )}
+          {/* Ad: HOME_FEED_1 — setelah Row 2 */}
+          <AdSpace type="HOME_FEED_1" />
+          {/* Row 3: asymmetric */}
+          {rows[2] && (
+            <FeedRow articles={rows[2].articles as HomeArticle[]} pattern={rows[2].pattern} site={site} rowIndex={2} />
+          )}
+          {/* Interstitial: Paling Dibaca — setelah Row 3 */}
+          <PalingDibaca articles={trendingForList} site={site} />
 
-              {/* Interstitial: Paling Dibaca — setelah Row 1 (hero_pair) */}
-              {index + 1 === 1 && (
-                <PalingDibaca articles={trendingForList} site={site} />
-              )}
-
-              {/* Ad: HOME_FEED_1 — setelah Row 2 (triplet) */}
-              {index + 1 === 2 && (
-                <AdSpace type="HOME_FEED_1" />
-              )}
-            </div>
-          ))}
-
-          {/* ═══ Interstitial: Akses Redaksi — antara BERITA TERBARU dan BERITA LAINNYA ═══ */}
-          <AksesRedaksi
-            whatsappUrl={whatsappUrl}
-            telegramUrl={telegramUrl}
-            reportUrl={reportUrl}
-            siteName={siteName}
-          />
-
-          {/* ═══ BERITA LAINNYA (Row 4+) — continued feed ═══ */}
+          {/* ═══ BERITA LAINNYA (Row 4+) ═══ */}
           <div>
             <div className="mb-5 flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
@@ -123,31 +110,37 @@ export function FeedSection({
             </div>
 
             <div className="space-y-6 md:space-y-8">
-              {rows.slice(3).map((row, index) => {
-                const globalIndex = index + 3
-                return (
-                  <div key={`row-${globalIndex}`}>
-                    <FeedRow
-                      articles={row.articles as HomeArticle[]}
-                      pattern={row.pattern}
-                      site={site}
-                      rowIndex={row.rowIndex}
-                    />
-
-                    {/* Interstitial: Info Pasar — setelah Row 4 (text_heavy) */}
-                    {index + 1 === 1 && (
-                      <InfoPasar data={marketData} />
-                    )}
-
-                    {/* Ad: HOME_FEED_2 — setelah Row 5 (compact_triplet) */}
-                    {index + 1 === 2 && (
-                      <AdSpace type="HOME_FEED_2" />
-                    )}
-                  </div>
-                )
-              })}
+              {/* Row 4: text_heavy */}
+              {rows[3] && (
+                <FeedRow articles={rows[3].articles as HomeArticle[]} pattern={rows[3].pattern} site={site} rowIndex={3} />
+              )}
+              {/* Row 5: compact_triplet */}
+              {rows[4] && (
+                <FeedRow articles={rows[4].articles as HomeArticle[]} pattern={rows[4].pattern} site={site} rowIndex={4} />
+              )}
+              {/* Ad: HOME_FEED_2 — setelah Row 5 */}
+              <AdSpace type="HOME_FEED_2" />
+              {/* Row 6+ lanjutan */}
+              {rows.slice(5).map((row, index) => (
+                <FeedRow
+                  key={`row-${index + 5}`}
+                  articles={row.articles as HomeArticle[]}
+                  pattern={row.pattern}
+                  site={site}
+                  rowIndex={row.rowIndex}
+                />
+              ))}
             </div>
           </div>
+
+          {/* ═══ Interstitials setelah BERITA LAINNYA ═══ */}
+          <AksesRedaksi
+            whatsappUrl={whatsappUrl}
+            telegramUrl={telegramUrl}
+            reportUrl={reportUrl}
+            siteName={siteName}
+          />
+          <InfoPasar data={marketData} />
 
           {/* Foto Jurnalistik — interstitial di akhir feed */}
           {showPhotoSection && (
