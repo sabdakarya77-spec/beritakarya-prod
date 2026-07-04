@@ -702,14 +702,13 @@ Masalah: sidebar selalu di samping, memotong feed, widget tersembunyi di bawah.
 ├─────────────────────────────────────────────────┤
 │                                                 │
 │  ░░░░░░░ PALING DIBACA ░░░░░░░  ← INTERSTITIAL │
-│  (full-width, bg berbeda, numbered list)         │
-│  ┌─────────────────────────────────────────────┐│
-│  │ 01  Judul Artikel Pertama       5 min baca  ││
-│  │ 02  Judul Artikel Kedua         3 min baca  ││
-│  │ 03  Judul Artikel Ketiga        4 min baca  ││
-│  │ 04  Judul Artikel Keempat       2 min baca  ││
-│  │ 05  Judul Artikel Kelima        6 min baca  ││
-│  └─────────────────────────────────────────────┘│
+│  (full-width, bg berbeda, horizontal cards)      │
+│  ┌────────┬────────┬────────┬────────┬────────┐ │
+│  │ 01     │ 02     │ 03     │ 04     │ 05     │ │
+│  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │ │
+│  │ Judul  │ Judul  │ Judul  │ Judul  │ Judul  │ │
+│  │ 5 min  │ 3 min  │ 4 min  │ 2 min  │ 6 min  │ │
+│  └────────┴────────┴────────┴────────┴────────┘ │
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │                                                 │
@@ -928,15 +927,14 @@ Ini adalah **Design F (Best of)** — default layout yang bisa dikonfigurasi per
 │  ╚══════════════════════════════════════════════════════════════════════════╝ │
 │                                                                              │
 │  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┐ │
-│  │  INTERSTITIAL: PALING DIBACA (Most Read)                               │ │
-│  │  bg: brand-grey/30, full-width                                         │ │
-│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
-│  │  │ 01  Judul Artikel Pertama                    Redaksi · 5 min    │  │ │
-│  │  │ 02  Judul Artikel Kedua                      Redaksi · 3 min    │  │ │
-│  │  │ 03  Judul Artikel Ketiga                     Redaksi · 4 min    │  │ │
-│  │  │ 04  Judul Artikel Keempat                    Redaksi · 2 min    │  │ │
-│  │  │ 05  Judul Artikel Kelima                     Redaksi · 6 min    │  │ │
-│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │  INTERSTITIAL: PALING DIBACA (horizontal cards, scrollable)            │ │
+│  │  bg: brand-grey/30, full-width, rounded-2xl                            │ │
+│  │  ┌────────┬────────┬────────┬────────┬────────┐                        │ │
+│  │  │ 01     │ 02     │ 03     │ 04     │ 05     │                        │ │
+│  │  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │                        │ │
+│  │  │ Judul  │ Judul  │ Judul  │ Judul  │ Judul  │                        │ │
+│  │  │ 5 min  │ 3 min  │ 4 min  │ 2 min  │ 6 min  │                        │ │
+│  │  └────────┴────────┴────────┴────────┴────────┘                        │ │
 │  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─┘ │
 │                                                                              │
 │  ╔══════════════════════════════════════════════════════════════════════════╗ │
@@ -1091,9 +1089,11 @@ Ini adalah **Design F (Best of)** — default layout yang bisa dikonfigurasi per
 │  (300×200, 3:2)          │
 ├──────────────────────────┤
 │  ░░░ PALING DIBACA ░░░   │  ← INTERSTITIAL
-│  01  Judul...  5 min     │
-│  02  Judul...  3 min     │
-│  03  Judul...  4 min     │
+│  ┌──────┬──────┬──────┐  │
+│  │01    │02    │03    │  │ ← horizontal scroll
+│  │[IMG] │[IMG] │[IMG] │  │
+│  │Judul │Judul │Judul │  │
+│  └──────┴──────┴──────┘  │
 ├──────────────────────────┤
 │                          │
 │  BERITA LAINNYA          │
