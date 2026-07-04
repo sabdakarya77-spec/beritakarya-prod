@@ -222,30 +222,6 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     ? [...feedFeatured, ...feedStream]
     : articlesList.slice(0, 8)
 
-  // DEBUG — hapus setelah selesai debug
-  // Cek breaking articles di API response
-  const breakingInApi = articlesList.filter((a: HomeArticle) => a.isBreaking).length
-  const featuredInApi = articlesList.filter((a: HomeArticle) => a.isFeatured).length
-  const exclusiveInApi = articlesList.filter((a: HomeArticle) => a.isExclusive).length
-
-  const debugInfo = {
-    apiTotal: articlesList.length,
-    uniqueIds: new Set(articlesList.map((a: HomeArticle) => a.id)).size,
-    breakingInApi,
-    featuredInApi,
-    exclusiveInApi,
-    hero: heroArticles.length,
-    fokus: fokusRedaksi.length,
-    feedFeatured: feedFeatured.length,
-    feedStream: feedStream.length,
-    feedTotal: feedArticles.length,
-    editorChoice: editorChoice.length,
-    opinion: opinionArticles.length,
-    photo: photoJournal.length,
-    video: videoStories.length,
-    trending: trending.length,
-    totalUsed: heroArticles.length + fokusRedaksi.length + feedArticles.length + editorChoice.length + opinionArticles.length + photoJournal.length + videoStories.length,
-  }
 
   // ── Popular untuk fallback trending interstitial ──
   const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
@@ -306,7 +282,6 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           siteSettings={siteSettings}
           siteConfigId={siteConfig.id}
           resolveCategoryName={resolveCategoryName}
-          debugInfo={debugInfo}
         />
 
         {/* ZONA 5+ — EDITORIAL EXTRAS */}

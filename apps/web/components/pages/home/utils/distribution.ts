@@ -273,27 +273,6 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const feedFeatured = feedPool.slice(0, 4)
   const feedStream = feedPool.slice(4, 16)
 
-  // DEBUG — hapus setelah selesai
-  const debugBreakdown = {
-    totalArticles: articles.length,
-    uniqueIds: new Set(articles.map(a => a.id)).size,
-    breakingCount: breaking.length,
-    nonBreakingCount: nonBreaking.length,
-    heroCount: hero.length,
-    overflowBreakingCount: 0,
-    remainingAfterHeroCount: remainingAfterHero.length,
-    editorialFlaggedCount: editorialFlagged.length,
-    fokusRedaksiCount: fokusRedaksi.length,
-    feedPoolCount: feedPool.length,
-    feedFeaturedCount: feedFeatured.length,
-    feedStreamCount: feedStream.length,
-    // Hitung total yang terpakai
-    totalUsed: hero.length + fokusRedaksi.length + feedFeatured.length + feedStream.length,
-    // Sisa yang tidak masuk zona
-    unaccounted: articles.length - hero.length - fokusRedaksi.length - feedFeatured.length - feedStream.length,
-  }
-  console.log('[distribution]', JSON.stringify(debugBreakdown))
-
   // 6. Editorial extras — dedup PROGRESIF. Urutan sengaja: editorial dulu,
   //    trending terakhir, supaya prioritas keputusan editor > metric views.
   const usedIds = new Set([...hero, ...fokusRedaksi, ...feedFeatured, ...feedStream].map(a => a.id))
