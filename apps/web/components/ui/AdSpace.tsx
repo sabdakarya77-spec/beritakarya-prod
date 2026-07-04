@@ -11,14 +11,16 @@ import BillboardShowcase from './BillboardShowcase';
 import InFeedShowcase from './InFeedShowcase';
 import { Container } from '../layout/Container';
 
-interface AdSpaceProps {
+export interface AdSpaceProps {
   type: AdSlotId;
   slot?: AdSlotId;
   label?: string;
   className?: string;
+  /** Pre-fetched ads from server (SSR) — skips client-side fetch for LCP optimization */
+  initialAds?: AdItem[];
 }
 
-interface AdItem {
+export interface AdItem {
   id: string;
   slot: string;
   code: string | null;
@@ -259,7 +261,8 @@ export default function AdSpace({
   type,
   slot,
   label = "Ad",
-  className = ""
+  className = "",
+  initialAds,
 }: AdSpaceProps) {
   const params = useParams();
   const site = params?.site as string | undefined;
@@ -280,8 +283,14 @@ export default function AdSpace({
   // Allow UI to reuse the same visual format while targeting a different backend slot.
   const slotName = slot || type;
 
-  // Fetch ads
+  // Fetch ads — skip if pre-fetched data is provided (SSR)
   useEffect(() => {
+    if (initialAds && initialAds.length > 0) {
+      setAds(initialAds);
+      setLoading(false);
+      return;
+    }
+
     let active = true;
     const fetchAds = async () => {
       try {
@@ -305,7 +314,7 @@ export default function AdSpace({
 
     fetchAds();
     return () => { active = false; };
-  }, [site, slotName]);
+  }, [site, slotName, initialAds]);
 
   // Carousel: auto-rotate (only if multiple ads)
   // HOME_TOP (video): 15 detik (video durasi 10-15 detik + buffer 3 detik agar video selesai penuh)

@@ -18,6 +18,7 @@ import {
   PhotoJournalWidget,
   VideoWidget,
 } from './LazyWidgets'
+import { fetchAdsForSlot } from '../../lib/ads'
 
 // ─────────────────────────────────────────────
 // Types for API-fetched data
@@ -321,11 +322,12 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
-  const [articlesList, categoriesTree, marketData, trendingArticles] = await Promise.all([
+  const [articlesList, categoriesTree, marketData, trendingArticles, homeTopAds] = await Promise.all([
     getArticles(siteConfig.id, categoryFilter, searchQuery),
     getCategories(siteConfig.id),
     getMarketSnapshot(),
     getTrendingArticles(siteConfig.id),
+    fetchAdsForSlot(siteConfig.id, 'HOME_TOP'),
   ])
 
   // Mode halaman
@@ -391,7 +393,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
         )}
 
         {/* ─── AD HOME_TOP — setelah hero, spacing dihandle internal oleh AdSpace ─── */}
-        <AdSpace type="HOME_TOP" />
+        <AdSpace type="HOME_TOP" initialAds={homeTopAds} />
 
         {/* ════════════════════════════════════════════════════════
             ZONA 2 — FOKUS REDAKSI  (Full Width, Grid Asimetris)
