@@ -281,6 +281,22 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const feedFeatured = feedPool.slice(0, 4)
   const feedStream = feedPool.slice(4, 16)
 
+  // DEBUG — hapus setelah selesai
+  console.log('[distribution DEBUG]', {
+    totalArticles: articles.length,
+    breakingCount: breaking.length,
+    nonBreakingCount: nonBreaking.length,
+    heroCount: hero.length,
+    heroIds: [...heroIds],
+    remainingAfterHeroCount: remainingAfterHero.length,
+    editorialFlaggedCount: editorialFlagged.length,
+    fokusRedaksiCount: fokusRedaksi.length,
+    fokusIds: [...fokusIds],
+    feedPoolCount: feedPool.length,
+    feedFeaturedCount: feedFeatured.length,
+    feedStreamCount: feedStream.length,
+  })
+
   // 6. Editorial extras — dedup PROGRESIF. Urutan sengaja: editorial dulu,
   //    trending terakhir, supaya prioritas keputusan editor > metric views.
   const usedIds = new Set([...hero, ...fokusRedaksi, ...feedFeatured, ...feedStream].map(a => a.id))
