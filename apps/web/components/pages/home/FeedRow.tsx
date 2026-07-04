@@ -29,57 +29,63 @@ export function FeedRow({ articles, pattern: intendedPattern, site, rowIndex }: 
   }
 
   switch (pattern) {
+    // Design F Row 1: background besar + right (text left, image right)
     case 'hero_pair':
       return (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <NewsCard article={articles[0]} variant="large" site={site} />
-          <NewsCard article={articles[1]} variant="horizontal" site={site} />
+          <NewsCard article={articles[0]} variant="medium" imagePosition="background" site={site} />
+          <NewsCard article={articles[1]} variant="horizontal" imagePosition="right" site={site} />
         </div>
       )
 
+    // Design F Row 2: 3 kartu sejajar, image di atas
     case 'triplet':
       return (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {articles.slice(0, 3).map(a => (
-            <NewsCard key={a.id} article={a} variant="medium" site={site} />
+            <NewsCard key={a.id} article={a} variant="medium" imagePosition="top" site={site} />
           ))}
         </div>
       )
 
+    // Design F Row 3: kiri besar background + kanan 2 stacked (image left)
     case 'asymmetric':
       return (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
           <div className="md:col-span-7">
-            <NewsCard article={articles[0]} variant="large" site={site} />
+            <NewsCard article={articles[0]} variant="medium" imagePosition="background" site={site} />
           </div>
           <div className="flex flex-col gap-4 md:col-span-5">
-            <NewsCard article={articles[1]} variant="horizontal" site={site} />
-            <NewsCard article={articles[2]} variant="horizontal" site={site} />
+            <NewsCard article={articles[1]} variant="horizontal" imagePosition="left" site={site} />
+            <NewsCard article={articles[2]} variant="horizontal" imagePosition="left" site={site} />
           </div>
         </div>
       )
 
+    // Design F Row 4: 2 kartu horizontal, kiri + kanan (image right untuk kontras)
     case 'text_heavy':
       return (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <NewsCard article={articles[0]} variant="horizontal" site={site} />
-          <NewsCard article={articles[1]} variant="horizontal" site={site} />
+          <NewsCard article={articles[0]} variant="horizontal" imagePosition="left" site={site} />
+          <NewsCard article={articles[1]} variant="horizontal" imagePosition="right" site={site} />
         </div>
       )
 
+    // Design F Row 5: 3 kartu compact, image di atas
     case 'compact_triplet':
       return (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {articles.slice(0, 3).map(a => (
-            <NewsCard key={a.id} article={a} variant="medium" site={site} />
+            <NewsCard key={a.id} article={a} variant="medium" imagePosition="top" site={site} />
           ))}
         </div>
       )
 
+    // Fallback: 1 kartu full-width background
     case 'single_feature':
       return (
         <div className="grid grid-cols-1">
-          <NewsCard article={articles[0]} variant="large" site={site} />
+          <NewsCard article={articles[0]} variant="medium" imagePosition="background" site={site} />
         </div>
       )
 

@@ -42,11 +42,12 @@ interface NewsCardArticle {
 interface NewsCardProps {
   article: NewsCardArticle;
   variant?: 'large' | 'medium' | 'minimal' | 'horizontal';
+  imagePosition?: 'top' | 'left' | 'right' | 'background' | 'none';
   site?: string;
   priority?: boolean;
 }
 
-const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', site = 'pusat', priority = false }: NewsCardProps) {
+const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', imagePosition, site = 'pusat', priority = false }: NewsCardProps) {
   if (!article) {
     return (
       <div className="flex items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-6 text-center dark:border-white/10 dark:bg-white/[0.02]">
@@ -215,6 +216,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
   }
 
   if (variant === 'horizontal') {
+    const isRight = imagePosition === 'right';
     return (
       <article className="group relative h-full flex flex-col rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20">
         <ArticleBookmarkButton
@@ -225,7 +227,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
           idleClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-black/20"
           iconSize={14}
         />
-        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="flex-1 flex gap-4">
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className={`flex-1 flex gap-4 ${isRight ? 'flex-row-reverse' : ''}`}>
           <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
             <SmartImage
               src={imageUrl}
@@ -239,7 +241,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
               priority={priority}
             />
           </div>
-          <div className="flex flex-1 flex-col justify-center gap-2 py-1 pr-10 min-w-0">
+          <div className={`flex flex-1 flex-col justify-center gap-2 py-1 min-w-0 ${isRight ? '' : 'pr-10'}`}>
             <div className="flex flex-wrap items-center gap-1.5">
               {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
               <span className={categoryLabelClass}>
@@ -269,6 +271,55 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', sit
     );
   }
 
+  // medium + background: full background image like large, tapi lebih pendek
+  if (imagePosition === 'background') {
+    return (
+      <div className="group relative h-full transition-transform duration-300 ease-out hover:-translate-y-0.5">
+        <ArticleBookmarkButton
+          article={article}
+          site={site}
+          className="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm"
+          activeClassName="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
+          idleClassName="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:text-white hover:border-white/20"
+          iconSize={14}
+        />
+        <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="h-full block">
+          <article className="relative h-full min-h-[220px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl">
+            <SmartImage
+              src={imageUrl}
+              blur={article.featuredImageBlur}
+              dominantColor={article.featuredImageColor}
+              context="card"
+              alt={article.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className={heroImageClass}
+              priority={priority}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-transparent" />
+            <div className="absolute bottom-0 left-0 w-full p-4 pb-6 md:p-5 md:pb-6">
+              <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                {badgeVariant && <EditorialBadge variant={badgeVariant} size="sm" />}
+                <span className="inline-block rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+                  {primaryCategoryName || 'UMUM'}
+                </span>
+              </div>
+              <h3 className="line-clamp-2 font-sans text-sm font-extrabold leading-[1.15] tracking-tight text-white md:text-base">
+                {article.title}
+              </h3>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-white/70">
+                <span>{authorName}</span>
+                <span className="opacity-30">•</span>
+                <span>{date}</span>
+              </div>
+            </div>
+          </article>
+        </Link>
+      </div>
+    );
+  }
+
+  // default medium: image on top
   return (
     <div className="group relative transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01]">
       <ArticleBookmarkButton
