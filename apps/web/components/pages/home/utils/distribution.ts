@@ -236,12 +236,13 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
 
   // 2. Pisahkan breaking news — ini hard override, bukan ikut sort by score.
   //    Di antara sesama breaking, urutkan by publishedAt terbaru dulu.
-  const breaking = scored
+  //    BATASI: maksimal 1 breaking masuk hero (hindari semua artikel isBreaking=true)
+  const allBreaking = scored
     .filter(s => s.article.isBreaking)
     .sort((a, b) => getPublishedDate(b.article).getTime() - getPublishedDate(a.article).getTime())
+  const breaking = allBreaking.slice(0, 1) // maksimal 1 breaking di hero
   const nonBreaking = scored
-    .filter(s => !s.article.isBreaking)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score) // semua artikel (termasuk breaking sisa) ikut skor
 
   // 3. Hero: breaking selalu didahulukan, sisanya diisi by score.
   const heroCount = heroMode === 'SINGLE_HEADLINE' ? 1
@@ -252,26 +253,17 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const hero = heroPicks.map(s => s.article)
   const heroIds = new Set(hero.map(a => a.id))
 
-  // 3b. Breaking yang TIDAK kebagian slot hero wajib tetap diprioritaskan —
-  //     dipaksa masuk depan Fokus Redaksi, bukan dilepas ke skor biasa
-  //     (yang sudah tidak punya bonus breaking sama sekali).
-  const overflowBreaking = breaking.map(s => s.article).filter(a => !heroIds.has(a.id))
-  if (overflowBreaking.length > 0 && typeof console !== 'undefined') {
-    console.warn(
-      `[homepage] ${overflowBreaking.length} breaking news tidak muat di hero ` +
-      `(heroMode=${heroMode}, kapasitas=${heroCount}) — dipindah ke depan Fokus Redaksi.`
-    )
-  }
+  // 3b. Breaking yang TIDAK kebagian slot hero — masuk ke pool biasa (skor).
+  //    Tidak ada overflow breaking karena kita batasi 1 breaking di hero.
 
-  // 4. Fokus Redaksi: overflow breaking di depan, sisanya diisi dari
-  //    artikel ber-flag editorial (isFeatured/isExclusive), fallback ke
-  //    top-by-score kalau flag editorial kurang dari 2 artikel.
+  // 4. Fokus Redaksi: prioritaskan artikel ber-flag editorial (isFeatured/isExclusive),
+  //    fallback ke top-by-score kalau flag editorial kurang dari 2 artikel.
   const remainingAfterHero = nonBreaking.filter(s => !heroIds.has(s.article.id))
   const editorialFlagged = remainingAfterHero.filter(s => s.signals.editorial >= 0.35).map(s => s.article)
   const fokusBase = editorialFlagged.length >= 2
     ? editorialFlagged.slice(0, 4)
     : remainingAfterHero.slice(0, 4).map(s => s.article)
-  const fokusRedaksi = dedupById([...overflowBreaking, ...fokusBase]).slice(0, 4)
+  const fokusRedaksi = fokusBase.slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
   // 5. Feed: sisa artikel pool utama setelah hero+fokus, urut by score.
@@ -288,7 +280,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     breakingCount: breaking.length,
     nonBreakingCount: nonBreaking.length,
     heroCount: hero.length,
-    overflowBreakingCount: overflowBreaking.length,
+    overflowBreakingCount: 0,
     remainingAfterHeroCount: remainingAfterHero.length,
     editorialFlaggedCount: editorialFlagged.length,
     fokusRedaksiCount: fokusRedaksi.length,
@@ -335,6 +327,6 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     videoStories,
     trending,
     popular,
-    overflowBreakingCount: overflowBreaking.length,
+    overflowBreakingCount: 0,
   }
 }
