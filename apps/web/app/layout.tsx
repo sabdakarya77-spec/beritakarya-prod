@@ -39,6 +39,8 @@ export default function RootLayout({
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#B91C1C" />
+        <link rel="preconnect" href="https://media.beritakarya.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://media.beritakarya.co" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

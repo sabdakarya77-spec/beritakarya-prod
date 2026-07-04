@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './Navbar';
 import SiteFooter from './SiteFooter';
 import BreakingNewsTicker from '../ui/BreakingNewsTicker';
-import AISummary from '../ui/AISummary';
 import MobileBottomNav from './MobileBottomNav';
-import MobileMenu from './MobileMenu';
-import FullScreenSearch from '../ui/FullScreenSearch';
 import { CATEGORIES_CONFIG, CategoryItem, type SiteConfig } from '../../lib/constants';
 import { api } from '../../lib/api';
 import { Container } from './Container';
+
+// Lazy load components that are hidden on initial render
+const MobileMenu = lazy(() => import('./MobileMenu'));
+const FullScreenSearch = lazy(() => import('../ui/FullScreenSearch'));
+const AISummary = lazy(() => import('../ui/AISummary'));
 
 interface ApiCategory {
   name: string;
@@ -25,17 +27,15 @@ interface PublicSiteLayoutProps {
   hideTicker?: boolean;
 }
 
-export default function PublicSiteLayout({ 
-  children, 
-  siteConfig, 
+export default function PublicSiteLayout({
+  children,
+  siteConfig,
   initialCategory = 'terbaru',
   hideTicker = false
 }: PublicSiteLayoutProps) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Sync selectedCategory when initialCategory prop changes
-  // (e.g., user clicks logo to go back to homepage → terbaru)
   useEffect(() => {
     setSelectedCategory(initialCategory);
   }, [initialCategory]);
@@ -50,7 +50,6 @@ export default function PublicSiteLayout({
           params: { site: siteConfig.id }
         });
           if (data.success && data.data && data.data.length > 0) {
-          // Filter out sistem categories (terbaru & tersimpan) from API response to avoid duplicates
           const apiCategories = data.data as ApiCategory[];
           const filteredCategories = apiCategories.filter(
             (cat) => cat.slug !== 'terbaru' && cat.slug !== 'tersimpan'
@@ -63,7 +62,6 @@ export default function PublicSiteLayout({
               subCategories: cat.subCategories?.map((sub) => ({
                 name: sub.name,
                 slug: sub.slug,
-                // Map 3rd-level sub-subcategories (Navbar supports 3 levels)
                 subCategories: sub.subCategories?.map((subsub) => ({
                   name: subsub.name,
                   slug: subsub.slug
@@ -87,7 +85,6 @@ export default function PublicSiteLayout({
       className="min-h-screen bg-[var(--bg-main)] pb-28 transition-colors duration-500 md:pb-0"
       style={{ '--brand-red': siteConfig.appearance?.primaryColor || '#B91C1C' } as React.CSSProperties}
     >
-      {/* Skip-to-content for keyboard and screen reader users */}
       <a href="#main-content" className="skip-to-content">
         Langsung ke konten
       </a>
@@ -100,7 +97,7 @@ export default function PublicSiteLayout({
         </div>
       )}
 
-      <Navbar 
+      <Navbar
         siteConfig={siteConfig}
         categories={categories}
         selectedCategory={selectedCategory}
@@ -108,42 +105,49 @@ export default function PublicSiteLayout({
         onSearchClick={() => setIsSearchOpen(true)}
         onMenuClick={() => setIsMenuOpen(true)}
       />
-      
+
       {children}
 
-      <SiteFooter 
+      <SiteFooter
         siteConfig={siteConfig}
         categories={categories}
       />
 
-      {/* AI Summary is hidden by default in its component logic */}
-      <AISummary title="Ringkasan AI" content="Konten ringkasan otomatis akan muncul di sini." />
-
-      <MobileBottomNav 
-        site={siteConfig.id} 
+      <MobileBottomNav
+        site={siteConfig.id}
         onSearchClick={() => setIsSearchOpen(true)}
         selectedCategory={selectedCategory}
         onMenuClick={() => setIsMenuOpen(true)}
       />
 
-      <MobileMenu 
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        categories={categories}
-        siteConfig={siteConfig}
-        selectedCategory={selectedCategory}
-        onCategoryClick={(slug) => {
-          setSelectedCategory(slug);
-          // router push logic is handled in Navbar, but we can sync here
-        }}
-      />
+      {/* Lazy-loaded overlay components — only loaded when triggered */}
+      <Suspense fallback={null}>
+        {isMenuOpen && (
+          <MobileMenu
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            categories={categories}
+            siteConfig={siteConfig}
+            selectedCategory={selectedCategory}
+            onCategoryClick={(slug) => setSelectedCategory(slug)}
+          />
+        )}
+      </Suspense>
 
-      <FullScreenSearch 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
-        site={siteConfig.id} 
-        trendingTopics={(siteConfig.trendingTopics as string[]) || undefined}
-      />
+      <Suspense fallback={null}>
+        {isSearchOpen && (
+          <FullScreenSearch
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+            site={siteConfig.id}
+            trendingTopics={(siteConfig.trendingTopics as string[]) || undefined}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <AISummary title="Ringkasan AI" content="Konten ringkasan otomatis akan muncul di sini." />
+      </Suspense>
     </div>
   );
 }
