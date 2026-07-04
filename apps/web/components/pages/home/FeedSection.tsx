@@ -41,17 +41,6 @@ export function FeedSection({
   const rows = chunkIntoRows(feedArticles as (HomeArticle & { [key: string]: unknown })[], DEFAULT_PATTERN_ROTATION)
   const trendingForList = trending.length > 0 ? trending : popular
 
-  // DEBUG — hapus setelah selesai debug
-  if (typeof window !== 'undefined') {
-    console.log('[FeedSection DEBUG]', {
-      feedArticlesCount: feedArticles.length,
-      rowsCount: rows.length,
-      rowsSummary: rows.map((r, i) => ({ index: i, pattern: r.pattern, articleCount: r.articles.length })),
-      trendingCount: trending.length,
-      popularCount: popular.length,
-    })
-  }
-
   return (
     <Container className="py-4 md:py-6">
       {/* Section Header */}
@@ -71,6 +60,14 @@ export function FeedSection({
           </span>
         </div>
       </div>
+
+      {/* DEBUG — hapus setelah selesai */}
+      <div className="mb-4 rounded-lg bg-yellow-100 p-3 text-xs font-mono dark:bg-yellow-900/30">
+        <strong>DEBUG FeedSection:</strong> feedArticles={feedArticles.length} | rows={rows.length} |
+        trending={trending.length} | popular={popular.length} |
+        rows: {rows.map((r, i) => `[${i}:${r.pattern}×${r.articles.length}]`).join(' ')}
+      </div>
+      {/* END DEBUG */}
 
       {showSavedFeed ? (
         <SavedArticlesFeed site={site} />
