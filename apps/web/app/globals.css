@@ -29,36 +29,6 @@
     --color-analysis: #0369A1;
     --color-live: #16A34A;
 
-    /* Workflow Status Colors */
-    --status-draft: #F59E0B;
-    --status-submitted: #3B82F6;
-    --status-review: #8B5CF6;
-    --status-revision: #F97316;
-    --status-approved: #10B981;
-    --status-scheduled: #06B6D4;
-    --status-published: #059669;
-    --status-archived: #6B7280;
-
-    /* Dashboard Accent */
-    --dash-sidebar: #0F172A;
-    --dash-sidebar-hover: rgba(255,255,255,0.05);
-    --dash-card: #FFFFFF;
-    --dash-border: #E2E8F0;
-
-    /* ==================== PANEL EDITOR DESIGN SYSTEM TOKENS ==================== */
-    --panel-bg: #FFFFFF;
-    --panel-surface: #F8FAFC;
-    --panel-elevated: #F1F5F9;
-    --panel-border: rgba(15, 23, 42, 0.08);
-    --panel-border-hover: rgba(15, 23, 42, 0.15);
-    --accent-red: #EF4444;
-    --accent-red-muted: rgba(239, 68, 68, 0.08);
-    --accent-amber: #F59E0B;
-    --accent-purple: #8B5CF6;
-    --panel-text-primary: #0F172A;
-    --panel-text-secondary: #475569;
-    --panel-text-muted: #94A3B8;
-
     /* ==================== CONTAINER SYSTEM TOKENS ==================== */
     /* Horizontal Padding (Container Gutters) */
     --container-padding-mobile: 1rem;    /* px-4 = 16px */
@@ -108,34 +78,6 @@
     --color-exclusive: #A78BFA;
     --color-analysis: #38BDF8;
     --color-live: #4ADE80;
-
-    /* Workflow Status Colors (Dark Mode) */
-    --status-draft: #FBBF24;
-    --status-submitted: #60A5FA;
-    --status-review: #A78BFA;
-    --status-revision: #FB923C;
-    --status-approved: #34D399;
-    --status-scheduled: #22D3EE;
-    --status-published: #2DD4BF;
-    --status-archived: #94A3B8;
-
-    --dash-sidebar: #020617;
-    --dash-card: #0F172A;
-    --dash-border: rgba(255,255,255,0.06);
-
-    /* ==================== PANEL EDITOR DESIGN SYSTEM TOKENS (DARK MODE) ==================== */
-    --panel-bg: #0E1118;
-    --panel-surface: #161B27;
-    --panel-elevated: #1C2333;
-    --panel-border: rgba(255, 255, 255, 0.07);
-    --panel-border-hover: rgba(255, 255, 255, 0.15);
-    --accent-red: #EF4444;
-    --accent-red-muted: rgba(239, 68, 68, 0.12);
-    --accent-amber: #F59E0B;
-    --accent-purple: #8B5CF6;
-    --panel-text-primary: #F1F5F9;
-    --panel-text-secondary: #64748B;
-    --panel-text-muted: #334155;
   }
 
   body {
