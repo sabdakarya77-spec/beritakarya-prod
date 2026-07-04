@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '../ui/SmartImage';
 import { cn } from '../../lib/utils';
@@ -14,7 +13,7 @@ type HeroArticle = {
   featuredImage?: string | null;
   featuredImageBlur?: string | null;
   featuredImageColor?: string | null;
-  category?: { name?: string | null } | null; // legacy
+  category?: { name?: string | null } | null;
   categories?: Array<{ category?: { name?: string | null } | null }> | null;
   blocks?: Array<{ type?: string; url?: string; width?: number; height?: number }>;
 };
@@ -59,10 +58,11 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
   const [activeIndex, setActiveIndex] = useState(0);
   const [timerTrigger, setTimerTrigger] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const prevIndexRef = useRef(0);
 
   const heroArticles = articles?.slice(0, 4) || [];
 
-  // Interval otomatis berganti slide setiap 5 detik, berhenti saat user hover
   useEffect(() => {
     if (heroArticles.length <= 1 || isPaused) return;
 
@@ -73,13 +73,23 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
     return () => clearInterval(interval);
   }, [timerTrigger, heroArticles.length, isPaused]);
 
+  // Trigger CSS transition on index change
+  useEffect(() => {
+    if (prevIndexRef.current !== activeIndex) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => setIsTransitioning(false), 350);
+      prevIndexRef.current = activeIndex;
+      return () => clearTimeout(timer);
+    }
+  }, [activeIndex]);
+
   if (!articles || articles.length === 0) return null;
 
   const currentArticle = heroArticles[activeIndex] || heroArticles[0];
 
   const handleNavClick = (idx: number) => {
     setActiveIndex(idx);
-    setTimerTrigger((prev) => prev + 1); // Mereset interval timer ke 0
+    setTimerTrigger((prev) => prev + 1);
   };
 
   return (
@@ -90,51 +100,47 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
     >
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] bg-brand-red/5 dark:bg-brand-red/10 blur-[80px] -z-10 rounded-full" />
-      
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 h-auto lg:h-[350px] xl:h-[380px]">
-        
+
         {/* Kiri: Slider Gambar Utama */}
         <div className="relative overflow-hidden rounded-2xl lg:col-span-8 h-[220px] sm:h-[280px] md:h-[320px] lg:h-full w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeIndex}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.35, ease: 'easeInOut' }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <Link href={`/${site}/artikel/${currentArticle.slug}`} className="relative block w-full h-full group">
-                <SmartImage 
-                  src={getImageUrl(currentArticle)} 
-                  blur={currentArticle.featuredImageBlur}
-                  dominantColor={currentArticle.featuredImageColor}
-                  context="hero_lead"
-                  alt={currentArticle.title}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                  style={{ objectPosition: getHeroImagePosition(currentArticle, 'lead') }}
-                  priority
-                />
-                
-                {/* Gradient overlay gelap agar judul mudah terbaca */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent min-h-[50%]" />
-                
-                {/* Overlay Konten Teks */}
-                <div className="absolute bottom-0 left-0 w-full p-5 sm:p-7 md:p-8 lg:p-10">
-                  <div className="mb-2.5 sm:mb-3">
-                    <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || undefined))}>
-                      {currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || 'Headline'}
-                    </span>
-                  </div>
-                  
-                  <h1 className="line-clamp-2 max-w-[22ch] text-balance font-sans text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
-                    {currentArticle.title}
-                  </h1>
+          <div
+            className={cn(
+              'absolute inset-0 w-full h-full transition-all duration-350 ease-in-out',
+              isTransitioning ? 'opacity-0 translate-x-2.5' : 'opacity-100 translate-x-0'
+            )}
+          >
+            <Link href={`/${site}/artikel/${currentArticle.slug}`} className="relative block w-full h-full group">
+              <SmartImage
+                src={getImageUrl(currentArticle)}
+                blur={currentArticle.featuredImageBlur}
+                dominantColor={currentArticle.featuredImageColor}
+                context="hero_lead"
+                alt={currentArticle.title}
+                fill
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                style={{ objectPosition: getHeroImagePosition(currentArticle, 'lead') }}
+                priority
+              />
+
+              {/* Gradient overlay gelap agar judul mudah terbaca */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent min-h-[50%]" />
+
+              {/* Overlay Konten Teks */}
+              <div className="absolute bottom-0 left-0 w-full p-5 sm:p-7 md:p-8 lg:p-10">
+                <div className="mb-2.5 sm:mb-3">
+                  <span className={cn("px-2.5 py-1 text-[10px] sm:text-[10px] font-black uppercase tracking-[0.14em] rounded-sm shadow-sm", getCategoryColor(currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || undefined))}>
+                    {currentArticle.categories?.[0]?.category?.name || currentArticle.category?.name || 'Headline'}
+                  </span>
                 </div>
-              </Link>
-            </motion.div>
-          </AnimatePresence>
+
+                <h1 className="line-clamp-2 max-w-[22ch] text-balance font-sans text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-extrabold leading-[1.2] tracking-tight text-white transition-colors group-hover:text-white/90">
+                  {currentArticle.title}
+                </h1>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Kanan: Navigasi Menu Vertikal (Hanya tampil di Desktop) */}
@@ -152,7 +158,6 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                     : "bg-transparent border-transparent hover:bg-white/60 dark:hover:bg-white/[0.02]"
                 )}
               >
-                {/* Label Kategori */}
                 <div className="mb-1.5 flex items-center justify-between">
                   <span className={cn(
                     "text-[10px] xl:text-[10px] font-extrabold uppercase tracking-widest",
@@ -160,14 +165,12 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
                   )}>
                     {article.category?.name || 'Headline'}
                   </span>
-                  
-                  {/* Indikator Progres Aktif Mini */}
+
                   {isActive && (
                     <span className="flex h-1.5 w-1.5 rounded-full bg-brand-red animate-ping" />
                   )}
                 </div>
 
-                {/* Judul Berita Pendek */}
                 <h3 className={cn(
                   "line-clamp-2 font-sans text-[0.78rem] xl:text-[0.82rem] leading-[1.25] tracking-tight font-bold transition-colors",
                   isActive ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white/60 hover:text-slate-700 dark:hover:text-white/80"
@@ -190,8 +193,8 @@ export function MagazineBentoHero({ articles, site }: { articles: HeroArticle[],
               onClick={() => handleNavClick(idx)}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
-                idx === activeIndex 
-                  ? "w-6 bg-brand-red" 
+                idx === activeIndex
+                  ? "w-6 bg-brand-red"
                   : "w-1.5 bg-slate-300 dark:bg-white/20 hover:bg-slate-400 dark:hover:bg-white/40"
               )}
               aria-label={`Go to slide ${idx + 1}`}

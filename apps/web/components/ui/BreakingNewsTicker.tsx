@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { usePrefersReducedMotion } from '../../hooks/useReducedMotion';
 
@@ -51,7 +50,6 @@ export default function BreakingNewsTicker({
 
   return (
     <div className="flex h-8 max-w-full items-center overflow-hidden text-white sm:h-9 lg:h-10">
-      {/* Penanda Minimalis Terkini (Pulse Dot + Teks) */}
       <div className="flex items-center gap-1.5 shrink-0 px-2 sm:px-3">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-red opacity-75"></span>
@@ -68,14 +66,8 @@ export default function BreakingNewsTicker({
             {tickerContent}
           </div>
         ) : (
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              duration: 40,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="absolute inset-y-0 left-0 flex h-full min-w-max items-center gap-5 whitespace-nowrap pl-6 pr-3 will-change-transform sm:gap-7 sm:pl-10 sm:pr-4 lg:gap-10 lg:pl-14 lg:pr-5"
+          <div
+            className="absolute inset-y-0 left-0 flex h-full min-w-max items-center gap-5 whitespace-nowrap pl-6 pr-3 will-change-transform sm:gap-7 sm:pl-10 sm:pr-4 lg:gap-10 lg:pl-14 lg:pr-5 animate-[ticker_40s_linear_infinite] hover:[animation-play-state:paused]"
           >
             {tickerContent}
             {tickerNews.map((item, i) => (
@@ -86,7 +78,7 @@ export default function BreakingNewsTicker({
                 <span className="h-1 w-1 rounded-full bg-brand-red sm:h-1 sm:w-1 lg:h-1.5 lg:w-1.5" />
               </div>
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

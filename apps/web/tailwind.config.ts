@@ -54,12 +54,22 @@ const config: Config = {
       },
       animation: {
         'marquee': 'marquee 25s linear infinite',
+        'ticker': 'ticker 40s linear infinite',
+        'fade-slide-up': 'fadeSlideUp 0.3s ease-out',
       },
       keyframes: {
         marquee: {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-100%)' },
-        }
+        },
+        ticker: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        fadeSlideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px) scale(0.95)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
       },
       /* ==================== CONTAINER SYSTEM TOKENS ==================== */
       spacing: {

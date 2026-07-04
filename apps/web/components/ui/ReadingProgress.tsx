@@ -1,39 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
-import { usePrefersReducedMotion } from '../../hooks/useReducedMotion';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function ReadingProgress() {
-  const shouldReduceMotion = usePrefersReducedMotion()
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: shouldReduceMotion ? 1000 : 100,
-    damping: shouldReduceMotion ? 100 : 30,
-    restDelta: 0.001
-  });
-
+  const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
+  const handleScroll = useCallback(() => {
+    const scrollTop = window.scrollY;
+    setIsVisible(scrollTop > 100);
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      setProgress(Math.min(scrollTop / docHeight, 1));
+    }
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   if (!isVisible) return null;
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-brand-red z-[60] origin-left"
-      style={{ scaleX }}
+    <div
+      className="fixed top-0 left-0 right-0 h-1 bg-brand-red z-[60] origin-left transition-transform duration-100 ease-out"
+      style={{ transform: `scaleX(${progress})` }}
     />
   );
 }

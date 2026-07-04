@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { usePrefersReducedMotion } from '../../hooks/useReducedMotion';
+import React, { useRef, useState, useEffect } from 'react';
+import { cn } from '../../lib/utils';
 
 interface ScrollAnimateProps {
   children: React.ReactNode;
@@ -11,21 +10,38 @@ interface ScrollAnimateProps {
 }
 
 export default function ScrollAnimate({ children, delay = 0, className = '' }: ScrollAnimateProps) {
-  const shouldReduceMotion = usePrefersReducedMotion()
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  if (shouldReduceMotion) {
-    return <div className={className}>{children}</div>
-  }
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: '-50px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
-      className={className}
+    <div
+      ref={ref}
+      className={cn(
+        'transition-all duration-[600ms] ease-out',
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
+        className
+      )}
+      style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
