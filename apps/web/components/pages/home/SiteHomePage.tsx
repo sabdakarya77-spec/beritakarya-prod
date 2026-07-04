@@ -223,9 +223,17 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     : articlesList.slice(0, 8)
 
   // DEBUG — hapus setelah selesai debug
+  // Cek breaking articles di API response
+  const breakingInApi = articlesList.filter((a: HomeArticle) => a.isBreaking).length
+  const featuredInApi = articlesList.filter((a: HomeArticle) => a.isFeatured).length
+  const exclusiveInApi = articlesList.filter((a: HomeArticle) => a.isExclusive).length
+
   const debugInfo = {
     apiTotal: articlesList.length,
     uniqueIds: new Set(articlesList.map((a: HomeArticle) => a.id)).size,
+    breakingInApi,
+    featuredInApi,
+    exclusiveInApi,
     hero: heroArticles.length,
     fokus: fokusRedaksi.length,
     feedFeatured: feedFeatured.length,
