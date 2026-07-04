@@ -102,45 +102,6 @@ export default function Navbar({
     router.push(`/${activeSite}?cat=${encodeURIComponent(cat)}`);
   };
 
-  // Profile dropdown component to avoid duplication
-  const ProfileDropdown = () => (
-    <div
-      role="menu"
-      aria-label="Menu profil"
-      className={cn(
-        'absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827] transition-all duration-150 origin-top-right',
-        isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-      )}
-    >
-      <div className="border-b border-gray-100 p-4 dark:border-white/10">
-        <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user!.name}</p>
-        <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user!.email}</p>
-      </div>
-      <div className="p-2" role="none">
-        {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user!.role) && (
-          <Link
-            href={`/${activeSite}/dashboard`}
-            role="menuitem"
-            className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
-            onClick={() => setIsProfileOpen(false)}
-          >
-            Dashboard
-          </Link>
-        )}
-        <button
-          role="menuitem"
-          onClick={() => {
-            setIsProfileOpen(false);
-            logout();
-          }}
-          className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
-        >
-          Keluar
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/98 backdrop-blur-sm text-gray-900 shadow-sm dark:border-white/10 dark:bg-[#0a0f1a]/98 dark:text-white dark:shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
       {isArticlePage ? (
@@ -219,7 +180,41 @@ export default function Navbar({
                     {user.name.split(' ')[0]}
                   </span>
                 </button>
-                <ProfileDropdown />
+                <div
+                  role="menu"
+                  aria-label="Menu profil"
+                  className={cn(
+                    'absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827] transition-all duration-150 origin-top-right',
+                    isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  )}
+                >
+                  <div className="border-b border-gray-100 p-4 dark:border-white/10">
+                    <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user!.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user!.email}</p>
+                  </div>
+                  <div className="p-2" role="none">
+                    {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user!.role) && (
+                      <Link
+                        href={`/${activeSite}/dashboard`}
+                        role="menuitem"
+                        className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        logout();
+                      }}
+                      className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
+                    >
+                      Keluar
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
               <Link
@@ -330,7 +325,41 @@ export default function Navbar({
                       {user.name.split(' ')[0]}
                     </span>
                   </button>
-                  <ProfileDropdown />
+                  <div
+                  role="menu"
+                  aria-label="Menu profil"
+                  className={cn(
+                    'absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#111827] transition-all duration-150 origin-top-right',
+                    isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  )}
+                >
+                  <div className="border-b border-gray-100 p-4 dark:border-white/10">
+                    <p className="text-xs font-bold text-gray-900 truncate dark:text-white">{user!.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate dark:text-white/60">{user!.email}</p>
+                  </div>
+                  <div className="p-2" role="none">
+                    {['superadmin', 'wapimred', 'reporter', 'kontributor'].includes(user!.role) && (
+                      <Link
+                        href={`/${activeSite}/dashboard`}
+                        role="menuitem"
+                        className="block rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand-red dark:text-white/80 dark:hover:bg-white/10"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        logout();
+                      }}
+                      className="w-full text-left rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-red transition-colors hover:bg-brand-red/10"
+                    >
+                      Keluar
+                    </button>
+                  </div>
+                </div>
                 </div>
               ) : (
                 <Link
