@@ -278,8 +278,8 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const feedPool = remainingAfterHero
     .filter(s => !fokusIds.has(s.article.id))
     .map(s => s.article)
-  const feedFeatured = feedPool.slice(0, 2)
-  const feedStream = feedPool.slice(2, 8)
+  const feedFeatured = feedPool.slice(0, 4)
+  const feedStream = feedPool.slice(4, 16)
 
   // 6. Editorial extras — dedup PROGRESIF. Urutan sengaja: editorial dulu,
   //    trending terakhir, supaya prioritas keputusan editor > metric views.

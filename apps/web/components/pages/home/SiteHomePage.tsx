@@ -104,7 +104,7 @@ function hasCategorySlug(a: HomeArticle, slugs: string[]): boolean {
 // ─────────────────────────────────────────────
 async function getArticles(siteId: string, category?: string, search?: string) {
   try {
-    let url = `${API_URL}/api/v1/articles/public?site=${siteId}&limit=25`
+    let url = `${API_URL}/api/v1/articles/public?site=${siteId}&limit=35`
     if (category && category !== 'terbaru' && category !== 'tersimpan') {
       url += `&category=${encodeURIComponent(category)}`
     }

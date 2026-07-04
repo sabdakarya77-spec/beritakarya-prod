@@ -24,31 +24,16 @@ export function FokusRedaksiSection({ articles, site }: FokusRedaksiSectionProps
           </h2>
         </div>
 
-        {/* Grid asimetris: 2 kolom kiri (besar) + 1 kolom kanan (2 stacked, balance) */}
-        <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-3">
-          {/* Kartu Besar — artikel pertama, mengambil 2/3 lebar */}
-          {articles[0] && (
-            <div className="md:col-span-2 md:h-full">
-              <NewsCard
-                article={articles[0]}
-                variant="large"
-                site={site}
-                priority
-              />
-            </div>
-          )}
-
-          {/* Kolom kanan — 2 artikel saja agar balance dengan kartu besar */}
-          <div className="flex flex-col gap-3 md:h-full">
-            {articles.slice(1, 3).map((article: HomeArticle) => (
-              <NewsCard
-                key={article.id}
-                article={article}
-                variant="horizontal"
-                site={site}
-              />
-            ))}
-          </div>
+        {/* Grid: 4 kartu sejajar (Design F) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+          {articles.slice(0, 4).map((article: HomeArticle) => (
+            <NewsCard
+              key={article.id}
+              article={article}
+              variant="medium"
+              site={site}
+            />
+          ))}
         </div>
       </ScrollAnimate>
     </Container>

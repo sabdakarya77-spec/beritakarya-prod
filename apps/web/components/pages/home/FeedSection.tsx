@@ -39,13 +39,14 @@ interface FeedSectionProps {
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
 }
 
-// Interstitial placement: muncul setelah berapa baris feed
+// Interstitial placement: muncul setelah berapa baris feed (1-indexed)
+// Dengan 16 artikel → 7 baris: hero_pair, triplet, asymmetric, text_heavy, compact_triplet, single_feature, hero_pair
 const INTERSTITIAL_AFTER_ROWS = {
-  palingDibaca: 2,   // setelah baris ke-2 (hero_pair + triplet)
-  ad1: 3,             // setelah baris ke-3 (asymmetric)
-  aksesRedaksi: 4,    // setelah baris ke-4 (text_heavy)
-  infoPasar: 5,       // setelah baris ke-5 (compact_triplet)
-  ad2: 6,             // setelah baris ke-6
+  palingDibaca: 1,   // setelah hero_pair
+  ad1: 2,             // setelah triplet
+  aksesRedaksi: 3,    // setelah asymmetric
+  ad2: 4,             // setelah text_heavy
+  infoPasar: 5,       // setelah compact_triplet
 }
 
 export function FeedSection({
