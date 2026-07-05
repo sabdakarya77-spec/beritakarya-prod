@@ -108,7 +108,7 @@ export function FeedWithSidebar({
                       </div>
                     </div>
                     {/* Image — 55% */}
-                    <div className="relative aspect-[16/9] flex-[11] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
+                    <div className="relative aspect-[16/10] flex-[11] shrink-0 overflow-hidden rounded-2xl bg-gray-100 shadow-sm dark:bg-white/5">
                       <SmartImage
                         src={imageUrl}
                         context="card_horizontal"

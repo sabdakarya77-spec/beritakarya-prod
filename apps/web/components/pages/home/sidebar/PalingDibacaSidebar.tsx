@@ -41,13 +41,13 @@ export function PalingDibacaSidebar({ articles, site }: PalingDibacaSidebarProps
                   {article.title}
                 </p>
               </div>
-              <div className="relative h-[52px] w-[52px] shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-white/5">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
                 <SmartImage
                   src={imageUrl}
                   context="thumbnail"
                   alt={article.title}
                   fill
-                  sizes="52px"
+                  sizes="80px"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
