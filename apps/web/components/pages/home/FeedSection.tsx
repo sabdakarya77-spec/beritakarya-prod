@@ -76,7 +76,7 @@ export function FeedSection({
       ) : rows.length > 0 ? (
         <div className="space-y-6 md:space-y-8">
           {rows.map((row, rowIndex) => {
-            const rowArticles = row.items
+            const rowArticles = row.articles
             const currentPattern = row.pattern
 
             // Cari tempat menyisipkan widget/iklan
@@ -87,7 +87,7 @@ export function FeedSection({
             return (
               <div key={rowIndex} className="space-y-6 md:space-y-8">
                 {/* 1. Baris Utama Grid */}
-                <FeedRow articles={rowArticles} pattern={currentPattern} site={site} />
+                <FeedRow articles={rowArticles} pattern={currentPattern} site={site} rowIndex={rowIndex} />
 
                 {/* 2. Sisipan Iklan di antara baris 1 dan 2 */}
                 {isFirstRow && (
@@ -115,7 +115,7 @@ export function FeedSection({
                       />
                     </div>
                     <div className="md:col-span-4">
-                      <InfoPasar initialData={marketData} />
+                      <InfoPasar initialData={marketData as never} />
                     </div>
                   </div>
                 )}
