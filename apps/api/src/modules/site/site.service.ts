@@ -664,6 +664,18 @@ export class SiteService {
   // Homepage Config — 6 template system
   // ─────────────────────────────────────────────────
 
+  // Default values untuk HomepageConfig
+  private readonly HOMEPAGE_DEFAULTS = {
+    sectionOrder: ['hero', 'fokus_redaksi', 'trending', 'feed', 'pilihan_editor', 'opini', 'foto', 'video'] as string[],
+    sectionVisibility: { hero: true, fokus_redaksi: true, trending: true, feed: true, pilihan_editor: true, opini: true, foto: true, video: true } as Record<string, boolean>,
+    interstitials: [
+      { id: 'trending', afterCardIndex: 6, widget: 'trending', enabled: true },
+      { id: 'redaksi', afterCardIndex: 12, widget: 'redaksi', enabled: true },
+      { id: 'market', afterCardIndex: 18, widget: 'market', enabled: true },
+      { id: 'photo', afterCardIndex: 24, widget: 'photo', enabled: true },
+    ] as Array<{ id: string; afterCardIndex: number; widget: string; enabled: boolean }>,
+  }
+
   async getHomepageConfig(siteId: string) {
     const config = await prisma.homepageConfig.findUnique({
       where: { siteId }
@@ -678,14 +690,30 @@ export class SiteService {
           heroMode: 'MAGAZINE_COVER_550',
           feedLayout: 'pattern_rotation',
           trendingStyle: 'numbered_podium',
-          sectionOrder: ['hero', 'fokus_redaksi', 'trending', 'feed', 'pilihan_editor', 'opini', 'foto', 'video'],
-          sectionVisibility: { hero: true, fokus_redaksi: true, trending: true, feed: true, pilihan_editor: true, opini: true, foto: true, video: true },
-          interstitials: [
-            { id: 'trending', afterCardIndex: 6, widget: 'trending', enabled: true },
-            { id: 'redaksi', afterCardIndex: 12, widget: 'redaksi', enabled: true },
-            { id: 'market', afterCardIndex: 18, widget: 'market', enabled: true },
-            { id: 'photo', afterCardIndex: 24, widget: 'photo', enabled: true },
-          ],
+          ...this.HOMEPAGE_DEFAULTS,
+        }
+      })
+    }
+
+    // Populate defaults jika field kosong (dari seed migration)
+    const needsUpdate =
+      Array.isArray(config.sectionOrder) && config.sectionOrder.length === 0 ||
+      typeof config.sectionVisibility === 'object' && Object.keys(config.sectionVisibility as object).length === 0 ||
+      Array.isArray(config.interstitials) && config.interstitials.length === 0
+
+    if (needsUpdate) {
+      return prisma.homepageConfig.update({
+        where: { siteId },
+        data: {
+          ...(Array.isArray(config.sectionOrder) && config.sectionOrder.length === 0
+            ? { sectionOrder: this.HOMEPAGE_DEFAULTS.sectionOrder }
+            : {}),
+          ...(typeof config.sectionVisibility === 'object' && Object.keys(config.sectionVisibility as object).length === 0
+            ? { sectionVisibility: this.HOMEPAGE_DEFAULTS.sectionVisibility }
+            : {}),
+          ...(Array.isArray(config.interstitials) && config.interstitials.length === 0
+            ? { interstitials: this.HOMEPAGE_DEFAULTS.interstitials }
+            : {}),
         }
       })
     }
