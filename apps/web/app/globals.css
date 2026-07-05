@@ -38,6 +38,7 @@
     /* Container Max Widths */
     --container-max-width: 72.5rem;     /* max-w-container = 1160px */
     --content-max-width: 42.5rem;       /* max-w-[680px] for optimal reading */
+    --wide-max-width: 87.5rem;          /* max-w-wide = 1400px */
     
     /* Bleeding Edge System */
     --bleed-mobile: -1rem;              /* -mx-4 */

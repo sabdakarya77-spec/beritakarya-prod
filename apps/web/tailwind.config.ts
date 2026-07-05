@@ -80,6 +80,7 @@ const config: Config = {
       maxWidth: {
         'container': 'var(--container-max-width)',
         'content': 'var(--content-max-width)',
+        'wide': 'var(--wide-max-width)',
       },
       borderRadius: {
         'card': 'var(--radius-card)',

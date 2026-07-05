@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 interface ContainerProps {
   children: React.ReactNode;
   className?: string;
-  size?: 'default' | 'content' | 'full';
+  size?: 'default' | 'content' | 'full' | 'wide';
   bleed?: boolean;
 }
 
@@ -17,6 +17,7 @@ interface ContainerProps {
  *   - 'default': max-w-container (1160px) for general content
  *   - 'content': max-w-content (760px) for optimal reading (articles, text-heavy pages)
  *   - 'full': max-w-full for edge-to-edge sections
+ *   - 'wide': max-w-wide (1400px) for full-width hero/grids
  * @param bleed - When true, creates edge-to-edge effect by extending to viewport edges
  *                while maintaining inner content padding balance. Note: bleed mode
  *                disables `mx-auto` to avoid class conflicts, so use inside a centered
@@ -49,7 +50,8 @@ export function Container({
   const sizeClasses = {
     default: 'max-w-container',
     content: 'max-w-content',
-    full: 'max-w-full'
+    full: 'max-w-full',
+    wide: 'max-w-wide'
   };
 
   return (

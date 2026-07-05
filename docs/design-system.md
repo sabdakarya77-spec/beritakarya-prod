@@ -452,6 +452,51 @@ import { Stack, Spacer } from '@/components/ui/Grid';
 </Stack>
 ```
 
+### 8.11 AnimateGrid
+
+**File:** `components/ui/AnimateGrid.tsx`
+
+Staggered entrance animation untuk card grids.
+
+| Prop | Default | Keterangan |
+|------|---------|------------|
+| `baseDelay` | `0` | Delay awal sebelum item pertama (ms) |
+| `stagger` | `80` | Increment delay per item (ms) |
+| `maxAnimated` | `12` | Maksimal item yang dianimasikan |
+
+```tsx
+import AnimateGrid, { AnimateItem } from '@/components/ui/AnimateGrid';
+
+// Grid dengan staggered entrance
+<AnimateGrid stagger={100}>
+  <Grid cols={3}>
+    {articles.map(a => <NewsCard key={a.id} article={a} />)}
+  </Grid>
+</AnimateGrid>
+
+// Single item
+<AnimateItem delay={200}>
+  <HeroSection />
+</AnimateItem>
+```
+
+Mendukung `prefers-reduced-motion` via `FadeInOnScroll`.
+
+### 8.12 Container — Wide Variant
+
+**File:** `components/layout/Container.tsx`
+
+```tsx
+<Container size="wide">  {/* max-w: 1400px — untuk full-width hero/grids */}
+```
+
+| Size | Max Width | CSS Variable |
+|------|-----------|--------------|
+| `default` | 1160px | `--container-max-width` |
+| `content` | 680px | `--content-max-width` |
+| `full` | 100% | — |
+| `wide` | 1400px | `--wide-max-width` |
+
 ---
 
 ## 9. Patterns
