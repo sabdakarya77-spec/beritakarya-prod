@@ -204,7 +204,7 @@ export default function BreakingNewsTicker({
           </div>
         ) : (
           <div
-            className="absolute inset-y-0 left-0 flex h-full min-w-max items-center gap-5 whitespace-nowrap pl-6 pr-3 will-change-transform sm:gap-7 sm:pl-10 sm:pr-4 lg:gap-10 lg:pl-14 lg:pr-5 animate-[ticker_40s_linear_infinite] hover:[animation-play-state:paused]"
+            className="absolute inset-y-0 left-0 flex h-full min-w-max items-center gap-5 whitespace-nowrap pl-6 pr-3 will-change-transform sm:gap-7 sm:pl-10 sm:pr-4 lg:gap-10 lg:pl-14 lg:pr-5 animate-[ticker_80s_linear_infinite] hover:[animation-play-state:paused]"
           >
             {tickerContent}
             {tickerItems.map((item, i) => (
