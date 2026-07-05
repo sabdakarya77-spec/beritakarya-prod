@@ -152,7 +152,7 @@ async function getTrendingArticles(siteId: string) {
       limit: '5',
       sort: 'views',
       order: 'desc',
-      sinceHours: '24',
+      sinceHours: '72',
     })
     const res = await fetch(
       `${API_URL}/api/v1/articles/public?${params.toString()}`,
