@@ -387,10 +387,10 @@ export default function Navbar({
       )}
       {!isArticlePage && (
         <div className="hidden border-t border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-[#0a0f1a] md:block">
-          {/* Info Pasar Ticker */}
+          {/* Info Pasar + Terkini Ticker */}
           <div className="border-b border-gray-200 dark:border-white/10">
-            <Container className="flex h-7 items-center justify-end gap-4 overflow-hidden">
-              <NavbarTicker />
+            <Container className="flex h-7 items-center overflow-hidden">
+              <NavbarTicker site={activeSite} />
             </Container>
           </div>
           <Container className={cn(
