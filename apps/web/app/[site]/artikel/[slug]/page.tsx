@@ -205,7 +205,7 @@ export default async function ArticlePage({ params }: Props) {
 
   const badgeVariant = resolveArticleBadge(article);
   const readingTime = article.readingTimeMin || Math.max(1, Math.ceil((article.wordCount || 0) / 200)) || 3;
-  const articleRailClassName = 'xl:grid xl:grid-cols-[minmax(0,1.75fr)_20rem] 2xl:grid-cols-[minmax(0,1.75fr)_22.5rem] xl:justify-between xl:gap-12 2xl:gap-16'
+  const articleRailClassName = 'xl:grid xl:grid-cols-[minmax(0,1.75fr)_21.25rem] xl:justify-between xl:gap-12'
   const sidebarCardClass = 'rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02]'
   const sidebarLabelClass = 'flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-brand-text-muted'
 

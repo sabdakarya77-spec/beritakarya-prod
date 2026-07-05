@@ -56,9 +56,9 @@ export function Container({
 
   return (
     <div className={cn(
-      bleed 
-        ? '-mx-4 md:-mx-8 lg:-mx-10 px-4 md:px-8 lg:px-10'
-        : 'px-4 md:px-8 lg:px-10',
+      bleed
+        ? '-mx-4 md:-mx-8 lg:-mx-[var(--container-padding-desktop)] px-4 md:px-8 lg:px-[var(--container-padding-desktop)]'
+        : 'px-4 md:px-8 lg:px-[var(--container-padding-desktop)]',
       sizeClasses[size],
       !bleed ? 'mx-auto' : '',
       className

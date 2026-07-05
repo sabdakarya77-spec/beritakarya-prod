@@ -218,7 +218,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   if (variant === 'horizontal') {
     const isRight = imagePosition === 'right';
     return (
-      <article className="group relative h-full flex flex-col rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20">
+      <article className="group relative h-full flex flex-col rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20">
         <ArticleBookmarkButton
           article={article}
           site={site}
@@ -228,7 +228,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
           iconSize={14}
         />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className={`flex-1 flex gap-4 ${isRight ? 'flex-row-reverse' : ''}`}>
-          <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
+          <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
             <SmartImage
               src={imageUrl}
               blur={article.featuredImageBlur}
@@ -375,7 +375,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
         <article
           className="relative flex cursor-pointer flex-col gap-2 md:gap-3"
         >
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-gray-100 shadow-sm dark:bg-white/5">
             <SmartImage
               src={imageUrl}
               blur={article.featuredImageBlur}

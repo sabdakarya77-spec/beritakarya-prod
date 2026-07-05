@@ -393,19 +393,25 @@ git add -A && git commit -m "chore: snapshot before design token updates"
 git revert HEAD
 ```
 
-**Perubahan di Fase 1 hanya 3 file** → mudah di-reverse secara manual jika perlu.
+**Perubahan di Fase 1 hanya 5 file** → mudah di-reverse secara manual jika perlu.
 
 ---
 
 ## 8. Checklist Eksekusi
 
-### Fase 1
-- [ ] Commit snapshot
-- [ ] `globals.css` → `--container-max-width: 80rem`
-- [ ] `MagazineBentoHero.tsx` → hero 560px
-- [ ] `SiteHomePage.tsx` → section gap 32px
-- [ ] Testing di 4 viewport (375, 1280, 1440, 1920)
-- [ ] Commit Fase 1
+### Fase 1 ✅ SELESAI (commit `a7c098a`)
+- [x] Commit snapshot (`0d43404`)
+- [x] `globals.css` → `--container-max-width: 80rem` (1280px)
+- [x] `MagazineCoverHero.tsx` → hero 560px
+- [x] `FeedSection.tsx` → `py-4 md:py-8` (section padding 32px desktop)
+- [x] `TrendingSection.tsx` → `pb-4 md:pb-8` (section padding 32px desktop)
+- [x] `EditorialExtras.tsx` → `py-8` (section padding 32px desktop)
+- [ ] Testing: homepage di viewport 375px — mobile tidak berubah
+- [ ] Testing: homepage di viewport 1280px — konten lega, section spacing terasa
+- [ ] Testing: homepage di viewport 1440px — konten tidak mepet
+- [ ] Testing: homepage di viewport 1920px — konten terpusat
+- [ ] Testing: article page di viewport 1440px — sidebar tidak terpotong
+- [ ] Testing: dashboard di viewport 1440px — layout tidak pecah
 
 ### Fase 2
 - [ ] `globals.css` → `clamp()` padding

@@ -33,7 +33,7 @@
     /* Horizontal Padding (Container Gutters) */
     --container-padding-mobile: 1rem;    /* px-4 = 16px */
     --container-padding-tablet: 2rem;    /* md:px-8 = 32px */
-    --container-padding-desktop: 2.5rem; /* lg:px-10 = 40px */
+    --container-padding-desktop: clamp(2.5rem, 3vw, 3rem); /* 40px–48px responsif */
     
     /* Container Max Widths */
     --container-max-width: 80rem;       /* max-w-container = 1280px */
@@ -43,7 +43,7 @@
     /* Bleeding Edge System */
     --bleed-mobile: -1rem;              /* -mx-4 */
     --bleed-tablet: -2rem;              /* md:-mx-8 */
-    --bleed-desktop: -2.5rem;           /* lg:-mx-10 */
+    --bleed-desktop: clamp(-2.5rem, -3vw, -3rem); /* -40px to -48px responsif */
     
     /* Grid Gaps */
     --gap-regular: 1.5rem;             /* gap-6 */
