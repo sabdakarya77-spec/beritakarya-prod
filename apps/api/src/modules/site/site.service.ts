@@ -696,6 +696,7 @@ export class SiteService {
       'feedLayout', 'trendingStyle',
       'scoreFreshness', 'scoreEngagement', 'scoreEditorial', 'scoreRelevance',
       'opinionCategories', 'photoCategories', 'videoCategories',
+      'sectionOrder', 'sectionVisibility', 'feedColumns', 'showExcerpt', 'interstitials',
     ]
 
     const filtered: Record<string, unknown> = {}

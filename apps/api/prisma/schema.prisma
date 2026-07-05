@@ -697,6 +697,17 @@ model HomepageConfig {
   photoCategories   Json     @default("[]") // ["foto-jurnalistik"]
   videoCategories   Json     @default("[]") // ["video", "dokumenter-reportase"]
 
+  // Section visibility & order (Level 2: Template + Customize)
+  sectionOrder      Json     @default('["hero","fokus_redaksi","trending","feed","pilihan_editor","opini","foto","video"]')
+  sectionVisibility Json     @default('{"hero":true,"fokus_redaksi":true,"trending":true,"feed":true,"pilihan_editor":true,"opini":true,"foto":true,"video":true}')
+
+  // Feed detail
+  feedColumns       Int      @default(2) // 1 | 2 | 3
+  showExcerpt       Boolean  @default(true)
+
+  // Interstitial placement (JSON: [{id, afterCardIndex, widget, enabled}])
+  interstitials     Json     @default('[{"id":"trending","afterCardIndex":6,"widget":"trending","enabled":true},{"id":"redaksi","afterCardIndex":12,"widget":"redaksi","enabled":true},{"id":"market","afterCardIndex":18,"widget":"market","enabled":true},{"id":"photo","afterCardIndex":24,"widget":"photo","enabled":true}]')
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

@@ -18,6 +18,11 @@ CREATE TABLE "HomepageConfig" (
     "opinionCategories" JSONB NOT NULL DEFAULT '[]',
     "photoCategories" JSONB NOT NULL DEFAULT '[]',
     "videoCategories" JSONB NOT NULL DEFAULT '[]',
+    "sectionOrder" JSONB NOT NULL DEFAULT '["hero","fokus_redaksi","trending","feed","pilihan_editor","opini","foto","video"]',
+    "sectionVisibility" JSONB NOT NULL DEFAULT '{"hero":true,"fokus_redaksi":true,"trending":true,"feed":true,"pilihan_editor":true,"opini":true,"foto":true,"video":true}',
+    "feedColumns" INTEGER NOT NULL DEFAULT 2,
+    "showExcerpt" BOOLEAN NOT NULL DEFAULT true,
+    "interstitials" JSONB NOT NULL DEFAULT '[{"id":"trending","afterCardIndex":6,"widget":"trending","enabled":true},{"id":"redaksi","afterCardIndex":12,"widget":"redaksi","enabled":true},{"id":"market","afterCardIndex":18,"widget":"market","enabled":true},{"id":"photo","afterCardIndex":24,"widget":"photo","enabled":true}]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
