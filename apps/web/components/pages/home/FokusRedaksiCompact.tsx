@@ -1,9 +1,9 @@
 import { Zap } from 'lucide-react'
 import NewsCard from '../../ui/NewsCard'
 import FadeInOnScroll from '../../ui/FadeInOnScroll'
+import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { sectionEyebrowClass } from './constants'
 
 /**
  * FokusRedaksiCompact — Template D (Compact Dense)
@@ -25,9 +25,9 @@ export function FokusRedaksiCompact({ articles, site }: FokusRedaksiCompactProps
       <FadeInOnScroll>
         <div className="mb-4 flex items-center gap-2">
           <Zap size={14} className="text-brand-red" />
-          <h2 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+          <SectionEyebrow as="h2" className="text-brand-black dark:text-white">
             Fokus Redaksi
-          </h2>
+          </SectionEyebrow>
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">

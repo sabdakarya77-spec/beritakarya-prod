@@ -9,9 +9,9 @@
 
 import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { SectionEyebrow } from '../../../ui/Typography'
 import { Container } from '../../../layout/Container'
 import type { HomeArticle } from '../utils/distribution'
-import { sectionEyebrowClass } from '../constants'
 
 interface HorizontalStripProps {
   articles: HomeArticle[]
@@ -26,9 +26,9 @@ export function HorizontalStrip({ articles, site }: HorizontalStripProps) {
       <section>
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp size={14} className="text-brand-red" />
-          <span className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+          <SectionEyebrow className="text-brand-black dark:text-white">
             Trending
-          </span>
+          </SectionEyebrow>
         </div>
         <div className="flex gap-0 divide-x divide-black/5 overflow-x-auto scrollbar-none dark:divide-white/5">
           {articles.slice(0, 5).map((article, index) => (

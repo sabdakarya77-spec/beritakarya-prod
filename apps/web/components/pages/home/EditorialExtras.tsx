@@ -2,9 +2,10 @@ import { Zap, Star, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SmartImage } from '../../ui/SmartImage'
 import FadeInOnScroll from '../../ui/FadeInOnScroll'
+import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { sectionEyebrowClass, sectionMetaClass, formatSidebarDate } from './constants'
+import { sectionMetaClass, formatSidebarDate } from './constants'
 
 interface ArticleBlock {
   type: string
@@ -39,9 +40,9 @@ export function EditorialExtras({
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <Star size={14} className="fill-amber-500 text-amber-500" />
-                <h3 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+                <SectionEyebrow as="h3" className="text-brand-black dark:text-white">
                   Pilihan Editor
-                </h3>
+                </SectionEyebrow>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
@@ -85,9 +86,9 @@ export function EditorialExtras({
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                <h3 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+                <SectionEyebrow as="h3" className="text-brand-black dark:text-white">
                   Opini &amp; Analisis
-                </h3>
+                </SectionEyebrow>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
@@ -128,9 +129,9 @@ export function EditorialExtras({
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <Zap size={14} className="fill-brand-red text-brand-red" />
-                <h3 className={`${sectionEyebrowClass} tracking-[0.14em] text-brand-black dark:text-white`}>
+                <SectionEyebrow as="h3" className="tracking-[0.14em] text-brand-black dark:text-white">
                   Laporan Video Eksklusif
-                </h3>
+                </SectionEyebrow>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">

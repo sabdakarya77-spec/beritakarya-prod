@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import AdSpace from '../../ui/AdSpace'
+import { SectionTitle, SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import { VideoWidget } from '../LazyWidgets'
 import type { HomeArticle } from './utils/distribution'
 import { chunkIntoRows, DEFAULT_PATTERN_ROTATION } from './utils/feedPatterns'
 import { FeedRow } from './FeedRow'
 import { PalingDibaca, AksesRedaksi, InfoPasar, InterstitialPhoto, InterstitialVideo } from './interstitials'
-import { sectionTitleClass, sectionEyebrowClass } from './constants'
 
 interface FeedSectionProps {
   feedArticles: HomeArticle[]
@@ -47,14 +47,14 @@ export function FeedSection({
     <Container className="py-4 md:py-6">
       {/* Section Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-black/10 pb-4 dark:border-white/5 md:flex-row md:items-end md:justify-between">
-        <h3 className={`${sectionTitleClass} flex items-center gap-3 uppercase md:!text-xl`}>
+        <SectionTitle as="h3" className="flex items-center gap-3 uppercase md:!text-xl">
           <span className="h-4.5 w-4.5 bg-brand-red shadow-lg shadow-brand-red/20" />
           {searchQuery
             ? `Hasil Pencarian: ${searchQuery}`
             : isCategoryFilter
               ? `Berita ${resolveCategoryName(categoryFilter, categoriesTree)}`
               : 'Berita Terbaru'}
-        </h3>
+        </SectionTitle>
         <div className="hidden items-center gap-3 text-[10px] font-bold uppercase tracking-[0.14em] text-brand-text-muted md:flex">
           <span className="inline-flex items-center gap-2 text-brand-red">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
@@ -114,7 +114,7 @@ export function FeedSection({
           {siteSettings?.featuredVideo && (
             <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
               <div className="mb-4">
-                <span className={`${sectionEyebrowClass} text-brand-red`}>Pilihan Visual</span>
+                <SectionEyebrow className="text-brand-red">Pilihan Visual</SectionEyebrow>
               </div>
               <VideoWidget
                 title={siteSettings.featuredVideo.title}

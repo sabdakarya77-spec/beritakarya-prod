@@ -9,9 +9,9 @@
 
 import Link from 'next/link'
 import { TrendingUp } from 'lucide-react'
+import { SectionEyebrow } from '../../../ui/Typography'
 import { Container } from '../../../layout/Container'
 import type { HomeArticle } from '../utils/distribution'
-import { sectionEyebrowClass } from '../constants'
 
 interface WithContextProps {
   articles: HomeArticle[]
@@ -26,9 +26,9 @@ export function WithContext({ articles, site }: WithContextProps) {
       <section>
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp size={14} className="text-brand-red" />
-          <span className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+          <SectionEyebrow className="text-brand-black dark:text-white">
             Paling Dibaca 24 Jam Terakhir
-          </span>
+          </SectionEyebrow>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white dark:border-white/5 dark:bg-white/[0.02]">
           {articles.slice(0, 5).map((article, index) => (

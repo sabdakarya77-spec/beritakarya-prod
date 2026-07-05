@@ -1,9 +1,9 @@
 import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { SmartImage } from '../../ui/SmartImage'
+import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { sectionEyebrowClass } from './constants'
 
 interface TrendingSectionProps {
   articles: HomeArticle[]
@@ -27,9 +27,9 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
         {/* Section Header */}
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp size={14} className="text-brand-red" />
-          <span className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
+          <SectionEyebrow className="text-brand-black dark:text-white">
             Trending
-          </span>
+          </SectionEyebrow>
         </div>
 
         {/* Top 3 — Numbered Podium dengan gambar besar */}
