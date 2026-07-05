@@ -38,6 +38,7 @@ export function FeedWithSidebar({
   const { LoadMoreArticles } = require('../LazyWidgets')
 
   const displayArticles = feedArticles.slice(0, 5)
+  const remainingArticles = feedArticles.slice(5)
 
   return (
     <Container className="py-4 md:py-8">
@@ -150,7 +151,13 @@ export function FeedWithSidebar({
       {/* Load More */}
       {!showSavedFeed && (
         <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
-          <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={Math.ceil(feedArticles.length / 10)} />
+          <LoadMoreArticles
+            siteId={siteConfigId}
+            category={categoryFilter}
+            search={searchQuery}
+            initialPage={1}
+            remainingArticles={remainingArticles}
+          />
         </div>
       )}
     </Container>

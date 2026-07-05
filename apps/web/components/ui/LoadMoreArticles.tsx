@@ -26,15 +26,18 @@ interface LoadMoreArticlesProps {
   category?: string;
   search?: string;
   initialPage?: number;
+  /** Artikel sisa dari distribusi yang belum ditampilkan */
+  remainingArticles?: LoadMoreArticleItem[];
 }
 
-export default function LoadMoreArticles({ 
-  siteId, 
-  category, 
+export default function LoadMoreArticles({
+  siteId,
+  category,
   search,
-  initialPage = 1 
+  initialPage = 1,
+  remainingArticles = [],
 }: LoadMoreArticlesProps) {
-  const [articles, setArticles] = useState<LoadMoreArticleItem[]>([]);
+  const [articles, setArticles] = useState<LoadMoreArticleItem[]>(remainingArticles);
   const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
