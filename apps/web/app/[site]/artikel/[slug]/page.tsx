@@ -128,7 +128,8 @@ async function getPopularArticles(site: string, currentSlug: string) {
       status: 'published',
       limit: '5',
       sort: 'views',
-      order: 'desc'
+      order: 'desc',
+      sinceHours: '168',
     })
     const res = await fetch(
       `${API_URL}/api/v1/articles/public?${params.toString()}`,

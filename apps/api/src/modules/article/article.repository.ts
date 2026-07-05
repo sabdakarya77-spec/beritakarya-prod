@@ -6,9 +6,9 @@ export const articleNotDeleted: Prisma.ArticleWhereInput = { deletedAt: null }
 
 export async function findArticlesBySite(
   siteId: string,
-  opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number; authorId?: string } = {}
+  opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; sort?: string; order?: string; sinceHours?: number; page?: number; limit?: number; authorId?: string } = {}
 ) {
-  const { status, search, category, startDate, endDate, page = 1, limit = 20, authorId } = opts
+  const { status, search, category, startDate, endDate, sort, order, sinceHours, page = 1, limit = 20, authorId } = opts
   const categoryFilter: Prisma.ArticleWhereInput = {}
 
   if (category) {
@@ -57,7 +57,21 @@ export async function findArticlesBySite(
         ...(endDate ? { lte: new Date(endDate) } : {}),
       }
     }),
+    ...(sinceHours && {
+      publishedAt: {
+        gte: new Date(Date.now() - sinceHours * 60 * 60 * 1000),
+      }
+    }),
   }
+
+  // Dynamic orderBy
+  const sortOrder = order === 'asc' ? 'asc' : 'desc'
+  const orderBy: Prisma.ArticleOrderByWithRelationInput[] =
+    sort === 'views'
+      ? [{ viewCount: sortOrder }, { publishedAt: 'desc' }]
+      : sort === 'createdAt'
+        ? [{ createdAt: sortOrder }]
+        : [{ publishedAt: { sort: sortOrder, nulls: 'last' } }, { createdAt: 'desc' }]
 
   const skip = (page - 1) * limit
 
@@ -77,7 +91,7 @@ export async function findArticlesBySite(
         },
         author: { select: { id: true, name: true, avatarUrl: true, role: true } }
       },
-      orderBy: [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+      orderBy,
       skip,
       take: limit
     }),

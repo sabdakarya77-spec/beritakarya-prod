@@ -2,7 +2,9 @@
 
 **Target:** `apps/web/components/pages/SiteHomePage.tsx`
 **Date:** 2026-07-04
-**Status:** Proposal
+**Updated:** 2026-07-05
+**Status:** In Progress — Phase 1-3 implemented, Phase 4-5 pending
+**Design:** F (Best of ⭐) — satu-satunya layout yang diterapkan
 
 ---
 
@@ -166,9 +168,8 @@ function calcRelevance(article: HomeArticle, targetCategorySlugs: string[]): num
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  ZONA 1 — HERO                                              │
-│  Tipe: SINGLE_HEADLINE | BENTO_4 | BENTO_3 | MAGAZINE_COVER_550 │
-│  Sumber: top-1 score (SINGLE) atau top-4 score (BENTO)      │
+│  ZONA 1 — HERO: MAGAZINE_COVER_550 (Design F, satu-satunya)│
+│  Sumber: top-5 score (1 utama + 4 thumbnail)                │
 │  Override: field heroSlot (manual assignment dari dashboard) │
 ├─────────────────────────────────────────────────────────────┤
 │  ZONA 2 — FOKUS REDAKSI                                     │
@@ -199,7 +200,7 @@ function scoreAndDistribute(
   articles: HomeArticle[],
   trendingArticles: HomeArticle[],
   opts: {
-    heroMode?: 'SINGLE_HEADLINE' | 'BENTO_4' | 'BENTO_3' | 'MAGAZINE_COVER_550'
+    heroMode?: 'MAGAZINE_COVER_550' // satu-satunya mode yang dipakai (Design F)
     weights?: ScoringWeights
     categoryConfig?: {
       opinionSlugs?: string[]
@@ -235,11 +236,8 @@ function scoreAndDistribute(
   // 3. Sort by score descending
   const sorted = [...scored].sort((a, b) => b.score - a.score)
 
-  // 4. Allocate ke zona
-  const heroCount = opts.heroMode === 'SINGLE_HEADLINE' ? 1
-    : opts.heroMode === 'BENTO_3' ? 3
-    : opts.heroMode === 'MAGAZINE_COVER_550' ? 5 // 1 utama + 4 thumbnail
-    : 4
+  // 4. Allocate ke zona — MAGAZINE_COVER_550: 1 utama + 4 thumbnail
+  const heroCount = 5
   const hero = sorted.splice(0, heroCount).map(s => s.article)
   const heroIds = new Set(hero.map(a => a.id))
 
@@ -328,51 +326,10 @@ model HomepagePlacement {
 
 ## 3. Redesign: Grid Layout
 
-### 3.1 Hero Section — Mode Selector
+### 3.1 Hero Section — MAGAZINE_COVER_550 ⭐
 
-Tiga mode hero yang bisa dipilih per site (atau auto-detect):
+**Satu-satunya hero mode yang dipakai.** Tidak ada opsi lain.
 
-#### Mode A: `SINGLE_HEADLINE` (Breaking News)
-```
-┌─────────────────────────────────────────────┐
-│                                             │
-│         [GAMBAR FULL-WIDTH]                 │
-│                                             │
-│         KATEGORI                            │
-│         JUDUL BESAR (2-3 baris)             │
-│         Excerpt singkat                     │
-│         Author · Date · Read Time           │
-│                                             │
-└─────────────────────────────────────────────┘
-```
-- Untuk: breaking news, artikel eksklusif besar
-- Trigger: `isBreaking` atau manual override
-- Responsive: full-width di semua breakpoint
-
-#### Mode B: `BENTO_4` (Default — Current)
-```
-┌──────────────────────────┬──────────────────┐
-│                          │  [1] Headline 1  │
-│   [GAMBAR UTAMA]         │  [2] Headline 2  │
-│   Auto-rotate 5 detik    │  [3] Headline 3  │
-│                          │  [4] Headline 4  │
-└──────────────────────────┴──────────────────┘
-```
-- Untuk: homepage normal, konten cukup
-- Tetap pertahankan `MagazineBentoHero`
-
-#### Mode C: `BENTO_3` (Compact)
-```
-┌────────────┬────────────┬──────────────────┐
-│            │            │                  │
-│  [ARTIKEL 1]│  [ARTIKEL 2]│  [ARTIKEL 3]    │
-│            │            │                  │
-└────────────┴────────────┴──────────────────┘
-```
-- Untuk: site dengan konten sedikit, atau mobile-first
-- 3 kartu sejajar, masing-masing dengan overlay text
-
-#### Mode D: `MAGAZINE_COVER_550` (Best of — DEFAULT) ⭐
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │                                                                    │
@@ -390,12 +347,16 @@ Tiga mode hero yang bisa dipilih per site (atau auto-detect):
 └──────┴──────┴──────┴──────┴──────┴────────────────────────────────┘
 Thumbnail: klik untuk ganti artikel utama (BUKAN auto-rotate)
 ```
-- **Default template** — kombinasi terbaik dari A+B+C
-- Tinggi hero dibatasi ~550px (BUKAN full-screen) → konten di atas fold tetap terlihat
-- Thumbnail bar interaktif (klik untuk ganti, bukan auto-rotate)
-- 5 artikel di hero: 1 utama + 4 thumbnail
-- Sumber: top-5 by score (breaking tetap prioritas)
-- Mobile: tinggi ~350px, thumbnail bar tetap
+
+**Spesifikasi:**
+- Tinggi hero: ~550px desktop, ~350px mobile (BUKAN full-screen)
+- 5 artikel: 1 utama + 4 thumbnail
+- Thumbnail bar interaktif: klik untuk ganti artikel utama
+- Auto-rotate: 5 detik, pause on hover
+- Progress bar di bawah gambar utama
+- Sumber: top-5 by score (breaking news = hard override, prioritas pertama)
+- Breaking news: maksimal 1 di hero (sisanya masuk Fokus Redaksi)
+- Component: `MagazineCoverHero.tsx`
 
 ### 3.2 Fokus Redaksi — Adaptive Grid
 
@@ -842,7 +803,7 @@ Ini adalah **Design F (Best of)** — default layout yang bisa dikonfigurasi per
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ╔══════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 1 — HERO: MAGAZINE_COVER_550 (Best of, DEFAULT) ⭐               ║ │
+│  ║  ZONA 1 — HERO: MAGAZINE_COVER_550 (Design F, satu-satunya) ⭐         ║ │
 │  ║  ┌────────────────────────────────────────────────────────────────────┐  ║ │
 │  ║  │                                                                    │  ║ │
 │  ║  │              [GAMBAR FULL-WIDTH — 550px tinggi]                    │  ║ │
@@ -1482,8 +1443,7 @@ model HomepageConfig {
   id                String   @id @default(uuid())
   siteId            String   @unique
 
-  // Hero
-  heroMode          String   @default("MAGAZINE_COVER_550") // SINGLE_HEADLINE | BENTO_4 | BENTO_3 | MAGAZINE_COVER_550
+  // Hero — selalu MAGAZINE_COVER_550 (Design F), tidak ada mode lain
   heroAutoRotate    Boolean  @default(true)
   heroIntervalMs    Int      @default(5000)
 
@@ -1523,11 +1483,10 @@ PUT /api/v1/sites/:siteId/homepage-config (admin only)
 ### 5.3 Dashboard UI
 
 Tambahkan tab "Homepage Settings" di site settings dashboard:
-- Hero mode selector (radio)
 - Scoring weights (slider 0-1 untuk masing-masing)
 - Feed layout selector (radio)
 - Category config (multi-select dari category tree)
-- Sidebar widget order (drag-and-drop)
+- Interstitial placement order (drag-and-drop)
 
 ---
 
@@ -1546,8 +1505,8 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 4. Pastikan tidak ada perubahan visual
 
 ### Phase 3: Layout Variants (Feature Flag)
-1. Tambahkan `heroMode` dan `feedLayout` ke site config
-2. Implementasi `SingleHeadlineHero` dan `Bento3Hero`
+1. ~~Tambahkan `heroMode` ke site config~~ — TIDAK DIPERLUKAN (satu mode saja: MAGAZINE_COVER_550)
+2. Tambahkan `feedLayout` ke site config
 3. Implementasi `compact` dan `dense` feed layout
 4. Feature flag: jika tidak ada config, gunakan default
 
@@ -1570,7 +1529,7 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 | Aspek | Sebelum | Sesudah |
 |-------|---------|---------|
 | Seleksi artikel | `.slice()` by position | Scoring engine (freshness + engagement + editorial + relevance) |
-| Hero | Selalu BENTO_4 | Configurable: MAGAZINE_COVER_550 (default) / SINGLE_HEADLINE / BENTO_4 / BENTO_3 |
+| Hero | Selalu BENTO_4 | MAGAZINE_COVER_550 (Design F, satu-satunya) |
 | Fokus Redaksi | Fixed 3 kartu | Adaptive 1-4 kartu |
 | Feed layout | Fixed 2-kolom, monoton | Pattern rotation (6 pola berganti setiap baris) |
 | NewsCard | 4 variant, image selalu atas/kiri | `imagePosition` prop: top/left/right/background/none |
@@ -1589,7 +1548,7 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 ## 9. Open Questions
 
 1. **Scoring weights default** — Apakah bobot 0.3/0.3/0.3/0.1 sudah tepat, atau perlu disesuaikan untuk konteks media Indonesia?
-2. **Hero mode trigger** — Apakah `SINGLE_HEADLINE` harus otomatis terpicu saat `isBreaking`, atau selalu manual?
+2. ~~**Hero mode trigger**~~ — Dihapus. Hanya ada satu mode: MAGAZINE_COVER_550. Breaking news masuk hero via hard override di scoring engine (maks 1 breaking di hero).
 3. **HomepagePlacement** — Apakah perlu tabel terpisah, atau cukup field di Article model?
 4. **A/B testing** — Apakah perlu capability untuk test layout berbeda secara bersamaan?
 5. **Cache strategy** — Dengan scoring engine, cache key harus mempertimbangkan weights dan placement. Bagaimana invalidation-nya?

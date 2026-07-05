@@ -45,7 +45,7 @@ export function assertCanPublish(
 
 export async function getArticles(
   siteId: string,
-  query: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number },
+  query: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; sort?: string; order?: string; sinceHours?: number; page?: number; limit?: number },
   user?: JWTPayload
 ) {
   // If search is provided, use Meilisearch
@@ -94,7 +94,7 @@ export async function getArticles(
     }
   }
 
-  const opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; page?: number; limit?: number; authorId?: string } = { ...query }
+  const opts: { status?: string; search?: string; category?: string; startDate?: string; endDate?: string; sort?: string; order?: string; sinceHours?: number; page?: number; limit?: number; authorId?: string } = { ...query }
 
   // If user is a reporter or kontributor, they can only see their own articles
   if (user?.role === 'reporter' || user?.role === 'kontributor') {

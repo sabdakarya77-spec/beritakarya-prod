@@ -129,6 +129,7 @@ async function getTrendingArticles(siteId: string) {
       limit: '5',
       sort: 'views',
       order: 'desc',
+      sinceHours: '24',
     })
     const res = await fetch(
       `${API_URL}/api/v1/articles/public?${params.toString()}`,
@@ -139,6 +140,29 @@ async function getTrendingArticles(siteId: string) {
     return json?.data?.articles || json?.data?.items || []
   } catch (e) {
     console.error('Error fetching trending articles:', e)
+    return []
+  }
+}
+
+async function getPopularArticles(siteId: string) {
+  try {
+    const params = new URLSearchParams({
+      site: siteId,
+      status: 'published',
+      limit: '5',
+      sort: 'views',
+      order: 'desc',
+      sinceHours: '168',
+    })
+    const res = await fetch(
+      `${API_URL}/api/v1/articles/public?${params.toString()}`,
+      { next: { revalidate: 300 } }
+    )
+    if (!res.ok) return []
+    const json = await res.json()
+    return json?.data?.articles || json?.data?.items || []
+  } catch (e) {
+    console.error('Error fetching popular articles:', e)
     return []
   }
 }
@@ -183,11 +207,12 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
-  const [articlesList, categoriesTree, marketData, trendingArticles, homeTopAds] = await Promise.all([
+  const [articlesList, categoriesTree, marketData, trendingArticles, popularArticles, homeTopAds] = await Promise.all([
     getArticles(siteConfig.id, categoryFilter, searchQuery),
     getCategories(siteConfig.id),
     getMarketSnapshot(),
     getTrendingArticles(siteConfig.id),
+    getPopularArticles(siteConfig.id),
     fetchAdsForSlot(siteConfig.id, 'HOME_TOP'),
   ])
 
@@ -199,7 +224,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   // ── Distribusi artikel (homepage) — scoring engine ──
   const dist = isHomepage ? scoreAndDistribute({
     main: articlesList,
-    trending: trendingArticles as HomeArticle[],
+    trending: popularArticles as HomeArticle[], // 7-hari views → untuk PalingDibaca interstitial
     editorChoicePool: articlesList.filter((a: HomeArticle) => a.isFeatured),
     opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, OPINION_SLUGS)),
     photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, PHOTO_SLUGS)),
@@ -279,6 +304,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           marketData={marketData}
           photoJournal={photoJournal}
           showPhotoSection={showPhotoSection}
+          videoStories={videoStories}
+          showVideoSection={showVideoSection}
           siteSettings={siteSettings}
           siteConfigId={siteConfig.id}
           resolveCategoryName={resolveCategoryName}

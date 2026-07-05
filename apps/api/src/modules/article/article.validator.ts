@@ -184,6 +184,10 @@ export const articleQuerySchema = z.object({
   category: z.string().optional(),
   startDate: z.string().optional(), // ISO date string for date range filtering
   endDate: z.string().optional(),   // ISO date string for date range filtering
+  sort: z.enum(['publishedAt', 'views', 'createdAt']).optional(),
+  order: z.enum(['asc', 'desc']).optional(),
+  /** Shorthand: filter publishedAt >= now - sinceHours. Overrides startDate. */
+  sinceHours: z.coerce.number().positive().max(720).optional(), // max 30 hari
   page: z.coerce.number().positive().default(1),
   limit: z.coerce.number().positive().max(100).default(20)
 })

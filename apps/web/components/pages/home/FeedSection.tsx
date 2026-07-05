@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import AdSpace from '../../ui/AdSpace'
 import { Container } from '../../layout/Container'
-import { MarketWidget, PhotoJournalWidget, VideoWidget } from '../LazyWidgets'
+import { VideoWidget } from '../LazyWidgets'
 import type { HomeArticle } from './utils/distribution'
 import { chunkIntoRows, DEFAULT_PATTERN_ROTATION } from './utils/feedPatterns'
 import { FeedRow } from './FeedRow'
-import { PalingDibaca, AksesRedaksi } from './interstitials'
+import { PalingDibaca, AksesRedaksi, InfoPasar, InterstitialPhoto, InterstitialVideo } from './interstitials'
 import { sectionTitleClass, sectionEyebrowClass } from './constants'
 
 interface FeedSectionProps {
@@ -25,6 +25,8 @@ interface FeedSectionProps {
   marketData: Record<string, unknown> | null
   photoJournal: HomeArticle[]
   showPhotoSection: boolean
+  videoStories: HomeArticle[]
+  showVideoSection: boolean
   siteSettings?: { featuredVideo?: { title: string; thumbnail: string; duration: string } }
   siteConfigId: string
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
@@ -33,7 +35,7 @@ interface FeedSectionProps {
 export function FeedSection({
   feedArticles, trending, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
-  whatsappUrl, telegramUrl, reportUrl, siteName, marketData, photoJournal, showPhotoSection, siteSettings,
+  whatsappUrl, telegramUrl, reportUrl, siteName, marketData, photoJournal, showPhotoSection, videoStories, showVideoSection, siteSettings,
   siteConfigId, resolveCategoryName,
 }: FeedSectionProps) {
   const { LoadMoreArticles, SavedArticlesFeed } = require('../LazyWidgets')
@@ -100,14 +102,15 @@ export function FeedSection({
 
           {/* ═══ Interstitials setelah semua feed rows ═══ */}
           <AksesRedaksi whatsappUrl={whatsappUrl} telegramUrl={telegramUrl} reportUrl={reportUrl} siteName={siteName} />
-          <div className="my-8">
-            <MarketWidget initialData={marketData as never} />
-          </div>
+          <InfoPasar initialData={marketData as never} />
 
-          {/* Foto Jurnalistik */}
-          {showPhotoSection && <PhotoJournalWidget articles={photoJournal} site={site} />}
+          {/* Foto Jurnalistik — interstitial */}
+          {showPhotoSection && <InterstitialPhoto articles={photoJournal} site={site} />}
 
-          {/* Video Widget */}
+          {/* Video Eksklusif — interstitial */}
+          {showVideoSection && <InterstitialVideo articles={videoStories} site={site} />}
+
+          {/* Featured Video Widget (siteSettings) */}
           {siteSettings?.featuredVideo && (
             <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
               <div className="mb-4">
