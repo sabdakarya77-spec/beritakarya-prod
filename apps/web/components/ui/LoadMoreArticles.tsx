@@ -125,8 +125,8 @@ export default function LoadMoreArticles({
       )}
 
       {!hasMore && articles.length > 0 && (
-        <div className="text-center py-20 border-t border-gray-50">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">
+        <div className="text-center py-20 border-t border-gray-100 dark:border-white/10">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 dark:text-white/30">
             Anda telah mencapai batas cakrawala berita
           </p>
         </div>

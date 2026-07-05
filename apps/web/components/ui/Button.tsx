@@ -35,6 +35,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   dark: cn(
     'bg-brand-black text-white rounded-sm',
     'hover:bg-brand-red',
+    'dark:bg-white dark:text-brand-black dark:hover:bg-brand-red dark:hover:text-white',
     'transition-all duration-200'
   ),
   dashboard: cn(
