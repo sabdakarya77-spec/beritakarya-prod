@@ -1,6 +1,6 @@
 import { Zap } from 'lucide-react'
 import NewsCard from '../../ui/NewsCard'
-import ScrollAnimate from '../../ui/ScrollAnimate'
+import FadeInOnScroll from '../../ui/FadeInOnScroll'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
 import { sectionEyebrowClass } from './constants'
@@ -22,7 +22,7 @@ export function FokusRedaksiCompact({ articles, site }: FokusRedaksiCompactProps
 
   return (
     <Container className="pt-2 pb-4 md:pt-0 md:pb-6">
-      <ScrollAnimate>
+      <FadeInOnScroll>
         <div className="mb-4 flex items-center gap-2">
           <Zap size={14} className="text-brand-red" />
           <h2 className={`${sectionEyebrowClass} text-brand-black dark:text-white`}>
@@ -40,7 +40,7 @@ export function FokusRedaksiCompact({ articles, site }: FokusRedaksiCompactProps
             />
           ))}
         </div>
-      </ScrollAnimate>
+      </FadeInOnScroll>
     </Container>
   )
 }

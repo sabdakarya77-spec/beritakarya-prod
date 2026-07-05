@@ -1,7 +1,7 @@
 import { Zap, Star, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SmartImage } from '../../ui/SmartImage'
-import ScrollAnimate from '../../ui/ScrollAnimate'
+import FadeInOnScroll from '../../ui/FadeInOnScroll'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
 import { sectionEyebrowClass, sectionMetaClass, formatSidebarDate } from './constants'
@@ -35,7 +35,7 @@ export function EditorialExtras({
 
         {/* Pilihan Editor — portrait cards (3:4) */}
         {showEditorChoice && (
-          <ScrollAnimate>
+          <FadeInOnScroll>
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <Star size={14} className="fill-amber-500 text-amber-500" />
@@ -76,12 +76,12 @@ export function EditorialExtras({
                 </div>
               ))}
             </div>
-          </ScrollAnimate>
+          </FadeInOnScroll>
         )}
 
         {/* Opini & Analisis */}
         {showOpinionSection && (
-          <ScrollAnimate>
+          <FadeInOnScroll>
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
@@ -119,12 +119,12 @@ export function EditorialExtras({
                 </div>
               ))}
             </div>
-          </ScrollAnimate>
+          </FadeInOnScroll>
         )}
 
         {/* Video Eksklusif */}
         {showVideoSection && (
-          <ScrollAnimate className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:px-6 md:py-8">
+          <FadeInOnScroll className="rounded-2xl border border-gray-200 bg-white px-5 py-6 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:px-6 md:py-8">
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
                 <Zap size={14} className="fill-brand-red text-brand-red" />
@@ -157,7 +157,7 @@ export function EditorialExtras({
                 )
               })}
             </div>
-          </ScrollAnimate>
+          </FadeInOnScroll>
         )}
 
       </Container>
