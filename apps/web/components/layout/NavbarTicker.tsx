@@ -68,18 +68,6 @@ export function NavbarTicker({ site = 'pusat', initialData }: NavbarTickerProps)
   const [market, setMarket] = useState<MarketSnapshot | null>(initialData ?? null)
   const [articles, setArticles] = useState<TickerArticle[]>([])
 
-  useEffect(() => {
-    fetchMarket()
-    fetchLatest()
-    const marketInterval = setInterval(fetchMarket, REFRESH_INTERVAL_MS)
-    const articleInterval = setInterval(fetchLatest, REFRESH_INTERVAL_MS)
-    return () => {
-      clearInterval(marketInterval)
-      clearInterval(articleInterval)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   async function fetchMarket() {
     try {
       const res = await fetch(`${API_URL}/api/v1/market/snapshot`)
@@ -102,6 +90,18 @@ export function NavbarTicker({ site = 'pusat', initialData }: NavbarTickerProps)
       // silent
     }
   }
+
+  useEffect(() => {
+    fetchMarket()
+    fetchLatest()
+    const marketInterval = setInterval(fetchMarket, REFRESH_INTERVAL_MS)
+    const articleInterval = setInterval(fetchLatest, REFRESH_INTERVAL_MS)
+    return () => {
+      clearInterval(marketInterval)
+      clearInterval(articleInterval)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (!market && articles.length === 0) return null
 
