@@ -288,6 +288,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const videoStories = dist?.videoStories || []
   const sidebarPopular = dist?.popular || []
   const trending = dist?.trending || []
+  const remainingArticles = dist?.remainingArticles || []
 
   // ── Feed: gabungkan featured + stream untuk pattern rotation ──
   const feedArticles = isHomepage
@@ -355,6 +356,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             homeTopAds={homeTopAds}
             resolveCategoryName={resolveCategoryName}
             getVideoThumbnail={getVideoThumbnail}
+            remainingArticles={remainingArticles}
           />
         ) : (
           // Category/search mode — tanpa hero/trending

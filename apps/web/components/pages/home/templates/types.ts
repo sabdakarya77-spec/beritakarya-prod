@@ -36,4 +36,6 @@ export interface TemplateProps {
   homeTopAds?: unknown[]
   resolveCategoryName: (slug: string, tree: TemplateProps['categoriesTree']) => string
   getVideoThumbnail: (article: HomeArticle) => string | null
+  /** Artikel sisa dari distribusi — untuk Load More */
+  remainingArticles?: HomeArticle[]
 }

@@ -21,7 +21,7 @@ export function TemplateF(props: TemplateProps) {
     site, searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
     showSavedFeed, whatsappUrl, telegramUrl, reportUrl,
     showEditorChoice, showOpinionSection, showVideoSection,
-    siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
+    siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail, remainingArticles,
   } = props
 
   return (
@@ -59,6 +59,7 @@ export function TemplateF(props: TemplateProps) {
         reportUrl={reportUrl}
         siteConfigId={siteConfigId}
         resolveCategoryName={resolveCategoryName}
+        remainingArticles={remainingArticles}
       />
 
       {/* ZONA 5+ — EDITORIAL EXTRAS */}

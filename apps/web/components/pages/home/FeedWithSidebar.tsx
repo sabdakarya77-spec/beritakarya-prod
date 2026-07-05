@@ -20,6 +20,8 @@ interface FeedWithSidebarProps {
   reportUrl: string
   siteConfigId: string
   resolveCategoryName: (slug: string, tree: FeedWithSidebarProps['categoriesTree']) => string
+  /** Artikel sisa dari distribusi — untuk Load More */
+  remainingArticles?: HomeArticle[]
 }
 
 const getImageUrl = (article: HomeArticle): string =>
@@ -34,11 +36,11 @@ export function FeedWithSidebar({
   feedArticles, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
   whatsappUrl, telegramUrl, reportUrl, siteConfigId, resolveCategoryName,
+  remainingArticles = [],
 }: FeedWithSidebarProps) {
   const { LoadMoreArticles } = require('../LazyWidgets')
 
   const displayArticles = feedArticles.slice(0, 5)
-  const remainingArticles = feedArticles.slice(5)
 
   return (
     <Container className="border-t border-gray-100 py-4 dark:border-white/5 md:py-8">

@@ -66,6 +66,8 @@ export interface DistributionResult {
   videoStories: HomeArticle[]
   trending: HomeArticle[]
   popular: HomeArticle[]
+  /** Semua artikel yang TIDAK dipakai di zona manapun — untuk Load More */
+  remainingArticles: HomeArticle[]
 }
 
 // ---------------------------------------------------------------------------
@@ -161,6 +163,24 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     .filter(a => !heroIds.has(a.id) && !trendingIds.has(a.id))
     .slice(0, 5)
 
+  // ─────────────────────────────────────────────
+  // 6. REMAINING: semua artikel yang TIDAK dipakai di zona manapun
+  //    Untuk Load More — hindari duplikat dengan zona yang sudah tampil.
+  // ─────────────────────────────────────────────
+  const allUsedIds = new Set([
+    ...hero,
+    ...fokusRedaksi,
+    ...feedFeatured,
+    ...feedStream,
+    ...editorChoice,
+    ...opinion,
+    ...photoJournal,
+    ...videoStories,
+    ...trending,
+  ].map(a => a.id))
+
+  const remainingArticles = articles.filter(a => !allUsedIds.has(a.id))
+
   return {
     hero,
     fokusRedaksi,
@@ -172,5 +192,6 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     videoStories,
     trending,
     popular,
+    remainingArticles,
   }
 }
