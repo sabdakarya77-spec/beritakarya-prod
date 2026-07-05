@@ -3,7 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './Navbar';
 import SiteFooter from './SiteFooter';
-import BreakingNewsTicker from '../ui/BreakingNewsTicker';
+import { NavbarTicker } from './NavbarTicker';
 import MobileBottomNav from './MobileBottomNav';
 import { CATEGORIES_CONFIG, CategoryItem, type SiteConfig } from '../../lib/constants';
 import { api } from '../../lib/api';
@@ -92,7 +92,7 @@ export default function PublicSiteLayout({
       {!hideTicker && (
         <div className="border-b border-black/5 bg-brand-black text-white shadow-[0_16px_32px_rgba(2,6,23,0.18)] dark:border-white/5 dark:bg-[#020617]">
           <Container>
-            <BreakingNewsTicker />
+            <NavbarTicker site={siteConfig.id} />
           </Container>
         </div>
       )}

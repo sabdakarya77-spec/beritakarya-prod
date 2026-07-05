@@ -7,7 +7,6 @@ import { SmartImage } from '../ui/SmartImage';
 import { cn } from '../../lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { Container } from './Container';
-import { NavbarTicker } from './NavbarTicker';
 
 import { CategoryItem, type SiteConfig } from '../../lib/constants';
 import { useSavedArticles } from '../../hooks/useSavedArticles';
@@ -387,12 +386,6 @@ export default function Navbar({
       )}
       {!isArticlePage && (
         <div className="hidden border-t border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-[#0a0f1a] md:block">
-          {/* Info Pasar + Terkini Ticker */}
-          <div className="border-b border-gray-200 dark:border-white/10">
-            <Container className="flex h-7 items-center overflow-hidden">
-              <NavbarTicker site={activeSite} />
-            </Container>
-          </div>
           <Container className={cn(
             "relative z-40 hidden items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-gray-500 dark:text-white/60 md:flex lg:text-[11px]",
             isCollapsed
