@@ -29,7 +29,7 @@ export function Bento4Hero({ articles, site }: Bento4HeroProps) {
       {/* Main image — col-span-8 */}
       <div className="md:col-span-8">
         <Link href={`/${site}/artikel/${main.slug}`} className="group block">
-          <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-slate-900">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-slate-900">
             <SmartImage
               src={main.featuredImage || '/placeholder.jpg'}
               context="hero_lead"

@@ -44,7 +44,7 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
               <Link
                 key={article.id}
                 href={`/${site}/artikel/${article.slug}`}
-                className="group relative aspect-[16/10] overflow-hidden rounded-2xl"
+                className="group relative aspect-[16/9] overflow-hidden rounded-2xl"
               >
                 {/* Background Image */}
                 <SmartImage

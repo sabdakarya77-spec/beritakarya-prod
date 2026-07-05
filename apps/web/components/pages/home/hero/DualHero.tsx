@@ -29,7 +29,7 @@ export function DualHero({ articles, site }: DualHeroProps) {
         <Link
           key={article.id}
           href={`/${site}/artikel/${article.slug}`}
-          className="group relative aspect-[16/10] overflow-hidden rounded-2xl"
+          className="group relative aspect-[16/9] overflow-hidden rounded-2xl"
         >
           <SmartImage
             src={article.featuredImage || '/placeholder.jpg'}
