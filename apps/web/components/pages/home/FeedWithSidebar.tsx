@@ -135,11 +135,13 @@ export function FeedWithSidebar({
         <aside className="lg:col-span-4">
           <div className="sticky top-24 space-y-4">
             <PalingDibacaSidebar articles={popular} site={site} />
-            <AksesRedaksiSidebar
-              whatsappUrl={whatsappUrl}
-              telegramUrl={telegramUrl}
-              reportUrl={reportUrl}
-            />
+            <div className="hidden lg:block">
+              <AksesRedaksiSidebar
+                whatsappUrl={whatsappUrl}
+                telegramUrl={telegramUrl}
+                reportUrl={reportUrl}
+              />
+            </div>
           </div>
         </aside>
       </div>
