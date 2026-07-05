@@ -678,6 +678,14 @@ export class SiteService {
           heroMode: 'MAGAZINE_COVER_550',
           feedLayout: 'pattern_rotation',
           trendingStyle: 'numbered_podium',
+          sectionOrder: ['hero', 'fokus_redaksi', 'trending', 'feed', 'pilihan_editor', 'opini', 'foto', 'video'],
+          sectionVisibility: { hero: true, fokus_redaksi: true, trending: true, feed: true, pilihan_editor: true, opini: true, foto: true, video: true },
+          interstitials: [
+            { id: 'trending', afterCardIndex: 6, widget: 'trending', enabled: true },
+            { id: 'redaksi', afterCardIndex: 12, widget: 'redaksi', enabled: true },
+            { id: 'market', afterCardIndex: 18, widget: 'market', enabled: true },
+            { id: 'photo', afterCardIndex: 24, widget: 'photo', enabled: true },
+          ],
         }
       })
     }
