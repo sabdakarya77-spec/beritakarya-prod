@@ -57,7 +57,7 @@ describe('Container Component', () => {
       // Bleed mode includes negative margins and padding
       expect(classes).toContain('px-4');
       expect(classes).toContain('md:px-8');
-      expect(classes).toContain('lg:px-10');
+      expect(classes).toContain('lg:px-[var(--container-padding-desktop)]');
       // tailwind-merge will remove conflicting -mx-* classes when px-* is present
       // That's expected behavior - we only need to verify padding is applied
     });
@@ -72,7 +72,7 @@ describe('Container Component', () => {
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper).toHaveClass('px-4');
       expect(wrapper).toHaveClass('md:px-8');
-      expect(wrapper).toHaveClass('lg:px-10');
+      expect(wrapper).toHaveClass('lg:px-[var(--container-padding-desktop)]');
       // When bleed is false, no negative margins should be in the class string
       expect(wrapper.className).not.toMatch(/\b-mx-\d+/);
       expect(wrapper.className).not.toMatch(/\bmd:-mx-\d+/);
@@ -175,7 +175,7 @@ describe('Container Component', () => {
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper).toHaveClass('px-4');
       expect(wrapper).toHaveClass('md:px-8');
-      expect(wrapper).toHaveClass('lg:px-10');
+      expect(wrapper).toHaveClass('lg:px-[var(--container-padding-desktop)]');
       expect(wrapper).toHaveClass('mx-auto');
     });
   });

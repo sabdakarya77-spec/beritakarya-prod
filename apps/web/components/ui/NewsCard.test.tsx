@@ -16,10 +16,6 @@ vi.mock('./EditorialBadge', () => ({
   ),
 }))
 
-vi.mock('./ArticleBookmarkButton', () => ({
-  default: () => <button data-testid="bookmark-btn">Bookmark</button>,
-}))
-
 vi.mock('../../lib/resolveArticleBadge', () => ({
   resolveArticleBadge: () => null,
 }))
@@ -64,28 +60,6 @@ describe('NewsCard', () => {
       expect(getByText('Test Article Title')).toBeTruthy()
     })
 
-    it('renders author name', () => {
-      const { getByText } = render(
-        <NewsCard article={baseArticle} />
-      )
-      expect(getByText('John Doe')).toBeTruthy()
-    })
-
-    it('renders reading time', () => {
-      const { getByText } = render(
-        <NewsCard article={baseArticle} />
-      )
-      expect(getByText('5 min baca')).toBeTruthy()
-    })
-
-    it('renders default reading time when not provided', () => {
-      const article = { ...baseArticle, readingTimeMin: null }
-      const { getByText } = render(
-        <NewsCard article={article} />
-      )
-      expect(getByText('3 min baca')).toBeTruthy()
-    })
-
     it('renders category name', () => {
       const { getByText } = render(
         <NewsCard article={baseArticle} />
@@ -109,12 +83,32 @@ describe('NewsCard', () => {
       expect(link?.getAttribute('href')).toContain('/bandung/artikel/test-article')
     })
 
-    it('renders date in Indonesian format', () => {
-      const { getByText } = render(
+    it('does not render author name (visual-forward)', () => {
+      const { queryByText } = render(
         <NewsCard article={baseArticle} />
       )
-      // Date should be formatted as "15 Jan 2026"
-      expect(getByText(/15.*Jan.*2026/)).toBeTruthy()
+      expect(queryByText('John Doe')).toBeNull()
+    })
+
+    it('does not render reading time (visual-forward)', () => {
+      const { queryByText } = render(
+        <NewsCard article={baseArticle} />
+      )
+      expect(queryByText('5 min baca')).toBeNull()
+    })
+
+    it('does not render date (visual-forward)', () => {
+      const { queryByText } = render(
+        <NewsCard article={baseArticle} />
+      )
+      expect(queryByText(/15.*Jan.*2026/)).toBeNull()
+    })
+
+    it('does not render bookmark button (visual-forward)', () => {
+      const { queryByTestId } = render(
+        <NewsCard article={baseArticle} />
+      )
+      expect(queryByTestId('bookmark-btn')).toBeNull()
     })
   })
 
@@ -129,11 +123,33 @@ describe('NewsCard', () => {
       expect(article).toBeTruthy()
     })
 
-    it('renders bookmark button in large variant', () => {
-      const { getByTestId } = render(
+    it('renders category badge', () => {
+      const { getByText } = render(
         <NewsCard article={baseArticle} variant="large" />
       )
-      expect(getByTestId('bookmark-btn')).toBeTruthy()
+      expect(getByText('Teknologi')).toBeTruthy()
+    })
+
+    it('does not render excerpt (visual-forward)', () => {
+      const article = { ...baseArticle, excerpt: 'Custom excerpt text' }
+      const { queryByText } = render(
+        <NewsCard article={article} variant="large" />
+      )
+      expect(queryByText('Custom excerpt text')).toBeNull()
+    })
+
+    it('does not render author name (visual-forward)', () => {
+      const { queryByText } = render(
+        <NewsCard article={baseArticle} variant="large" />
+      )
+      expect(queryByText('John Doe')).toBeNull()
+    })
+
+    it('does not render bookmark button (visual-forward)', () => {
+      const { queryByTestId } = render(
+        <NewsCard article={baseArticle} variant="large" />
+      )
+      expect(queryByTestId('bookmark-btn')).toBeNull()
     })
   })
 
@@ -143,6 +159,27 @@ describe('NewsCard', () => {
         <NewsCard article={baseArticle} variant="horizontal" />
       )
       expect(getByText('Test Article Title')).toBeTruthy()
+    })
+
+    it('renders category badge', () => {
+      const { getByText } = render(
+        <NewsCard article={baseArticle} variant="horizontal" />
+      )
+      expect(getByText('Teknologi')).toBeTruthy()
+    })
+
+    it('does not render excerpt (visual-forward)', () => {
+      const { queryByText } = render(
+        <NewsCard article={baseArticle} variant="horizontal" />
+      )
+      expect(queryByText('some excerpt')).toBeNull()
+    })
+
+    it('does not render author name (visual-forward)', () => {
+      const { queryByText } = render(
+        <NewsCard article={baseArticle} variant="horizontal" />
+      )
+      expect(queryByText('John Doe')).toBeNull()
     })
   })
 
@@ -205,38 +242,6 @@ describe('NewsCard', () => {
       )
       const img = getByTestId('smart-image')
       expect(img.getAttribute('data-src')).toBe('/placeholder.jpg')
-    })
-  })
-
-  describe('Excerpt (large variant)', () => {
-    it('uses article.excerpt when available', () => {
-      const article = { ...baseArticle, excerpt: 'Custom excerpt text' }
-      const { getByText } = render(
-        <NewsCard article={article} variant="large" />
-      )
-      expect(getByText('Custom excerpt text')).toBeTruthy()
-    })
-
-    it('falls back to first paragraph block content', () => {
-      const article = {
-        ...baseArticle,
-        excerpt: null,
-        blocks: [{ type: 'paragraph', content: 'Block paragraph text' }],
-      }
-      const { getByText } = render(
-        <NewsCard article={article} variant="large" />
-      )
-      expect(getByText('Block paragraph text')).toBeTruthy()
-    })
-  })
-
-  describe('Author fallback', () => {
-    it('shows Redaksi when author is null', () => {
-      const article = { ...baseArticle, author: null }
-      const { getByText } = render(
-        <NewsCard article={article} />
-      )
-      expect(getByText('Redaksi')).toBeTruthy()
     })
   })
 
