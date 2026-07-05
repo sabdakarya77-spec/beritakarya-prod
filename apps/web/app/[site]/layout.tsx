@@ -14,7 +14,8 @@ export async function generateMetadata({
     siteParam === 'pusat' ? 'BeritaKarya' : `BeritaKarya ${siteName}`
 
   return {
-    manifest: `/${siteParam}/manifest.webmanifest`,
+    // manifest: root manifest (app/manifest.ts) dipakai otomatis
+    // [site]/manifest.ts tidak di-build Next.js untuk dynamic routes
     title: {
       default: displayName,
       template: `%s | ${displayName}`,
