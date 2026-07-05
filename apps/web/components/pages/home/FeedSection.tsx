@@ -30,6 +30,12 @@ interface FeedSectionProps {
   siteSettings?: { featuredVideo?: { title: string; thumbnail: string; duration: string } }
   siteConfigId: string
   resolveCategoryName: (slug: string, tree: FeedSectionProps['categoriesTree']) => string
+  /** Artikel sisa dari distribusi — untuk Load More */
+  remainingArticles?: HomeArticle[]
+  /** ID artikel yang sudah dirender di beranda — untuk disaring dari hasil Load More */
+  excludeIds?: string[]
+  /** Jika true, komponen dipakai di dalam grid berkolom sehingga pembungkus Container dihilangkan */
+  isNestedInGrid?: boolean
 }
 
 export function FeedSection({
@@ -37,14 +43,19 @@ export function FeedSection({
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
   whatsappUrl, telegramUrl, reportUrl, siteName, marketData, photoJournal, showPhotoSection, videoStories, showVideoSection, siteSettings,
   siteConfigId, resolveCategoryName,
+  remainingArticles = [], excludeIds = [], isNestedInGrid = false,
 }: FeedSectionProps) {
   const { LoadMoreArticles, SavedArticlesFeed } = require('../LazyWidgets')
 
   const rows = chunkIntoRows(feedArticles as (HomeArticle & { [key: string]: unknown })[], DEFAULT_PATTERN_ROTATION)
   const trendingForList = trending.length > 0 ? trending : popular
 
+  const Wrapper = isNestedInGrid
+    ? ({ children }: { children: React.ReactNode }) => <div className="py-4 md:py-8">{children}</div>
+    : ({ children }: { children: React.ReactNode }) => <Container className="py-4 md:py-8">{children}</Container>
+
   return (
-    <Container className="py-4 md:py-8">
+    <Wrapper>
       {/* Section Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-black/10 pb-4 dark:border-white/5 md:flex-row md:items-end md:justify-between">
         <SectionTitle as="h3" className="flex items-center gap-3 uppercase md:!text-xl">
@@ -146,9 +157,16 @@ export function FeedSection({
       {/* Load More */}
       {!showSavedFeed && (
         <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
-          <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={Math.ceil(feedArticles.length / 10)} />
+          <LoadMoreArticles
+            siteId={siteConfigId}
+            category={categoryFilter}
+            search={searchQuery}
+            initialPage={Math.ceil(feedArticles.length / 10)}
+            remainingArticles={remainingArticles as never[]}
+            excludeIds={excludeIds}
+          />
         </div>
       )}
-    </Container>
+    </Wrapper>
   )
 }

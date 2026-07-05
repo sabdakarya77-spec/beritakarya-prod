@@ -28,6 +28,7 @@ export function TemplateB(props: TemplateProps) {
     showSavedFeed, whatsappUrl, telegramUrl, reportUrl, siteName,
     marketData, showPhotoSection, showVideoSection, showEditorChoice, showOpinionSection,
     siteSettings, siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
+    remainingArticles, excludeIds,
   } = props
 
   return (
@@ -73,6 +74,8 @@ export function TemplateB(props: TemplateProps) {
         siteSettings={siteSettings as never}
         siteConfigId={siteConfigId}
         resolveCategoryName={resolveCategoryName}
+        remainingArticles={remainingArticles}
+        excludeIds={excludeIds}
       />
 
       {/* ZONA 5+ — EDITORIAL EXTRAS */}

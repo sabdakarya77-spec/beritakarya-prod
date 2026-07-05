@@ -304,6 +304,20 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     ? trendingArticles
     : popularArticles
 
+  // ── Kumpulkan semua ID artikel yang sudah dipakai di beranda ──
+  // Digunakan oleh LoadMoreArticles untuk menyaring duplikat dari hasil API
+  const excludeIds = [
+    ...heroArticles,
+    ...fokusRedaksi,
+    ...feedFeatured,
+    ...feedStream,
+    ...editorChoice,
+    ...opinionArticles,
+    ...photoJournal,
+    ...videoStories,
+    ...(effectiveTrending as HomeArticle[]),
+  ].map((a) => a.id)
+
   // ── Conditional flags ──
   const showHomepageHero = isHomepage && heroArticles.length > 0
   const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
@@ -357,6 +371,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             resolveCategoryName={resolveCategoryName}
             getVideoThumbnail={getVideoThumbnail}
             remainingArticles={remainingArticles}
+            excludeIds={excludeIds}
           />
         ) : (
           // Category/search mode — tanpa hero/trending
@@ -364,7 +379,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             heroArticles={[]}
             fokusRedaksi={[]}
             trendingArticles={[]}
-            feedArticles={articlesList.slice(0, 8)}
+            feedArticles={articlesList.slice(0, 10)}
             trending={[]}
             popular={articlesList.slice(0, 5)}
             editorChoice={[]}
@@ -391,6 +406,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             homeTopAds={homeTopAds}
             resolveCategoryName={resolveCategoryName}
             getVideoThumbnail={getVideoThumbnail}
+            excludeIds={articlesList.slice(0, 10).map((a: HomeArticle) => a.id)}
           />
         )}
       </main>

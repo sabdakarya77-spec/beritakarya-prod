@@ -28,6 +28,8 @@ interface LoadMoreArticlesProps {
   initialPage?: number;
   /** Artikel sisa dari distribusi yang belum ditampilkan */
   remainingArticles?: LoadMoreArticleItem[];
+  /** ID artikel yang sudah ditampilkan di beranda untuk disaring keluar */
+  excludeIds?: string[];
 }
 
 export default function LoadMoreArticles({
@@ -36,6 +38,7 @@ export default function LoadMoreArticles({
   search,
   initialPage = 1,
   remainingArticles = [],
+  excludeIds = [],
 }: LoadMoreArticlesProps) {
   const [articles, setArticles] = useState<LoadMoreArticleItem[]>(remainingArticles);
   const [page, setPage] = useState(initialPage);
@@ -66,7 +69,11 @@ export default function LoadMoreArticles({
       if (newArticles.length === 0) {
         setHasMore(false);
       } else {
-        setArticles([...articles, ...newArticles]);
+        const excludeSet = new Set(excludeIds);
+        const filteredNewArticles = (newArticles as LoadMoreArticleItem[]).filter(
+          (art) => !excludeSet.has(art.id)
+        );
+        setArticles([...articles, ...filteredNewArticles]);
         setPage(nextPage);
         if (newArticles.length < 10) setHasMore(false);
       }

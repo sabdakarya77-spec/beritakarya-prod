@@ -25,7 +25,7 @@ export function PalingDibaca({ articles, site }: PalingDibacaProps) {
         </h3>
       </div>
       {/* Horizontal scrollable cards */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
         {articles.slice(0, 5).map((article, index) => {
           const imageUrl = getImageUrl(article)
           return (

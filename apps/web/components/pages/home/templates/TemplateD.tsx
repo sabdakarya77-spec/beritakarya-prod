@@ -29,6 +29,7 @@ export function TemplateD(props: TemplateProps) {
     showSavedFeed, whatsappUrl, telegramUrl, reportUrl, siteName,
     marketData, showPhotoSection, showVideoSection, showEditorChoice, showOpinionSection,
     siteSettings, siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
+    remainingArticles, excludeIds,
   } = props
 
   const trendingForSidebar = trendingArticles.length > 0 ? trendingArticles : popular
@@ -53,8 +54,11 @@ export function TemplateD(props: TemplateProps) {
       )}
 
       {/* ZONA 3+4 — FEED + TRENDING SIDEBAR (side by side) */}
-      <Container className="py-4 md:py-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+      {/* NOTE: FeedSection sudah memiliki Container di dalamnya.
+          Wrapper di sini sengaja menggunakan div biasa (bukan Container)
+          untuk menghindari double horizontal padding (bug nested container). */}
+      <div className="py-4 md:py-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8 px-4 md:px-8 lg:px-[max(2rem,calc((100vw-1280px)/2+2rem))]">
           {/* Feed — 8 kolom */}
           <div className="md:col-span-8">
             <FeedSection
@@ -79,6 +83,9 @@ export function TemplateD(props: TemplateProps) {
               siteSettings={siteSettings as never}
               siteConfigId={siteConfigId}
               resolveCategoryName={resolveCategoryName}
+              remainingArticles={remainingArticles}
+              excludeIds={excludeIds}
+              isNestedInGrid
             />
           </div>
 
@@ -87,7 +94,7 @@ export function TemplateD(props: TemplateProps) {
             <StickySidebar articles={trendingForSidebar} site={site} />
           </aside>
         </div>
-      </Container>
+      </div>
 
       {/* ZONA 5+ — EDITORIAL EXTRAS */}
       <EditorialExtras

@@ -22,6 +22,7 @@ export function TemplateF(props: TemplateProps) {
     showSavedFeed, whatsappUrl, telegramUrl, reportUrl,
     showEditorChoice, showOpinionSection, showVideoSection,
     siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail, remainingArticles,
+    excludeIds,
   } = props
 
   return (
@@ -60,6 +61,7 @@ export function TemplateF(props: TemplateProps) {
         siteConfigId={siteConfigId}
         resolveCategoryName={resolveCategoryName}
         remainingArticles={remainingArticles}
+        excludeIds={excludeIds}
       />
 
       {/* ZONA 5+ — EDITORIAL EXTRAS */}

@@ -38,4 +38,6 @@ export interface TemplateProps {
   getVideoThumbnail: (article: HomeArticle) => string | null
   /** Artikel sisa dari distribusi — untuk Load More */
   remainingArticles?: HomeArticle[]
+  /** ID artikel yang sudah dirender di beranda — untuk disaring dari hasil Load More */
+  excludeIds?: string[]
 }

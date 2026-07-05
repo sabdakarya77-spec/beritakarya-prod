@@ -22,6 +22,8 @@ interface FeedWithSidebarProps {
   resolveCategoryName: (slug: string, tree: FeedWithSidebarProps['categoriesTree']) => string
   /** Artikel sisa dari distribusi — untuk Load More */
   remainingArticles?: HomeArticle[]
+  /** ID artikel yang sudah dirender di beranda — untuk disaring dari hasil Load More */
+  excludeIds?: string[]
 }
 
 const getImageUrl = (article: HomeArticle): string =>
@@ -36,7 +38,7 @@ export function FeedWithSidebar({
   feedArticles, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
   whatsappUrl, telegramUrl, reportUrl, siteConfigId, resolveCategoryName,
-  remainingArticles = [],
+  remainingArticles = [], excludeIds = [],
 }: FeedWithSidebarProps) {
   const { LoadMoreArticles } = require('../LazyWidgets')
 
@@ -172,6 +174,7 @@ export function FeedWithSidebar({
             search={searchQuery}
             initialPage={1}
             remainingArticles={remainingArticles}
+            excludeIds={excludeIds}
           />
         </div>
       )}

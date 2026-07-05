@@ -30,7 +30,7 @@ export function HorizontalStrip({ articles, site }: HorizontalStripProps) {
             Trending
           </SectionEyebrow>
         </div>
-        <div className="flex gap-0 divide-x divide-black/5 overflow-x-auto scrollbar-none dark:divide-white/5">
+        <div className="flex gap-0 divide-x divide-black/5 overflow-x-auto no-scrollbar dark:divide-white/5">
           {articles.slice(0, 5).map((article, index) => (
             <Link
               key={article.id}
