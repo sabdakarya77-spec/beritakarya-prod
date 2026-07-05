@@ -1,18 +1,37 @@
-🔴 Temuan #1: Video iklan autoplay adalah penyebab utama payload 24 MB
-Bukti dari diagnostik: "Menghindari payload jaringan yang sangat besar — Ukuran total adalah 24.492 KiB" (~24 MB — ini sangat besar untuk halaman berita mobile, wajarnya di bawah 2-3 MB).
-Saya cek kodenya, dan ini penyebabnya — di AdSpace.tsx dan HeroBannerRow.tsx:
-tsx<video ref={videoRef} src={effectiveUrl} autoPlay loop muted playsInline ... />
-Tidak ada atribut preload. Default browser untuk <video> tanpa preload adalah preload="auto" — artinya begitu halaman dimuat, browser langsung mendownload seluruh file video iklan (bukan cuma metadata), lalu autoPlay langsung memutarnya. Kalau ada video ad 10-15 detik di HOME_TOP (sesuai rencana Seedance kamu nanti), itu bisa dengan mudah beberapa MB sekali muat — dan ini terjadi sebelum user sempat berinteraksi, di jaringan mobile pula (throttle 4G lambat, sesuai kondisi test di laporan).
-Perbaikan:
-tsx<video preload="none" poster={posterImageUrl} autoPlay loop muted playsInline ... />
-Pakai preload="none" + poster (gambar thumbnail statis yang muncul sebelum video dimuat) — video baru benar-benar didownload saat elemen masuk viewport (pakai IntersectionObserver, bukan otomatis saat page load). Ini kemungkinan besar akan memangkas payload paling banyak dari semua temuan.
-🔴 Temuan #2: CLS 0,533 — lebih dari 2x ambang "buruk" (ambang buruk itu >0,25)
-Bukti: "Penyebab perubahan tata letak" dan "Ubah posisi/geometri yang dipaksa" sama-sama ditandai merah.
-Ini konsisten dengan dugaan saya sebelumnya: <img>/<video> di AdSpace.tsx tidak punya width/height eksplisit atau aspect-ratio CSS yang pasti pada containernya. Begitu gambar/video iklan selesai dimuat (telat, karena payload besar di atas), elemen lain di halaman "meloncat" untuk memberi ruang — inilah yang dirasakan user sebagai layout yang tidak stabil.
-Perbaikan: pastikan container ad slot (AdSpace.tsx) selalu punya aspect-ratio CSS tetap sesuai ukuran slot dari config/ad-slots.ts (misal aspect-[4/1] untuk HOME_TOP desktop), supaya ruang sudah dialokasikan browser sebelum media selesai dimuat — bukan menunggu media datang baru menentukan tinggi elemen.
-🔴 Temuan #3: LCP 5,7 detik — lebih dari 2x ambang "buruk" (ambang buruk itu >4 detik)
-Bukti: "Perincian LCP" dan "Penemuan permintaan LCP" sama-sama merah — artinya bukan cuma elemen LCP-nya berat, tapi browser terlambat menemukan/mulai men-download resource-nya.
-Ini nyambung ke dua temuan di atas: kalau elemen LCP di halaman ini adalah banner/video iklan (sangat mungkin untuk situs berita, hero banner di atas selalu jadi kandidat LCP), maka: (a) datanya kemungkinan di-fetch client-side dulu (perlu JS jalan → fetch API ad → baru tahu src gambar/videonya), sehingga browser tidak bisa mulai download di awal HTML, dan (b) begitu ditemukan, yang didownload adalah video besar tadi (Temuan #1). Ini efek berantai dari 2 masalah di atas, bukan masalah terpisah.
-Perbaikan tambahan: kalau data ad slot untuk 1-2 slot teratas (di atas fold) bisa di-fetch di server (Server Component / SSR) alih-alih client-side fetch, src gambar sudah ada di HTML awal → browser bisa mulai download lebih cepat.
-🟡 Temuan #4 (lebih kecil): render-blocking 650ms, unused JS/CSS
-"Permintaan pemblokiran render" (650ms), "Kurangi JavaScript yang tidak digunakan" (48 KiB), "Kurangi CSS yang tidak digunakan" (22 KiB) — ini kemungkinan bundle dashboard/editor (Tiptap, dsb.) ikut ter-load di halaman publik, atau CSS global Tailwind belum ter-purge maksimal per-route. Dampaknya jauh lebih kecil dari 3 temuan di atas — saya sarankan dikerjakan belakangan setelah masalah video/CLS/LCP selesai, karena kemungkinan besar begitu Temuan #1-3 dibereskan, skor Performa akan naik signifikan duluan (dari 55 ke kemungkinan 80-an), baru sisanya perlu di-fine-tune.
+✅ Implementasi Design System Components — Prioritas Tinggi
+
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │  File                          │  Status  │  Keterangan                    │
+  ├────────────────────────────────┼──────────┼────────────────────────────────┤
+  │  components/ui/Typography.tsx  │    ✅    │  8 typography primitives       │
+  │  components/ui/Button.tsx      │    ✅    │  5 button variants + loading   │
+  │  components/ui/Grid.tsx        │    ✅    │  Grid + Stack + Spacer         │
+  │  docs/design-system.md         │    ✅    │  Dokumentasi updated           │
+  └────────────────────────────────┴──────────┴────────────────────────────────┘
+
+  Typography Components (8):
+  - SectionTitle      → text-base md:text-xl font-extrabold tracking-tight
+  - SectionEyebrow    → text-[10px] font-black uppercase tracking-[0.16em]
+  - BadgeLabel        → text-[10px] font-black uppercase tracking-widest
+  - DashLabel         → text-[10px] font-black uppercase tracking-[0.2em]
+  - DashValue         → text-3xl font-black tabular-nums
+  - CardTitle         → text-sm md:text-base font-extrabold tracking-tight
+  - CardMeta          → text-[11px] font-medium text-brand-text-muted
+  - NavLink           → text-[10px] font-bold tracking-[0.12em]
+
+  Button Variants (5):
+  - primary             → bg-brand-red hover:bg-brand-black (public CTA)
+  - secondary           → bordered ghost (public alternatif)
+  - dark                → bg-brand-black hover:bg-brand-red (dark CTA)
+  - dashboard           → flat red (admin)
+  - dashboard-secondary → flat bordered (admin)
+  + Props: loading, fullWidth, disabled, size (sm/md/lg)
+
+  Layout Primitives:
+  - Grid     → responsive cols (number atau per-breakpoint), gap tokens
+  - Stack    → vertical/horizontal flex, gap, align, justify, wrap
+  - Spacer   → fixed size atau flex-1
+  - Gap tokens: tight(12px), regular(24px), wide(48px), wider(80px)
+
+  TypeScript: ✅ Clean (no errors)
+  Dokumentasi: ✅ design-system.md updated (sections 8.8, 8.9, 8.10)

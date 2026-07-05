@@ -349,6 +349,109 @@ Auto-dismiss: 5 detik. Position: `fixed bottom-6 right-6 z-[100]`
 
 Label badge: `rounded-sm bg-brand-red px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg`
 
+### 8.8 Typography Primitives
+
+**File:** `components/ui/Typography.tsx`
+
+Reusable typography components sesuai design-system.md tokens.
+
+| Component | Default Style | Penggunaan |
+|-----------|---------------|------------|
+| `<SectionTitle>` | `text-base md:text-xl font-extrabold tracking-tight` | Judul section homepage |
+| `<SectionEyebrow>` | `text-[10px] font-black uppercase tracking-[0.16em]` | Label di atas section title |
+| `<BadgeLabel>` | `text-[10px] font-black uppercase tracking-widest` | Label badge / tag |
+| `<DashLabel>` | `text-[10px] font-black uppercase tracking-[0.2em]` | Label dashboard cards |
+| `<DashValue>` | `text-3xl font-black tabular-nums` | Angka dashboard cards |
+| `<CardTitle>` | `text-sm md:text-base font-extrabold tracking-tight` | Judul card |
+| `<CardMeta>` | `text-[11px] font-medium text-brand-text-muted` | Meta info card |
+| `<NavLink>` | `text-[10px] font-bold tracking-[0.12em]` | Label navigasi |
+
+Semua mendukung `className` override dan `as` prop untuk custom element.
+
+```tsx
+import { SectionTitle, SectionEyebrow } from '@/components/ui/Typography';
+
+<SectionEyebrow>TRENDING</SectionEyebrow>
+<SectionTitle>Berita Utama</SectionTitle>
+```
+
+### 8.9 Button
+
+**File:** `components/ui/Button.tsx`
+
+Centralized button component dengan 5 variants.
+
+| Variant | Style | Penggunaan |
+|---------|-------|------------|
+| `primary` | `bg-brand-red` → `hover:bg-brand-red` | CTA utama (public) |
+| `secondary` | Bordered ghost | Tombol alternatif (public) |
+| `dark` | `bg-brand-black` → `hover:bg-brand-red` | Dark CTA |
+| `dashboard` | Flat red | Tombol utama (admin) |
+| `dashboard-secondary` | Flat bordered | Tombol sekunder (admin) |
+
+| Size | Padding | Font |
+|------|---------|------|
+| `sm` | `px-3.5 py-1.5` | `text-[9px]` |
+| `md` | `px-5 py-2.5` | `text-[10px]` |
+| `lg` | `px-8 py-3.5` | `text-[11px]` |
+
+Props: `loading` (spinner), `fullWidth`, `disabled`
+
+```tsx
+import Button from '@/components/ui/Button';
+
+<Button variant="primary">Simpan</Button>
+<Button variant="dashboard-secondary" loading>Menyimpan...</Button>
+<Button variant="dark" fullWidth>Baca Selengkapnya</Button>
+```
+
+### 8.10 Grid & Stack
+
+**File:** `components/ui/Grid.tsx`
+
+Layout primitives dengan gap tokens dari design-system.
+
+**Gap Tokens:**
+
+| Token | Value | Class |
+|-------|-------|-------|
+| `tight` | 12px | `gap-3` |
+| `regular` | 24px | `gap-6` |
+| `wide` | 48px | `gap-12` |
+| `wider` | 80px | `gap-20` |
+
+**Grid** — responsive grid layout:
+
+```tsx
+import { Grid } from '@/components/ui/Grid';
+
+// 3 kolom responsif
+<Grid cols={3} gap="regular">
+  <Card /><Card /><Card />
+</Grid>
+
+// Custom breakpoints
+<Grid cols={{ sm: 1, md: 2, lg: 4 }} gap="wide">
+  {items.map(item => <Card key={item.id} />)}
+</Grid>
+```
+
+**Stack** — vertical/horizontal layout:
+
+```tsx
+import { Stack, Spacer } from '@/components/ui/Grid';
+
+// Vertical
+<Stack gap="regular">
+  <Heading /><Content /><Footer />
+</Stack>
+
+// Horizontal dengan spacer
+<Stack direction="horizontal" align="center" justify="between">
+  <Logo /><Spacer /><Nav />
+</Stack>
+```
+
 ---
 
 ## 9. Patterns
@@ -515,6 +618,9 @@ Semua elemen interaktif minimal **44×44px**:
 | Utility classes | 25+ |
 | UI components | 40+ |
 | Layout components | 11 |
+| Typography primitives | 8 (SectionTitle, SectionEyebrow, BadgeLabel, DashLabel, DashValue, CardTitle, CardMeta, NavLink) |
+| Button variants | 5 (primary, secondary, dark, dashboard, dashboard-secondary) |
+| Grid gap tokens | 4 (tight, regular, wide, wider) |
 
 ---
 
