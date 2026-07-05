@@ -41,36 +41,20 @@ Folder ini masih dalam pengembangan (belum 100% dikerjakan). Tidak di-sentuh dal
 
 | File A | File B | Fungsi | Status |
 |--------|--------|--------|--------|
-| `ui/ScrollAnimate.tsx` | `ui/FadeInOnScroll.tsx` | Scroll-based fade-in animation | **Keduanya aktif dipakai** |
+| ~~`ui/ScrollAnimate.tsx`~~ | `ui/FadeInOnScroll.tsx` | Scroll-based fade-in animation | ✅ **Sudah dikonsolidasi** |
 
-**Perbedaan:**
+**Yang dilakukan:**
+- 5 homepage files di-update: `ScrollAnimate` → `FadeInOnScroll`
+- `ScrollAnimate.tsx` dihapus
+- `FadeInOnScroll` dipakai oleh: 5 homepage files + AnimateGrid
+
+### Alasan konsolidasi:
 
 | Aspek | ScrollAnimate | FadeInOnScroll |
 |-------|---------------|----------------|
-| Lines | 47 | 87 |
-| `prefers-reduced-motion` | ❌ Tidak ada | ✅ Ada |
-| `jsReady` hydration guard | ❌ Tidak ada | ✅ Ada (cegah flash SSR) |
-| Fallback check already visible | ❌ Tidak ada | ✅ Ada |
-| Delay support | ✅ Via `style` | ✅ Via `setTimeout` |
-| Dipakai oleh | 5 homepage files | AnimateGrid (baru) |
-
-**Rekomendasi:** Konsolidasi ke `FadeInOnScroll` (lebih robust), hapus `ScrollAnimate`, update 5 import di homepage.
-
-### Siapa yang pakai ScrollAnimate:
-
-```
-components/pages/home/EditorialExtras.tsx
-components/pages/home/FokusRedaksiTextHeavy.tsx
-components/pages/home/FokusRedaksiSection.tsx
-components/pages/home/FokusRedaksiCompact.tsx
-components/pages/home/FokusRedaksiAsymmetric.tsx
-```
-
-### Siapa yang pakai FadeInOnScroll:
-
-```
-components/ui/AnimateGrid.tsx (baru dibuat)
-```
+| `prefers-reduced-motion` | ❌ | ✅ |
+| `jsReady` hydration guard | ❌ | ✅ |
+| Fallback check already visible | ❌ | ✅ |
 
 ---
 
@@ -119,9 +103,9 @@ components/
 | ✅ Aktif dipakai | 155 |
 | 🔴 Dead code (berita/ + ui/) | 9 ← dihapus |
 | ⏭️ Skip (dashboard/ads/) | 6 ← tidak di-sentuh |
-| 🟡 Duplicate functionality | 2 (1 pasang) |
+| 🟡 Duplicate functionality | ~~2 (1 pasang)~~ → ✅ dikonsolidasi |
 | 🟢 New (belum integrasi) | 4 |
-| **Total** | **176** |
+| **Total** | **176** → **165** (setelah cleanup) |
 
 ---
 
