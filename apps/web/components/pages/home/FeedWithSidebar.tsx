@@ -43,7 +43,7 @@ export function FeedWithSidebar({
   const displayArticles = feedArticles.slice(0, 5)
 
   return (
-    <Container className="border-t border-gray-100 py-4 dark:border-white/5 md:py-8">
+    <Container className="border-t border-gray-100 pt-6 pb-6 dark:border-white/5 md:pt-8 md:pb-8">
       {/* Section Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-black/10 pb-4 dark:border-white/5 md:flex-row md:items-end md:justify-between">
         <SectionTitle as="h3" className="flex items-center gap-3 uppercase md:!text-xl">

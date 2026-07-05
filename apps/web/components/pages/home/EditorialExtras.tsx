@@ -31,8 +31,8 @@ export function EditorialExtras({
   if (!showEditorChoice && !showOpinionSection && !showVideoSection) return null
 
   return (
-    <div className="border-t border-black/5 dark:border-white/5">
-      <Container className="py-8 space-y-8 md:space-y-10">
+    <div className="border-t border-gray-100 dark:border-white/5">
+      <Container className="pt-6 pb-6 space-y-8 md:pt-8 md:pb-8 md:space-y-10">
 
         {/* Pilihan Editor — portrait cards (3:4) */}
         {showEditorChoice && (

@@ -15,7 +15,7 @@ export function FokusRedaksiSection({ articles, site }: FokusRedaksiSectionProps
   if (articles.length === 0) return null
 
   return (
-    <Container className="pt-2 pb-6 md:pt-0 md:pb-8">
+    <Container className="border-t border-gray-100 pt-6 pb-6 dark:border-white/5 md:pt-8 md:pb-8">
       <FadeInOnScroll>
         {/* Section header */}
         <div className="mb-5 flex items-center gap-2">
