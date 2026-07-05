@@ -79,10 +79,10 @@ export function FeedWithSidebar({
                   <Link
                     key={article.id}
                     href={`/${site}/artikel/${article.slug}`}
-                    className="group flex gap-4 py-5 first:pt-0 last:pb-0 md:gap-6"
+                    className="group flex gap-4 py-5 first:pt-0 last:pb-0 md:gap-5"
                   >
-                    {/* Text */}
-                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+                    {/* Text — 40% */}
+                    <div className="flex min-w-0 flex-[2] flex-col justify-center gap-1.5">
                       <span className="inline-block w-fit rounded-sm bg-brand-red/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-brand-red">
                         {categoryName}
                       </span>
@@ -104,14 +104,14 @@ export function FeedWithSidebar({
                         <span>{readTime}</span>
                       </div>
                     </div>
-                    {/* Image */}
-                    <div className="relative aspect-[16/9] w-[180px] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-[280px]">
+                    {/* Image — 60% */}
+                    <div className="relative aspect-[16/9] flex-[3] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5">
                       <SmartImage
                         src={imageUrl}
                         context="card_horizontal"
                         alt={article.title}
                         fill
-                        sizes="(max-width: 768px) 180px, 280px"
+                        sizes="(max-width: 768px) 60vw, 40vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
