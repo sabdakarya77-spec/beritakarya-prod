@@ -105,13 +105,13 @@ export function FeedWithSidebar({
                       </div>
                     </div>
                     {/* Image */}
-                    <div className="relative h-[88px] w-[140px] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:h-[100px] md:w-[180px]">
+                    <div className="relative aspect-[16/9] w-[180px] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-[280px]">
                       <SmartImage
                         src={imageUrl}
                         context="card_horizontal"
                         alt={article.title}
                         fill
-                        sizes="(max-width: 768px) 140px, 180px"
+                        sizes="(max-width: 768px) 180px, 280px"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
