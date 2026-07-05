@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Save, Loader2, Layout, Palette, TrendingUp } from 'lucide-react'
+import { X, Save, Loader2, Layout, Palette } from 'lucide-react'
 import { api } from '../../lib/api'
 
 // ─── Types ───────────────────────────────────────────────────────────────

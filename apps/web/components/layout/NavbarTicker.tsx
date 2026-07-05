@@ -58,14 +58,6 @@ interface NavbarTickerProps {
 export function NavbarTicker({ initialData }: NavbarTickerProps) {
   const [data, setData] = useState<MarketSnapshot | null>(initialData ?? null)
 
-  useEffect(() => {
-    if (!data) {
-      fetchMarket()
-    }
-    const interval = setInterval(fetchMarket, REFRESH_INTERVAL_MS)
-    return () => clearInterval(interval)
-  }, [])
-
   async function fetchMarket() {
     try {
       const res = await fetch(`${API_URL}/api/v1/market/snapshot`)
@@ -76,6 +68,15 @@ export function NavbarTicker({ initialData }: NavbarTickerProps) {
       // silent
     }
   }
+
+  useEffect(() => {
+    if (!data) {
+      fetchMarket()
+    }
+    const interval = setInterval(fetchMarket, REFRESH_INTERVAL_MS)
+    return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (!data) return null
 

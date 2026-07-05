@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Clock, BookOpen, User } from 'lucide-react';
 import Link from 'next/link';
 import { SmartImage, prefetchImage } from './SmartImage';
 import { cn } from '../../lib/utils';
@@ -91,7 +90,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
     return '/placeholder.jpg';
   })();
   // Prioritaskan field excerpt langsung dari API, fallback ke paragraf pertama dari blocks
-  const excerptText =
+  const _excerptText =
     article.excerpt ||
     (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'paragraph')?.content ||
     '';
@@ -105,7 +104,7 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   const readTime = article.readingTimeMin ? `${article.readingTimeMin} min baca` : "3 min baca";
   const badgeVariant = resolveArticleBadge(article);
   const authorName = article.author?.name || 'Redaksi';
-  const authorAvatarUrl = article.author?.avatarUrl || null;
+  const _authorAvatarUrl = article.author?.avatarUrl || null;
   // Primary category: dari categories[0] (baru) atau category (legacy)
   const primaryCategoryName = article.categories?.[0]?.category?.name || article.category?.name || null;
   const categoryLabelClass = cn(
