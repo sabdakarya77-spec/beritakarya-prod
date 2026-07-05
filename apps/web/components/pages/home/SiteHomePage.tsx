@@ -304,10 +304,15 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   // ── Popular untuk fallback trending interstitial ──
   const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
 
+  // ── Fallback: jika trending 24jam kosong, pakai popular 7 hari ──
+  const effectiveTrending = trendingArticles.length > 0
+    ? trendingArticles
+    : popularArticles
+
   // ── Conditional flags ──
   const showHomepageHero = isHomepage && heroArticles.length > 0
   const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
-  const showTrending = isHomepage && trendingArticles.length > 0
+  const showTrending = isHomepage && effectiveTrending.length > 0
   const showEditorChoice = isHomepage && editorChoice.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1
@@ -328,7 +333,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
           <SelectedTemplate
             heroArticles={heroArticles}
             fokusRedaksi={fokusRedaksi}
-            trendingArticles={trendingArticles as HomeArticle[]}
+            trendingArticles={effectiveTrending as HomeArticle[]}
             feedArticles={feedArticles}
             trending={trending}
             popular={popular}
