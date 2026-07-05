@@ -1,27 +1,19 @@
 /**
  * apps/web/components/pages/home/utils/distribution.ts
  *
- * Article scoring & zone allocation engine for the homepage.
- * Replaces the old position-based `distributeArticles()`.
+ * Zone allocation engine for the homepage.
+ * Logic sederhana: hero = terbaru, fokus = featured, feed = sisa.
  *
- * Perubahan penting dari draft awal (hasil review):
- * 1. Engagement dapat "grace period" — artikel baru tidak dihukum karena
- *    belum sempat dilihat orang. Bobot direalokasikan ke dimensi lain,
- *    bukan ditebak dengan nilai netral 0.5.
- * 2. isBreaking = hard override (masuk hero di luar mekanisme skor),
- *    BUKAN bobot tambahan. Breaking yang overflow dari hero (kebagian
- *    slot lebih sedikit dari jumlah breaking yang ada) dipaksa masuk
- *    depan Fokus Redaksi, tidak dilepas ke kompetisi skor biasa.
- * 3. Semua pool editorial extras (editorChoice/opinion/photo/video/
- *    trending) di-fetch mandiri oleh caller (Server Component, paralel,
- *    tidak nambah latency user) — bukan mengambil sisa dari pool utama.
- * 4. Dedup antar zona editorial extras berjalan progresif (usedIds
- *    di-update satu per satu), bukan dihitung sekali di awal — supaya
- *    satu artikel tidak muncul di dua section editorial sekaligus.
+ * Prinsip:
+ * 1. Hero = 5 artikel terbaru (publishedAt descending), tanpa scoring kompleks
+ * 2. Fokus Redaksi = artikel featured (isFeatured), fallback ke terbaru
+ * 3. Feed = sisa setelah hero + fokus, urut by publishedAt descending
+ * 4. Editorial extras = pool terpisah, dedup progresif
+ * 5. Popular & Trending = fetch terpisah, tetap terpisah
  */
 
 // ---------------------------------------------------------------------------
-// Types — disesuaikan dengan HomeArticle yang ada di SiteHomePage.tsx
+// Types
 // ---------------------------------------------------------------------------
 
 export interface HomeArticle {
@@ -40,37 +32,9 @@ export interface HomeArticle {
   readingTimeMin?: number
   wordCount?: number
   author?: { name: string; avatarUrl?: string | null }
-  category?: { name: string; slug?: string; parentSlug?: string } // legacy
+  category?: { name: string; slug?: string; parentSlug?: string }
   categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   blocks?: Array<{ type: string; url?: string; embedType?: string; images?: { url: string }[] }>
-}
-
-export interface ScoringWeights {
-  freshness: number   // default 0.3
-  engagement: number  // default 0.3
-  editorial: number   // default 0.3
-  relevance: number   // default 0.1
-}
-
-export const DEFAULT_WEIGHTS: ScoringWeights = {
-  freshness: 0.3,
-  engagement: 0.3,
-  editorial: 0.3,
-  relevance: 0.1,
-}
-
-interface ArticleSignals {
-  freshness: number
-  engagement: number
-  editorial: number
-  relevance: number
-}
-
-interface ScoredArticle {
-  article: HomeArticle
-  signals: ArticleSignals
-  score: number
-  inGracePeriod: boolean
 }
 
 export type HeroMode = 'SINGLE_HEADLINE' | 'BENTO_4' | 'BENTO_3' | 'MAGAZINE_COVER_550'
@@ -78,7 +42,7 @@ export type HeroMode = 'SINGLE_HEADLINE' | 'BENTO_4' | 'BENTO_3' | 'MAGAZINE_COV
 export interface HomepagePools {
   /** Pool utama untuk hero/fokus/feed — hasil query utama (limit ~25). */
   main: HomeArticle[]
-  /** 5 artikel by views — fetch terpisah, TETAP terpisah (hanya di-dedup belakangan). */
+  /** 5 artikel by views — fetch terpisah, TETAP terpisah. */
   trending: HomeArticle[]
   /** Fetch mandiri, bukan sisa pool utama. */
   editorChoicePool: HomeArticle[]
@@ -89,15 +53,6 @@ export interface HomepagePools {
 
 export interface DistributionOptions {
   heroMode?: HeroMode
-  weights?: ScoringWeights
-  /** Batas umur artikel (jam) yang dianggap "belum adil" dinilai dari engagement. */
-  engagementGracePeriodHours?: number
-  /** Category slugs per type — dari HomepageConfig, mengganti hardcoded. */
-  categoryConfig?: {
-    opinionSlugs?: string[]
-    photoSlugs?: string[]
-    videoSlugs?: string[]
-  }
 }
 
 export interface DistributionResult {
@@ -111,93 +66,19 @@ export interface DistributionResult {
   videoStories: HomeArticle[]
   trending: HomeArticle[]
   popular: HomeArticle[]
-  /** Breaking news yang tidak kebagian slot hero — untuk logging/observability. */
-  overflowBreakingCount: number
 }
 
-const ENGAGEMENT_GRACE_PERIOD_HOURS_DEFAULT = 2
-
 // ---------------------------------------------------------------------------
-// Signal calculators
+// Helpers
 // ---------------------------------------------------------------------------
-
-function hoursSince(date: Date): number {
-  return (Date.now() - date.getTime()) / (1000 * 60 * 60)
-}
 
 function getPublishedDate(article: HomeArticle): Date {
   return new Date(article.publishedAt || article.createdAt || Date.now())
 }
 
-/** Exponential decay: <6 jam ≈ 1.0, 24 jam ≈ 0.7, 72 jam ≈ 0.3, >168 jam → floor 0.3 */
-function calcFreshness(publishedAt: Date): number {
-  return Math.max(0.3, Math.exp(-hoursSince(publishedAt) / 48))
-}
-
-/**
- * Normalized viewCount — TAPI hanya berlaku setelah grace period lewat.
- * Selama grace period, dimensi ini dianggap tidak bisa dinilai adil dan
- * bobotnya direalokasikan di calcTotalScore(), bukan diisi nilai netral.
- */
-function calcEngagement(article: HomeArticle, maxViews: number): number {
-  if (maxViews === 0) return 0
-  return Math.min(1, (article.viewCount ?? 0) / maxViews)
-}
-
-/**
- * isBreaking SENGAJA tidak masuk sini — breaking ditangani sebagai hard
- * override di scoreAndDistribute(), bukan sebagai bobot yang bisa kalah
- * oleh artikel lama yang kebetulan sangat viral.
- */
-function calcEditorial(article: HomeArticle): number {
-  let score = 0
-  if (article.isFeatured) score += 0.35
-  if (article.isExclusive) score += 0.25
-  return Math.min(1, score)
-}
-
-// Helper: ambil semua slug kategori dari artikel (multi-category aware)
-function getCategorySlugs(article: HomeArticle): string[] {
-  const slugs: string[] = []
-  // categories array (baru)
-  if (article.categories) {
-    for (const c of article.categories) {
-      if (c.category?.slug) slugs.push(c.category.slug.toLowerCase())
-    }
-  }
-  // category legacy
-  if (article.category?.slug) slugs.push(article.category.slug.toLowerCase())
-  if (article.category?.parentSlug) slugs.push(article.category.parentSlug.toLowerCase())
-  return slugs
-}
-
-function calcRelevance(article: HomeArticle, targetCategorySlugs: string[] = []): number {
-  if (targetCategorySlugs.length === 0) return 0.5
-  const slugs = getCategorySlugs(article)
-  return slugs.some(s => targetCategorySlugs.includes(s)) ? 1.0 : 0.3
-}
-
-/**
- * Total score. Kalau artikel masih dalam grace period engagement, bobot
- * `engagement` direalokasikan proporsional ke 3 dimensi lain — bukan
- * ditebak dengan nilai netral 0.5 yang arbitrer.
- */
-function calcTotalScore(signals: ArticleSignals, weights: ScoringWeights, inGracePeriod: boolean): number {
-  if (inGracePeriod) {
-    const remaining = weights.freshness + weights.editorial + weights.relevance
-    if (remaining === 0) return 0 // guard: hindari div-by-zero kalau site set semua bobot lain ke 0
-    const partial =
-      signals.freshness * weights.freshness +
-      signals.editorial * weights.editorial +
-      signals.relevance * weights.relevance
-    const totalWeight = weights.freshness + weights.engagement + weights.editorial + weights.relevance
-    return (partial / remaining) * totalWeight
-  }
-  return (
-    signals.freshness * weights.freshness +
-    signals.engagement * weights.engagement +
-    signals.editorial * weights.editorial +
-    signals.relevance * weights.relevance
+function sortByNewest(articles: HomeArticle[]): HomeArticle[] {
+  return [...articles].sort(
+    (a, b) => getPublishedDate(b).getTime() - getPublishedDate(a).getTime()
   )
 }
 
@@ -215,75 +96,49 @@ function dedupById(articles: HomeArticle[]): HomeArticle[] {
 // ---------------------------------------------------------------------------
 
 export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptions = {}): DistributionResult {
-  const weights = opts.weights ?? DEFAULT_WEIGHTS
-  const graceHours = opts.engagementGracePeriodHours ?? ENGAGEMENT_GRACE_PERIOD_HOURS_DEFAULT
   const heroMode: HeroMode = opts.heroMode ?? 'MAGAZINE_COVER_550'
-
   const articles = dedupById(pools.main)
-  const maxViews = Math.max(...articles.map(a => a.viewCount ?? 0), 1)
 
-  // 1. Score semua artikel di pool utama.
-  const scored: ScoredArticle[] = articles.map(article => {
-    const publishedAt = getPublishedDate(article)
-    const inGracePeriod = hoursSince(publishedAt) < graceHours
-    const signals: ArticleSignals = {
-      freshness: calcFreshness(publishedAt),
-      engagement: calcEngagement(article, maxViews),
-      editorial: calcEditorial(article),
-      relevance: calcRelevance(article),
-    }
-    return {
-      article,
-      signals,
-      inGracePeriod,
-      score: calcTotalScore(signals, weights, inGracePeriod),
-    }
-  })
-
-  // 2. Pisahkan breaking news — ini hard override, bukan ikut sort by score.
-  //    Di antara sesama breaking, urutkan by publishedAt terbaru dulu.
-  //    BATASI: maksimal 1 breaking masuk hero (hindari semua artikel isBreaking=true)
-  const allBreaking = scored
-    .filter(s => s.article.isBreaking)
-    .sort((a, b) => getPublishedDate(b.article).getTime() - getPublishedDate(a.article).getTime())
-  const breaking = allBreaking.slice(0, 1) // maksimal 1 breaking di hero
-  const nonBreaking = scored
-    .sort((a, b) => b.score - a.score) // semua artikel (termasuk breaking sisa) ikut skor
-
-  // 3. Hero: breaking selalu didahulukan, sisanya diisi by score.
-  //    BATASI: hero hanya artikel maksimal 7 hari (168 jam) — hindari artikel lama viral mengunci slot.
-  const HERO_MAX_AGE_HOURS = 168
-  const heroEligible = nonBreaking.filter(s => hoursSince(getPublishedDate(s.article)) < HERO_MAX_AGE_HOURS)
+  // ─────────────────────────────────────────────
+  // 1. HERO: 5 artikel terbaru (publishedAt desc)
+  //    Tanpa breaking override, tanpa scoring kompleks.
+  // ─────────────────────────────────────────────
   const heroCount = heroMode === 'SINGLE_HEADLINE' ? 1
     : heroMode === 'BENTO_3' ? 3
-    : heroMode === 'MAGAZINE_COVER_550' ? 5 // 1 utama + 4 thumbnail
+    : heroMode === 'MAGAZINE_COVER_550' ? 5
     : 4
-  const heroPicks = [...breaking, ...heroEligible].slice(0, heroCount)
-  const hero = heroPicks.map(s => s.article)
+
+  const sortedByNewest = sortByNewest(articles)
+  const hero = sortedByNewest.slice(0, heroCount)
   const heroIds = new Set(hero.map(a => a.id))
 
-  // 3b. Breaking yang TIDAK kebagian slot hero — masuk ke pool biasa (skor).
-  //    Tidak ada overflow breaking karena kita batasi 1 breaking di hero.
+  // ─────────────────────────────────────────────
+  // 2. FOKUS REDAKSI: featured articles, fallback ke terbaru
+  //    Prioritaskan isFeatured=true, maksimal 4.
+  //    Kalau kurang dari 2 featured, fallback ke terbaru.
+  // ─────────────────────────────────────────────
+  const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
+  const sortedRemaining = sortByNewest(remainingAfterHero)
 
-  // 4. Fokus Redaksi: prioritaskan artikel ber-flag editorial (isFeatured/isExclusive),
-  //    fallback ke top-by-score kalau flag editorial kurang dari 2 artikel.
-  const remainingAfterHero = nonBreaking.filter(s => !heroIds.has(s.article.id))
-  const editorialFlagged = remainingAfterHero.filter(s => s.signals.editorial >= 0.35).map(s => s.article)
-  const fokusBase = editorialFlagged.length >= 2
-    ? editorialFlagged.slice(0, 4)
-    : remainingAfterHero.slice(0, 4).map(s => s.article)
-  const fokusRedaksi = fokusBase.slice(0, 4)
+  const featured = sortedRemaining.filter(a => a.isFeatured)
+  const fokusRedaksi = featured.length >= 2
+    ? featured.slice(0, 4)
+    : sortedRemaining.slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
-  // 5. Feed: sisa artikel pool utama setelah hero+fokus, urut by score.
-  const feedPool = remainingAfterHero
-    .filter(s => !fokusIds.has(s.article.id))
-    .map(s => s.article)
+  // ─────────────────────────────────────────────
+  // 3. BERITA TERBARU (Feed): sisa setelah hero + fokus
+  //    Urut by publishedAt descending.
+  // ─────────────────────────────────────────────
+  const feedPool = sortedRemaining.filter(a => !fokusIds.has(a.id))
   const feedFeatured = feedPool.slice(0, 4)
   const feedStream = feedPool.slice(4, 16)
 
-  // 6. Editorial extras — dedup PROGRESIF. Urutan sengaja: editorial dulu,
-  //    trending terakhir, supaya prioritas keputusan editor > metric views.
+  // ─────────────────────────────────────────────
+  // 4. EDITORIAL EXTRAS: pool terpisah, dedup progresif
+  //    Urutan: editor choice → opini → foto → video → trending.
+  //    Prioritas keputusan editor > metric views.
+  // ─────────────────────────────────────────────
   const usedIds = new Set([...hero, ...fokusRedaksi, ...feedFeatured, ...feedStream].map(a => a.id))
 
   const takeUnused = (pool: HomeArticle[], limit: number): HomeArticle[] => {
@@ -298,7 +153,9 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const videoStories = takeUnused(pools.videoPool, 3)
   const trending = takeUnused(pools.trending, 5)
 
-  // 7. Popular: untuk sidebar — non-hero, non-trending
+  // ─────────────────────────────────────────────
+  // 5. POPULAR: untuk sidebar — non-hero, non-trending
+  // ─────────────────────────────────────────────
   const trendingIds = new Set(trending.map(a => a.id))
   const popular = articles
     .filter(a => !heroIds.has(a.id) && !trendingIds.has(a.id))
@@ -315,6 +172,5 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     videoStories,
     trending,
     popular,
-    overflowBreakingCount: 0,
   }
 }

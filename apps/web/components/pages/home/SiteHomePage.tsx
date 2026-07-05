@@ -4,7 +4,7 @@ import { API_URL } from '../../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../../lib/siteSettings'
 import { fetchAdsForSlot } from '../../../lib/ads'
 import { scoreAndDistribute } from './utils/distribution'
-import type { HomeArticle, ScoringWeights, HeroMode } from './utils/distribution'
+import type { HomeArticle, HeroMode } from './utils/distribution'
 import { TemplateA, TemplateB, TemplateC, TemplateD, TemplateE, TemplateF } from './templates'
 
 // ─────────────────────────────────────────────
@@ -259,12 +259,6 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   // ── Config dari HomepageConfig (atau default) ──
   const heroMode: HeroMode = (homepageConfig?.heroMode as HeroMode) || 'MAGAZINE_COVER_550'
-  const weights: ScoringWeights = homepageConfig ? {
-    freshness: homepageConfig.scoreFreshness,
-    engagement: homepageConfig.scoreEngagement,
-    editorial: homepageConfig.scoreEditorial,
-    relevance: homepageConfig.scoreRelevance,
-  } : undefined as unknown as ScoringWeights
 
   const configOpinion = homepageConfig?.opinionCategories as string[] | undefined
   const configPhoto = homepageConfig?.photoCategories as string[] | undefined
@@ -274,7 +268,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const photoSlugs = configPhoto?.length ? configPhoto : DEFAULT_PHOTO_SLUGS
   const videoSlugs = configVideo?.length ? configVideo : DEFAULT_VIDEO_SLUGS
 
-  // ── Distribusi artikel (homepage) — scoring engine ──
+  // ── Distribusi artikel (homepage) — zone allocation ──
   const dist = isHomepage ? scoreAndDistribute({
     main: articlesList,
     trending: popularArticles as HomeArticle[],
@@ -282,7 +276,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, opinionSlugs)),
     photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, photoSlugs)),
     videoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'video_exclusive' || hasCategorySlug(a, videoSlugs)),
-  }, { heroMode, weights }) : null
+  }, { heroMode }) : null
 
   const heroArticles = dist?.hero || []
   const fokusRedaksi = dist?.fokusRedaksi || []

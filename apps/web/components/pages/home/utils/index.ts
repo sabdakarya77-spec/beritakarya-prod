@@ -1,7 +1,6 @@
-export { scoreAndDistribute, DEFAULT_WEIGHTS } from './distribution'
+export { scoreAndDistribute } from './distribution'
 export type {
   HomeArticle,
-  ScoringWeights,
   HeroMode,
   HomepagePools,
   DistributionOptions,
