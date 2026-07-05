@@ -120,9 +120,6 @@ export function NavbarTicker({ site = 'pusat', initialData }: NavbarTickerProps)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const hasContent = market || articles.length > 0 || antaraNews.length > 0
-  if (!hasContent) return null
-
   return (
     <div className="flex h-8 items-center gap-3 overflow-hidden sm:h-9 lg:h-10">
       {/* Label */}
@@ -143,6 +140,13 @@ export function NavbarTicker({ site = 'pusat', initialData }: NavbarTickerProps)
         <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-6 bg-gradient-to-l from-brand-black to-transparent sm:w-10 lg:w-14 dark:from-[#020617]" />
 
         <div className="absolute inset-y-0 left-0 flex h-full min-w-max items-center gap-5 whitespace-nowrap pl-6 pr-3 will-change-transform sm:gap-7 sm:pl-10 sm:pr-4 lg:gap-10 lg:pl-14 lg:pr-5 animate-[ticker_40s_linear_infinite] hover:[animation-play-state:paused]">
+          {/* Fallback — tampil jika semua data kosong */}
+          {!market && articles.length === 0 && antaraNews.length === 0 && (
+            <span className="text-[10px] font-medium text-white/60 sm:text-[11px]">
+              Memuat data pasar dan berita...
+            </span>
+          )}
+
           {/* Market Data */}
           {market && MARKET_ITEMS.map(({ label, key, formatter }) => {
             const indicator = market[key]
