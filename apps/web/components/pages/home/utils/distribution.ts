@@ -129,9 +129,9 @@ function getPublishedDate(article: HomeArticle): Date {
   return new Date(article.publishedAt || article.createdAt || Date.now())
 }
 
-/** Exponential decay: <6 jam ≈ 1.0, 24 jam ≈ 0.7, 72 jam ≈ 0.3, >168 jam → floor 0.1 */
+/** Exponential decay: <6 jam ≈ 1.0, 24 jam ≈ 0.7, 72 jam ≈ 0.3, >168 jam → floor 0.3 */
 function calcFreshness(publishedAt: Date): number {
-  return Math.max(0.1, Math.exp(-hoursSince(publishedAt) / 48))
+  return Math.max(0.3, Math.exp(-hoursSince(publishedAt) / 48))
 }
 
 /**
@@ -251,11 +251,14 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     .sort((a, b) => b.score - a.score) // semua artikel (termasuk breaking sisa) ikut skor
 
   // 3. Hero: breaking selalu didahulukan, sisanya diisi by score.
+  //    BATASI: hero hanya artikel maksimal 7 hari (168 jam) — hindari artikel lama viral mengunci slot.
+  const HERO_MAX_AGE_HOURS = 168
+  const heroEligible = nonBreaking.filter(s => hoursSince(getPublishedDate(s.article)) < HERO_MAX_AGE_HOURS)
   const heroCount = heroMode === 'SINGLE_HEADLINE' ? 1
     : heroMode === 'BENTO_3' ? 3
     : heroMode === 'MAGAZINE_COVER_550' ? 5 // 1 utama + 4 thumbnail
     : 4
-  const heroPicks = [...breaking, ...nonBreaking].slice(0, heroCount)
+  const heroPicks = [...breaking, ...heroEligible].slice(0, heroCount)
   const hero = heroPicks.map(s => s.article)
   const heroIds = new Set(hero.map(a => a.id))
 
