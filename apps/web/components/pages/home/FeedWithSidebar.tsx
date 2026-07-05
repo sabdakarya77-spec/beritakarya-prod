@@ -62,10 +62,10 @@ export function FeedWithSidebar({
         </div>
       </div>
 
-      {/* 75% : 25% Layout — hanya untuk news cards + sidebar */}
+      {/* 70% : 30% Layout — hanya untuk news cards + sidebar */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-        {/* Main Column — 75% (9 kolom) */}
-        <div className="lg:col-span-9">
+        {/* Main Column — 70% (8 kolom) */}
+        <div className="lg:col-span-8">
           {displayArticles.length > 0 ? (
             <div className="space-y-0 divide-y divide-gray-100 dark:divide-white/5">
               {displayArticles.map((article) => {
@@ -131,8 +131,8 @@ export function FeedWithSidebar({
           )}
         </div>
 
-        {/* Sidebar — 25% (3 kolom) */}
-        <aside className="lg:col-span-3">
+        {/* Sidebar — 30% (4 kolom) */}
+        <aside className="lg:col-span-4">
           <div className="sticky top-24 space-y-4">
             <PalingDibacaSidebar articles={popular} site={site} />
             <AksesRedaksiSidebar
