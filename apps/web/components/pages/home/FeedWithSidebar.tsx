@@ -82,10 +82,21 @@ export function FeedWithSidebar({
                   <Link
                     key={article.id}
                     href={`/${site}/artikel/${article.slug}`}
-                    className="group flex gap-4 py-5 first:pt-0 last:pb-0 md:gap-5"
+                    className="group flex flex-col gap-3 py-5 first:pt-0 last:pb-0 md:flex-row md:gap-5"
                   >
-                    {/* Text — 45% */}
-                    <div className="flex min-w-0 flex-[9] flex-col gap-1.5">
+                    {/* Image — stacked mobile, right desktop */}
+                    <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100 shadow-sm dark:bg-white/5 md:order-2 md:w-auto md:flex-[11]">
+                      <SmartImage
+                        src={imageUrl}
+                        context="card_horizontal"
+                        alt={article.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 40vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    {/* Text — below mobile, left desktop */}
+                    <div className="flex min-w-0 flex-col gap-1.5 md:order-1 md:flex-[9]">
                       <span className="inline-block w-fit rounded-sm bg-brand-red/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] text-brand-red">
                         {categoryName}
                       </span>
@@ -106,17 +117,6 @@ export function FeedWithSidebar({
                         <span className="opacity-30">·</span>
                         <span>{readTime}</span>
                       </div>
-                    </div>
-                    {/* Image — 55% */}
-                    <div className="relative aspect-[16/9] flex-[11] shrink-0 overflow-hidden rounded-2xl bg-gray-100 shadow-sm dark:bg-white/5">
-                      <SmartImage
-                        src={imageUrl}
-                        context="card_horizontal"
-                        alt={article.title}
-                        fill
-                        sizes="(max-width: 768px) 60vw, 40vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
                     </div>
                   </Link>
                 )
