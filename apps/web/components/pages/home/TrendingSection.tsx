@@ -70,6 +70,17 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
                     {article.title}
                   </h3>
                   <div className="mt-1.5 flex items-center gap-2 text-[10px] text-white/60">
+                    {article.author?.avatarUrl ? (
+                      <img
+                        src={article.author.avatarUrl}
+                        alt={article.author.name || 'Redaksi'}
+                        className="h-4 w-4 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[7px] font-black text-white">
+                        {(article.author?.name || 'R')[0]}
+                      </div>
+                    )}
                     <span className="truncate">{article.author?.name || 'Redaksi'}</span>
                     <span className="opacity-40">·</span>
                     <span>{article.readingTimeMin || 3} min</span>
@@ -98,6 +109,17 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
                     {article.title}
                   </h4>
                   <div className="mt-1.5 flex items-center gap-2 text-[10px] text-brand-text-muted">
+                    {article.author?.avatarUrl ? (
+                      <img
+                        src={article.author.avatarUrl}
+                        alt={article.author.name || 'Redaksi'}
+                        className="h-4 w-4 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-100 text-[7px] font-black text-brand-text-muted dark:bg-white/10">
+                        {(article.author?.name || 'R')[0]}
+                      </div>
+                    )}
                     <span className="truncate">{article.author?.name || 'Redaksi'}</span>
                     <span className="opacity-30">·</span>
                     <span>{article.readingTimeMin || 3} min</span>

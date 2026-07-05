@@ -16,7 +16,7 @@ type HeroArticle = {
   readingTimeMin?: number | null;
   publishedAt?: string | null;
   createdAt?: string | null;
-  author?: { name?: string | null } | null;
+  author?: { name?: string | null; avatarUrl?: string | null } | null;
   category?: { name?: string | null } | null;
   categories?: Array<{ category?: { name?: string | null } | null }> | null;
   blocks?: Array<{ type?: string; url?: string }>;
@@ -131,6 +131,17 @@ export function MagazineCoverHero({ articles, site }: MagazineCoverHeroProps) {
 
           {/* Meta */}
           <div className="flex items-center gap-2 text-[11px] text-white/60">
+            {active.author?.avatarUrl ? (
+              <img
+                src={active.author.avatarUrl}
+                alt={active.author.name || 'Redaksi'}
+                className="h-6 w-6 rounded-full object-cover ring-2 ring-white/20"
+              />
+            ) : (
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-red text-[9px] font-black text-white ring-2 ring-white/20">
+                {(active.author?.name || 'R')[0]}
+              </div>
+            )}
             <span className="font-semibold text-white/80">{active.author?.name || 'Redaksi'}</span>
             <span className="opacity-40">·</span>
             <span>{active.readingTimeMin || 3} min baca</span>
