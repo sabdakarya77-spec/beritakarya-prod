@@ -109,6 +109,17 @@ export function FeedWithSidebar({
                         </p>
                       )}
                       <div className="flex items-center gap-2 text-[11px] text-brand-text-muted">
+                        {article.author?.avatarUrl ? (
+                          <img
+                            src={article.author.avatarUrl}
+                            alt={article.author.name || 'Redaksi'}
+                            className="h-5 w-5 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-red text-[8px] font-black text-white">
+                            {(article.author?.name || 'R')[0]}
+                          </div>
+                        )}
                         <span className="font-medium text-brand-black/70 dark:text-white/70">
                           {article.author?.name || 'Redaksi'}
                         </span>
