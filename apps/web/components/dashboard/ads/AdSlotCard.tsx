@@ -562,7 +562,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                     <button
                       onClick={() => handleEditSave(ad.id)}
                       disabled={saving}
-                      className="px-4 py-1.5 bg-brand-black dark:bg-white text-white dark:text-brand-black rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-lg hover:opacity-90 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      className="px-4 py-1.5 bg-brand-black dark:bg-white text-white dark:text-gray-900 rounded-lg text-[9px] font-bold uppercase tracking-wider shadow-lg hover:opacity-90 transition-all flex items-center gap-1.5 disabled:opacity-50"
                     >
                       {saving ? <RefreshCw size={10} className="animate-spin" /> : <Save size={10} />}
                       Simpan

@@ -234,7 +234,7 @@ export function HeroBannerRow({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2 bg-brand-black dark:bg-white text-white dark:text-brand-black rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all flex items-center gap-2"
+              className="px-6 py-2 bg-brand-black dark:bg-white text-white dark:text-gray-900 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:opacity-90 transition-all flex items-center gap-2"
             >
               {isSaving ? <RefreshCw size={12} className="animate-spin" /> : <Save size={12} />}
               Simpan
