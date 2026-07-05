@@ -117,7 +117,7 @@ export function MagazineCoverHero({ articles, site }: MagazineCoverHeroProps) {
 
           {/* Title */}
           <Link href={`/${site}/artikel/${active.slug}`}>
-            <h1 className="mb-3 max-w-3xl font-sans text-xl font-extrabold leading-tight tracking-tight text-white transition-colors hover:text-white/85 md:text-2xl lg:text-3xl xl:text-4xl">
+            <h1 className="mb-3 max-w-3xl line-clamp-3 font-sans text-xl font-extrabold leading-tight tracking-tight text-white transition-colors hover:text-white/85 md:text-2xl lg:text-3xl xl:text-4xl">
               {active.title}
             </h1>
           </Link>
