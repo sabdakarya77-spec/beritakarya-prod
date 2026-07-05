@@ -1,5 +1,6 @@
 import { prisma } from '../../db/client'
 import { logger } from '../../lib/logger'
+import { AppError } from '../../utils/AppError'
 import type { Prisma } from '@prisma/client'
 
 /**
@@ -657,6 +658,88 @@ export class SiteService {
     })
 
     return merged
+  }
+
+  // ─────────────────────────────────────────────────
+  // Homepage Config — 6 template system
+  // ─────────────────────────────────────────────────
+
+  async getHomepageConfig(siteId: string) {
+    const config = await prisma.homepageConfig.findUnique({
+      where: { siteId }
+    })
+
+    // Jika belum ada config, buat default (Design F)
+    if (!config) {
+      return prisma.homepageConfig.create({
+        data: {
+          siteId,
+          template: 'F',
+          heroMode: 'MAGAZINE_COVER_550',
+          feedLayout: 'pattern_rotation',
+          trendingStyle: 'numbered_podium',
+        }
+      })
+    }
+
+    return config
+  }
+
+  async updateHomepageConfig(siteId: string, data: Record<string, unknown>, actorUserId: string) {
+    // Validasi site exists
+    const site = await prisma.site.findUnique({ where: { id: siteId } })
+    if (!site) throw new AppError('Site tidak ditemukan', 404)
+
+    // Whitelist field yang boleh di-update
+    const allowedFields = [
+      'template', 'heroMode', 'heroAutoRotate', 'heroIntervalMs',
+      'feedLayout', 'trendingStyle',
+      'scoreFreshness', 'scoreEngagement', 'scoreEditorial', 'scoreRelevance',
+      'opinionCategories', 'photoCategories', 'videoCategories',
+    ]
+
+    const filtered: Record<string, unknown> = {}
+    for (const key of allowedFields) {
+      if (data[key] !== undefined) {
+        filtered[key] = data[key]
+      }
+    }
+
+    // Validasi template value
+    if (filtered.template && !['A', 'B', 'C', 'D', 'E', 'F'].includes(filtered.template as string)) {
+      throw new AppError('Template harus A, B, C, D, E, atau F', 400)
+    }
+
+    // Validasi scoring weights sum to 1.0
+    const wFreshness = filtered.scoreFreshness as number | undefined
+    const wEngagement = filtered.scoreEngagement as number | undefined
+    const wEditorial = filtered.scoreEditorial as number | undefined
+    const wRelevance = filtered.scoreRelevance as number | undefined
+
+    if ([wFreshness, wEngagement, wEditorial, wRelevance].some(w => w !== undefined)) {
+      const sum = (wFreshness ?? 0.3) + (wEngagement ?? 0.3) + (wEditorial ?? 0.3) + (wRelevance ?? 0.1)
+      if (Math.abs(sum - 1.0) > 0.01) {
+        throw new AppError(`Total scoring weights harus 1.0, saat ini ${sum.toFixed(2)}`, 400)
+      }
+    }
+
+    // Upsert config
+    const config = await prisma.homepageConfig.upsert({
+      where: { siteId },
+      create: {
+        siteId,
+        ...filtered,
+      },
+      update: filtered,
+    })
+
+    // Audit log
+    await this.logAudit(actorUserId, 'homepage_config_update', {
+      siteId,
+      changes: filtered
+    })
+
+    return config
   }
 
   private async logAudit(

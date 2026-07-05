@@ -4,8 +4,36 @@ import { API_URL } from '../../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../../lib/siteSettings'
 import { fetchAdsForSlot } from '../../../lib/ads'
 import { scoreAndDistribute } from './utils/distribution'
-import type { HomeArticle } from './utils/distribution'
-import { TemplateF } from './templates'
+import type { HomeArticle, ScoringWeights, HeroMode } from './utils/distribution'
+import { TemplateA, TemplateB, TemplateC, TemplateD, TemplateE, TemplateF } from './templates'
+
+// ─────────────────────────────────────────────
+// Template selector
+// ─────────────────────────────────────────────
+const TEMPLATES = {
+  A: TemplateA,
+  B: TemplateB,
+  C: TemplateC,
+  D: TemplateD,
+  E: TemplateE,
+  F: TemplateF,
+} as const
+
+type TemplateKey = keyof typeof TEMPLATES
+
+interface HomepageConfigData {
+  template: string
+  heroMode: string
+  feedLayout: string
+  trendingStyle: string
+  scoreFreshness: number
+  scoreEngagement: number
+  scoreEditorial: number
+  scoreRelevance: number
+  opinionCategories: string[]
+  photoCategories: string[]
+  videoCategories: string[]
+}
 
 // ─────────────────────────────────────────────
 // Types
@@ -81,11 +109,11 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
 }
 
 // ─────────────────────────────────────────────
-// Helpers for editorial pools
+// Default category slugs (fallback jika config belum ada)
 // ─────────────────────────────────────────────
-const OPINION_SLUGS = ['opini', 'kolom-esai', 'analisis', 'kolom']
-const PHOTO_SLUGS = ['foto-jurnalistik']
-const VIDEO_SLUGS = ['video', 'dokumenter-reportase', 'podcast-audio']
+const DEFAULT_OPINION_SLUGS = ['opini', 'kolom-esai', 'analisis', 'kolom']
+const DEFAULT_PHOTO_SLUGS = ['foto-jurnalistik']
+const DEFAULT_VIDEO_SLUGS = ['video', 'dokumenter-reportase', 'podcast-audio']
 
 function hasCategorySlug(a: HomeArticle, slugs: string[]): boolean {
   if (a.categories?.some(c => slugs.includes(c.category?.slug?.toLowerCase() || ''))) return true
@@ -186,6 +214,18 @@ async function getMarketSnapshot() {
   }
 }
 
+async function getHomepageConfig(siteId: string): Promise<HomepageConfigData | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/sites/${siteId}/homepage-config`, { next: { revalidate: 300 } })
+    if (!res.ok) return null
+    const json = await res.json()
+    return json?.data || null
+  } catch (e) {
+    console.error('Error fetching homepage config:', e)
+    return null
+  }
+}
+
 // ─────────────────────────────────────────────
 // Main Component (Orchestrator)
 // ─────────────────────────────────────────────
@@ -202,13 +242,14 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
-  const [articlesList, categoriesTree, marketData, trendingArticles, popularArticles, homeTopAds] = await Promise.all([
+  const [articlesList, categoriesTree, marketData, trendingArticles, popularArticles, homeTopAds, homepageConfig] = await Promise.all([
     getArticles(siteConfig.id, categoryFilter, searchQuery),
     getCategories(siteConfig.id),
     getMarketSnapshot(),
     getTrendingArticles(siteConfig.id),
     getPopularArticles(siteConfig.id),
     fetchAdsForSlot(siteConfig.id, 'HOME_TOP'),
+    getHomepageConfig(siteConfig.id),
   ])
 
   // Mode halaman
@@ -216,15 +257,32 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const isCategoryFilter = categoryFilter && categoryFilter !== 'terbaru' && categoryFilter !== 'tersimpan'
   const showSavedFeed = categoryFilter === 'tersimpan'
 
+  // ── Config dari HomepageConfig (atau default) ──
+  const heroMode: HeroMode = (homepageConfig?.heroMode as HeroMode) || 'MAGAZINE_COVER_550'
+  const weights: ScoringWeights = homepageConfig ? {
+    freshness: homepageConfig.scoreFreshness,
+    engagement: homepageConfig.scoreEngagement,
+    editorial: homepageConfig.scoreEditorial,
+    relevance: homepageConfig.scoreRelevance,
+  } : undefined as unknown as ScoringWeights
+
+  const configOpinion = homepageConfig?.opinionCategories as string[] | undefined
+  const configPhoto = homepageConfig?.photoCategories as string[] | undefined
+  const configVideo = homepageConfig?.videoCategories as string[] | undefined
+
+  const opinionSlugs = configOpinion?.length ? configOpinion : DEFAULT_OPINION_SLUGS
+  const photoSlugs = configPhoto?.length ? configPhoto : DEFAULT_PHOTO_SLUGS
+  const videoSlugs = configVideo?.length ? configVideo : DEFAULT_VIDEO_SLUGS
+
   // ── Distribusi artikel (homepage) — scoring engine ──
   const dist = isHomepage ? scoreAndDistribute({
     main: articlesList,
-    trending: popularArticles as HomeArticle[], // 7-hari views → untuk PalingDibaca interstitial
+    trending: popularArticles as HomeArticle[],
     editorChoicePool: articlesList.filter((a: HomeArticle) => a.isFeatured),
-    opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, OPINION_SLUGS)),
-    photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, PHOTO_SLUGS)),
-    videoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'video_exclusive' || hasCategorySlug(a, VIDEO_SLUGS)),
-  }, { heroMode: 'MAGAZINE_COVER_550' }) : null
+    opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, opinionSlugs)),
+    photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, photoSlugs)),
+    videoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'video_exclusive' || hasCategorySlug(a, videoSlugs)),
+  }, { heroMode, weights }) : null
 
   const heroArticles = dist?.hero || []
   const fokusRedaksi = dist?.fokusRedaksi || []
@@ -259,11 +317,15 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const telegramUrl = siteConfig.socialLinks?.telegram || null
   const reportUrl = `mailto:${siteConfig.contactEmail}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
 
+  // ── Pilih template berdasarkan config ──
+  const templateKey: TemplateKey = (homepageConfig?.template as TemplateKey) || 'F'
+  const SelectedTemplate = TEMPLATES[templateKey] || TemplateF
+
   return (
     <PublicSiteLayout siteConfig={siteConfig} initialCategory={categoryFilter}>
       <main id="main-content" className="pb-20 md:pb-6">
         {isHomepage ? (
-          <TemplateF
+          <SelectedTemplate
             heroArticles={heroArticles}
             fokusRedaksi={fokusRedaksi}
             trendingArticles={trendingArticles as HomeArticle[]}
@@ -296,8 +358,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             getVideoThumbnail={getVideoThumbnail}
           />
         ) : (
-          // Category/search mode — tanpa template, langsung feed
-          <TemplateF
+          // Category/search mode — tanpa hero/trending
+          <SelectedTemplate
             heroArticles={[]}
             fokusRedaksi={[]}
             trendingArticles={[]}

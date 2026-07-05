@@ -37,6 +37,12 @@ siteRouter.post('/:id/wapimred',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(assignWapimred))
 
+// Homepage Config — 6 template system
+siteRouter.get('/:id/homepage-config', publicLimiter, asyncHandler(getHomepageConfig))
+siteRouter.put('/:id/homepage-config',
+  requireAuth, requireRole(['superadmin', 'wapimred']),
+  asyncHandler(updateHomepageConfig))
+
 /**
  * Site Routes - Express Router
  * All routes are prefixed with /api/v1/sites
@@ -355,6 +361,47 @@ export async function assignWapimred(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'WAPIMRED_ASSIGN_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+// ─────────────────────────────────────────────────
+// Homepage Config — 6 template system
+// ─────────────────────────────────────────────────
+
+/**
+ * GET /api/v1/sites/:id/homepage-config
+ * Get homepage config for a site (public)
+ */
+export async function getHomepageConfig(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+    const config = await siteService.getHomepageConfig(id)
+    res.json({ success: true, data: config })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'HOMEPAGE_CONFIG_FETCH_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * PUT /api/v1/sites/:id/homepage-config
+ * Update homepage config (superadmin/wapimred only)
+ */
+export async function updateHomepageConfig(req: Request, res: Response) {
+  try {
+    const { id } = req.params
+    const actorUserId = req.user!.userId
+    const config = await siteService.updateHomepageConfig(id, req.body, actorUserId)
+    res.json({ success: true, data: config })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'HOMEPAGE_CONFIG_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }

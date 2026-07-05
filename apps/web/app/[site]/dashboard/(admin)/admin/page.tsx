@@ -15,9 +15,11 @@ import {
   FolderOpen,
   AlertTriangle,
   X,
-  CheckCircle2
+  CheckCircle2,
+  Layout
 } from 'lucide-react'
 import { useRequireRole } from '../../../../../hooks/useRequireRole'
+import { HomepageConfigDialog } from '../../../../../components/dashboard/HomepageConfigDialog'
 import axios from 'axios'
 
 interface Site {
@@ -46,6 +48,7 @@ export default function AdminDashboardPage() {
     contactEmail: ''
   })
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [templateSite, setTemplateSite] = useState<Site | null>(null)
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type })
@@ -419,8 +422,14 @@ export default function AdminDashboardPage() {
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex gap-2 justify-end">
-                        {/* Tombol Kategori dihapus — sync dilakukan dari halaman Categories */}
-                        <button 
+                        <button
+                          onClick={() => setTemplateSite(site)}
+                          className="px-3.5 py-1.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
+                        >
+                          <Layout size={13} />
+                          Template
+                        </button>
+                        <button
                           onClick={() => openEditDialog(site)}
                           className="px-3.5 py-1.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
                         >
@@ -448,6 +457,16 @@ export default function AdminDashboardPage() {
 
       {createEditDialog}
       {deleteDialog}
+
+      {/* Homepage Template Config */}
+      {templateSite && (
+        <HomepageConfigDialog
+          siteId={templateSite.id}
+          siteName={templateSite.name}
+          open={!!templateSite}
+          onClose={() => setTemplateSite(null)}
+        />
+      )}
     </div>
   )
 }

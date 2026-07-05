@@ -92,6 +92,12 @@ export interface DistributionOptions {
   weights?: ScoringWeights
   /** Batas umur artikel (jam) yang dianggap "belum adil" dinilai dari engagement. */
   engagementGracePeriodHours?: number
+  /** Category slugs per type — dari HomepageConfig, mengganti hardcoded. */
+  categoryConfig?: {
+    opinionSlugs?: string[]
+    photoSlugs?: string[]
+    videoSlugs?: string[]
+  }
 }
 
 export interface DistributionResult {
@@ -211,7 +217,7 @@ function dedupById(articles: HomeArticle[]): HomeArticle[] {
 export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptions = {}): DistributionResult {
   const weights = opts.weights ?? DEFAULT_WEIGHTS
   const graceHours = opts.engagementGracePeriodHours ?? ENGAGEMENT_GRACE_PERIOD_HOURS_DEFAULT
-  const heroMode: HeroMode = opts.heroMode ?? 'BENTO_4'
+  const heroMode: HeroMode = opts.heroMode ?? 'MAGAZINE_COVER_550'
 
   const articles = dedupById(pools.main)
   const maxViews = Math.max(...articles.map(a => a.viewCount ?? 0), 1)
