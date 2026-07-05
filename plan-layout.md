@@ -423,14 +423,19 @@ git revert HEAD
 - [ ] Testing: article page — sidebar 340px
 - [ ] Testing: NewsCard radius konsisten
 
-### Fase 2B — NewsCard Visual-Forward
-- [ ] `NewsCard.tsx` → hapus excerpt, author, date dari variant `large`, `medium`, `horizontal`
-- [ ] `NewsCard.tsx` → perbesar proporsi gambar `medium` dan `horizontal`
-- [ ] `FeedSection.tsx` → sesuaikan grid gap dan proporsi card
-- [ ] `StickySidebar.tsx` → hapus author + date dari sidebar items
-- [ ] `page.tsx` (artikel) → hapus excerpt + author dari recommended articles
-- [ ] Testing: feed cards, hero, pilihan editor, trending, sidebar, mobile, dark mode
-- [ ] Commit Fase 2B
+### Fase 2B ✅ SELESAI (commit `6895a66`)
+- [x] `NewsCard.tsx` → large: hapus excerpt, author, date, read time
+- [x] `NewsCard.tsx` → medium: hapus author, date, read time
+- [x] `NewsCard.tsx` → horizontal: hapus excerpt, author, date
+- [x] `page.tsx` (artikel) → inline related: hapus author + read time
+- [x] `page.tsx` (artikel) → sidebar popular: hapus author + read time
+- [x] StickySidebar sudah bersih (hanya nomor + judul)
+- [ ] Testing: feed cards — judul + category badge terlihat jelas
+- [ ] Testing: hero — tetap tampil lengkap (judul + excerpt + author)
+- [ ] Testing: pilihan editor — tetap tampil lengkap
+- [ ] Testing: trending — tetap tampil nomor + judul + author
+- [ ] Testing: sidebar — nomor + judul tanpa author/date
+- [ ] Testing: mobile — card tidak terlalu kecil
 
 ### Fase 3
 - [ ] Review analytics untuk monitor distribution
