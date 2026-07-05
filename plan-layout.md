@@ -413,13 +413,15 @@ git revert HEAD
 - [ ] Testing: article page di viewport 1440px — sidebar tidak terpotong
 - [ ] Testing: dashboard di viewport 1440px — layout tidak pecah
 
-### Fase 2
-- [ ] `globals.css` → `clamp()` padding
-- [ ] `Container.tsx` → update padding classes
-- [ ] `page.tsx` (artikel) → sidebar 340px
-- [ ] `NewsCard.tsx` → radius review
-- [ ] Testing di 4 viewport
-- [ ] Commit Fase 2
+### Fase 2 ✅ SELESAI (commit `773c688`)
+- [x] `globals.css` → `clamp(2.5rem, 3vw, 3rem)` padding + bleed
+- [x] `Container.tsx` → gunakan CSS variable `--container-padding-desktop`
+- [x] `page.tsx` (artikel) → sidebar 340px (21.25rem, 1 breakpoint)
+- [x] `NewsCard.tsx` → medium `rounded-xl`→`rounded-2xl`, horizontal `rounded-xl`→`rounded-2xl`, thumb `rounded-lg`→`rounded-xl`
+- [ ] Testing: viewport 1440px — padding ~43px
+- [ ] Testing: viewport 1920px — padding 48px
+- [ ] Testing: article page — sidebar 340px
+- [ ] Testing: NewsCard radius konsisten
 
 ### Fase 2B — NewsCard Visual-Forward
 - [ ] `NewsCard.tsx` → hapus excerpt, author, date dari variant `large`, `medium`, `horizontal`

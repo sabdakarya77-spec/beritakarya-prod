@@ -425,9 +425,6 @@ export default async function ArticlePage({ params }: Props) {
                                         <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
                                           {rel.title}
                                         </h4>
-                                        <span className="mt-1.5 text-[9px] font-semibold text-brand-text-muted">
-                                          {rel.author?.name || 'Redaksi'} · {rel.readingTimeMin || 3} min baca
-                                        </span>
                                       </div>
                                     </Link>
                                   </div>
@@ -684,9 +681,6 @@ export default async function ArticlePage({ params }: Props) {
                             <div className="min-w-0">
                               <p className="line-clamp-2 text-[11px] font-bold leading-snug text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
                                 {pop.title}
-                              </p>
-                              <p className="mt-1 text-[9px] font-semibold text-brand-text-muted">
-                                {pop.author?.name || 'Redaksi'} · {pop.readingTimeMin || 3} min
                               </p>
                             </div>
                           </Link>

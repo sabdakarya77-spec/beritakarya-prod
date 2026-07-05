@@ -153,26 +153,9 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
                   {primaryCategoryName || 'UMUM'}
                 </span>
               </div>
-              <h2 className="mb-3.5 max-w-[75%] line-clamp-2 font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
+              <h2 className="max-w-[75%] line-clamp-2 font-sans text-lg font-extrabold leading-[1.15] tracking-tight text-white md:text-xl lg:text-[1.6rem]">
                 {article.title}
               </h2>
-              <p className="mb-5 max-w-[80%] line-clamp-2 text-xs leading-relaxed text-gray-300 opacity-90 md:text-sm">
-                {excerptText}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-t border-white/10 pt-4 text-[11px] font-semibold text-white/70">
-                <div className="flex items-center gap-1.5">
-                  {authorAvatarUrl ? (
-                    <img src={authorAvatarUrl} alt={authorName} className="h-7 w-7 rounded-full object-cover" />
-                  ) : (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-red text-[10px] font-black text-white">
-                      {authorName[0] || 'R'}
-                    </div>
-                  )}
-                  <span>{authorName}</span>
-                </div>
-                <span className="flex items-center gap-1"><Clock size={12}/> {date}</span>
-                <span className="flex items-center gap-1"><BookOpen size={12}/> {readTime}</span>
-              </div>
             </div>
           </article>
         </Link>
@@ -251,20 +234,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
             <h3 className="line-clamp-2 font-sans text-sm font-bold leading-[1.3] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-[15px]">
               {article.title}
             </h3>
-            <p className="line-clamp-2 text-xs leading-relaxed text-brand-text-muted dark:text-brand-text-muted/80">
-              {excerptText}
-            </p>
-            <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-brand-text-muted">
-               <span className="flex min-w-0 items-center gap-1">
-                  {authorAvatarUrl ? (
-                    <img src={authorAvatarUrl} alt={authorName} className="h-4 w-4 rounded-full object-cover" />
-                  ) : (
-                    <User size={11}/>
-                  )}
-                  <span className="truncate">{authorName}</span>
-                </span>
-               <span>{date}</span>
-            </div>
           </div>
         </Link>
       </article>
@@ -400,22 +369,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
               <h3 className="line-clamp-2 font-sans text-sm font-extrabold leading-[1.2] tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white md:text-base">
                 {article.title}
               </h3>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] text-brand-text-muted">
-               <div className="flex min-w-0 items-center gap-1">
-                  {authorAvatarUrl ? (
-                    <img src={authorAvatarUrl} alt={authorName} className="h-[18px] w-[18px] rounded-full object-cover" />
-                  ) : (
-                    <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold dark:bg-white/10">
-                      {authorName[0] || 'R'}
-                    </div>
-                  )}
-                 <span className="truncate">{authorName}</span>
-               </div>
-               <span className="opacity-30">•</span>
-               <span>{date}</span>
-               <span className="opacity-30">•</span>
-               <span className="flex items-center gap-1"><BookOpen size={10}/> {readTime}</span>
-            </div>
           </div>
         </article>
       </Link>
