@@ -1,8 +1,7 @@
 /**
  * TemplateF — Best of (Hybrid) ⭐ DEFAULT
  *
- * Kombinasi kurasi elemen terbaik dari Design A, B, dan C.
- * Hero: MAGAZINE_COVER_550 | Feed: pattern_rotation | Trending: numbered_podium
+ * Layout: Hero → Fokus Redaksi → Trending → Berita Terbaru (75%:25% + Sidebar) → Editorial Extras
  *
  * Reference: docs/design-grid.md — Design F
  */
@@ -11,18 +10,18 @@ import AdSpace from '../../../ui/AdSpace'
 import { HeroSection } from '../HeroSection'
 import { FokusRedaksiSection } from '../FokusRedaksiSection'
 import { TrendingSection } from '../TrendingSection'
-import { FeedSection } from '../FeedSection'
+import { FeedWithSidebar } from '../FeedWithSidebar'
 import { EditorialExtras } from '../EditorialExtras'
 import type { TemplateProps } from './types'
 
 export function TemplateF(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
-    trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,
+    popular, editorChoice, opinionArticles, videoStories,
     site, searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
-    showSavedFeed, whatsappUrl, telegramUrl, reportUrl, siteName,
-    marketData, showPhotoSection, showVideoSection, showEditorChoice, showOpinionSection,
-    siteSettings, siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
+    showSavedFeed, whatsappUrl, telegramUrl, reportUrl,
+    showEditorChoice, showOpinionSection, showVideoSection,
+    siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
   } = props
 
   return (
@@ -45,10 +44,9 @@ export function TemplateF(props: TemplateProps) {
         <TrendingSection articles={trendingArticles} site={site} />
       )}
 
-      {/* ZONA 4 — FEED + INTERSTITIALS */}
-      <FeedSection
+      {/* ZONA 4 — BERITA TERBARU (75% + Sidebar 25%) */}
+      <FeedWithSidebar
         feedArticles={feedArticles}
-        trending={trending}
         popular={popular}
         site={site}
         searchQuery={searchQuery}
@@ -59,13 +57,6 @@ export function TemplateF(props: TemplateProps) {
         whatsappUrl={whatsappUrl}
         telegramUrl={telegramUrl}
         reportUrl={reportUrl}
-        siteName={siteName}
-        marketData={marketData}
-        photoJournal={photoJournal}
-        showPhotoSection={showPhotoSection}
-        videoStories={videoStories}
-        showVideoSection={showVideoSection}
-        siteSettings={siteSettings as never}
         siteConfigId={siteConfigId}
         resolveCategoryName={resolveCategoryName}
       />
