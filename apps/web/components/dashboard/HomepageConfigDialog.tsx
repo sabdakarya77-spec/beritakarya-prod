@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Save, Loader2, Layout, Palette, TrendingUp, BarChart3 } from 'lucide-react'
+import { X, Save, Loader2, Layout, Palette, TrendingUp } from 'lucide-react'
 import { api } from '../../lib/api'
 
 // ─── Types ───────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [activeSection, setActiveSection] = useState<'template' | 'sections' | 'scoring' | 'categories'>('template')
+  const [activeSection, setActiveSection] = useState<'template' | 'sections' | 'categories'>('template')
 
   // Fetch config
   useEffect(() => {
@@ -161,7 +161,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                 {[
                   { key: 'template' as const, label: 'Template', icon: Layout },
                   { key: 'sections' as const, label: 'Sections', icon: Layout },
-                  { key: 'scoring' as const, label: 'Scoring', icon: BarChart3 },
                   { key: 'categories' as const, label: 'Kategori', icon: Palette },
                 ].map(({ key, label, icon: Icon }) => (
                   <button
@@ -390,55 +389,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                         )
                       })}
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Scoring Weights */}
-              {activeSection === 'scoring' && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide">Scoring Weights</h3>
-                  <p className="text-xs text-gray-500">Bobot untuk menentukan prioritas artikel di homepage. Total harus 1.0.</p>
-
-                  {[
-                    { key: 'scoreFreshness', label: 'Freshness', desc: 'Artikel lebih baru = skor lebih tinggi', color: 'bg-blue-500' },
-                    { key: 'scoreEngagement', label: 'Engagement', desc: 'Artikel lebih banyak dilihat = skor lebih tinggi', color: 'bg-emerald-500' },
-                    { key: 'scoreEditorial', label: 'Editorial', desc: 'Artikel featured/exclusive = skor lebih tinggi', color: 'bg-amber-500' },
-                    { key: 'scoreRelevance', label: 'Relevance', desc: 'Kategori cocok = skor lebih tinggi', color: 'bg-purple-500' },
-                  ].map(({ key, label, desc, color }) => (
-                    <div key={key} className="flex items-center gap-4">
-                      <div className={`w-2 h-8 rounded-full ${color}`} />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{label}</span>
-                          <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
-                            {(config[key as keyof HomepageConfig] as number).toFixed(2)}
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min={0}
-                          max={1}
-                          step={0.05}
-                          value={config[key as keyof HomepageConfig] as number}
-                          onChange={(e) => setConfig({ ...config, [key]: parseFloat(e.target.value) })}
-                          className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-red"
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">{desc}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Total */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                    <span className="text-sm font-medium text-gray-500">Total</span>
-                    <span className={`text-sm font-bold ${
-                      Math.abs(config.scoreFreshness + config.scoreEngagement + config.scoreEditorial + config.scoreRelevance - 1.0) < 0.01
-                        ? 'text-emerald-600'
-                        : 'text-red-600'
-                    }`}>
-                      {(config.scoreFreshness + config.scoreEngagement + config.scoreEditorial + config.scoreRelevance).toFixed(2)}
-                    </span>
                   </div>
                 </div>
               )}
