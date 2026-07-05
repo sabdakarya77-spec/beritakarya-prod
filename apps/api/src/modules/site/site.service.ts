@@ -681,41 +681,48 @@ export class SiteService {
     const site = await prisma.site.findUnique({ where: { id: siteId } })
     if (!site) throw new AppError('Site tidak ditemukan', 404)
 
-    const config = await prisma.homepageConfig.findUnique({
+    let config = await prisma.homepageConfig.findUnique({
       where: { siteId }
     })
 
     // Jika belum ada config, buat default (Design F)
     if (!config) {
-      return prisma.homepageConfig.create({
+      config = await prisma.homepageConfig.create({
         data: {
           siteId,
           template: 'F',
           heroMode: 'MAGAZINE_COVER_550',
           feedLayout: 'pattern_rotation',
           trendingStyle: 'numbered_podium',
-          ...this.HOMEPAGE_DEFAULTS,
+          sectionOrder: this.HOMEPAGE_DEFAULTS.sectionOrder,
+          sectionVisibility: this.HOMEPAGE_DEFAULTS.sectionVisibility,
+          interstitials: this.HOMEPAGE_DEFAULTS.interstitials,
         }
       })
+      return config
     }
 
     // Populate defaults jika field kosong (dari seed migration)
+    const sectionOrder = config.sectionOrder as string[] | null
+    const sectionVisibility = config.sectionVisibility as Record<string, boolean> | null
+    const interstitials = config.interstitials as Array<{ id: string; afterCardIndex: number; widget: string; enabled: boolean }> | null
+
     const needsUpdate =
-      Array.isArray(config.sectionOrder) && config.sectionOrder.length === 0 ||
-      typeof config.sectionVisibility === 'object' && Object.keys(config.sectionVisibility as object).length === 0 ||
-      Array.isArray(config.interstitials) && config.interstitials.length === 0
+      !sectionOrder || sectionOrder.length === 0 ||
+      !sectionVisibility || Object.keys(sectionVisibility).length === 0 ||
+      !interstitials || interstitials.length === 0
 
     if (needsUpdate) {
       return prisma.homepageConfig.update({
         where: { siteId },
         data: {
-          ...(Array.isArray(config.sectionOrder) && config.sectionOrder.length === 0
+          ...(!sectionOrder || sectionOrder.length === 0
             ? { sectionOrder: this.HOMEPAGE_DEFAULTS.sectionOrder }
             : {}),
-          ...(typeof config.sectionVisibility === 'object' && Object.keys(config.sectionVisibility as object).length === 0
+          ...(!sectionVisibility || Object.keys(sectionVisibility).length === 0
             ? { sectionVisibility: this.HOMEPAGE_DEFAULTS.sectionVisibility }
             : {}),
-          ...(Array.isArray(config.interstitials) && config.interstitials.length === 0
+          ...(!interstitials || interstitials.length === 0
             ? { interstitials: this.HOMEPAGE_DEFAULTS.interstitials }
             : {}),
         }
