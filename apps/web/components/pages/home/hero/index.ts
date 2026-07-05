@@ -1,0 +1,5 @@
+export { Bento4Hero } from './Bento4Hero'
+export { MagazineCoverHero } from './MagazineCoverHero'
+export { SplitHero } from './SplitHero'
+export { Bento3Hero } from './Bento3Hero'
+export { DualHero } from './DualHero'

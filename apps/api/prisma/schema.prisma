@@ -89,6 +89,7 @@ model Site {
   adBookings            AdBooking[]
   siteCategories        SiteCategory[]
   adPaymentConfig       AdPaymentConfig?
+  homepageConfig        HomepageConfig?
 }
 
 model User {
@@ -665,4 +666,41 @@ enum AdStatus {
   ACTIVE
   COMPLETED
   REJECTED
+}
+
+// Homepage Configuration per site — 6 template system (A-F)
+// Reference: docs/design-grid.md
+model HomepageConfig {
+  id                String   @id @default(uuid())
+  siteId            String   @unique
+
+  // Template selection (A-F)
+  template          String   @default("F") // A | B | C | D | E | F
+
+  // Hero mode
+  heroMode          String   @default("MAGAZINE_COVER_550") // BENTO_4 | MAGAZINE_COVER | SPLIT_HERO | BENTO_3 | DUAL_HERO | MAGAZINE_COVER_550
+  heroAutoRotate    Boolean  @default(true)
+  heroIntervalMs    Int      @default(5000)
+
+  // Feed layout
+  feedLayout        String   @default("pattern_rotation") // pattern_rotation | asymmetric_heavy | text_heavy | dense_3col | hero_pair_heavy
+  trendingStyle     String   @default("numbered_podium") // numbered_podium | horizontal_strip | ticker | sticky_sidebar | with_context
+
+  // Scoring weights
+  scoreFreshness    Float    @default(0.3)
+  scoreEngagement   Float    @default(0.3)
+  scoreEditorial    Float    @default(0.3)
+  scoreRelevance    Float    @default(0.1)
+
+  // Category config (JSON arrays of slugs)
+  opinionCategories Json     @default("[]") // ["opini", "kolom-esai", "analisis", "kolom"]
+  photoCategories   Json     @default("[]") // ["foto-jurnalistik"]
+  videoCategories   Json     @default("[]") // ["video", "dokumenter-reportase"]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  site              Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
 }

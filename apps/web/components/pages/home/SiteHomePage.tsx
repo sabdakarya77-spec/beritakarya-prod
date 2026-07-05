@@ -1,16 +1,11 @@
 import PublicSiteLayout from '../../layout/PublicSiteLayout'
-import AdSpace from '../../ui/AdSpace'
 import { notFound } from 'next/navigation'
 import { API_URL } from '../../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../../lib/siteSettings'
 import { fetchAdsForSlot } from '../../../lib/ads'
 import { scoreAndDistribute } from './utils/distribution'
 import type { HomeArticle } from './utils/distribution'
-import { HeroSection } from './HeroSection'
-import { FokusRedaksiSection } from './FokusRedaksiSection'
-import { TrendingSection } from './TrendingSection'
-import { FeedSection } from './FeedSection'
-import { EditorialExtras } from './EditorialExtras'
+import { TemplateF } from './templates'
 
 // ─────────────────────────────────────────────
 // Types
@@ -267,62 +262,74 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   return (
     <PublicSiteLayout siteConfig={siteConfig} initialCategory={categoryFilter}>
       <main id="main-content" className="pb-20 md:pb-6">
-
-        {/* ZONA 1 — HERO */}
-        {showHomepageHero && (
-          <HeroSection articles={heroArticles} site={siteParam} />
+        {isHomepage ? (
+          <TemplateF
+            heroArticles={heroArticles}
+            fokusRedaksi={fokusRedaksi}
+            trendingArticles={trendingArticles as HomeArticle[]}
+            feedArticles={feedArticles}
+            trending={trending}
+            popular={popular}
+            editorChoice={editorChoice}
+            opinionArticles={opinionArticles}
+            photoJournal={photoJournal}
+            videoStories={videoStories}
+            site={siteParam}
+            searchQuery={searchQuery}
+            isCategoryFilter={!!isCategoryFilter}
+            categoryFilter={categoryFilter}
+            categoriesTree={categoriesTree}
+            showSavedFeed={showSavedFeed}
+            whatsappUrl={whatsappUrl}
+            telegramUrl={telegramUrl}
+            reportUrl={reportUrl}
+            siteName={siteConfig.name}
+            marketData={marketData}
+            showPhotoSection={showPhotoSection}
+            showVideoSection={showVideoSection}
+            showEditorChoice={showEditorChoice}
+            showOpinionSection={showOpinionSection}
+            siteSettings={siteSettings}
+            siteConfigId={siteConfig.id}
+            homeTopAds={homeTopAds}
+            resolveCategoryName={resolveCategoryName}
+            getVideoThumbnail={getVideoThumbnail}
+          />
+        ) : (
+          // Category/search mode — tanpa template, langsung feed
+          <TemplateF
+            heroArticles={[]}
+            fokusRedaksi={[]}
+            trendingArticles={[]}
+            feedArticles={articlesList.slice(0, 8)}
+            trending={[]}
+            popular={articlesList.slice(0, 5)}
+            editorChoice={[]}
+            opinionArticles={[]}
+            photoJournal={[]}
+            videoStories={[]}
+            site={siteParam}
+            searchQuery={searchQuery}
+            isCategoryFilter={!!isCategoryFilter}
+            categoryFilter={categoryFilter}
+            categoriesTree={categoriesTree}
+            showSavedFeed={showSavedFeed}
+            whatsappUrl={whatsappUrl}
+            telegramUrl={telegramUrl}
+            reportUrl={reportUrl}
+            siteName={siteConfig.name}
+            marketData={marketData}
+            showPhotoSection={false}
+            showVideoSection={false}
+            showEditorChoice={false}
+            showOpinionSection={false}
+            siteSettings={siteSettings}
+            siteConfigId={siteConfig.id}
+            homeTopAds={homeTopAds}
+            resolveCategoryName={resolveCategoryName}
+            getVideoThumbnail={getVideoThumbnail}
+          />
         )}
-
-        {/* AD HOME_TOP */}
-        <AdSpace type="HOME_TOP" initialAds={homeTopAds} />
-
-        {/* ZONA 2 — FOKUS REDAKSI */}
-        {showFokusRedaksi && (
-          <FokusRedaksiSection articles={fokusRedaksi} site={siteParam} />
-        )}
-
-        {/* ZONA 3 — TRENDING */}
-        {showTrending && (
-          <TrendingSection articles={trendingArticles as HomeArticle[]} site={siteParam} />
-        )}
-
-        {/* ZONA 4 — FEED (pattern rotation + interstitials) */}
-        <FeedSection
-          feedArticles={feedArticles}
-          trending={trending}
-          popular={popular}
-          site={siteParam}
-          searchQuery={searchQuery}
-          isCategoryFilter={!!isCategoryFilter}
-          categoryFilter={categoryFilter}
-          categoriesTree={categoriesTree}
-          showSavedFeed={showSavedFeed}
-          whatsappUrl={whatsappUrl}
-          telegramUrl={telegramUrl}
-          reportUrl={reportUrl}
-          siteName={siteConfig.name}
-          marketData={marketData}
-          photoJournal={photoJournal}
-          showPhotoSection={showPhotoSection}
-          videoStories={videoStories}
-          showVideoSection={showVideoSection}
-          siteSettings={siteSettings}
-          siteConfigId={siteConfig.id}
-          resolveCategoryName={resolveCategoryName}
-        />
-
-        {/* ZONA 5+ — EDITORIAL EXTRAS */}
-        <EditorialExtras
-          editorChoice={editorChoice}
-          opinionArticles={opinionArticles}
-          videoStories={videoStories}
-          site={siteParam}
-          showEditorChoice={showEditorChoice}
-          showOpinionSection={showOpinionSection}
-          showVideoSection={showVideoSection}
-          getVideoThumbnail={getVideoThumbnail}
-        />
-
       </main>
     </PublicSiteLayout>
   )

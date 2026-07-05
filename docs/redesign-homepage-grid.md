@@ -3,8 +3,9 @@
 **Target:** `apps/web/components/pages/SiteHomePage.tsx`
 **Date:** 2026-07-04
 **Updated:** 2026-07-05
-**Status:** In Progress — Phase 1-3 implemented, Phase 4-5 pending
-**Design:** F (Best of ⭐) — satu-satunya layout yang diterapkan
+**Status:** In Progress — Phase 1-3 implemented, Phase 4 pending
+**Design:** F (Best of ⭐) — default layout
+**Template System:** 6 template (A-F), lihat `docs/design-grid.md`
 
 ---
 
@@ -168,9 +169,9 @@ function calcRelevance(article: HomeArticle, targetCategorySlugs: string[]): num
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  ZONA 1 — HERO: MAGAZINE_COVER_550 (Design F, satu-satunya)│
+│  ZONA 1 — HERO: MAGAZINE_COVER_550 (Design F, default)     │
 │  Sumber: top-5 score (1 utama + 4 thumbnail)                │
-│  Override: field heroSlot (manual assignment dari dashboard) │
+│  Breaking news: hard override (maks 1), bukan manual slot   │
 ├─────────────────────────────────────────────────────────────┤
 │  ZONA 2 — FOKUS REDAKSI                                     │
 │  Artikel: score rank 5-8, filter: isFeatured || isExclusive  │
@@ -283,44 +284,24 @@ function scoreAndDistribute(
 }
 ```
 
-### 2.4 Editorial Override System
+### 2.4 Prinsip: Otomatis, Bukan Manual
 
-Tambahkan field baru di Prisma `Article` model:
+**Tidak ada `HomepagePlacement`.** Semua penempatan artikel ke zona dilakukan **otomatis** oleh scoring engine.
 
-```prisma
-model Article {
-  // ... existing fields ...
-  heroSlot      Int?      @default(null) // 1-4, null = auto-assign by score
-  homepageZone  String?   @default(null) // 'hero' | 'fokus' | 'editor_choice' | null
-  homepageOrder Int?      @default(null) // manual ordering within zone
-}
-```
+Alasan:
+- Jika editor bisa manual taruh artikel ke zona, semua akan rebutan slot hero → zona lain kosong
+- `isFeatured` dan `isBreaking` sudah cukup sebagai sinyal editorial — scoring engine yang menentukan zona terbaik
+- Konsisten: satu mekanisme, bukan dua (auto + manual) yang bisa konflik
 
-Atau, lebih fleksibel — gunakan tabel terpisah:
+**Yang bisa dikontrol editor:**
+- `isBreaking` → hard override masuk hero (maks 1)
+- `isFeatured` → boost editorial score → prioritas masuk Fokus Redaksi
+- `isExclusive` → boost editorial score
 
-```prisma
-model HomepagePlacement {
-  id          String   @id @default(uuid())
-  siteId      String
-  articleId   String
-  zone        String   // 'hero' | 'fokus' | 'editor_choice' | 'trending'
-  position    Int      // 1-based ordering within zone
-  expiresAt   DateTime? // optional: auto-remove after date
-  createdAt   DateTime @default(now())
-
-  site    Site    @relation(fields: [siteId], references: [id])
-  article Article @relation(fields: [articleId], references: [id])
-
-  @@unique([siteId, zone, position])
-  @@index([siteId, zone])
-}
-```
-
-**Flow:**
-1. Editor menempatkan artikel ke zona tertentu via dashboard
-2. `scoreAndDistribute()` membaca `HomepagePlacement` terlebih dahulu
-3. Slot yang sudah di-override tidak diisi oleh scoring engine
-4. Sisa slot diisi otomatis berdasarkan score
+**Yang dikontrol scoring engine (otomatis):**
+- Zona mana yang ditempati (hero/fokus/feed/editorial extras)
+- Posisi dalam zona (berdasarkan skor)
+- Dedup antar zona (artikel tidak muncul di dua zona)
 
 ---
 
@@ -1434,18 +1415,41 @@ export function FeedSection({
 
 ---
 
-## 6. Site Configuration Schema
+## 6. Site Configuration — 6 Template System
 
-### 5.1 Prisma Model Baru
+Konfigurasi per site untuk memilih template homepage. Referensi lengkap: `docs/design-grid.md`.
+
+### 6.1 Template Mapping
+
+| Design | heroMode | feedLayout | trendingStyle |
+|--------|----------|------------|---------------|
+| A: Classic Editorial | `BENTO_4` | `pattern_rotation` | `horizontal_strip` |
+| B: Magazine Bold | `MAGAZINE_COVER` | `asymmetric_heavy` | `numbered_podium` |
+| C: Data-Driven | `SPLIT_HERO` | `text_heavy` | `ticker` |
+| D: Compact Dense | `BENTO_3` | `dense_3col` | `sticky_sidebar` |
+| E: Visual Storytelling | `DUAL_HERO` | `hero_pair_heavy` | `with_context` |
+| **F: Best of** ⭐ | `MAGAZINE_COVER` (550px) | `pattern_rotation` | `numbered_podium` |
+
+Default untuk semua site baru: **Design F**.
+
+### 6.2 Prisma Model
 
 ```prisma
 model HomepageConfig {
   id                String   @id @default(uuid())
   siteId            String   @unique
 
-  // Hero — selalu MAGAZINE_COVER_550 (Design F), tidak ada mode lain
+  // Template selection
+  template          String   @default("F") // A | B | C | D | E | F
+
+  // Hero
+  heroMode          String   @default("MAGAZINE_COVER_550") // BENTO_4 | MAGAZINE_COVER | SPLIT_HERO | BENTO_3 | DUAL_HERO | MAGAZINE_COVER_550
   heroAutoRotate    Boolean  @default(true)
   heroIntervalMs    Int      @default(5000)
+
+  // Feed
+  feedLayout        String   @default("pattern_rotation") // pattern_rotation | asymmetric_heavy | text_heavy | dense_3col | hero_pair_heavy
+  trendingStyle     String   @default("numbered_podium") // numbered_podium | horizontal_strip | ticker | sticky_sidebar | with_context
 
   // Scoring weights
   scoreFreshness    Float    @default(0.3)
@@ -1453,18 +1457,10 @@ model HomepageConfig {
   scoreEditorial    Float    @default(0.3)
   scoreRelevance    Float    @default(0.1)
 
-  // Feed
-  feedLayout        String   @default("comfortable") // comfortable | compact | dense
-  feedColumns       Int      @default(2)
-  showExcerpt       Boolean  @default(true)
-
   // Category config (JSON)
   opinionCategories Json     @default("[]") // ["opini", "kolom-esai", "analisis"]
   photoCategories   Json     @default("[]") // ["foto-jurnalistik"]
   videoCategories   Json     @default("[]") // ["video", "dokumenter-reportase"]
-
-  // Sidebar widget order (JSON)
-  sidebarWidgets    Json     @default('[{"id":"redaksi","enabled":true,"position":1},{"id":"terbaru","enabled":true,"position":2},{"id":"market","enabled":true,"position":3},{"id":"photo","enabled":true,"position":4},{"id":"video","enabled":true,"position":5}]')
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -1473,20 +1469,29 @@ model HomepageConfig {
 }
 ```
 
-### 5.2 API Endpoint
+### 6.3 API Endpoint
 
 ```
 GET /api/v1/sites/:siteId/homepage-config
 PUT /api/v1/sites/:siteId/homepage-config (admin only)
 ```
 
-### 5.3 Dashboard UI
+### 6.4 Dashboard UI
 
 Tambahkan tab "Homepage Settings" di site settings dashboard:
-- Scoring weights (slider 0-1 untuk masing-masing)
-- Feed layout selector (radio)
+
+**Template Selector (Level 1):**
+- Pilih dari 6 template (A-F) dengan preview thumbnail
+- Default: F (Best of ⭐)
+
+**Customize (Level 2, opsional):**
+- Hero mode override (dropdown)
+- Feed layout override (dropdown)
+- Trending style override (dropdown)
+- Scoring weights (slider 0-1)
 - Category config (multi-select dari category tree)
-- Interstitial placement order (drag-and-drop)
+
+**Flow:** Pilih Template → Customize Detail → Simpan
 
 ---
 
@@ -1504,23 +1509,18 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 3. Import dan render di `SiteHomePage.tsx` sebagai orchestrator
 4. Pastikan tidak ada perubahan visual
 
-### Phase 3: Layout Variants (Feature Flag)
-1. ~~Tambahkan `heroMode` ke site config~~ — TIDAK DIPERLUKAN (satu mode saja: MAGAZINE_COVER_550)
-2. Tambahkan `feedLayout` ke site config
-3. Implementasi `compact` dan `dense` feed layout
-4. Feature flag: jika tidak ada config, gunakan default
+### Phase 3: Layout Variants (Non-Breaking)
+1. Implementasi `compact` dan `dense` feed layout variants
+2. Feed layout mengikuti config dari `HomepageConfig` (default: `pattern_rotation`)
+3. Feature flag: jika tidak ada config, gunakan Design F default
 
-### Phase 4: Editorial Override (Dashboard)
-1. Tambahkan `HomepagePlacement` model
-2. Tambahkan UI di dashboard untuk menempatkan artikel
-3. Update `scoreAndDistribute()` untuk membaca placement
-4. Editor bisa override otomatis
-
-### Phase 5: Dashboard Config UI
-1. Tambahkan Homepage Config page di dashboard
-2. Scoring weight sliders
-3. Category config
-4. Sidebar widget order
+### Phase 4: HomepageConfig — 6 Template System
+1. Tambahkan `HomepageConfig` model di Prisma
+2. Tambahkan API: `GET/PUT /api/v1/sites/:siteId/homepage-config`
+3. Update `scoreAndDistribute()` untuk baca config (heroMode, feedLayout)
+4. Dashboard: template selector (6 pilihan dengan preview)
+5. Dashboard: customize detail (hero/feed/trending override, scoring weights, category config)
+6. Default untuk site baru: Design F
 
 ---
 
@@ -1536,8 +1536,9 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 | **Sidebar** | **Kolom 4-kol rigid, membelah halaman** | **Dihapus → jadi interstitial sections (ala NYT/Kompas.id)** |
 | Sidebar widgets | Tersembunyi di kolom kanan | Full-width interstitials di antara baris feed |
 | Feed + Sidebar | 8+4 grid terpisah | 12-kol penuh, konten terintegrasi |
-| Category slugs | Hardcode | Configurable per site |
-| Editorial control | `isFeatured` flag only | Full placement override system |
+| Category slugs | Hardcode | Configurable per site (via HomepageConfig) |
+| Template system | Tidak ada | 6 template (A-F) bisa dipilih per site |
+| Editorial control | `isFeatured` flag only | `isFeatured` + `isBreaking` + `isExclusive` → auto scoring (BUKAN manual placement) |
 | Code organization | 1 file, 920 baris | 15+ komponen terpisah (sections + interstitials + utils) |
 | Trending | API terpisah, overlap possible | Merged pool, hero-excluded |
 | Error handling | All-or-nothing | Per-section error boundary |
@@ -1548,7 +1549,8 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 ## 9. Open Questions
 
 1. **Scoring weights default** — Apakah bobot 0.3/0.3/0.3/0.1 sudah tepat, atau perlu disesuaikan untuk konteks media Indonesia?
-2. ~~**Hero mode trigger**~~ — Dihapus. Hanya ada satu mode: MAGAZINE_COVER_550. Breaking news masuk hero via hard override di scoring engine (maks 1 breaking di hero).
-3. **HomepagePlacement** — Apakah perlu tabel terpisah, atau cukup field di Article model?
+2. ~~**Hero mode trigger**~~ — Dihapus. Breaking news masuk hero via hard override di scoring engine (maks 1 breaking di hero).
+3. ~~**HomepagePlacement**~~ — Dihapus. Semua penempatan otomatis via scoring engine. Editor kontrol via `isFeatured`/`isBreaking`/`isExclusive` saja.
 4. **A/B testing** — Apakah perlu capability untuk test layout berbeda secara bersamaan?
-5. **Cache strategy** — Dengan scoring engine, cache key harus mempertimbangkan weights dan placement. Bagaimana invalidation-nya?
+5. **Cache strategy** — Dengan scoring engine + HomepageConfig, cache key harus mempertimbangkan config. Bagaimana invalidation-nya?
+6. **Template migration** — Ketika site ganti template (misal F → B), apakah perlu re-index di Meilisearch atau cukup re-render?
