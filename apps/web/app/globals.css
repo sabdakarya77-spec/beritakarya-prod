@@ -36,7 +36,7 @@
     --container-padding-desktop: 2.5rem; /* lg:px-10 = 40px */
     
     /* Container Max Widths */
-    --container-max-width: 72.5rem;     /* max-w-container = 1160px */
+    --container-max-width: 80rem;       /* max-w-container = 1280px */
     --content-max-width: 42.5rem;       /* max-w-[680px] for optimal reading */
     --wide-max-width: 87.5rem;          /* max-w-wide = 1400px */
     

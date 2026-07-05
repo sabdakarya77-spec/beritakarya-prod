@@ -32,7 +32,7 @@ export function EditorialExtras({
 
   return (
     <div className="border-t border-black/5 dark:border-white/5">
-      <Container className="py-6 space-y-8 md:space-y-10">
+      <Container className="py-8 space-y-8 md:space-y-10">
 
         {/* Pilihan Editor — portrait cards (3:4) */}
         {showEditorChoice && (

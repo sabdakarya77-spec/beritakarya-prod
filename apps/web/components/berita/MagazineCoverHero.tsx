@@ -87,7 +87,7 @@ export function MagazineCoverHero({ articles, site }: MagazineCoverHeroProps) {
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Main Hero Image — 550px desktop, 350px mobile */}
-      <div className="relative h-[350px] overflow-hidden rounded-2xl sm:h-[400px] md:h-[450px] lg:h-[550px]">
+      <div className="relative h-[350px] overflow-hidden rounded-2xl sm:h-[400px] md:h-[450px] lg:h-[560px]">
         {/* Background Image */}
         <SmartImage
           src={imageUrl}

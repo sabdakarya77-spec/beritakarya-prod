@@ -44,7 +44,7 @@ export function FeedSection({
   const trendingForList = trending.length > 0 ? trending : popular
 
   return (
-    <Container className="py-4 md:py-6">
+    <Container className="py-4 md:py-8">
       {/* Section Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-black/10 pb-4 dark:border-white/5 md:flex-row md:items-end md:justify-between">
         <SectionTitle as="h3" className="flex items-center gap-3 uppercase md:!text-xl">
