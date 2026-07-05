@@ -59,7 +59,7 @@ export function FeedWithSidebar({
         </div>
       </div>
 
-      {/* 75% : 25% Layout */}
+      {/* 75% : 25% Layout — hanya untuk news cards + sidebar */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         {/* Main Column — 75% (9 kolom) */}
         <div className="lg:col-span-9">
@@ -126,18 +126,6 @@ export function FeedWithSidebar({
               </p>
             </div>
           )}
-
-          {/* Ad: HOME_FEED_1 */}
-          <div className="mt-6 md:mt-8">
-            <AdSpace type="HOME_FEED_1" />
-          </div>
-
-          {/* Load More */}
-          {!showSavedFeed && (
-            <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
-              <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={Math.ceil(feedArticles.length / 10)} />
-            </div>
-          )}
         </div>
 
         {/* Sidebar — 25% (3 kolom) */}
@@ -152,6 +140,19 @@ export function FeedWithSidebar({
           </div>
         </aside>
       </div>
+
+      {/* Full-width sections — di luar grid */}
+      {/* Ad: HOME_FEED_1 */}
+      <div className="mt-6 md:mt-8">
+        <AdSpace type="HOME_FEED_1" />
+      </div>
+
+      {/* Load More */}
+      {!showSavedFeed && (
+        <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
+          <LoadMoreArticles siteId={siteConfigId} category={categoryFilter} search={searchQuery} initialPage={Math.ceil(feedArticles.length / 10)} />
+        </div>
+      )}
     </Container>
   )
 }
