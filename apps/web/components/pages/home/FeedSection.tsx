@@ -39,7 +39,7 @@ interface FeedSectionProps {
 }
 
 export function FeedSection({
-  feedArticles, trending, popular, site,
+  feedArticles, trending: _trending, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
   whatsappUrl, telegramUrl, reportUrl, siteName, marketData, photoJournal, showPhotoSection, videoStories, showVideoSection, siteSettings,
   siteConfigId, resolveCategoryName,
@@ -48,14 +48,9 @@ export function FeedSection({
   const { LoadMoreArticles, SavedArticlesFeed } = require('../LazyWidgets')
 
   const rows = chunkIntoRows(feedArticles as (HomeArticle & { [key: string]: unknown })[], DEFAULT_PATTERN_ROTATION)
-  const trendingForList = trending.length > 0 ? trending : popular
-
-  const Wrapper = isNestedInGrid
-    ? ({ children }: { children: React.ReactNode }) => <div className="py-4 md:py-8">{children}</div>
-    : ({ children }: { children: React.ReactNode }) => <Container className="py-4 md:py-8">{children}</Container>
-
-  return (
-    <Wrapper>
+  
+  const content = (
+    <>
       {/* Section Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-black/10 pb-4 dark:border-white/5 md:flex-row md:items-end md:justify-between">
         <SectionTitle as="h3" className="flex items-center gap-3 uppercase md:!text-xl">
@@ -71,6 +66,8 @@ export function FeedSection({
             <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
             Update Langsung
           </span>
+          <span className="text-gray-300 dark:text-white/10">|</span>
+          <span>{feedArticles.length} Berita</span>
         </div>
       </div>
 
@@ -78,49 +75,67 @@ export function FeedSection({
         <SavedArticlesFeed site={site} />
       ) : rows.length > 0 ? (
         <div className="space-y-6 md:space-y-8">
-          {rows.map((row, i) => (
-            <div key={`feed-row-${i}`}>
-              {/* Feed Row */}
-              <FeedRow
-                articles={row.articles as HomeArticle[]}
-                pattern={row.pattern}
-                site={site}
-                rowIndex={row.rowIndex}
-              />
+          {rows.map((row, rowIndex) => {
+            const rowArticles = row.items
+            const currentPattern = row.pattern
 
-              {/* ═══ Interstitials inline sesuai index ═══ */}
+            // Cari tempat menyisipkan widget/iklan
+            const isFirstRow = rowIndex === 0
+            const isSecondRow = rowIndex === 1
+            const isThirdRow = rowIndex === 2
 
-              {/* HOME_FEED_1: setelah Row 2 (index 1) */}
-              {i === 1 && <div className="mt-6 md:mt-8"><AdSpace type="HOME_FEED_1" /></div>}
+            return (
+              <div key={rowIndex} className="space-y-6 md:space-y-8">
+                {/* 1. Baris Utama Grid */}
+                <FeedRow articles={rowArticles} pattern={currentPattern} site={site} />
 
-              {/* Paling Dibaca: setelah Row 3 (index 2) */}
-              {i === 2 && <PalingDibaca articles={trendingForList} site={site} />}
+                {/* 2. Sisipan Iklan di antara baris 1 dan 2 */}
+                {isFirstRow && (
+                  <div className="my-6 md:my-8">
+                    <AdSpace type="HOME_FEED_1" />
+                  </div>
+                )}
 
-              {/* BERITA LAINNYA header: sebelum Row 4 (index 3) */}
-              {i === 3 && (
-                <div className="mb-2 mt-6 flex items-center gap-2 md:mt-8">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-brand-black dark:text-white">
-                    Berita Lainnya
-                  </h3>
-                </div>
-              )}
+                {/* 3. Interstitial Paling Dibaca di bawah baris ke-2 */}
+                {isSecondRow && popular.length > 0 && (
+                  <div className="my-6 md:my-8">
+                    <PalingDibaca articles={popular} site={site} />
+                  </div>
+                )}
 
-              {/* HOME_FEED_2: setelah Row 5 (index 4) */}
-              {i === 4 && <div className="mt-6 md:mt-8"><AdSpace type="HOME_FEED_2" /></div>}
-            </div>
-          ))}
+                {/* 4. Interstitial Akses Redaksi & Info Pasar di bawah baris ke-3 */}
+                {isThirdRow && (
+                  <div className="grid grid-cols-1 gap-6 my-6 md:grid-cols-12 md:gap-8 md:my-8">
+                    <div className="md:col-span-8">
+                      <AksesRedaksi
+                        whatsappUrl={whatsappUrl}
+                        telegramUrl={telegramUrl}
+                        reportUrl={reportUrl}
+                        siteName={siteName}
+                      />
+                    </div>
+                    <div className="md:col-span-4">
+                      <InfoPasar initialData={marketData} />
+                    </div>
+                  </div>
+                )}
 
-          {/* ═══ Interstitials setelah semua feed rows ═══ */}
-          <AksesRedaksi whatsappUrl={whatsappUrl} telegramUrl={telegramUrl} reportUrl={reportUrl} siteName={siteName} />
-          <InfoPasar initialData={marketData as never} />
+                {/* 5. Sisipan multimedia lainnya: Foto (setelah baris ke-4) & Video (setelah baris ke-5) */}
+                {rowIndex === 3 && showPhotoSection && photoJournal.length > 0 && (
+                  <div className="my-6 md:my-8">
+                    <InterstitialPhoto articles={photoJournal} site={site} />
+                  </div>
+                )}
 
-          {/* Foto Jurnalistik — interstitial */}
-          {showPhotoSection && <InterstitialPhoto articles={photoJournal} site={site} />}
-
-          {/* Video Eksklusif — interstitial */}
-          {showVideoSection && <InterstitialVideo articles={videoStories} site={site} />}
-
+                {rowIndex === 4 && showVideoSection && videoStories.length > 0 && (
+                  <div className="my-6 md:my-8">
+                    <InterstitialVideo articles={videoStories} site={site} />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          
           {/* Featured Video Widget (siteSettings) */}
           {siteSettings?.featuredVideo && (
             <div className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-4">
@@ -136,8 +151,8 @@ export function FeedSection({
           )}
         </div>
       ) : (
-        <div className="mb-12 rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-center dark:border-white/10 dark:bg-white/[0.02]">
-          <p className="text-sm md:text-base font-sans font-bold text-brand-black dark:text-white">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-sm font-semibold text-brand-black dark:text-white md:text-base">
             Belum ada berita untuk konteks ini.
           </p>
           <p className="mt-2 text-xs md:text-sm text-brand-text-muted">
@@ -167,6 +182,11 @@ export function FeedSection({
           />
         </div>
       )}
-    </Wrapper>
-  )
+    </>
+  );
+
+  if (isNestedInGrid) {
+    return <div className="py-4 md:py-8">{content}</div>;
+  }
+  return <Container className="py-4 md:py-8">{content}</Container>;
 }
