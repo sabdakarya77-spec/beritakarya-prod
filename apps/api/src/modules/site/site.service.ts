@@ -677,6 +677,10 @@ export class SiteService {
   }
 
   async getHomepageConfig(siteId: string) {
+    // Validasi site exists (cegah foreign key violation)
+    const site = await prisma.site.findUnique({ where: { id: siteId } })
+    if (!site) throw new AppError('Site tidak ditemukan', 404)
+
     const config = await prisma.homepageConfig.findUnique({
       where: { siteId }
     })
