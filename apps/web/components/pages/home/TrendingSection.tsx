@@ -23,7 +23,7 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
   const rest = articles.slice(3, 5)
 
   return (
-    <Container className="pb-4 md:pb-8">
+    <Container className="border-t border-gray-100 pt-6 pb-4 dark:border-white/5 md:pt-8 md:pb-8">
       <section>
         {/* Section Header */}
         <div className="mb-4 flex items-center gap-2">
