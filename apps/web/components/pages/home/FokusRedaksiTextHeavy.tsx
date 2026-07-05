@@ -1,6 +1,7 @@
 import { Zap } from 'lucide-react'
 import NewsCard from '../../ui/NewsCard'
 import FadeInOnScroll from '../../ui/FadeInOnScroll'
+import AnimateGrid from '../../ui/AnimateGrid'
 import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
@@ -30,17 +31,19 @@ export function FokusRedaksiTextHeavy({ articles, site }: FokusRedaksiTextHeavyP
           </SectionEyebrow>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {articles.slice(0, 4).map((article) => (
-            <NewsCard
-              key={article.id}
-              article={article}
-              variant="horizontal"
-              imagePosition="left"
-              site={site}
-            />
-          ))}
-        </div>
+        <AnimateGrid stagger={80}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {articles.slice(0, 4).map((article) => (
+              <NewsCard
+                key={article.id}
+                article={article}
+                variant="horizontal"
+                imagePosition="left"
+                site={site}
+              />
+            ))}
+          </div>
+        </AnimateGrid>
       </FadeInOnScroll>
     </Container>
   )

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import NewsCard from './NewsCard';
 import { Loader2, ChevronDown } from 'lucide-react';
 import { API_URL } from '../../lib/api';
+import Button from './Button';
 
 interface LoadMoreArticleItem {
   id: string;
@@ -99,23 +100,24 @@ export default function LoadMoreArticles({
       {/* Load More Button or State */}
       {hasMore && !error && (
         <div className="flex justify-center mt-12 pb-20">
-          <button 
-            onClick={loadMore}
-            disabled={loading}
-            className="group flex flex-col items-center gap-3 transition-all"
-          >
-            <div className="px-10 py-4 bg-brand-black text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-[0.3em] group-hover:bg-brand-red transition-all flex items-center gap-3 rounded-sm">
+          <div className="group flex flex-col items-center gap-3">
+            <Button
+              variant="dark"
+              size="lg"
+              onClick={loadMore}
+              loading={loading}
+            >
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 <ChevronDown size={16} className="group-hover:translate-y-1 transition-transform" />
               )}
               {loading ? 'Menyelaraskan Data...' : 'Muat Lebih Banyak'}
-            </div>
+            </Button>
             <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
               Eksplorasi Berita Lainnya
             </span>
-          </button>
+          </div>
         </div>
       )}
 

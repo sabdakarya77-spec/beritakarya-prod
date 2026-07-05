@@ -7,6 +7,7 @@ import { MessageSquare, Send, User, Clock, AlertCircle, CheckCircle2 } from 'luc
 import { cn } from '../../lib/utils';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import Button from './Button';
 
 interface Comment {
   id: string;
@@ -125,13 +126,14 @@ export default function CommentSection({ articleId }: { articleId: string }) {
                   <p className="text-[10px] font-bold uppercase tracking-widest text-brand-text-muted">
                     Komentar ditinjau redaksi sebelum tayang
                   </p>
-                  <button
+                  <Button
                     type="submit"
-                    disabled={isSubmitting || !content.trim()}
-                    className="inline-flex items-center gap-2 rounded-full bg-brand-red px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-white transition-all hover:bg-brand-black disabled:cursor-not-allowed disabled:opacity-50"
+                    variant="primary"
+                    loading={isSubmitting}
+                    disabled={!content.trim()}
                   >
                     {isSubmitting ? 'Mengirim...' : 'Kirim'} <Send size={13} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { SmartImage } from '../../ui/SmartImage'
+import AnimateGrid from '../../ui/AnimateGrid'
 import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
@@ -33,8 +34,9 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
         </div>
 
         {/* Top 3 — Numbered Podium dengan gambar besar */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {top3.map((article, index) => {
+        <AnimateGrid stagger={120}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {top3.map((article, index) => {
             const imageUrl = getImageUrl(article)
             const rank = index + 1
 
@@ -76,7 +78,8 @@ export function TrendingSection({ articles, site }: TrendingSectionProps) {
               </Link>
             )
           })}
-        </div>
+          </div>
+        </AnimateGrid>
 
         {/* Ranking 4-5 — text-only, di bawah podium */}
         {rest.length > 0 && (

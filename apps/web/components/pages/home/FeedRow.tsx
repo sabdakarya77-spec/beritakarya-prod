@@ -1,4 +1,5 @@
 import NewsCard from '../../ui/NewsCard'
+import AnimateGrid from '../../ui/AnimateGrid'
 import type { HomeArticle } from './utils/distribution'
 import type { RowPattern } from './utils/feedPatterns'
 import { PATTERN_REQUIREMENTS } from './utils/feedPatterns'
@@ -41,11 +42,13 @@ export function FeedRow({ articles, pattern: intendedPattern, site, rowIndex }: 
     // Design F Row 2: 3 kartu sejajar, image di atas
     case 'triplet':
       return (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {articles.slice(0, 3).map(a => (
-            <NewsCard key={a.id} article={a} variant="medium" imagePosition="top" site={site} />
-          ))}
-        </div>
+        <AnimateGrid stagger={100}>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            {articles.slice(0, 3).map(a => (
+              <NewsCard key={a.id} article={a} variant="medium" imagePosition="top" site={site} />
+            ))}
+          </div>
+        </AnimateGrid>
       )
 
     // Design F Row 3: kiri besar background + kanan 2 stacked (image left)
