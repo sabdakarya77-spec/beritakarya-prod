@@ -3,7 +3,7 @@
 **Target:** `apps/web/components/pages/SiteHomePage.tsx`
 **Date:** 2026-07-04
 **Updated:** 2026-07-05
-**Status:** In Progress — Phase 1-3 implemented, Phase 4 pending
+**Status:** In Progress — Phase 1-4 implemented
 **Design:** F (Best of ⭐) — default layout
 **Template System:** 6 template (A-F), lihat `docs/design-grid.md`
 
@@ -1514,13 +1514,16 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 2. Feed layout mengikuti config dari `HomepageConfig` (default: `pattern_rotation`)
 3. Feature flag: jika tidak ada config, gunakan Design F default
 
-### Phase 4: HomepageConfig — 6 Template System
-1. Tambahkan `HomepageConfig` model di Prisma
-2. Tambahkan API: `GET/PUT /api/v1/sites/:siteId/homepage-config`
-3. Update `scoreAndDistribute()` untuk baca config (heroMode, feedLayout)
-4. Dashboard: template selector (6 pilihan dengan preview)
-5. Dashboard: customize detail (hero/feed/trending override, scoring weights, category config)
-6. Default untuk site baru: Design F
+### Phase 4: HomepageConfig — 6 Template System ✅
+1. ✅ Tambahkan `HomepageConfig` model di Prisma (dengan sectionOrder, sectionVisibility, feedColumns, showExcerpt, interstitials)
+2. ✅ Tambahkan API: `GET/PUT /api/v1/sites/:siteId/homepage-config` (dengan validasi template A-F, scoring weights sum 1.0)
+3. ✅ Update `scoreAndDistribute()` untuk baca config (heroMode, scoring weights, category slugs)
+4. ✅ Dashboard: template selector (6 pilihan) di admin page (`/dashboard/admin`)
+5. ✅ Dashboard: customize detail (hero/feed/trending override, scoring weights sliders, category config)
+6. ✅ Dashboard: section order (↑↓ reorder), section toggle (ON/OFF), feed columns, show excerpt
+7. ✅ Dashboard: interstitial placement (per-widget card index + enable toggle)
+8. ✅ Dashboard: Reset Default button + Preview link
+9. ✅ Default untuk site baru: Design F (auto-create di service)
 
 ---
 
@@ -1539,10 +1542,13 @@ Tambahkan tab "Homepage Settings" di site settings dashboard:
 | Category slugs | Hardcode | Configurable per site (via HomepageConfig) |
 | Template system | Tidak ada | 6 template (A-F) bisa dipilih per site |
 | Editorial control | `isFeatured` flag only | `isFeatured` + `isBreaking` + `isExclusive` → auto scoring (BUKAN manual placement) |
-| Code organization | 1 file, 920 baris | 15+ komponen terpisah (sections + interstitials + utils) |
-| Trending | API terpisah, overlap possible | Merged pool, hero-excluded |
-| Error handling | All-or-nothing | Per-section error boundary |
-| Visual rhythm | Pola sama berulang | Setiap baris berbeda: hero_pair → triplet → asymmetric → text_heavy |
+| Code organization | 1 file, 920 baris | 30+ komponen terpisah (templates + hero + trending + sections + interstitials + utils) |
+| Trending | API terpisah, overlap possible | 24h (TrendingSection) + 7 hari (PalingDibaca), non-overlap |
+| Section order | Fixed | Configurable per site (↑↓ reorder) |
+| Section visibility | Semua aktif | Toggle ON/OFF per section |
+| Interstitial placement | Fixed index | Configurable per site (per-widget card index) |
+| Feed columns | Fixed 2 kolom | Configurable (1/2/3) |
+| Dashboard config | Tidak ada | Template selector + customize + scoring + categories + sections |
 
 ---
 
