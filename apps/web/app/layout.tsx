@@ -1,11 +1,11 @@
-import { Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google'
+import { Inter, Playfair_Display, Lora } from 'next/font/google'
 import './globals.css'
 import { constructMetadata } from '../lib/metadata'
 import type { Viewport } from 'next'
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-plus-jakarta-sans',
+  variable: '--font-inter',
   display: 'swap',
   adjustFontFallback: true,
 })
@@ -13,6 +13,12 @@ const playfair = Playfair_Display({
   subsets: ['latin'],
   weight: ['800', '900'],
   variable: '--font-playfair',
+  display: 'swap',
+  adjustFontFallback: true,
+})
+const lora = Lora({
+  subsets: ['latin'],
+  variable: '--font-lora',
   display: 'swap',
   adjustFontFallback: true,
 })
@@ -66,7 +72,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${plusJakartaSans.variable} ${playfair.variable} font-sans antialiased overflow-x-hidden`}>
+      <body className={`${inter.variable} ${playfair.variable} ${lora.variable} font-sans antialiased overflow-x-hidden`}>
         <AuthCheck />
         <ScrollReset />
         {children}

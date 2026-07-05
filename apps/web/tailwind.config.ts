@@ -10,8 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-plus-jakarta-sans)', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
         serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        body: ['var(--font-lora)', 'Georgia', 'serif'],
       },
       colors: {
         primary: {
