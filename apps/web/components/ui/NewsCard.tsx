@@ -8,7 +8,6 @@ import { cn } from '../../lib/utils';
 import EditorialBadge from './EditorialBadge';
 import { resolveArticleBadge } from '../../lib/resolveArticleBadge';
 import { getCategoryColor } from '../../lib/constants';
-import ArticleBookmarkButton from './ArticleBookmarkButton';
 
 interface NewsCardBlock {
   type: string;
@@ -121,14 +120,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   if (variant === 'large') {
     return (
       <div className="group relative h-full transition-transform duration-300 ease-out hover:-translate-y-0.5">
-        <ArticleBookmarkButton
-          article={article}
-          site={site}
-          className="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm hover:border-white/20 hover:text-white"
-          activeClassName="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-          idleClassName="absolute right-4 top-4 z-20 h-11 w-11 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:border-white/20 hover:text-white"
-          iconSize={16}
-        />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="h-full block">
           <article
             className="relative h-full min-h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl"
@@ -166,14 +157,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   if (variant === 'minimal') {
     return (
       <div className="relative">
-        <ArticleBookmarkButton
-          article={article}
-          site={site}
-          className="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white dark:border-white/10 dark:bg-white/[0.03]"
-          activeClassName="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/5 text-brand-red"
-          idleClassName="absolute right-0 top-3 z-10 h-11 w-11 justify-center rounded-full border border-gray-200 bg-white text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-white/[0.03]"
-          iconSize={15}
-        />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
           <div className="py-2 pr-12 border-b border-gray-100 dark:border-white/5 last:border-0 group cursor-pointer flex justify-between items-start gap-4">
             <div className="flex-1">
@@ -202,14 +185,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
     const isRight = imagePosition === 'right';
     return (
       <article className="group relative h-full flex flex-col rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-brand-red/20 hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-brand-red/20">
-        <ArticleBookmarkButton
-          article={article}
-          site={site}
-          className="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 backdrop-blur-sm dark:border-white/10 dark:bg-black/20"
-          activeClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-brand-red/40 bg-brand-red/10 text-brand-red"
-          idleClassName="absolute right-2 top-2 z-10 h-9 w-9 justify-center rounded-full border border-gray-200 bg-white/90 text-brand-text-muted hover:text-brand-red hover:border-brand-red/40 dark:border-white/10 dark:bg-black/20"
-          iconSize={14}
-        />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className={`flex-1 flex gap-4 ${isRight ? 'flex-row-reverse' : ''}`}>
           <div className="relative aspect-[4/3] w-28 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm dark:bg-white/5 md:w-36">
             <SmartImage
@@ -244,14 +219,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   if (imagePosition === 'background') {
     return (
       <div className="group relative h-full transition-transform duration-300 ease-out hover:-translate-y-0.5">
-        <ArticleBookmarkButton
-          article={article}
-          site={site}
-          className="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-white/10 bg-black/45 text-white backdrop-blur-sm"
-          activeClassName="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-          idleClassName="absolute right-3 top-3 z-20 h-10 w-10 justify-center rounded-full border border-white/10 bg-black/45 text-white/80 hover:text-white hover:border-white/20"
-          iconSize={14}
-        />
         <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)} className="h-full block">
           <article className="relative h-full min-h-[220px] w-full cursor-pointer overflow-hidden rounded-2xl bg-slate-900 shadow-xl">
             <SmartImage
@@ -332,14 +299,6 @@ const NewsCard = React.memo(function NewsCard({ article, variant = 'medium', ima
   // default medium: image on top
   return (
     <div className="group relative transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01]">
-      <ArticleBookmarkButton
-        article={article}
-        site={site}
-        className="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm"
-        activeClassName="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-brand-red/40 bg-brand-red/20 text-white"
-        idleClassName="absolute right-3 top-3 z-20 h-11 w-11 justify-center rounded-full border border-white/20 bg-black/45 text-white/85 hover:text-white hover:border-white/35"
-        iconSize={15}
-      />
       <Link href={articleHref} onMouseEnter={() => prefetchImage(imageUrl)}>
         <article
           className="relative flex cursor-pointer flex-col gap-2 md:gap-3"
