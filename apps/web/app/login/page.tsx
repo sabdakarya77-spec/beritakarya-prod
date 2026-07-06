@@ -255,7 +255,7 @@ export default function LoginPage() {
           </div>
         </div>
         
-        <p className="text-center text-[10px] text-brand-text-muted font-bold uppercase tracking-widest mt-6">
+        <p suppressHydrationWarning className="text-center text-[10px] text-brand-text-muted font-bold uppercase tracking-widest mt-6">
           &copy; {new Date().getFullYear()} BeritaKarya Nusantara
         </p>
       </div>

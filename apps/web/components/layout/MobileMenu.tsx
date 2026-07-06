@@ -252,7 +252,7 @@ export default function MobileMenu({
 
         {/* Footer */}
         <div className="border-t border-gray-100 bg-gray-50/50 px-5 py-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-          <p className="text-[8px] font-medium tracking-[0.05em] text-brand-text-muted">
+          <p suppressHydrationWarning className="text-[8px] font-medium tracking-[0.05em] text-brand-text-muted">
             © {new Date().getFullYear()} BERITA KARYA.<br />
             Nusantara Berbicara.
           </p>

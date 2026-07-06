@@ -51,12 +51,15 @@ export default function Navbar({
   const activeSite = siteConfig?.id || pathname.split('/')[1] || 'pusat';
   const isArticlePage = pathname.includes('/artikel/');
   const { count: savedArticlesCount } = useSavedArticles(activeSite);
-  const articleTopDate = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const [articleTopDate, setArticleTopDate] = useState('');
+  useEffect(() => {
+    setArticleTopDate(new Date().toLocaleDateString('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }));
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
