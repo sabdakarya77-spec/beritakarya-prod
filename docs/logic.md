@@ -45,8 +45,20 @@ Tidak pakai scoring — zona ini memang sengaja menampilkan 5 berita terbaru.
 ## ZONA 2 — FOKUS REDAKSI (4 kartu sejajar)
 
 **Jumlah:** 4 artikel
-**Filter:** Pool = artikel setelah hero (tidak termasuk hero)
-**Urutan:** Scoring (bukan hanya `isFeatured`)
+**Filter:** `isFeatured === true` (hanya artikel featured yang masuk)
+**Urutan:** Scoring di antara featured (supaya rotasi, tidak selalu sama)
+**Fallback:** Jika featured < 2, pakai scoring semua sisa setelah hero
+
+### Logic
+
+```typescript
+const featuredPool = remainingAfterHero.filter(a => a.isFeatured)
+
+if (featuredPool.length >= 2):
+  fokusRedaksi = scoreAndSort(featuredPool).slice(0, 4)
+else:
+  fokusRedaksi = scoreAndSort(remainingAfterHero).slice(0, 4)
+```
 
 ### Scoring Formula
 
@@ -79,12 +91,12 @@ score = (freshness × 0.4) + (engagement × 0.3) + (editorial × 0.3)
 - `isBreaking` = true → +0.2
 - Bisa dijumlahkan, max 1.0
 
-### Kenapa Scoring?
+### Kenapa Filter + Scoring?
 
-Tanpa scoring, `isFeatured` saja = artikel yang sama terus muncul di Fokus Redaksi. Dengan scoring:
-- Artikel featured tetap punya keunggulan (+0.5 editorial)
-- Tapi artikel baru yang populer bisa naik ke Zona 2
-- Rotasi lebih natural, tidak stagnan
+- **Filter `isFeatured`** = Zona 2 tetap zona editorial, hanya artikel pilihan redaksi yang masuk
+- **Scoring** = urutan featured berputar berdasarkan freshness + engagement, tidak selalu sama
+- Tanpa scoring: featured A, B, C, D selalu urut itu-itu saja
+- Dengan scoring: featured B yang baru publish + banyak views bisa naik ke posisi 1
 
 ---
 
