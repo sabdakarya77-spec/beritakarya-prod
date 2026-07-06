@@ -26,7 +26,7 @@ interface TeamMember {
 }
 
 export default function TeamMonitoring() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil']);
   const { site } = useParams() as { site: string };
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);

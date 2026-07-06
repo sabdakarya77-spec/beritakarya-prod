@@ -46,7 +46,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [globalSearch, setGlobalSearch] = useState('')
   const [isMobile, setIsMobile] = useState(false)
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([])
   const router = useRouter()
+
+  const toggleExpandedMenu = (menuName: string) => {
+    setExpandedMenus(prev =>
+      prev.includes(menuName) ? prev.filter(m => m !== menuName) : [...prev, menuName]
+    )
+  }
 
   // Detect mobile/PWA for conditional navigation behavior
   useEffect(() => {
@@ -77,13 +84,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setLastActiveSite(site)
         }
 
-        const allowedRoles = ['superadmin', 'wapimred', 'reporter', 'kontributor', 'advertiser']
+        const allowedRoles = ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor', 'advertiser']
         if (!allowedRoles.includes(user.role)) {
           router.push(`/${site}`)
           return
         }
 
-        const isKycRequired = ['reporter', 'kontributor', 'wapimred'].includes(user.role)
+        const isKycRequired = ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
         const targetKycPath = `/${site}/dashboard/kyc`
 
         if (isKycRequired && !user.isVerified && pathname !== targetKycPath) {
@@ -115,30 +122,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       label: 'Utama',
       items: [
-        { name: 'Ringkasan', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['superadmin', 'wapimred', 'reporter', 'kontributor'] },
-        { name: 'Post', href: `/${site}/dashboard/articles`, icon: FileText, roles: ['superadmin', 'wapimred', 'reporter', 'kontributor'] },
-        { name: 'Media', href: `/${site}/dashboard/media`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'reporter', 'kontributor'] },
-        { name: 'Profil Saya', href: `/${site}/dashboard/profile`, icon: User, roles: ['superadmin', 'wapimred', 'reporter', 'kontributor'] },
-        ...(user && !user.isVerified ? [{ name: 'Verifikasi KYC', href: `/${site}/dashboard/kyc`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'reporter', 'kontributor'] }] : []),
+        { name: 'Ringkasan', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Post', href: `/${site}/dashboard/articles`, icon: FileText, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Media', href: `/${site}/dashboard/media`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Profil Saya', href: `/${site}/dashboard/profile`, icon: User, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
+        ...(user && !user.isVerified ? [{ name: 'Verifikasi KYC', href: `/${site}/dashboard/kyc`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] }] : []),
       ]
     },
     {
       label: 'Editorial',
       items: [
-        { name: 'Antrian Review', href: `/${site}/dashboard/review`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred'] },
-        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred'] },
-        { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred'] },
+        { name: 'Antrian Review', href: `/${site}/dashboard/review`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
+        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred', 'kaperwil'] },
+        { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
         { name: 'Kategori', href: `/${site}/dashboard/categories`, icon: Tag, roles: ['superadmin'] },
-        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred'] },
-        { name: 'Komentar', href: `/${site}/dashboard/comments`, icon: MessageSquare, roles: ['superadmin', 'wapimred'] },
+        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
+        { name: 'Komentar', href: `/${site}/dashboard/comments`, icon: MessageSquare, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
       ]
     },
     {
       label: 'Administrasi',
       items: [
-        { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred'] },
-        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred'] },
-        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred'] },
+        { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
+        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
+        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kaperwil'] },
         { name: 'Audit Log', href: `/${site}/dashboard/audit`, icon: Shield, roles: ['superadmin'] },
         { name: 'Pengaturan', href: `/${site}/dashboard/settings`, icon: Settings, roles: ['superadmin', 'wapimred'] },
       ]
@@ -147,7 +154,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: 'Superadmin',
       items: [
         { name: 'Manajemen Situs', href: `/${site}/dashboard/admin`, icon: Settings, roles: ['superadmin'] },
-        { name: 'Hak Akses', href: `/${site}/dashboard/admin/wapimred-permissions`, icon: Lock, roles: ['superadmin'] },
+        {
+          name: 'Hak Akses',
+          href: `/${site}/dashboard/admin/permissions`,
+          icon: Lock,
+          roles: ['superadmin'],
+          expandable: true,
+          children: [
+            { name: 'Wapimred', href: `/${site}/dashboard/admin/permissions/wapimred`, roles: ['superadmin'] },
+            { name: 'Kaperwil', href: `/${site}/dashboard/admin/permissions/kaperwil`, roles: ['superadmin'] },
+            { name: 'Kabiro', href: `/${site}/dashboard/admin/permissions/kabiro`, roles: ['superadmin'] },
+          ]
+        },
         { name: 'AI Dashboard', href: `/${site}/dashboard/admin/ai-usage`, icon: Activity, roles: ['superadmin'] },
         { name: 'Setelan Iklan', href: `/${site}/dashboard/ads/payment-config`, icon: Settings, roles: ['superadmin'] },
       ]
@@ -326,11 +344,74 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="space-y-0.5">
                   {filteredItems.map((item) => {
                     const isActive = item.href === activeHref
-                    const isKycRequired = user && ['reporter', 'kontributor', 'wapimred'].includes(user.role)
+                    const isChildActive = item.children?.some((child: { href: string }) => pathname === child.href || pathname.startsWith(child.href + '/'))
+                    const isExpanded = expandedMenus.includes(item.name) || isChildActive
+                    const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
                     const isLocked = isKycRequired && !user.isVerified && item.href !== `/${site}/dashboard/kyc`
                     const isExternal = item.href.startsWith('http')
                     const Icon = isLocked ? Lock : item.icon
 
+                    // Expandable menu item
+                    if (item.expandable && item.children) {
+                      return (
+                        <div key={item.name}>
+                          <button
+                            onClick={() => toggleExpandedMenu(item.name)}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative overflow-hidden w-full text-left",
+                              isChildActive
+                                ? 'bg-brand-red/10 text-brand-red'
+                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            )}
+                          >
+                            <Icon size={17} strokeWidth={isChildActive ? 2.5 : 1.8} className="relative z-10 flex-shrink-0" />
+                            {!isSidebarCollapsed && (
+                              <>
+                                <span className="text-[11px] font-black uppercase tracking-wider relative z-10 flex-1">{item.name}</span>
+                                <ChevronRight
+                                  size={12}
+                                  className={cn(
+                                    "relative z-10 transition-transform duration-200",
+                                    isExpanded ? "rotate-90" : ""
+                                  )}
+                                />
+                              </>
+                            )}
+                            {isSidebarCollapsed && (
+                              <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-wider rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                                {item.name}
+                                <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800" />
+                              </div>
+                            )}
+                          </button>
+
+                          {/* Sub-items */}
+                          {isExpanded && !isSidebarCollapsed && (
+                            <div className="ml-6 mt-1 space-y-0.5 border-l-2 border-gray-200 dark:border-gray-700 pl-3">
+                              {item.children.map((child: { name: string; href: string; roles: string[] }) => {
+                                const isChildItemActive = pathname === child.href || pathname.startsWith(child.href + '/')
+                                return (
+                                  <Link
+                                    key={child.name}
+                                    href={child.href}
+                                    className={cn(
+                                      "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-[11px] font-bold uppercase tracking-wider",
+                                      isChildItemActive
+                                        ? 'bg-brand-red text-white'
+                                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                    )}
+                                  >
+                                    {child.name}
+                                  </Link>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    }
+
+                    // Regular menu item
                     const navContent = (
                       <>
                         {isActive && !isLocked && (
@@ -477,9 +558,60 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="px-3 text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-1.5">{section.label}</p>
                 {filteredItems.map((item) => {
                   const isActive = item.href === activeHref
-                  const isKycRequired = user && ['reporter', 'kontributor', 'wapimred'].includes(user.role)
+                  const isChildActive = item.children?.some((child: { href: string }) => pathname === child.href || pathname.startsWith(child.href + '/'))
+                  const isExpanded = expandedMenus.includes(item.name) || isChildActive
+                  const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
                   const isLocked = isKycRequired && !user.isVerified && item.href !== `/${site}/dashboard/kyc`
                   const Icon = isLocked ? Lock : item.icon
+
+                  // Expandable menu item
+                  if (item.expandable && item.children) {
+                    return (
+                      <div key={item.name}>
+                        <button
+                          onClick={() => toggleExpandedMenu(item.name)}
+                          className={cn(
+                            "flex items-center gap-3 py-2 px-3 rounded-lg mb-0.5 w-full text-left",
+                            isChildActive ? "text-brand-red bg-brand-red/5" : "text-gray-400"
+                          )}
+                        >
+                          <Icon size={16} />
+                          <span className="text-[11px] font-black uppercase tracking-wider flex-1">{item.name}</span>
+                          <ChevronRight
+                            size={14}
+                            className={cn(
+                              "transition-transform duration-200",
+                              isExpanded ? "rotate-90" : ""
+                            )}
+                          />
+                        </button>
+
+                        {/* Sub-items */}
+                        {isExpanded && (
+                          <div className="ml-6 border-l-2 border-gray-700 pl-3 mb-2">
+                            {item.children.map((child: { name: string; href: string; roles: string[] }) => {
+                              const isChildItemActive = pathname === child.href || pathname.startsWith(child.href + '/')
+                              return (
+                                <Link
+                                  key={child.name}
+                                  href={child.href}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className={cn(
+                                    "flex items-center gap-2 py-1.5 px-3 rounded-lg mb-0.5 text-[11px] font-bold uppercase tracking-wider",
+                                    isChildItemActive ? "text-brand-red bg-brand-red/5" : "text-gray-500"
+                                  )}
+                                >
+                                  {child.name}
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  }
+
+                  // Regular menu item
                   return (
                     <Link
                       key={item.name}

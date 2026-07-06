@@ -425,7 +425,9 @@ export class SiteService {
       googleIndexingConfig: site.googleIndexingConfig,
       ga4PropertyId: site.ga4PropertyId,
       gscSiteUrl: site.gscSiteUrl,
-      wapimredSettings: site.wapimredSettings
+      wapimredSettings: site.wapimredSettings,
+      kaperwilSettings: site.kaperwilSettings,
+      kabiroSettings: site.kabiroSettings
     }
   }
 
@@ -459,7 +461,8 @@ export class SiteService {
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
       'socialLinks', 'appearance', 'trendingTopics',
-      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl', 'wapimredSettings'
+      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl',
+      'wapimredSettings', 'kaperwilSettings', 'kabiroSettings'
     ]
 
     for (const field of allowedFields) {
@@ -653,6 +656,140 @@ export class SiteService {
     })
 
     await this.logAudit(actorUserId, 'site.wapimred_settings_updated', {
+      siteId,
+      changes: filtered
+    })
+
+    return merged
+  }
+
+  /**
+   * GET kaperwil settings for a site.
+   * Returns defaults if not yet set.
+   */
+  async getKaperwilSettings(siteId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { kaperwilSettings: true }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const defaults = {
+      canPublish: false,
+      canSchedule: false,
+      canForcePublish: false,
+      canDeletePublished: false,
+      canManageCategories: false,
+      canTransferUser: false,
+      canDeleteUser: false,
+      notifyPimredOnSubmit: true,
+      notifyPimredOnApprove: true
+    }
+
+    const settings = (site.kaperwilSettings as Record<string, boolean>) || {}
+    return { ...defaults, ...settings }
+  }
+
+  /**
+   * UPDATE kaperwil settings for a site (superadmin-only).
+   * Merges with existing settings.
+   */
+  async updateKaperwilSettings(siteId: string, data: Record<string, boolean>, actorUserId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished', 'canManageCategories', 'canTransferUser', 'canDeleteUser', 'notifyPimredOnSubmit', 'notifyPimredOnApprove']
+    const filtered: Record<string, boolean> = {}
+    for (const key of allowedKeys) {
+      if (data[key] !== undefined) {
+        filtered[key] = data[key]
+      }
+    }
+
+    const current = (site.kaperwilSettings as Record<string, boolean>) || {}
+    const merged = { ...current, ...filtered }
+
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { kaperwilSettings: merged }
+    })
+
+    await this.logAudit(actorUserId, 'site.kaperwil_settings_updated', {
+      siteId,
+      changes: filtered
+    })
+
+    return merged
+  }
+
+  /**
+   * GET kabiro settings for a site.
+   * Returns defaults if not yet set.
+   */
+  async getKabiroSettings(siteId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { kabiroSettings: true }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const defaults = {
+      canPublish: false,
+      canSchedule: false,
+      canForcePublish: false,
+      canDeletePublished: false,
+      canManageCategories: false,
+      canTransferUser: false,
+      canDeleteUser: false,
+      notifyPimredOnSubmit: true,
+      notifyPimredOnApprove: true
+    }
+
+    const settings = (site.kabiroSettings as Record<string, boolean>) || {}
+    return { ...defaults, ...settings }
+  }
+
+  /**
+   * UPDATE kabiro settings for a site (superadmin-only).
+   * Merges with existing settings.
+   */
+  async updateKabiroSettings(siteId: string, data: Record<string, boolean>, actorUserId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished', 'canManageCategories', 'canTransferUser', 'canDeleteUser', 'notifyPimredOnSubmit', 'notifyPimredOnApprove']
+    const filtered: Record<string, boolean> = {}
+    for (const key of allowedKeys) {
+      if (data[key] !== undefined) {
+        filtered[key] = data[key]
+      }
+    }
+
+    const current = (site.kabiroSettings as Record<string, boolean>) || {}
+    const merged = { ...current, ...filtered }
+
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { kabiroSettings: merged }
+    })
+
+    await this.logAudit(actorUserId, 'site.kabiro_settings_updated', {
       siteId,
       changes: filtered
     })
