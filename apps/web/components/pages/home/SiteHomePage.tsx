@@ -122,7 +122,7 @@ const DEFAULT_OPINION_SLUGS = ['opini', 'kolom-esai', 'analisis', 'kolom']
 const DEFAULT_PHOTO_SLUGS = ['foto-jurnalistik']
 const DEFAULT_VIDEO_SLUGS = ['video', 'dokumenter-reportase', 'podcast-audio']
 const DEFAULT_TECHNOLOGY_SLUGS = [
-  'teknologi',
+  'teknologi', 'techno',
   'gadget-review', 'smartphone', 'laptop-pc', 'aksesoris',
   'ai-inovasi',
   'startups-digital',
