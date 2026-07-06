@@ -11,11 +11,11 @@ Template homepage (A-F) saat ini bermasalah:
 
 ## Tujuan
 
-- [ ] Pindahkan template dari `pages/home/templates/` ke `components/templates/`
-- [ ] Rename template berdasarkan fungsi, bukan huruf desain
-- [ ] Terapkan logic terbaru ke semua template yang aktif
+- [x] Pindahkan template dari `pages/home/templates/` ke `components/templates/`
+- [x] Rename template berdasarkan fungsi, bukan huruf desain
+- [x] Terapkan logic terbaru ke semua template yang aktif
 - [ ] Hapus atau arsipkan template yang tidak dipakai
-- [ ] Bersihkan duplikasi kode antar template
+- [x] Bersihkan duplikasi kode antar template
 
 ## Struktur Target
 
@@ -40,38 +40,38 @@ components/templates/
 
 ## Langkah Refactor
 
-### Phase 1: Pindah Folder (low risk)
+### Phase 1: Pindah Folder (low risk) ✅
 
-- [ ] Buat folder `components/templates/layouts/`
-- [ ] Pindahkan `TemplateF.tsx` → `HybridLayout.tsx`
-- [ ] Pindahkan `TemplateA.tsx` → `ClassicEditorialLayout.tsx`
-- [ ] Pindahkan `TemplateB.tsx` → `MagazineBoldLayout.tsx`
-- [ ] Pindahkan `TemplateC.tsx` → `DataDrivenLayout.tsx`
-- [ ] Pindahkan `TemplateD.tsx` → `CompactDenseLayout.tsx`
-- [ ] Pindahkan `TemplateE.tsx` → `VisualStorytellingLayout.tsx`
-- [ ] Update semua import di `SiteHomePage.tsx`
-- [ ] Hapus folder `pages/home/templates/`
-- [ ] Type-check + lint
+- [x] Buat folder `components/templates/layouts/`
+- [x] Pindahkan `TemplateF.tsx` → `HybridLayout.tsx`
+- [x] Pindahkan `TemplateA.tsx` → `ClassicEditorialLayout.tsx`
+- [x] Pindahkan `TemplateB.tsx` → `MagazineBoldLayout.tsx`
+- [x] Pindahkan `TemplateC.tsx` → `DataDrivenLayout.tsx`
+- [x] Pindahkan `TemplateD.tsx` → `CompactDenseLayout.tsx`
+- [x] Pindahkan `TemplateE.tsx` → `VisualStorytellingLayout.tsx`
+- [x] Update semua import di `SiteHomePage.tsx`
+- [x] Hapus folder `pages/home/templates/`
+- [x] Type-check + lint
 
-### Phase 2: Terapkan Logic Terbaru ke Semua Layout (medium risk)
+### Phase 2: Terapkan Logic Terbaru ke Semua Layout (medium risk) ✅
 
-Logic yang sudah ada di HybridLayout tapi belum di layout lain:
+Logic terbaru ada di shared layer (`distribution.ts`, `SiteHomePage.tsx`) — otomatis diterapkan ke semua template:
 
-- [ ] Scoring zona 2 (`scoreAndSort` dari `distribution.ts`)
-- [ ] Dedup Row 1 → Row 2 (`feedLeftover + remainingArticles`)
-- [ ] Trending weekly (168 jam)
-- [ ] Popular monthly (720 jam)
-- [ ] `feed` (bukan `feedFeatured + feedStream`)
-- [ ] `photoJournal` + `showPhotoSection` di EditorialExtras
+- [x] Scoring zona 2 (`scoreAndSort` dari `distribution.ts`)
+- [x] Dedup Row 1 → Row 2 (`feedLeftover + remainingArticles`) — HybridLayout specific
+- [x] Trending weekly (168 jam) — di `SiteHomePage.tsx`
+- [x] Popular monthly (720 jam) — di `SiteHomePage.tsx`
+- [x] `feed` (bukan `feedFeatured + feedStream`) — di `distribution.ts`
+- [x] `photoJournal` + `showPhotoSection` di EditorialExtras — semua layout
 
-### Phase 3: Extract Shared Zones (medium risk)
+### Phase 3: Extract Shared Zones (medium risk) ✅
 
-Komponen yang dipakai semua layout tapi dikopi manual:
+Komponen shared sudah diextract ke `components/templates/zones/`:
 
-- [ ] Extract `AdSection` — wrapper untuk HOME_TOP, HOME_FEED_1, HOME_FEED_2
-- [ ] Extract `SectionSeparator` — `border-t border-gray-100`
-- [ ] Extract `LoadMoreSection` — LoadMoreArticles wrapper
-- [ ] Pindahkan zona wrapper ke `components/templates/zones/`
+- [x] Extract `AdZone` — wrapper untuk HOME_TOP, HOME_FEED_1, HOME_FEED_2
+- [x] Extract `SectionSeparator` — `border-t border-gray-100`
+- [x] Extract `LoadMoreZone` — LoadMoreArticles wrapper
+- [x] Pindahkan zona wrapper ke `components/templates/zones/`
 
 ### Phase 4: Cleanup (low risk)
 

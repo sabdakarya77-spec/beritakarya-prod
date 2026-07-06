@@ -1240,6 +1240,7 @@ Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar di
 | **Interstitial count** | 3-4 | 3 (satu gabungan) | 3 (compact) | 2 (sidebar menggantikan) | 3-4 | **3-4** |
 | **Ad slots (desktop)** | 3 (HOME_TOP, FEED_1, FEED_2) | 3 (sama) | 3 (sama) | 3 (sama) | 3 (sama) | 3 (sama) |
 | **Ad slots (mobile)** | 3 (sama, ukuran menyesuaikan) | 3 (sama) | 3 (sama) | 3 (sama) | 3 (sama) | 3 (sama) |
+| **Status** | Siap pakai | Siap pakai | Siap pakai | Siap pakai | Siap pakai | ⭐ **Default, paling aktif** |
 
 ---
 

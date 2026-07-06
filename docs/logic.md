@@ -291,15 +291,37 @@ Load More fetch dari API dengan `excludeIds` → hindari duplikat.
 
 ## File yang Relevan
 
+### Core Engine
+
 | File | Fungsi |
 |------|--------|
-| `distribution.ts` | Zone allocation engine — scoring + distribusi |
-| `SiteHomePage.tsx` | Orchestrator — fetch data + render template |
-| `TemplateF.tsx` | Layout final — urutan zona |
-| `MagazineCoverHero.tsx` | Zona 1 |
-| `FokusRedaksiSection.tsx` | Zona 2 |
-| `TrendingSection.tsx` | Zona 3 |
-| `FeedWithSidebar.tsx` | Zona 4 Row 1 |
-| `ContinuedFeed.tsx` | Zona 4 Row 2 |
-| `EditorialExtras.tsx` | Zona 5 |
+| `pages/home/utils/distribution.ts` | Zone allocation engine — scoring + distribusi |
+| `pages/home/SiteHomePage.tsx` | Orchestrator — fetch data + render template |
+
+### Template System (`components/templates/`)
+
+| File | Fungsi |
+|------|--------|
+| `templates/index.ts` | Barrel export semua layout |
+| `templates/types.ts` | Shared types (TemplateProps) |
+| `templates/layouts/HybridLayout.tsx` | ⭐ Default layout (8:4 sidebar + continued feed) |
+| `templates/layouts/ClassicEditorialLayout.tsx` | Layout A — pattern rotation |
+| `templates/layouts/MagazineBoldLayout.tsx` | Layout B — magazine cover |
+| `templates/layouts/DataDrivenLayout.tsx` | Layout C — split hero + ticker |
+| `templates/layouts/CompactDenseLayout.tsx` | Layout D — dense 3 kolom |
+| `templates/layouts/VisualStorytellingLayout.tsx` | Layout E — dual hero |
+| `templates/zones/AdZone.tsx` | Shared ad wrapper |
+| `templates/zones/SectionSeparator.tsx` | Shared separator |
+| `templates/zones/LoadMoreZone.tsx` | Shared load more wrapper |
+
+### Homepage Components (`pages/home/`)
+
+| File | Fungsi |
+|------|--------|
+| `MagazineCoverHero.tsx` | Zona 1 — Hero |
+| `FokusRedaksiSection.tsx` | Zona 2 — 4 kartu sejajar |
+| `TrendingSection.tsx` | Zona 3 — Numbered podium |
+| `FeedWithSidebar.tsx` | Zona 4 Row 1 — 8:4 sidebar |
+| `ContinuedFeed.tsx` | Zona 4 Row 2 — 4 kolom grid |
+| `EditorialExtras.tsx` | Zona 5 — Editor · Opini · Foto · Video |
 | `PalingDibacaSidebar.tsx` | Sidebar popular |
