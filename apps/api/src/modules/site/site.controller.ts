@@ -371,7 +371,39 @@ export async function assignWapimred(req: Request, res: Response) {
 
 /**
  * GET /api/v1/sites/:id/homepage-config
- * Get homepage config for a site (public)
+ *
+ * @swagger
+ * /sites/{id}/homepage-config:
+ *   get:
+ *     summary: Ambil konfigurasi homepage site
+ *     description: >
+ *       Mengembalikan konfigurasi homepage untuk sebuah site.
+ *       Termasuk template selection (A-F), hero mode, feed layout,
+ *       trending style, scoring weights, kategori, dan section control.
+ *       Endpoint ini public — tidak perlu authentication.
+ *     tags:
+ *       - Sites
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Site ID (UUID)
+ *     responses:
+ *       200:
+ *         description: Konfigurasi homepage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/HomepageConfig'
+ *       404:
+ *         description: Config tidak ditemukan
  */
 export async function getHomepageConfig(req: Request, res: Response) {
   try {
@@ -389,7 +421,47 @@ export async function getHomepageConfig(req: Request, res: Response) {
 
 /**
  * PUT /api/v1/sites/:id/homepage-config
- * Update homepage config (superadmin/wapimred only)
+ *
+ * @swagger
+ * /sites/{id}/homepage-config:
+ *   put:
+ *     summary: Update konfigurasi homepage
+ *     description: >
+ *       Mengubah konfigurasi homepage untuk sebuah site.
+ *       Hanya bisa diakses oleh superadmin atau wapimred.
+ *     tags:
+ *       - Sites
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Site ID (UUID)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/HomepageConfigInput'
+ *     responses:
+ *       200:
+ *         description: Config berhasil diupdate
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/HomepageConfig'
+ *       401:
+ *         description: Tidak terautentikasi
+ *       403:
+ *         description: Tidak punya akses (bukan superadmin/wapimred)
  */
 export async function updateHomepageConfig(req: Request, res: Response) {
   try {
