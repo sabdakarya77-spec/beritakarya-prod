@@ -148,7 +148,7 @@ Sidebar dihapus → interstitial sections.
 │  ╔══════════════════════════════════════════════════════════════════════════════╗ │
 │  ║  ZONA 5+ — EDITORIAL EXTRAS                                                 ║ │
 │  ║                                                                              ║ │
-│  ║  ── Pilihan Editor (portrait 3:4) ────────────────────────────────────────  ║ │
+│  ║  ── Teknologi (portrait 3:4) ─────────────────────────────────────────────  ║ │
 │  ║  ┌────────────────┬────────────────┬────────────────┐                        ║ │
 │  ║  │ ░░ [PORTRAIT]░ │ ░░ [PORTRAIT]░ │ ░░ [PORTRAIT]░ │                        ║ │
 │  ║  │ Judul          │ Judul          │ Judul          │                        ║ │
@@ -265,7 +265,7 @@ Sidebar dihapus → interstitial sections.
 │  [WA] [TG] [Email]       │
 ├──────────────────────────┤
 │  EDITORIAL EXTRAS        │
-│  • Pilihan Editor        │
+│  • Teknologi             │
 │  • Opini                 │
 │  • Video                 │
 ├──────────────────────────┤
@@ -622,7 +622,7 @@ Informasi padat. Hero split per kategori. Trending jadi ticker berjalan. Cocok u
 │  ╔══════════════════════════════════════════════════════════════════════════════╗ │
 │  ║  ZONA 5+ — EDITORIAL EXTRAS (compact layout)                                ║ │
 │  ║  ┌────────────────────────────────────────────────────────────────────┐      ║ │
-│  ║  │ PILIHAN EDITOR  │  OPINI  │  VIDEO  │  FOTO  (tab navigation)    │      ║ │
+│  ║  │ TEKNOLOGI  │  OPINI  │  VIDEO  │  FOTO  (tab navigation)    │      ║ │
 │  ║  ├────────────────────────────────────────────────────────────────────┤      ║ │
 │  ║  │ [content sesuai tab yang aktif]                                    │      ║ │
 │  ║  └────────────────────────────────────────────────────────────────────┘      ║ │
@@ -707,7 +707,7 @@ Informasi padat. Hero split per kategori. Trending jadi ticker berjalan. Cocok u
 │  USD/IDR 15,890          │
 ├──────────────────────────┤
 │  EDITORIAL (tabs)        │
-│  [Editor] [Opini] [Video]│
+│  [Tekno] [Opini] [Video] │
 ├──────────────────────────┤
 │  [Load More]             │
 │  FOOTER                  │
@@ -799,7 +799,7 @@ Maksimal konten di atas fold. Hero kecil (3 kolom), trending jadi sidebar sticky
 │  ╔══════════════════════════════════════════════════════════════════════════════╗ │
 │  ║  ZONA 5+ — EDITORIAL EXTRAS (tab-based, compact)                            ║ │
 │  ║  ┌────────────────────────────────────────────────────────────────────┐      ║ │
-│  ║  │ [Pilihan Editor] [Opini] [Video] [Foto]                           │      ║ │
+│  ║  │ [Teknologi] [Opini] [Video] [Foto]                                │      ║ │
 │  ║  ├────────────────────────────────────────────────────────────────────┤      ║ │
 │  ║  │ ┌──────────────┬──────────────┬──────────────┬──────────────┐     │      ║ │
 │  ║  │ │ [CARD]       │ [CARD]       │ [CARD]       │ [CARD]       │     │      ║ │
@@ -874,7 +874,7 @@ Maksimal konten di atas fold. Hero kecil (3 kolom), trending jadi sidebar sticky
 │  USD/IDR 15,890          │
 ├──────────────────────────┤
 │  EDITORIAL (tabs)        │
-│  [Editor] [Opini] [Video]│
+│  [Tekno] [Opini] [Video] │
 │  ┌────────────────────┐  │
 │  │ [CARD]  [CARD]     │  │
 │  └────────────────────┘  │
@@ -1025,7 +1025,7 @@ Foto-forward, immersive. Hero dual besar, trending dengan konteks "kenapa trendi
 │                                                                                  │
 │  ╔══════════════════════════════════════════════════════════════════════════════╗ │
 │  ║  ZONA 5+ — EDITORIAL EXTRAS                                                 ║ │
-│  ║  (Pilihan Editor portrait, Opini text-heavy, Video play overlay)            ║ │
+│  ║  (Teknologi portrait, Opini text-heavy, Video play overlay)                 ║ │
 │  ╚══════════════════════════════════════════════════════════════════════════════╝ │
 │                                                                                  │
 │  [Load More]                                                                     │
@@ -1145,7 +1145,7 @@ Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar di
 | Fokus Redaksi | **A: Classic Editorial** (4 kartu sejajar) + **Scoring** | Hierarki jelas, rotasi dinamis |
 | Trending | **B: Numbered Podium** (top 3 gambar) | Social proof lebih kuat |
 | Feed | **8:4 sidebar** (Row 1) + **4 kolom grid** (Row 2) | Konten padat, sidebar informatif |
-| Editorial Extras | **A: Lengkap** (Editor, Opini, Foto, Video) | SEO terbaik, 4 jenis konten |
+| Editorial Extras | **A: Lengkap** (Teknologi, Foto, Video) + **Opini di sidebar** | SEO terbaik, konten tersegmentasi |
 
 ### Desktop (1280px)
 
@@ -1179,8 +1179,8 @@ Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar di
 │  ┌──────────────────────────┬───────────────────────────┐   │
 │  │  8 kolom (News Cards)    │  4 kolom (Sidebar)        │   │
 │  │  [text] [gambar 16:9]    │  📰 Paling Dibaca (80×80) │   │
-│  │  [text] [gambar 16:9]    │  💬 Akses Redaksi         │   │
-│  │  [text] [gambar 16:9]    │                           │   │
+│  │  [text] [gambar 16:9]    │  💬 Opini & Analisis      │   │
+│  │  [text] [gambar 16:9]    │  📧 Akses Redaksi         │   │
 │  │  [text] [gambar 16:9]    │                           │   │
 │  │  [text] [gambar 16:9]    │                           │   │
 │  └──────────────────────────┴───────────────────────────┘   │
@@ -1206,10 +1206,7 @@ Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar di
 ├─────────────────────────────────────────────────────────────┤ ← separator
 │                                                              │
 │  ZONA 5 — EDITORIAL EXTRAS                                   │
-│  ── Pilihan Editor (portrait 3:4) ───────────────────────   │
-│  [Card] [Card] [Card]                                        │
-│                                                              │
-│  ── Opini & Analisis ────────────────────────────────────   │
+│  ── Teknologi (portrait 3:4) ────────────────────────────   │
 │  [Card] [Card] [Card]                                        │
 │                                                              │
 │  ── Foto Jurnalistik ────────────────────────────────────   │
@@ -1335,17 +1332,10 @@ Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar di
 ├──────────────────────────┤
 │                          │
 │  ZONA 5 — EDITORIAL      │
-│  ── Pilihan Editor ────  │
+│  ── Teknologi ──────────  │
 │  ┌────────────────────┐  │
 │  │ [PORTRAIT 3:4]     │  │
 │  │ Judul · Author     │  │
-│  └────────────────────┘  │
-│  (3 kartu stacked)       │
-│                          │
-│  ── Opini & Analisis ──  │
-│  ┌────────────────────┐  │
-│  │ "Judul..."         │  │
-│  │ Excerpt · Author   │  │
 │  └────────────────────┘  │
 │  (3 kartu stacked)       │
 │                          │
@@ -1576,8 +1566,8 @@ Pilih template, lalu bisa modifikasi bagian-bagian tertentu:
 │  ☑ 3. Trending                                      │
 │  ☑ 4. Feed                                          │
 │  ☐ 5. Foto Jurnalistik   ← bisa dimatikan           │
-│  ☑ 6. Pilihan Editor                                │
-│  ☑ 7. Opini                                         │
+│  ☑ 6. Teknologi                                     │
+│  ☑ 7. Opini (sidebar)                               │
 │  ☐ 8. Video              ← bisa dimatikan           │
 │                                                     │
 │  ── Interstitials ───────────────────────────────── │
