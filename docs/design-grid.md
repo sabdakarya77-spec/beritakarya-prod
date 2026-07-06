@@ -1431,7 +1431,7 @@ Kombinasi kurasi elemen terbaik dari Design A, B, dan C. Menjadi **rekomendasi d
 |-------|-----------|-------------|----------------|------------|-----------|-------------------|
 | **Hero** | BENTO_4 (slider) | MAGAZINE_COVER (thumbnail bar) | SPLIT_HERO (kategori grid) | BENTO_3 (compact) | DUAL_HERO (2 besar) | **MAGAZINE_COVER (550px)** |
 | **Trending** | Horizontal strip | Numbered podium (top 3 gambar) | Ticker berjalan | Sticky sidebar | With context (+persentase) | **Numbered podium** |
-| **Feed style** | Pattern rotation | Asymmetric dominant | Text-heavy | Dense 3-kolom | Hero_pair dominant | **70:30 sidebar + 4kol grid** |
+| **Feed style** | Pattern rotation | Asymmetric dominant | Text-heavy | Dense 3-kolom | Hero_pair dominant | **8:4 sidebar + 4kol grid** |
 | **Sidebar** | Dihapus → interstitial | Dihapus → interstitial | Dihapus → interstitial | **Sticky sidebar** tetap | Dihapus → interstitial | **PalingDibaca + AksesRedaksi** |
 | **Konten above fold** | ~8 artikel | ~6 artikel | ~10+ artikel | ~12+ artikel | ~6 artikel | **~10 artikel** |
 | **Visual weight** | Seimbang | Sangat tinggi | Rendah (info-padat) | Rendah (padat) | Sangat tinggi | **Seimbang-tinggi** |
@@ -1728,8 +1728,8 @@ Seperti page builder (Elementor, WordPress Gutenberg). Superadmin bisa drag sect
 
 | Aspek | Spec Design F | Implementasi Aktual |
 |-------|---------------|---------------------|
-| **Feed layout** | Pattern Rotation (hero_pair → triplet → asymmetric → text_heavy → compact_triplet) | **70:30 sidebar** (Row 1) + **4 kolom grid** (Row 2) |
-| **Sidebar** | Tidak ada (interstitials antar baris) | **PalingDibaca + AksesRedaksi** di sidebar 30% |
+| **Feed layout** | Pattern Rotation (hero_pair → triplet → asymmetric → text_heavy → compact_triplet) | **8:4 sidebar** (Row 1) + **4 kolom grid** (Row 2) |
+| **Sidebar** | Tidak ada (interstitials antar baris) | **PalingDibaca + AksesRedaksi** di sidebar 4 kolom |
 | **Interstitials** | HOME_FEED_1, PalingDibaca, AksesRedaksi, InfoPasar, Foto, HOME_FEED_2 tersebar di antara baris feed | Semua di luar feed — sidebar, setelah feed, atau di Editorial Extras |
 | **Foto Jurnalistik** | Interstitial terpisah (dark bg, 3 foto) | Masuk ke **Editorial Extras** (sebelum Video) |
 | **Load More** | Di tengah (setelah feed, sebelum editorial) | Di **paling bawah** (setelah Editorial Extras) |
@@ -1764,11 +1764,12 @@ Seperti page builder (Elementor, WordPress Gutenberg). Superadmin bisa drag sect
 │                                                              │
 │  ZONA 4 — BERITA TERBARU                                     │
 │                                                              │
-│  ── Row 1: 70:30 sidebar ─────────────────────────────────   │
+│  ── Row 1: 8:4 sidebar ───────────────────────────────────   │
 │  ┌──────────────────────────┬───────────────────────────┐   │
-│  │  70% (8 kolom)           │  30% (4 kolom)            │   │
-│  │  News Cards              │  📰 Paling Dibaca (80×80) │   │
+│  │  8 kolom (News Cards)    │  4 kolom (Sidebar)        │   │
+│  │  [text] [gambar 16:9]    │  📰 Paling Dibaca (80×80) │   │
 │  │  [text] [gambar 16:9]    │  💬 Akses Redaksi         │   │
+│  │  [text] [gambar 16:9]    │                           │   │
 │  │  [text] [gambar 16:9]    │                           │   │
 │  │  [text] [gambar 16:9]    │                           │   │
 │  └──────────────────────────┴───────────────────────────┘   │
