@@ -153,15 +153,18 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const heroIds = new Set(hero.map(a => a.id))
 
   // ─────────────────────────────────────────────
-  // 2. FOKUS REDAKSI: scoring-based selection
-  //    score = (freshness × 0.4) + (engagement × 0.3) + (editorial × 0.3)
-  //    Artikel featured tetap punya keunggulan, tapi artikel baru yang
-  //    populer juga bisa naik ke zona ini.
+  // 2. FOKUS REDAKSI: filter isFeatured + scoring
+  //    Filter dulu: hanya artikel featured yang masuk zona ini.
+  //    Di antara featured, pakai scoring untuk urutan supaya rotasi.
+  //    Fallback: jika featured kurang dari 2, pakai scoring semua sisa.
   // ─────────────────────────────────────────────
   const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
   const sortedRemaining = sortByNewest(remainingAfterHero)
 
-  const fokusRedaksi = scoreAndSort(remainingAfterHero).slice(0, 4)
+  const featuredPool = remainingAfterHero.filter(a => a.isFeatured)
+  const fokusRedaksi = featuredPool.length >= 2
+    ? scoreAndSort(featuredPool).slice(0, 4)
+    : scoreAndSort(remainingAfterHero).slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
   // ─────────────────────────────────────────────
