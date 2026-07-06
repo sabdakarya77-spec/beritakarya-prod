@@ -12,15 +12,15 @@
  * Reference: docs/design-grid.md — Design B
  */
 
-import AdSpace from '../../../ui/AdSpace'
-import { HeroSection } from '../HeroSection'
-import { FokusRedaksiAsymmetric } from '../FokusRedaksiAsymmetric'
-import { TrendingSection } from '../TrendingSection'
-import { FeedSection } from '../FeedSection'
-import { EditorialExtras } from '../EditorialExtras'
-import type { TemplateProps } from './types'
+import AdSpace from '../../ui/AdSpace'
+import { HeroSection } from '../../pages/home/HeroSection'
+import { FokusRedaksiAsymmetric } from '../../pages/home/FokusRedaksiAsymmetric'
+import { TrendingSection } from '../../pages/home/TrendingSection'
+import { FeedSection } from '../../pages/home/FeedSection'
+import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import type { TemplateProps } from '../types'
 
-export function TemplateB(props: TemplateProps) {
+export function MagazineBoldLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
     trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,

@@ -14,16 +14,16 @@
  *   [Load More Articles]
  */
 
-import AdSpace from '../../../ui/AdSpace'
-import { HeroSection } from '../HeroSection'
-import { FokusRedaksiSection } from '../FokusRedaksiSection'
-import { TrendingSection } from '../TrendingSection'
-import { FeedWithSidebar } from '../FeedWithSidebar'
-import { ContinuedFeed } from '../ContinuedFeed'
-import { EditorialExtras } from '../EditorialExtras'
-import type { TemplateProps } from './types'
+import AdSpace from '../../ui/AdSpace'
+import { HeroSection } from '../../pages/home/HeroSection'
+import { FokusRedaksiSection } from '../../pages/home/FokusRedaksiSection'
+import { TrendingSection } from '../../pages/home/TrendingSection'
+import { FeedWithSidebar } from '../../pages/home/FeedWithSidebar'
+import { ContinuedFeed } from '../../pages/home/ContinuedFeed'
+import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import type { TemplateProps } from '../types'
 
-export function TemplateF(props: TemplateProps) {
+export function HybridLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
     popular, editorChoice, opinionArticles, photoJournal, videoStories,
@@ -33,7 +33,7 @@ export function TemplateF(props: TemplateProps) {
     homeTopAds, resolveCategoryName, getVideoThumbnail, remainingArticles, excludeIds,
   } = props
 
-  const { LoadMoreArticles } = require('../../LazyWidgets')
+  const { LoadMoreArticles } = require('../../pages/LazyWidgets')
 
   // Row 2: sisa dari feed (yang tidak tampil di Row 1) + remainingArticles
   // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(5) mengambil setelah5 pertama

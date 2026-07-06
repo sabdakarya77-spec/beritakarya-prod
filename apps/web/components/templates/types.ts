@@ -3,7 +3,7 @@
  * Setiap template menerima props yang sama — yang beda hanya komponen yang dipakai.
  */
 
-import type { HomeArticle } from '../utils/distribution'
+import type { HomeArticle } from '../pages/home/utils/distribution'
 
 export interface TemplateProps {
   heroArticles: HomeArticle[]

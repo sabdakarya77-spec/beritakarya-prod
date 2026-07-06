@@ -12,16 +12,16 @@
  * Reference: docs/design-grid.md — Design D
  */
 
-import AdSpace from '../../../ui/AdSpace'
-import { Bento3Hero } from '../hero/Bento3Hero'
-import { FokusRedaksiCompact } from '../FokusRedaksiCompact'
-import { StickySidebar } from '../trending/StickySidebar'
-import { FeedSection } from '../FeedSection'
-import { EditorialExtras } from '../EditorialExtras'
-import { Container } from '../../../layout/Container'
-import type { TemplateProps } from './types'
+import AdSpace from '../../ui/AdSpace'
+import { Bento3Hero } from '../../pages/home/hero/Bento3Hero'
+import { FokusRedaksiCompact } from '../../pages/home/FokusRedaksiCompact'
+import { StickySidebar } from '../../pages/home/trending/StickySidebar'
+import { FeedSection } from '../../pages/home/FeedSection'
+import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import { Container } from '../../layout/Container'
+import type { TemplateProps } from '../types'
 
-export function TemplateD(props: TemplateProps) {
+export function CompactDenseLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
     trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,

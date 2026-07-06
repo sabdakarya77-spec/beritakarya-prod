@@ -1,27 +1,27 @@
 /**
- * TemplateE — Visual Storytelling
+ * TemplateC — Data-Driven
  *
- * Foto-forward, immersive. Hero dual besar.
- * Feed didominasi hero_pair untuk visual impact.
+ * Informasi padat, kategori grid. Hero split per kategori.
+ * Ticker trending di atas hero. Feed text-heavy.
  *
  * Perbedaan dari TemplateF:
- * - Hero: DualHero (2 gambar besar sejajar, bukan MagazineCoverHero)
- * - Fokus Redaksi: Asymmetric (1 besar + 3 kecil, sama dengan TemplateB)
- * - Trending: WithContext (kategori + views, bukan NumberedPodium)
+ * - Trending: Ticker (di atas hero, bukan di bawah fokus redaksi)
+ * - Hero: SplitHero (gambar kiri + daftar kategori kanan)
+ * - Fokus Redaksi: TextHeavy (4 kartu horizontal)
  *
- * Reference: docs/design-grid.md — Design E
+ * Reference: docs/design-grid.md — Design C
  */
 
-import AdSpace from '../../../ui/AdSpace'
-import { DualHero } from '../hero/DualHero'
-import { FokusRedaksiAsymmetric } from '../FokusRedaksiAsymmetric'
-import { WithContext } from '../trending/WithContext'
-import { FeedSection } from '../FeedSection'
-import { EditorialExtras } from '../EditorialExtras'
-import { Container } from '../../../layout/Container'
-import type { TemplateProps } from './types'
+import AdSpace from '../../ui/AdSpace'
+import { SplitHero } from '../../pages/home/hero/SplitHero'
+import { FokusRedaksiTextHeavy } from '../../pages/home/FokusRedaksiTextHeavy'
+import { Ticker } from '../../pages/home/trending/Ticker'
+import { FeedSection } from '../../pages/home/FeedSection'
+import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import { Container } from '../../layout/Container'
+import type { TemplateProps } from '../types'
 
-export function TemplateE(props: TemplateProps) {
+export function DataDrivenLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
     trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,
@@ -34,11 +34,18 @@ export function TemplateE(props: TemplateProps) {
 
   return (
     <>
-      {/* ZONA 1 — HERO: DUAL_HERO (2 gambar besar sejajar) */}
+      {/* ZONA 3 — TRENDING: TICKER (di atas hero, khas Design C) */}
+      {trendingArticles.length > 0 && (
+        <Container className="pt-4 pb-2">
+          <Ticker articles={trendingArticles} site={site} />
+        </Container>
+      )}
+
+      {/* ZONA 1 — HERO: SPLIT_HERO (gambar kiri + kategori kanan) */}
       {heroArticles.length > 0 && (
         <section className="overflow-hidden border-t border-black/5 bg-[linear-gradient(180deg,rgba(248,250,252,0.96)_0%,rgba(255,255,255,1)_72%)] dark:border-white/5 dark:bg-[linear-gradient(180deg,rgba(2,6,23,0.98)_0%,rgba(2,6,23,1)_72%)]">
-          <Container className="pt-5 pb-6 md:pt-6 md:pb-8">
-            <DualHero articles={heroArticles} site={site} />
+          <Container className="pt-4 pb-6 md:pt-5 md:pb-8">
+            <SplitHero articles={heroArticles} site={site} />
           </Container>
         </section>
       )}
@@ -46,14 +53,9 @@ export function TemplateE(props: TemplateProps) {
       {/* AD HOME_TOP */}
       <AdSpace type="HOME_TOP" initialAds={homeTopAds as never} />
 
-      {/* ZONA 2 — FOKUS REDAKSI: ASYMMETRIC (1 besar + 3 kecil) */}
+      {/* ZONA 2 — FOKUS REDAKSI: TEXT_HEAVY (4 kartu horizontal) */}
       {fokusRedaksi.length > 0 && (
-        <FokusRedaksiAsymmetric articles={fokusRedaksi} site={site} />
-      )}
-
-      {/* ZONA 3 — TRENDING: WITH_CONTEXT (kategori + views + waktu) */}
-      {trendingArticles.length > 0 && (
-        <WithContext articles={trendingArticles} site={site} />
+        <FokusRedaksiTextHeavy articles={fokusRedaksi} site={site} />
       )}
 
       {/* ZONA 4 — FEED + INTERSTITIALS */}
@@ -83,7 +85,7 @@ export function TemplateE(props: TemplateProps) {
         excludeIds={excludeIds}
       />
 
-      {/* ZONA 5+ — EDITORIAL EXTRAS */}
+      {/* ZONA 5+ — EDITORIAL EXTRAS (compact tab-based) */}
       <EditorialExtras
         editorChoice={editorChoice}
         opinionArticles={opinionArticles}

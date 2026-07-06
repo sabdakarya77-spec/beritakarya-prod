@@ -1,0 +1,7 @@
+export { ClassicEditorialLayout } from './layouts/ClassicEditorialLayout'
+export { MagazineBoldLayout } from './layouts/MagazineBoldLayout'
+export { DataDrivenLayout } from './layouts/DataDrivenLayout'
+export { CompactDenseLayout } from './layouts/CompactDenseLayout'
+export { VisualStorytellingLayout } from './layouts/VisualStorytellingLayout'
+export { HybridLayout } from './layouts/HybridLayout'
+export type { TemplateProps } from './types'

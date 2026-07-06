@@ -58,7 +58,7 @@ const TEMPLATES: TemplateOption[] = [
   { key: 'C', name: 'Data-Driven', desc: 'Informasi padat, kategori grid', hero: 'SPLIT_HERO', feed: 'text_heavy', trending: 'ticker', color: 'bg-emerald-500' },
   { key: 'D', name: 'Compact Dense', desc: 'Maksimal konten di atas fold', hero: 'BENTO_3', feed: 'dense_3col', trending: 'sticky_sidebar', color: 'bg-amber-500' },
   { key: 'E', name: 'Visual Storytelling', desc: 'Foto-forward, immersive', hero: 'DUAL_HERO', feed: 'hero_pair_heavy', trending: 'with_context', color: 'bg-pink-500' },
-  { key: 'F', name: 'Best of ⭐', desc: 'Kombinasi terbaik, default', hero: 'MAGAZINE_COVER_550', feed: 'pattern_rotation', trending: 'numbered_podium', color: 'bg-brand-red' },
+  { key: 'F', name: 'Best of ⭐', desc: 'Kombinasi terbaik, default', hero: 'MAGAZINE_COVER_550', feed: 'sidebar_70_30', trending: 'numbered_podium', color: 'bg-brand-red' },
 ]
 
 // ─── Component ───────────────────────────────────────────────────────────
@@ -448,7 +448,7 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                     heroMode: 'MAGAZINE_COVER_550',
                     heroAutoRotate: true,
                     heroIntervalMs: 5000,
-                    feedLayout: 'pattern_rotation',
+                    feedLayout: 'sidebar_70_30',
                     trendingStyle: 'numbered_podium',
                     scoreFreshness: 0.3,
                     scoreEngagement: 0.3,

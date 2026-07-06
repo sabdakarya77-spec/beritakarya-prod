@@ -5,18 +5,25 @@ import { fetchSiteSettings, buildPublicSiteConfig } from '../../../lib/siteSetti
 import { fetchAdsForSlot } from '../../../lib/ads'
 import { scoreAndDistribute } from './utils/distribution'
 import type { HomeArticle, HeroMode } from './utils/distribution'
-import { TemplateA, TemplateB, TemplateC, TemplateD, TemplateE, TemplateF } from './templates'
+import {
+  ClassicEditorialLayout,
+  MagazineBoldLayout,
+  DataDrivenLayout,
+  CompactDenseLayout,
+  VisualStorytellingLayout,
+  HybridLayout,
+} from '../../templates'
 
 // ─────────────────────────────────────────────
 // Template selector
 // ─────────────────────────────────────────────
 const TEMPLATES = {
-  A: TemplateA,
-  B: TemplateB,
-  C: TemplateC,
-  D: TemplateD,
-  E: TemplateE,
-  F: TemplateF,
+  A: ClassicEditorialLayout,
+  B: MagazineBoldLayout,
+  C: DataDrivenLayout,
+  D: CompactDenseLayout,
+  E: VisualStorytellingLayout,
+  F: HybridLayout,
 } as const
 
 type TemplateKey = keyof typeof TEMPLATES
@@ -327,7 +334,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   // ── Pilih template berdasarkan config ──
   const templateKey: TemplateKey = (homepageConfig?.template as TemplateKey) || 'F'
-  const SelectedTemplate = TEMPLATES[templateKey] || TemplateF
+  const SelectedTemplate = TEMPLATES[templateKey] || HybridLayout
 
   return (
     <PublicSiteLayout siteConfig={siteConfig} initialCategory={categoryFilter}>

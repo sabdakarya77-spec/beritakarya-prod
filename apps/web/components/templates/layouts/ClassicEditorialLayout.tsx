@@ -7,16 +7,16 @@
  * Reference: docs/design-grid.md — Design A
  */
 
-import AdSpace from '../../../ui/AdSpace'
-import { Bento4Hero } from '../hero/Bento4Hero'
-import { FokusRedaksiSection } from '../FokusRedaksiSection'
-import { HorizontalStrip } from '../trending/HorizontalStrip'
-import { FeedSection } from '../FeedSection'
-import { EditorialExtras } from '../EditorialExtras'
-import { Container } from '../../../layout/Container'
-import type { TemplateProps } from './types'
+import AdSpace from '../../ui/AdSpace'
+import { Bento4Hero } from '../../pages/home/hero/Bento4Hero'
+import { FokusRedaksiSection } from '../../pages/home/FokusRedaksiSection'
+import { HorizontalStrip } from '../../pages/home/trending/HorizontalStrip'
+import { FeedSection } from '../../pages/home/FeedSection'
+import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import { Container } from '../../layout/Container'
+import type { TemplateProps } from '../types'
 
-export function TemplateA(props: TemplateProps) {
+export function ClassicEditorialLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
     trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,
