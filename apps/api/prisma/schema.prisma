@@ -23,6 +23,8 @@ enum Role {
   wapimred
   superadmin
   advertiser
+  kaperwil
+  kabiro
 }
 
 enum ArticleStatus {

@@ -109,7 +109,7 @@ export async function getArticleById(id: string, siteId: string, user?: JWTPaylo
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization: Reporters and kontributors can only view their own articles (unless published, but dashboard usually shows drafts)
-  if (user && !['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
+  if (user && !['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
@@ -284,7 +284,7 @@ export async function updateArticle(
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization
-  if (!['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
@@ -316,7 +316,7 @@ export async function updateArticle(
   }
 
   // Cek toggle canSchedule untuk wapimred
-  if (user.role === 'wapimred' && input.status === 'scheduled') {
+  if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role) && input.status === 'scheduled') {
     const siteForToggle = await prisma.site.findUnique({
       where: { id: siteId },
       select: { wapimredSettings: true }
@@ -446,7 +446,7 @@ export async function updateArticle(
     const notifyPimredOnSubmit = wapimredSettings.notifyPimredOnSubmit !== false // default true
 
     // Filter editor berdasarkan toggle
-    const editorRoles: string[] = ['wapimred']
+    const editorRoles: string[] = ['wapimred', 'kaperwil', 'kabiro']
     if (notifyPimredOnSubmit) {
       editorRoles.push('superadmin')
     }
@@ -467,7 +467,7 @@ export async function updateArticle(
     }
   } else if (input.status === 'approved') {
     // Notifikasi ke pimred saat wapimred approve artikel
-    if (user.role === 'wapimred') {
+    if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
       const siteData = await prisma.site.findUnique({
         where: { id: siteId },
         select: { wapimredSettings: true }
@@ -549,12 +549,12 @@ export async function publishArticle(
   const article = await repo.findArticleById(id, siteId)
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
-  if (!['superadmin', 'wapimred'].includes(user.role)) {
-    throw new AppError('Akses ditolak: Hanya Wapimred dan Superadmin yang dapat mem-publish post', 403)
+  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
+    throw new AppError('Akses ditolak: Hanya Wapimred, Kaperwil, Kabiro, dan Superadmin yang dapat mem-publish post', 403)
   }
 
   // Cek toggle wapimred_can_publish dari site settings
-  if (user.role === 'wapimred') {
+  if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
     const site = await prisma.site.findUnique({
       where: { id: siteId },
       select: { wapimredSettings: true }
@@ -587,7 +587,7 @@ export async function publishArticle(
 }
 
 export async function getDueScheduledArticles(siteId: string, user: JWTPayload) {
-  if (!['superadmin', 'wapimred'].includes(user.role)) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
     throw new AppError('Akses ditolak', 403)
   }
 
@@ -635,7 +635,7 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
   // siteMiddleware + requireSiteAccess sudah memastikan user berada di situs
   // yang sesuai; di sini kita hanya mengatur per-status & ownership.
   const isSuperadmin = user.role === 'superadmin'
-  const isWapimred = user.role === 'wapimred'
+  const isWapimred = user.role === 'wapimred' || user.role === 'kaperwil' || user.role === 'kabiro'
   const isReporterOrKontributor = user.role === 'reporter' || user.role === 'kontributor'
   const isAuthor = article.authorId === user.userId
   const isPublished = article.status === 'published'
@@ -730,7 +730,7 @@ export async function restoreArticleVersion(versionId: string, siteId: string, u
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization check
-  if (!['superadmin', 'wapimred'].includes(user.role) && article.authorId !== user.userId) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Akses ditolak', 403)
   }
 

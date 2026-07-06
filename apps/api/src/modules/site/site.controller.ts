@@ -14,11 +14,11 @@ siteRouter.get('/settings', publicLimiter, asyncHandler(getSiteSettings))
 siteRouter.get('/:id', asyncHandler(getSiteById))
 siteRouter.patch('/settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(updateSiteSettings))
 siteRouter.get('/wapimred-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(getWapimredSettings))
 siteRouter.patch('/wapimred-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
@@ -40,7 +40,7 @@ siteRouter.post('/:id/wapimred',
 // Homepage Config — 6 template system
 siteRouter.get('/:id/homepage-config', publicLimiter, asyncHandler(getHomepageConfig))
 siteRouter.put('/:id/homepage-config',
-  requireAuth, requireRole(['superadmin', 'wapimred']),
+  requireAuth, requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(updateHomepageConfig))
 
 /**

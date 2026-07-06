@@ -49,15 +49,15 @@ categoryRouter.post('/sync-all',
   asyncHandler(syncAllSites))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(createCategory))
 categoryRouter.put('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(updateCategory))
 categoryRouter.delete('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(deleteCategory))
 
 /**

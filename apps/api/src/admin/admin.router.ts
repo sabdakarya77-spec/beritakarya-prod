@@ -6,7 +6,7 @@ import { asyncHandler } from '../utils/asyncHandler'
 
 const adminRouter = Router()
 
-const requireAdmin = requireRole(['superadmin', 'wapimred'])
+const requireAdmin = requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro'])
 
 // ── USAGE DASHBOARD ─────────────────────────────────────────────────────
 adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req: Request, res: Response) => {

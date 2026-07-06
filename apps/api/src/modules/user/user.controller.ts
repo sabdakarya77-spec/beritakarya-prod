@@ -266,7 +266,7 @@ userRouter.get('/stats',
       where: {
         siteId,
         deletedAt: null,
-        role: { in: ['reporter', 'kontributor', 'wapimred', 'superadmin'] }
+        role: { in: ['reporter', 'kontributor', 'wapimred', 'superadmin', 'kaperwil', 'kabiro'] }
       },
       select: {
         id: true,
@@ -506,12 +506,12 @@ userRouter.put('/:id/role',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { role, siteId } = req.body
 
-    const validRoles = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser']
+    const validRoles = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser', 'kaperwil', 'kabiro']
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         success: false,
@@ -651,7 +651,7 @@ userRouter.delete('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
