@@ -152,7 +152,7 @@ async function getTrendingArticles(siteId: string) {
       limit: '5',
       sort: 'views',
       order: 'desc',
-      sinceHours: '72',
+      sinceHours: '168',  // 7 hari (weekly)
     })
     const res = await fetch(
       `${API_URL}/api/v1/articles/public?${params.toString()}`,
@@ -175,7 +175,7 @@ async function getPopularArticles(siteId: string) {
       limit: '5',
       sort: 'views',
       order: 'desc',
-      sinceHours: '168',
+      sinceHours: '720',  // 30 hari (monthly)
     })
     const res = await fetch(
       `${API_URL}/api/v1/articles/public?${params.toString()}`,
