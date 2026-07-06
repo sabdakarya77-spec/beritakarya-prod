@@ -31,7 +31,7 @@ export interface HomeArticle {
   readingTimeMin?: number
   wordCount?: number
   author?: { name: string; avatarUrl?: string | null }
-  category?: { name: string; slug?: string; parentSlug?: string }
+  category?: { name: string; slug?: string; parentSlug?: string; parent?: { slug?: string } | null }
   categories?: Array<{ category?: { name?: string; slug?: string } | null }> | null
   blocks?: Array<{ type: string; url?: string; embedType?: string; images?: { url: string }[] }>
 }

@@ -121,12 +121,18 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
 const DEFAULT_OPINION_SLUGS = ['opini', 'kolom-esai', 'analisis', 'kolom']
 const DEFAULT_PHOTO_SLUGS = ['foto-jurnalistik']
 const DEFAULT_VIDEO_SLUGS = ['video', 'dokumenter-reportase', 'podcast-audio']
-const DEFAULT_TECHNOLOGY_SLUGS = ['teknologi', 'gadget-review', 'ai-inovasi', 'startups-digital', 'game-esports']
+const DEFAULT_TECHNOLOGY_SLUGS = [
+  'teknologi',
+  'gadget-review', 'smartphone', 'laptop-pc', 'aksesoris',
+  'ai-inovasi',
+  'startups-digital',
+  'game-esports',
+]
 
 function hasCategorySlug(a: HomeArticle, slugs: string[]): boolean {
   if (a.categories?.some(c => slugs.includes(c.category?.slug?.toLowerCase() || ''))) return true
   const catSlug = a.category?.slug?.toLowerCase() || ''
-  const parentSlug = a.category?.parentSlug?.toLowerCase() || ''
+  const parentSlug = a.category?.parentSlug?.toLowerCase() || a.category?.parent?.slug?.toLowerCase() || ''
   return slugs.includes(catSlug) || slugs.includes(parentSlug)
 }
 

@@ -87,7 +87,7 @@ export async function findArticlesBySite(
         blocks: true, tags: true, metaTitle: true, metaDescription: true,
         contentType: true,
         categories: {
-          include: { category: { select: { id: true, name: true, slug: true } } }
+          include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } }
         },
         author: { select: { id: true, name: true, avatarUrl: true, role: true } }
       },
@@ -122,7 +122,7 @@ export async function findArticlesByIds(
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
@@ -159,7 +159,7 @@ export async function findArticleById(id: string, siteId: string) {
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, email: true, avatarUrl: true, role: true } }
     }
   })
@@ -176,7 +176,7 @@ export async function findArticleBySlug(slug: string, siteId: string) {
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
@@ -193,7 +193,7 @@ export async function findPublishedArticleBySlug(slug: string, siteId: string) {
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
@@ -228,7 +228,7 @@ export async function createArticle(data: {
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
@@ -259,7 +259,7 @@ export async function updateArticle(
       viewCount: true, wordCount: true, readingTimeMin: true,
       blocks: true, tags: true, metaTitle: true, metaDescription: true,
       contentType: true,
-      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+      categories: { include: { category: { select: { id: true, name: true, slug: true, parent: { select: { slug: true } } } } } },
       author: { select: { id: true, name: true, avatarUrl: true, role: true } }
     }
   })
