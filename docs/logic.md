@@ -327,3 +327,37 @@ Load More fetch dari API dengan `excludeIds` → hindari duplikat.
 | `ContinuedFeed.tsx` | Zona 4 Row 2 — 4 kolom grid |
 | `EditorialExtras.tsx` | Zona 5 — Editor · Opini · Foto · Video |
 | `PalingDibacaSidebar.tsx` | Sidebar popular |
+
+---
+
+## HomepageConfig — Dashboard Integration
+
+Config per site disimpan di DB dan bisa diubah via dashboard (`HomepageConfigDialog.tsx`).
+
+### Field Aktif
+
+| Field | Default | Keterangan |
+|-------|---------|------------|
+| `template` | `'F'` | A-F, pilih layout |
+| `heroMode` | `'MAGAZINE_COVER_550'` | Hero variant |
+| `feedLayout` | `'sidebar_70_30'` | Feed layout style |
+| `trendingStyle` | `'numbered_podium'` | Trending variant |
+| `scoreFreshness` | `0.4` | Bobot scoring freshness |
+| `scoreEngagement` | `0.3` | Bobot scoring engagement |
+| `scoreEditorial` | `0.3` | Bobot scoring editorial |
+| `opinionCategories` | `['opini', 'kolom-esai', ...]` | Slug kategori opini |
+| `photoCategories` | `['foto-jurnalistik']` | Slug kategori foto |
+| `videoCategories` | `['video', 'dokumenter-reportase']` | Slug kategori video |
+| `sectionOrder` | `['hero', 'fokus_redaksi', ...]` | Urutan section |
+| `sectionVisibility` | semua `true` | Toggle section on/off |
+
+### Alur Config → Render
+
+```
+Dashboard (admin ubah config)
+  → DB (HomepageConfig)
+  → SiteHomePage.tsx (fetch config)
+  → scoreAndDistribute({ scoreWeights: { freshness, engagement, editorial } })
+  → Template (pilih layout berdasarkan config.template)
+  → Render
+```

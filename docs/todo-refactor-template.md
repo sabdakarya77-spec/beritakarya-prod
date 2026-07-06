@@ -14,33 +14,33 @@ Template homepage (A-F) saat ini bermasalah:
 - [x] Pindahkan template dari `pages/home/templates/` ke `components/templates/`
 - [x] Rename template berdasarkan fungsi, bukan huruf desain
 - [x] Terapkan logic terbaru ke semua template yang aktif
-- [ ] Hapus atau arsipkan template yang tidak dipakai
 - [x] Bersihkan duplikasi kode antar template
+- [x] Bersihkan HomepageConfigDialog — hapus dead config
+- [x] Implementasi configurable scoring weights via dashboard
 
-## Struktur Target
+## Struktur Aktual
 
 ```
 components/templates/
-├── Homepage.tsx                  ← Orchestrator utama (ganti SiteHomePage logic)
+├── index.ts                          ← Barrel export
+├── types.ts                          ← Shared types (TemplateProps)
 ├── layouts/
-│   ├── HybridLayout.tsx          ← Default (ex-TemplateF)
-│   ├── ClassicEditorialLayout.tsx ← ex-TemplateA
-│   ├── MagazineBoldLayout.tsx    ← ex-TemplateB
-│   ├── DataDrivenLayout.tsx      ← ex-TemplateC
-│   ├── CompactDenseLayout.tsx    ← ex-TemplateD
-│   └── VisualStorytellingLayout.tsx ← ex-TemplateE
-├── zones/
-│   ├── HeroZone.tsx              ← Shared hero wrapper
-│   ├── FokusRedaksiZone.tsx      ← Shared fokus wrapper
-│   ├── TrendingZone.tsx          ← Shared trending wrapper
-│   ├── FeedZone.tsx              ← Shared feed wrapper
-│   └── EditorialZone.tsx         ← Shared editorial wrapper
-└── types.ts                      ← Shared types
+│   ├── HybridLayout.tsx              ← ⭐ Default (ex-TemplateF)
+│   ├── ClassicEditorialLayout.tsx    ← ex-TemplateA
+│   ├── MagazineBoldLayout.tsx        ← ex-TemplateB
+│   ├── DataDrivenLayout.tsx          ← ex-TemplateC
+│   ├── CompactDenseLayout.tsx        ← ex-TemplateD
+│   └── VisualStorytellingLayout.tsx  ← ex-TemplateE
+└── zones/
+    ├── index.ts
+    ├── AdZone.tsx                    ← Shared ad wrapper
+    ├── SectionSeparator.tsx          ← Shared separator
+    └── LoadMoreZone.tsx              ← Shared load more wrapper
 ```
 
 ## Langkah Refactor
 
-### Phase 1: Pindah Folder (low risk) ✅
+### Phase 1: Pindah Folder ✅
 
 - [x] Buat folder `components/templates/layouts/`
 - [x] Pindahkan `TemplateF.tsx` → `HybridLayout.tsx`
@@ -53,7 +53,7 @@ components/templates/
 - [x] Hapus folder `pages/home/templates/`
 - [x] Type-check + lint
 
-### Phase 2: Terapkan Logic Terbaru ke Semua Layout (medium risk) ✅
+### Phase 2: Terapkan Logic Terbaru ke Semua Layout ✅
 
 Logic terbaru ada di shared layer (`distribution.ts`, `SiteHomePage.tsx`) — otomatis diterapkan ke semua template:
 
@@ -64,7 +64,7 @@ Logic terbaru ada di shared layer (`distribution.ts`, `SiteHomePage.tsx`) — ot
 - [x] `feed` (bukan `feedFeatured + feedStream`) — di `distribution.ts`
 - [x] `photoJournal` + `showPhotoSection` di EditorialExtras — semua layout
 
-### Phase 3: Extract Shared Zones (medium risk) ✅
+### Phase 3: Extract Shared Zones ✅
 
 Komponen shared sudah diextract ke `components/templates/zones/`:
 
@@ -73,25 +73,25 @@ Komponen shared sudah diextract ke `components/templates/zones/`:
 - [x] Extract `LoadMoreZone` — LoadMoreArticles wrapper
 - [x] Pindahkan zona wrapper ke `components/templates/zones/`
 
-### Phase 4: Cleanup (low risk)
+### Phase 4: Cleanup ✅
 
-- [ ] Hapus template yang tidak dipakai (jika ada site yang hanya pakai F)
-- [ ] Atau arsipkan ke `components/templates/_archived/`
-- [ ] Update `design-grid.md` — tandai template mana yang aktif
-- [ ] Update `logic.md` — tambah referensi struktur folder baru
+- [x] Update `design-grid.md` — tandai template mana yang aktif
+- [x] Update `logic.md` — tambah referensi struktur folder baru
+- [x] Bersihkan `HomepageConfigDialog.tsx` — hapus dead config
+- [x] Implementasi configurable scoring weights via dashboard
 
 ## Mapping Nama
 
 | Nama Lama | Nama Baru | Status |
 |-----------|-----------|--------|
-| `TemplateA.tsx` | `ClassicEditorialLayout.tsx` | Perlu update logic |
-| `TemplateB.tsx` | `MagazineBoldLayout.tsx` | Perlu update logic |
-| `TemplateC.tsx` | `DataDrivenLayout.tsx` | Perlu update logic |
-| `TemplateD.tsx` | `CompactDenseLayout.tsx` | Perlu update logic |
-| `TemplateE.tsx` | `VisualStorytellingLayout.tsx` | Perlu update logic |
-| `TemplateF.tsx` | `HybridLayout.tsx` | ✅ Sudah siap produksi |
+| `TemplateA.tsx` | `ClassicEditorialLayout.tsx` | ✅ Aktif |
+| `TemplateB.tsx` | `MagazineBoldLayout.tsx` | ✅ Aktif |
+| `TemplateC.tsx` | `DataDrivenLayout.tsx` | ✅ Aktif |
+| `TemplateD.tsx` | `CompactDenseLayout.tsx` | ✅ Aktif |
+| `TemplateE.tsx` | `VisualStorytellingLayout.tsx` | ✅ Aktif |
+| `TemplateF.tsx` | `HybridLayout.tsx` | ⭐ Default |
 
-## Config Mapping (tetap sama)
+## Config Mapping
 
 ```typescript
 const TEMPLATES = {
@@ -104,21 +104,27 @@ const TEMPLATES = {
 }
 ```
 
-Per-site config tetap via `HomepageConfig.template` (A-F). Tidak ada perubahan di API.
+Per-site config via `HomepageConfig.template` (A-F). Scoring weights configurable per site via dashboard.
 
-## Catatan
+## HomepageConfig — Field Aktif
 
-- Phase 1 bisa dilakukan tanpa mengubah behavior (pure move)
-- Phase 2 perlu testing karena mengubah logic render
-- Phase 3 bisa dilakukan sekaligus dengan Phase 1
-- Phase 4 tergantung keputusan: hapus atau arsipkan template lain
-
-## Estimasi
-
-| Phase | Effort | Risk |
-|-------|--------|------|
-| Phase 1 | 1-2 jam | Low |
-| Phase 2 | 3-4 jam | Medium |
-| Phase 3 | 2-3 jam | Medium |
-| Phase 4 | 1 jam | Low |
-| **Total** | **7-10 jam** | |
+| Field | Status | Keterangan |
+|-------|--------|------------|
+| `template` | ✅ Aktif | A-F, pilih layout |
+| `heroMode` | ✅ Aktif | MAGAZINE_COVER_550, BENTO_4, dll |
+| `feedLayout` | ✅ Aktif | sidebar_70_30, pattern_rotation, dll |
+| `trendingStyle` | ✅ Aktif | numbered_podium, horizontal_strip, dll |
+| `scoreFreshness` | ✅ Aktif | Bobot scoring freshness (default 0.4) |
+| `scoreEngagement` | ✅ Aktif | Bobot scoring engagement (default 0.3) |
+| `scoreEditorial` | ✅ Aktif | Bobot scoring editorial (default 0.3) |
+| `opinionCategories` | ✅ Aktif | Slug kategori opini |
+| `photoCategories` | ✅ Aktif | Slug kategori foto |
+| `videoCategories` | ✅ Aktif | Slug kategori video |
+| `sectionOrder` | ✅ Aktif | Urutan section |
+| `sectionVisibility` | ✅ Aktif | Toggle section on/off |
+| ~~`heroAutoRotate`~~ | ❌ Dihapus | Tidak dipakai |
+| ~~`heroIntervalMs`~~ | ❌ Dihapus | Tidak dipakai |
+| ~~`scoreRelevance`~~ | ❌ Dihapus | Tidak ada di formula |
+| ~~`feedColumns`~~ | ❌ Dihapus | Tidak dipakai HybridLayout |
+| ~~`showExcerpt`~~ | ❌ Dihapus | Tidak dipakai |
+| ~~`interstitials`~~ | ❌ Dihapus | Tidak dipakai HybridLayout |
