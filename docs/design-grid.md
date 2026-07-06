@@ -1,4 +1,4 @@
-# Homepage Grid Layout — 6 Design Blueprint
+﻿# Homepage Grid Layout — 6 Design Blueprint
 
 **Container**: 1280px (desktop), 100% (mobile)
 **Grid**: 12 kolom desktop, 4 kolom mobile
@@ -1137,290 +1137,90 @@ Foto-forward, immersive. Hero dual besar, trending dengan konteks "kenapa trendi
 
 ## Design F: Best of (Hybrid) ⭐ DEFAULT
 
-Kombinasi kurasi elemen terbaik dari Design A, B, dan C. Menjadi **rekomendasi default** untuk semua site karena paling seimbang antara visual impact, konten density, dan UX.
+Kombinasi terbaik dari elemen Design A, B, dan C. Layout ini yang benar-benar dipakai di codebase.
 
 | Komponen | Sumber | Alasan |
 |----------|--------|--------|
-| Hero | **B: Magazine Cover** (500-600px) | Wow factor tanpa full-screen, konten di atas fold tetap terlihat |
-| Fokus Redaksi | **A: Classic Editorial** (4 kartu sejajar) | Hierarki jelas, clean |
-| Trending | **B: Numbered Podium** (top 3 gambar) | Social proof lebih kuat dari strip biasa |
-| Feed | **A: Pattern Rotation** | Visual rhythm terbaik, mata tidak capek |
-| Info Pasar | **C: Widget kecil** (opsional per site) | Tambah nilai untuk site ekonomi |
-| Editorial Extras | **A: Lengkap** (Editor, Opini, Video, Foto) | SEO terbaik, 4 jenis konten |
+| Hero | **B: Magazine Cover** (560px) | Wow factor tanpa full-screen |
+| Fokus Redaksi | **A: Classic Editorial** (4 kartu sejajar) + **Scoring** | Hierarki jelas, rotasi dinamis |
+| Trending | **B: Numbered Podium** (top 3 gambar) | Social proof lebih kuat |
+| Feed | **8:4 sidebar** (Row 1) + **4 kolom grid** (Row 2) | Konten padat, sidebar informatif |
+| Editorial Extras | **A: Lengkap** (Editor, Opini, Foto, Video) | SEO terbaik, 4 jenis konten |
 
 ### Desktop (1280px)
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│  NAVBAR (full-width, fixed top)                                                  │
-│  [Logo]    [Kategori scroll...]    [Search]    [Login]                           │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 1 — HERO: MAGAZINE_COVER (tinggi ~550px, BUKAN full-screen)          ║ │
-│  ║  ┌────────────────────────────────────────────────────────────────────┐      ║ │
-│  ║  │                                                                    │      ║ │
-│  ║  │              [GAMBAR FULL-WIDTH — 550px tinggi]                    │      ║ │
-│  ║  │              overlay gradient bottom                               │      ║ │
-│  ║  │                                                                    │      ║ │
-│  ║  │              POLITIK                                               │      ║ │
-│  ║  │              JUDUL ARTIKEL UTAMA SANGAT BESAR                      │      ║ │
-│  ║  │              Excerpt singkat satu baris                            │      ║ │
-│  ║  │              Author · 5 menit baca · 2 jam lalu                   │      ║ │
-│  ║  │                                                                    │      ║ │
-│  ║  ├──────┬──────┬──────┬──────┬──────┬────────────────────────────────┤      ║ │
-│  ║  │ [TH] │ [TH] │ [TH] │ [TH] │ [TH] │           ► Next              │      ║ │
-│  ║  │ 01   │ 02   │ 03   │ 04   │ 05   │                               │      ║ │
-│  ║  └──────┴──────┴──────┴──────┴──────┴────────────────────────────────┘      ║ │
-│  ║  Thumbnail: klik untuk ganti artikel utama (BUKAN auto-rotate)              ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ┌──────────────────────────────────────────────────────────────────────────┐    │
-│  │  AD: HOME_TOP (880×220 desktop, 4:1, video)                              │    │
-│  └──────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 2 — FOKUS REDAKSI (4 kartu sejajar)                                  ║ │
-│  ║  ┌──────────────┬──────────────┬──────────────┬──────────────┐              ║ │
-│  ║  │ image="bg"   │ image="top"  │ image="top"  │ image="top"  │              ║ │
-│  ║  │ ░░░░░░░░░░░░ │ ┌──────────┐ │ ┌──────────┐ │ ┌──────────┐ │              ║ │
-│  ║  │ ░░░░░░░░░░░░ │ │ [GAMBAR] │ │ │ [GAMBAR] │ │ │ [GAMBAR] │ │              ║ │
-│  ║  │ Judul besar  │ └──────────┘ │ └──────────┘ │ └──────────┘ │              ║ │
-│  ║  │ Author       │ Title        │ Title        │ Title        │              ║ │
-│  ║  └──────────────┴──────────────┴──────────────┴──────────────┘              ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 3 — TRENDING: NUMBERED_PODIUM                                         ║ │
-│  ║  ┌──────────────────────┬──────────────────────┬──────────────────────┐      ║ │
-│  ║  │      🥇 [GAMBAR]     │      🥈 [GAMBAR]     │      🥉 [GAMBAR]     │      ║ │
-│  ║  │      Judul besar     │      Judul besar     │      Judul besar     │      ║ │
-│  ║  │      12.5k views     │      8.2k views      │      6.1k views      │      ║ │
-│  ║  └──────────────────────┴──────────────────────┴──────────────────────┘      ║ │
-│  ║  ┌────────────────────────────────────────────────────────────────────┐      ║ │
-│  ║  │ 4. Judul keempat...                                    3.2k views │      ║ │
-│  ║  │ 5. Judul kelima...                                     2.8k views │      ║ │
-│  ║  └────────────────────────────────────────────────────────────────────┘      ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 4 — BERITA TERBARU (pattern rotation)                                 ║ │
-│  ║                                                                              ║ │
-│  ║  ── Row 1: hero_pair ─────────────────────────────────────────────────────   ║ │
-│  ║  ┌─────────────────────────────┬─────────────────────────────┐              ║ │
-│  ║  │ image="background"          │ image="right"               │              ║ │
-│  ║  │ ░░░░░░░░░░░░░░░░░░░░░░░░░  │ Kategori       ┌────────┐  │              ║ │
-│  ║  │ Judul besar                 │ Judul          │ [IMG]  │  │              ║ │
-│  ║  │ Author                      │ Author         └────────┘  │              ║ │
-│  ║  └─────────────────────────────┴─────────────────────────────┘              ║ │
-│  ║                                                                              ║ │
-│  ║  ── Row 2: triplet ──────────────────────────────────────────────────────   ║ │
-│  ║  ┌──────────────┬──────────────┬──────────────┐                              ║ │
-│  ║  │ image="top"  │ image="top"  │ image="top"  │                              ║ │
-│  ║  │ ┌──────────┐ │ ┌──────────┐ │ ┌──────────┐ │                              ║ │
-│  ║  │ │ [GAMBAR] │ │ │ [GAMBAR] │ │ │ [GAMBAR] │ │                              ║ │
-│  ║  │ └──────────┘ │ └──────────┘ │ └──────────┘ │                              ║ │
-│  ║  │ Title        │ Title        │ Title        │                              ║ │
-│  ║  └──────────────┴──────────────┴──────────────┘                              ║ │
-│  ║                                                                              ║ │
-│  ║  ── Ad: HOME_FEED_1 ─────────────────────────────────────────────────────   ║ │
-│  ║                                                                              ║ │
-│  ║  ── Row 3: asymmetric ───────────────────────────────────────────────────   ║ │
-│  ║  ┌─────────────────────────────┬──────────────┐                              ║ │
-│  ║  │ image="background"          │ image="left" │                              ║ │
-│  ║  │ ░░░░░░░░░░░░░░░░░░░░░░░░░  │ ┌────┬─────┐ │                              ║ │
-│  ║  │ Judul besar                 │ │IMG │Title│ │                              ║ │
-│  ║  │ Author                      │ └────┴─────┘ │                              ║ │
-│  ║  │                             │ image="left" │                              ║ │
-│  ║  │                             │ ┌────┬─────┐ │                              ║ │
-│  ║  │                             │ │IMG │Title│ │                              ║ │
-│  ║  │                             │ └────┴─────┘ │                              ║ │
-│  ║  └─────────────────────────────┴──────────────┘                              ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│  │  INTERSTITIAL: PALING DIBACA (horizontal cards, scrollable)                 │ │
-│  │  bg: brand-grey/30, full-width, rounded-2xl                                 │ │
-│  │  ┌────────┬────────┬────────┬────────┬────────┐                             │ │
-│  │  │ 01     │ 02     │ 03     │ 04     │ 05     │                             │ │
-│  │  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │ [IMG]  │                             │ │
-│  │  │ Judul  │ Judul  │ Judul  │ Judul  │ Judul  │                             │ │
-│  │  │ 5 min  │ 3 min  │ 4 min  │ 2 min  │ 6 min  │                             │ │
-│  │  └────────┴────────┴────────┴────────┴────────┘                             │ │
-│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  BERITA LAINNYA (continued feed — pattern rotation lanjut)                  ║ │
-│  ║                                                                              ║ │
-│  ║  ── Row 4: text_heavy ───────────────────────────────────────────────────   ║ │
-│  ║  ┌─────────────────────────────────┬─────────────────────────────────┐      ║ │
-│  ║  │ image="left"                    │ image="right"                   │      ║ │
-│  ║  │ ┌─────────┬───────────────────┐ │ ┌───────────────────┬─────────┐ │      ║ │
-│  ║  │ │ [IMG]   │ Title             │ │ │ Title             │ [IMG]   │ │      ║ │
-│  ║  │ │         │ Excerpt 2 baris   │ │ │ Excerpt 2 baris   │         │ │      ║ │
-│  ║  │ │         │ Author · Date     │ │ │ Author · Date     │         │ │      ║ │
-│  ║  │ └─────────┴───────────────────┘ │ └───────────────────┴─────────┘ │      ║ │
-│  ║  └─────────────────────────────────┴─────────────────────────────────┘      ║ │
-│  ║                                                                              ║ │
-│  ║  ── Row 5: compact_triplet ──────────────────────────────────────────────   ║ │
-│  ║  ┌──────────────┬──────────────┬──────────────┐                              ║ │
-│  ║  │ image="top"  │ image="top"  │ image="top"  │                              ║ │
-│  ║  │ (compact)    │ (compact)    │ (compact)    │                              ║ │
-│  ║  │ Title        │ Title        │ Title        │                              ║ │
-│  ║  └──────────────┴──────────────┴──────────────┘                              ║ │
-│  ║                                                                              ║ │
-│  ║  ── Ad: HOME_FEED_2 (300×150, 2:1) ──────────────────────────────────────   ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│  │  INTERSTITIAL: AKSES REDAKSI                                                │ │
-│  │  bg: white, border-top/bottom, full-width                                   │ │
-│  │  ┌─────────────────┬─────────────────┬─────────────────┐                    │ │
-│  │  │ WhatsApp        │ Telegram        │ Email           │                    │ │
-│  │  │ [icon]          │ [icon]          │ [icon]          │                    │ │
-│  │  │ Chat Redaksi    │ Ikuti Kanal     │ Kirim Email     │                    │ │
-│  │  └─────────────────┴─────────────────┴─────────────────┘                    │ │
-│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
-│                                                                                  │
-│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│  │  INTERSTITIAL: INFO PASAR (opsional, widget kecil)                          │ │
-│  │  bg: brand-grey/10, full-width                                              │ │
-│  │  ┌──────────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ IHSG ▲ 7,234 (+1.2%)  │  USD/IDR 15,890  │  Emas ▲ 2,150  │  ...  │   │ │
-│  │  └──────────────────────────────────────────────────────────────────────┘   │ │
-│  │  ⚠️ Opsional per site — aktifkan untuk site ekonomi, matikan untuk lainnya  │ │
-│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘ │
-│                                                                                  │
-│  ╔══════════════════════════════════════════════════════════════════════════════╗ │
-│  ║  ZONA 5+ — EDITORIAL EXTRAS                                                 ║ │
-│  ║                                                                              ║ │
-│  ║  ── Pilihan Editor (portrait 3:4) ────────────────────────────────────────  ║ │
-│  ║  ┌────────────────┬────────────────┬────────────────┐                        ║ │
-│  ║  │ ░░ [PORTRAIT]░ │ ░░ [PORTRAIT]░ │ ░░ [PORTRAIT]░ │                        ║ │
-│  ║  │ Judul          │ Judul          │ Judul          │                        ║ │
-│  ║  │ Author         │ Author         │ Author         │                        ║ │
-│  ║  └────────────────┴────────────────┴────────────────┘                        ║ │
-│  ║                                                                              ║ │
-│  ║  ── Opini & Analisis ─────────────────────────────────────────────────────  ║ │
-│  ║  ┌──────────────┬──────────────┬──────────────┐                              ║ │
-│  ║  │ "Judul..."   │ "Judul..."   │ "Judul..."   │                              ║ │
-│  ║  │ Excerpt      │ Excerpt      │ Excerpt      │                              ║ │
-│  ║  │ Author       │ Author       │ Author       │                              ║ │
-│  ║  └──────────────┴──────────────┴──────────────┘                              ║ │
-│  ║                                                                              ║ │
-│  ║  ── Video Eksklusif ─────────────────────────────────────────────────────── ║ │
-│  ║  ┌──────────────────┬──────────────────┬──────────────────┐                  ║ │
-│  ║  │ [▶ VIDEO THUMB]  │ [▶ VIDEO THUMB]  │ [▶ VIDEO THUMB]  │                  ║ │
-│  ║  │ Judul · 03:45    │ Judul · 12:30    │ Judul · 08:15    │                  ║ │
-│  ║  └──────────────────┴──────────────────┴──────────────────┘                  ║ │
-│  ╚══════════════════════════════════════════════════════════════════════════════╝ │
-│                                                                                  │
-│  ┌──────────────────────────────────────────────────────────────────────────┐    │
-│  │  [Load More Articles]                                                    │    │
-│  └──────────────────────────────────────────────────────────────────────────┘    │
-│                                                                                  │
-│  FOOTER                                                                          │
-└──────────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Mobile (375px)
-
-```
-┌──────────────────────────┐
-│  NAVBAR (hamburger menu)  │
-├──────────────────────────┤
-│                          │
-│  HERO: MAGAZINE_COVER    │
-│  (tinggi ~350px)         │
-│  ┌────────────────────┐  │
-│  │ [GAMBAR FULL]      │  │
-│  │ overlay gradient   │  │
-│  │ POLITIK            │  │
-│  │ JUDUL BESAR        │  │
-│  │ Author · 5 min     │  │
-│  │                    │  │
-│  │ [TH][TH][TH][TH]   │  │ ← thumbnail bar
-│  └────────────────────┘  │
-│                          │
-├──────────────────────────┤
-│  AD: HOME_TOP            │
-│  (320×80, 4:1)           │
-├──────────────────────────┤
-│                          │
-│  FOKUS REDAKSI           │
-│  ┌────────────────────┐  │
-│  │ [GAMBAR]           │  │
-│  │ Judul              │  │
-│  └────────────────────┘  │
-│  ┌────────────────────┐  │
-│  │ [GAMBAR]           │  │
-│  │ Judul              │  │
-│  └────────────────────┘  │
-│                          │
-├──────────────────────────┤
-│  TRENDING: PODIUM        │
-│  ┌────────────────────┐  │
-│  │ 🥇 [GAMBAR]        │  │
-│  │ Judul · 12.5k views│  │
-│  └────────────────────┘  │
-│  02  Judul...  8.2k     │
-│  03  Judul...  6.1k     │
-│  04  Judul...  3.2k     │
-│  05  Judul...  2.8k     │
-├──────────────────────────┤
-│                          │
-│  BERITA TERBARU          │
-│  ┌────────────────────┐  │
-│  │ [GAMBAR]           │  │ ← hero_pair → single
-│  │ Judul besar        │  │
-│  │ Author             │  │
-│  └────────────────────┘  │
-│  ┌────────┬─────────────┐│
-│  │ [IMG]  │ Title       ││ ← text_heavy → stacked
-│  │        │ Author      ││
-│  └────────┴─────────────┘│
-│  ┌────────┬─────────────┐│
-│  │ [IMG]  │ Title       ││
-│  └────────┴─────────────┘│
-│                          │
-├──────────────────────────┤
-│  AD: HOME_FEED_1         │
-│  (300×200, 3:2)          │
-├──────────────────────────┤
-│  ░░░ PALING DIBACA ░░░   │
-│  ┌──────┬──────┬──────┐  │
-│  │01    │02    │03    │  │ ← horizontal scroll
-│  │[IMG] │[IMG] │[IMG] │  │
-│  │Judul │Judul │Judul │  │
-│  └──────┴──────┴──────┘  │
-├──────────────────────────┤
-│                          │
-│  BERITA LAINNYA          │
-│  ┌────────────────────┐  │
-│  │ [GAMBAR]           │  │
-│  │ Judul              │  │
-│  └────────────────────┘  │
-│                          │
-├──────────────────────────┤
-│  AD: HOME_FEED_2         │
-│  (300×150, 2:1)          │
-├──────────────────────────┤
-│  ░░░ AKSES REDAKSI ░░░   │
-│  [WA] [TG] [Email]       │
-├──────────────────────────┤
-│  ░░░ INFO PASAR ░░░      │
-│  (opsional)              │
-│  IHSG ▲ 7,234            │
-│  USD/IDR 15,890          │
-├──────────────────────────┤
-│  EDITORIAL EXTRAS        │
-│  • Pilihan Editor        │
-│  • Opini                 │
-│  • Video                 │
-├──────────────────────────┤
-│  [Load More]             │
-│  FOOTER                  │
-└──────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  NAVBAR (fixed)                                              │
+│  [Logo] [Kategori scroll...] [Search] [Login]               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ZONA 1 — HERO: MAGAZINE_COVER (560px)                       │
+│  [GAMBAR FULL] · Judul besar · Thumbnail bar (5)             │
+│                                                              │
+│  AD: HOME_TOP (880×220)                                      │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤ ← separator
+│                                                              │
+│  ZONA 2 — FOKUS REDAKSI (4 kartu sejajar)                    │
+│  [Card] [Card] [Card] [Card]                                 │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤ ← separator
+│                                                              │
+│  ZONA 3 — TRENDING: NUMBERED_PODIUM                          │
+│  [🥇 BESAR] [🥈 BESAR] [🥉 BESAR]                           │
+│  04 ...  05 ...                                              │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤ ← separator
+│                                                              │
+│  ZONA 4 — BERITA TERBARU                                     │
+│                                                              │
+│  ── Row 1: 8:4 sidebar ───────────────────────────────────   │
+│  ┌──────────────────────────┬───────────────────────────┐   │
+│  │  8 kolom (News Cards)    │  4 kolom (Sidebar)        │   │
+│  │  [text] [gambar 16:9]    │  📰 Paling Dibaca (80×80) │   │
+│  │  [text] [gambar 16:9]    │  💬 Akses Redaksi         │   │
+│  │  [text] [gambar 16:9]    │                           │   │
+│  │  [text] [gambar 16:9]    │                           │   │
+│  │  [text] [gambar 16:9]    │                           │   │
+│  └──────────────────────────┴───────────────────────────┘   │
+│                                                              │
+│  AD: HOME_FEED_1 (full-width)                                │
+│                                                              │
+│  ── Row 2: Continued Feed (4 sejajar, full info) ─────────   │
+│  ┌──────────────┬──────────────┬──────────────┬──────────┐  │
+│  │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG]    │  │
+│  │ Title        │ Title        │ Title        │ Title    │  │
+│  │ Excerpt      │ Excerpt      │ Excerpt      │ Excerpt  │  │
+│  │ Author·Date  │ Author·Date  │ Author·Date  │ Auth·Dt  │  │
+│  ├──────────────┼──────────────┼──────────────┼──────────┤  │
+│  │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG]    │  │
+│  │ Title        │ Title        │ Title        │ Title    │  │
+│  │ Excerpt      │ Excerpt      │ Excerpt      │ Excerpt  │  │
+│  │ Author·Date  │ Author·Date  │ Author·Date  │ Auth·Dt  │  │
+│  └──────────────┴──────────────┴──────────────┴──────────┘  │
+│  Max 2 baris × 4 kolom = 8 artikel (sisa dari Row 1)        │
+│                                                              │
+│  AD: HOME_FEED_2 (full-width)                                │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤ ← separator
+│                                                              │
+│  ZONA 5 — EDITORIAL EXTRAS                                   │
+│  ── Pilihan Editor (portrait 3:4) ───────────────────────   │
+│  [Card] [Card] [Card]                                        │
+│                                                              │
+│  ── Opini & Analisis ────────────────────────────────────   │
+│  [Card] [Card] [Card]                                        │
+│                                                              │
+│  ── Foto Jurnalistik ────────────────────────────────────   │
+│  [Foto] [Foto] [Foto]                                        │
+│                                                              │
+│  ── Video Eksklusif ─────────────────────────────────────   │
+│  [▶ Card] [▶ Card] [▶ Card]                                 │
+│                                                              │
+│  [Load More Articles]                                        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -1719,134 +1519,9 @@ Seperti page builder (Elementor, WordPress Gutenberg). Superadmin bisa drag sect
 
 ---
 
-## Design F: Implementasi Aktual (Production)
+### Archive: Design F Spec Asli
 
-> Dokumentasi layout final yang benar-benar dipakai di codebase.
-> Berbeda dari spec Design F di atas. Lihat juga `log.txt`.
-
-### Perbedaan dari Spec Asli
-
-| Aspek | Spec Design F | Implementasi Aktual |
-|-------|---------------|---------------------|
-| **Feed layout** | Pattern Rotation (hero_pair → triplet → asymmetric → text_heavy → compact_triplet) | **8:4 sidebar** (Row 1) + **4 kolom grid** (Row 2) |
-| **Sidebar** | Tidak ada (interstitials antar baris) | **PalingDibaca + AksesRedaksi** di sidebar 4 kolom |
-| **Interstitials** | HOME_FEED_1, PalingDibaca, AksesRedaksi, InfoPasar, Foto, HOME_FEED_2 tersebar di antara baris feed | Semua di luar feed — sidebar, setelah feed, atau di Editorial Extras |
-| **Foto Jurnalistik** | Interstitial terpisah (dark bg, 3 foto) | Masuk ke **Editorial Extras** (sebelum Video) |
-| **Load More** | Di tengah (setelah feed, sebelum editorial) | Di **paling bawah** (setelah Editorial Extras) |
-| **HOME_FEED_2** | Setelah feed row 5 | Setelah Continued Feed (Row 2) |
-| **Image ratio** | Tidak dispesifikasikan | **16:9** (konsisten di semua card) |
-
-### Desktop (1280px)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  NAVBAR (fixed)                                              │
-│  [Logo] [Kategori scroll...] [Search] [Login]               │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ZONA 1 — HERO: MAGAZINE_COVER (560px)                       │
-│  [GAMBAR FULL] · Judul besar · Thumbnail bar (5)             │
-│                                                              │
-│  AD: HOME_TOP (880×220)                                      │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤ ← separator
-│                                                              │
-│  ZONA 2 — FOKUS REDAKSI (4 kartu sejajar)                    │
-│  [Card] [Card] [Card] [Card]                                 │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤ ← separator
-│                                                              │
-│  ZONA 3 — TRENDING: NUMBERED_PODIUM                          │
-│  [🥇 BESAR] [🥈 BESAR] [🥉 BESAR]                           │
-│  04 ...  05 ...                                              │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤ ← separator
-│                                                              │
-│  ZONA 4 — BERITA TERBARU                                     │
-│                                                              │
-│  ── Row 1: 8:4 sidebar ───────────────────────────────────   │
-│  ┌──────────────────────────┬───────────────────────────┐   │
-│  │  8 kolom (News Cards)    │  4 kolom (Sidebar)        │   │
-│  │  [text] [gambar 16:9]    │  📰 Paling Dibaca (80×80) │   │
-│  │  [text] [gambar 16:9]    │  💬 Akses Redaksi         │   │
-│  │  [text] [gambar 16:9]    │                           │   │
-│  │  [text] [gambar 16:9]    │                           │   │
-│  │  [text] [gambar 16:9]    │                           │   │
-│  └──────────────────────────┴───────────────────────────┘   │
-│                                                              │
-│  AD: HOME_FEED_1 (full-width)                                │
-│                                                              │
-│  ── Row 2: Continued Feed (4 sejajar, full info) ─────────   │
-│  ┌──────────────┬──────────────┬──────────────┬──────────┐  │
-│  │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG]    │  │
-│  │ Title        │ Title        │ Title        │ Title    │  │
-│  │ Excerpt      │ Excerpt      │ Excerpt      │ Excerpt  │  │
-│  │ Author·Date  │ Author·Date  │ Author·Date  │ Auth·Dt  │  │
-│  ├──────────────┼──────────────┼──────────────┼──────────┤  │
-│  │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG 16:9]   │ [IMG]    │  │
-│  │ Title        │ Title        │ Title        │ Title    │  │
-│  │ Excerpt      │ Excerpt      │ Excerpt      │ Excerpt  │  │
-│  │ Author·Date  │ Author·Date  │ Author·Date  │ Auth·Dt  │  │
-│  └──────────────┴──────────────┴──────────────┴──────────┘  │
-│  Max 2 baris × 4 kolom = 8 artikel (sisa dari Row 1)        │
-│                                                              │
-│  AD: HOME_FEED_2 (full-width)                                │
-│                                                              │
-├─────────────────────────────────────────────────────────────┤ ← separator
-│                                                              │
-│  ZONA 5 — EDITORIAL EXTRAS                                   │
-│  ── Pilihan Editor (portrait 3:4) ───────────────────────   │
-│  [Card] [Card] [Card]                                        │
-│                                                              │
-│  ── Opini & Analisis ────────────────────────────────────   │
-│  [Card] [Card] [Card]                                        │
-│                                                              │
-│  ── Foto Jurnalistik ────────────────────────────────────   │
-│  [Foto] [Foto] [Foto]                                        │
-│                                                              │
-│  ── Video Eksklusif ─────────────────────────────────────   │
-│  [▶ Card] [▶ Card] [▶ Card]                                 │
-│                                                              │
-│  [Load More Articles]                                        │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### File yang Relevan
-
-| File | Fungsi |
-|------|--------|
-| `TemplateF.tsx` | Orchestrator — mengatur urutan semua zona |
-| `MagazineCoverHero.tsx` | ZONA 1 — Hero (560px, thumbnail bar) |
-| `FokusRedaksiSection.tsx` | ZONA 2 — 4 kartu sejajar (NewsCard medium) |
-| `TrendingSection.tsx` | ZONA 3 — Numbered Podium (top 3 gambar + 2 text) |
-| `FeedWithSidebar.tsx` | ZONA 4 Row 1 — 70:30 layout (news cards + sidebar) |
-| `ContinuedFeed.tsx` | ZONA 4 Row 2 — 4 kolom grid, max 8 artikel, full info |
-| `EditorialExtras.tsx` | ZONA 5 — Editor · Opini · Foto · Video |
-| `InterstitialPhoto.tsx` | Foto Jurnalistik section (dipakai di Editorial Extras) |
-| `PalingDibacaSidebar.tsx` | Sidebar widget — berita populer (80×80 thumbnail) |
-| `AksesRedaksiSidebar.tsx` | Sidebar widget — kontak redaksi (WA/Telegram/Email) |
-| `distribution.ts` | Zone allocation engine — distribusi artikel ke zona |
-| `AdSpace.tsx` | Ad renderer — HOME_TOP, HOME_FEED_1, HOME_FEED_2 |
-
-### Design Tokens
-
-| Token | Value |
-|-------|-------|
-| Container max-width | 1280px |
-| Container padding | `clamp(40px, 3vw, 48px)` |
-| Section spacing | 32px (desktop) / 24px (mobile) |
-| Separator | `border-t border-gray-100` |
-| Card radius | 16px (`rounded-2xl`) |
-| Hero height | 560px |
-| Sidebar width | 30% (4 kolom) |
-| News card image ratio | 16:9 |
-
-### Typography
-
-| Elemen | Font |
-|--------|------|
-| Navbar, Badge, Tombol, Metadata | Inter |
-| Hero H1 | Playfair Display |
-| H2–H6 | Inter SemiBold |
-| Body Artikel | Source Serif 4 |
+> Spec asli Design F (Pattern Rotation dengan interstitials) telah digantikan oleh
+> dokumentasi implementasi aktual di section "Design F: Best of (Hybrid)" di atas.
+> Perubahan utama: feed layout menjadi 8:4 sidebar + 4-kolom grid,
+> interstitials dipindah ke sidebar dan Editorial Extras.
