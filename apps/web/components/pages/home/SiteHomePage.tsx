@@ -36,7 +36,6 @@ interface HomepageConfigData {
   scoreFreshness: number
   scoreEngagement: number
   scoreEditorial: number
-  scoreRelevance: number
   opinionCategories: string[]
   photoCategories: string[]
   videoCategories: string[]

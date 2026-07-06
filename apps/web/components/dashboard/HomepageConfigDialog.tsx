@@ -12,34 +12,21 @@ import { api } from '../../lib/api'
 
 // ─── Types ───────────────────────────────────────────────────────────────
 
-interface InterstitialItem {
-  id: string
-  afterCardIndex: number
-  widget: string
-  enabled: boolean
-}
-
 interface HomepageConfig {
   id: string
   siteId: string
   template: string
   heroMode: string
-  heroAutoRotate: boolean
-  heroIntervalMs: number
   feedLayout: string
   trendingStyle: string
   scoreFreshness: number
   scoreEngagement: number
   scoreEditorial: number
-  scoreRelevance: number
   opinionCategories: string[]
   photoCategories: string[]
   videoCategories: string[]
   sectionOrder: string[]
   sectionVisibility: Record<string, boolean>
-  feedColumns: number
-  showExcerpt: boolean
-  interstitials: InterstitialItem[]
 }
 
 interface TemplateOption {
@@ -247,16 +234,59 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                       </div>
                     </div>
                   </div>
+
+                  {/* Scoring Weights */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-4">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase">Bobot Scoring Fokus Redaksi</h4>
+                    <p className="text-[10px] text-gray-400">Mengurutkan artikel featured di Zona 2. Total tidak harus 100%.</p>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Freshness</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          value={config.scoreFreshness}
+                          onChange={(e) => setConfig({ ...config, scoreFreshness: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Engagement</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          value={config.scoreEngagement}
+                          onChange={(e) => setConfig({ ...config, scoreEngagement: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Editorial</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          value={config.scoreEditorial}
+                          onChange={(e) => setConfig({ ...config, scoreEditorial: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Section Order & Visibility */}
               {activeSection === 'sections' && (
                 <div className="space-y-6">
-                  {/* Section Order */}
                   <div>
                     <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide mb-1">Urutan Section</h3>
-                    <p className="text-xs text-gray-500 mb-4">Drag untuk reorder. Toggle untuk mati/hidup.</p>
+                    <p className="text-xs text-gray-500 mb-4">Toggle untuk mati/hidup section.</p>
                     <div className="space-y-2">
                       {config.sectionOrder.map((sectionId, index) => {
                         const labels: Record<string, string> = {
@@ -274,7 +304,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              {/* Move up */}
                               {index > 0 && (
                                 <button
                                   onClick={() => {
@@ -285,7 +314,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                                   className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                                 >↑</button>
                               )}
-                              {/* Move down */}
                               {index < config.sectionOrder.length - 1 && (
                                 <button
                                   onClick={() => {
@@ -296,7 +324,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                                   className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                                 >↓</button>
                               )}
-                              {/* Toggle visibility */}
                               <button
                                 onClick={() => setConfig({
                                   ...config,
@@ -305,84 +332,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                                 className={`px-3 py-1 rounded text-xs font-medium ${visible ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-800'}`}
                               >
                                 {visible ? 'ON' : 'OFF'}
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Feed Columns & Excerpt */}
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-4">
-                    <h4 className="text-xs font-bold text-gray-500 uppercase">Feed Detail</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Feed Columns</label>
-                        <select
-                          value={config.feedColumns}
-                          onChange={(e) => setConfig({ ...config, feedColumns: parseInt(e.target.value) })}
-                          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm"
-                        >
-                          <option value={1}>1 kolom</option>
-                          <option value={2}>2 kolom</option>
-                          <option value={3}>3 kolom</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Show Excerpt</label>
-                        <button
-                          onClick={() => setConfig({ ...config, showExcerpt: !config.showExcerpt })}
-                          className={`w-full px-3 py-2 rounded-lg text-sm font-medium border ${config.showExcerpt ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400' : 'bg-gray-50 border-gray-200 text-gray-500 dark:bg-gray-800 dark:border-gray-700'}`}
-                        >
-                          {config.showExcerpt ? '✓ Aktif' : 'Nonaktif'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Interstitial Placement */}
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wide mb-1">Interstitial Placement</h3>
-                    <p className="text-xs text-gray-500 mb-4">Atur kapan widget muncul di antara kartu feed.</p>
-                    <div className="space-y-3">
-                      {config.interstitials.map((item, index) => {
-                        const labels: Record<string, string> = {
-                          trending: 'Paling Dibaca', redaksi: 'Akses Redaksi',
-                          market: 'Info Pasar', photo: 'Foto Jurnalistik',
-                        }
-                        return (
-                          <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <div className="flex-1">
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {labels[item.widget] || item.widget}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-1">
-                                <span className="text-xs text-gray-500">Setelah kartu ke-</span>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={50}
-                                  value={item.afterCardIndex}
-                                  onChange={(e) => {
-                                    const newInterstitials = [...config.interstitials]
-                                    newInterstitials[index] = { ...item, afterCardIndex: parseInt(e.target.value) || 6 }
-                                    setConfig({ ...config, interstitials: newInterstitials })
-                                  }}
-                                  className="w-16 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded px-2 py-1 text-sm text-center"
-                                />
-                              </div>
-                              <button
-                                onClick={() => {
-                                  const newInterstitials = [...config.interstitials]
-                                  newInterstitials[index] = { ...item, enabled: !item.enabled }
-                                  setConfig({ ...config, interstitials: newInterstitials })
-                                }}
-                                className={`px-3 py-1 rounded text-xs font-medium ${item.enabled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-400 dark:bg-gray-800'}`}
-                              >
-                                {item.enabled ? 'ON' : 'OFF'}
                               </button>
                             </div>
                           </div>
@@ -446,8 +395,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                     ...config!,
                     template: 'F',
                     heroMode: 'MAGAZINE_COVER_550',
-                    heroAutoRotate: true,
-                    heroIntervalMs: 5000,
                     feedLayout: 'sidebar_70_30',
                     trendingStyle: 'numbered_podium',
                     scoreFreshness: 0.4,
@@ -455,14 +402,6 @@ export function HomepageConfigDialog({ siteId, siteName, open, onClose }: Homepa
                     scoreEditorial: 0.3,
                     sectionOrder: ['hero', 'fokus_redaksi', 'trending', 'feed', 'pilihan_editor', 'opini', 'foto', 'video'],
                     sectionVisibility: { hero: true, fokus_redaksi: true, trending: true, feed: true, pilihan_editor: true, opini: true, foto: true, video: true },
-                    feedColumns: 2,
-                    showExcerpt: true,
-                    interstitials: [
-                      { id: 'trending', afterCardIndex: 6, widget: 'trending', enabled: true },
-                      { id: 'redaksi', afterCardIndex: 12, widget: 'redaksi', enabled: true },
-                      { id: 'market', afterCardIndex: 18, widget: 'market', enabled: true },
-                      { id: 'photo', afterCardIndex: 24, widget: 'photo', enabled: true },
-                    ],
                   })
                 }
               }}
