@@ -1,8 +1,8 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useRequireRole } from '../../../../../../../../hooks/useRequireRole'
-import RolePermissions from '../../../../../../../../components/admin/RolePermissions'
+import { useRequireRole } from '../../../../../../../hooks/useRequireRole'
+import RolePermissions from '../../../../../../../components/admin/RolePermissions'
 
 const VALID_ROLES = ['wapimred', 'kaperwil', 'kabiro'] as const
 type ValidRole = (typeof VALID_ROLES)[number]

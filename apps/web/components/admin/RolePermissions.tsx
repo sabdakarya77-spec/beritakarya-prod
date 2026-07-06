@@ -8,7 +8,7 @@ import {
   Loader2,
   Lock as LockIcon,
 } from 'lucide-react'
-import { api } from '../../../lib/api'
+import { api } from '../../lib/api'
 import axios from 'axios'
 
 interface PermissionSettings {
