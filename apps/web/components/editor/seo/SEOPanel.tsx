@@ -225,7 +225,7 @@ export function SEOPanel() {
           <div className="space-y-1 text-left">
             {/* Breadcrumb URL */}
             <div className="flex items-center gap-1 text-[11px] text-[#202124] dark:text-[#bdc1c6] truncate">
-              <span>https://beritakarya.id</span>
+              <span>https://{typeof window !== 'undefined' ? window.location.hostname : 'beritakarya.co'}</span>
               <span className="text-[9px] opacity-60">›</span>
               <span className="truncate">artikel</span>
             </div>
