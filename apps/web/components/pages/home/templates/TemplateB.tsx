@@ -82,10 +82,12 @@ export function TemplateB(props: TemplateProps) {
       <EditorialExtras
         editorChoice={editorChoice}
         opinionArticles={opinionArticles}
+        photoJournal={photoJournal}
         videoStories={videoStories}
         site={site}
         showEditorChoice={showEditorChoice}
         showOpinionSection={showOpinionSection}
+        showPhotoSection={showPhotoSection}
         showVideoSection={showVideoSection}
         getVideoThumbnail={getVideoThumbnail}
       />

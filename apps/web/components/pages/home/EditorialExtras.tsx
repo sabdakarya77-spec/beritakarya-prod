@@ -6,6 +6,7 @@ import { SectionEyebrow } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
 import { sectionMetaClass, formatSidebarDate } from './constants'
+import { InterstitialPhoto } from './interstitials/InterstitialPhoto'
 
 interface ArticleBlock {
   type: string
@@ -15,20 +16,22 @@ interface ArticleBlock {
 interface EditorialExtrasProps {
   editorChoice: HomeArticle[]
   opinionArticles: HomeArticle[]
+  photoJournal: HomeArticle[]
   videoStories: HomeArticle[]
   site: string
   showEditorChoice: boolean
   showOpinionSection: boolean
+  showPhotoSection: boolean
   showVideoSection: boolean
   getVideoThumbnail: (article: HomeArticle) => string | null
 }
 
 export function EditorialExtras({
-  editorChoice, opinionArticles, videoStories, site,
-  showEditorChoice, showOpinionSection, showVideoSection,
+  editorChoice, opinionArticles, photoJournal, videoStories, site,
+  showEditorChoice, showOpinionSection, showPhotoSection, showVideoSection,
   getVideoThumbnail,
 }: EditorialExtrasProps) {
-  if (!showEditorChoice && !showOpinionSection && !showVideoSection) return null
+  if (!showEditorChoice && !showOpinionSection && !showPhotoSection && !showVideoSection) return null
 
   return (
     <div className="border-t border-gray-100 dark:border-white/5">
@@ -120,6 +123,13 @@ export function EditorialExtras({
                 </div>
               ))}
             </div>
+          </FadeInOnScroll>
+        )}
+
+        {/* Foto Jurnalistik */}
+        {showPhotoSection && photoJournal.length > 0 && (
+          <FadeInOnScroll>
+            <InterstitialPhoto articles={photoJournal} site={site} />
           </FadeInOnScroll>
         )}
 

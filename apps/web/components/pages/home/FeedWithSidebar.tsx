@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import AdSpace from '../../ui/AdSpace'
 import { SectionTitle } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
@@ -14,16 +13,10 @@ interface FeedWithSidebarProps {
   isCategoryFilter: boolean
   categoryFilter: string
   categoriesTree: Array<{ id: string; name: string; slug: string; subCategories?: { name: string; slug: string }[] }>
-  showSavedFeed: boolean
   whatsappUrl: string | null
   telegramUrl: string | null
   reportUrl: string
-  siteConfigId: string
   resolveCategoryName: (slug: string, tree: FeedWithSidebarProps['categoriesTree']) => string
-  /** Artikel sisa dari distribusi — untuk Load More */
-  remainingArticles?: HomeArticle[]
-  /** ID artikel yang sudah dirender di beranda — untuk disaring dari hasil Load More */
-  excludeIds?: string[]
 }
 
 const getImageUrl = (article: HomeArticle): string =>
@@ -36,12 +29,9 @@ const getCategoryName = (article: HomeArticle): string =>
 
 export function FeedWithSidebar({
   feedArticles, popular, site,
-  searchQuery, isCategoryFilter, categoryFilter, categoriesTree, showSavedFeed,
-  whatsappUrl, telegramUrl, reportUrl, siteConfigId, resolveCategoryName,
-  remainingArticles = [], excludeIds = [],
+  searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
+  whatsappUrl, telegramUrl, reportUrl, resolveCategoryName,
 }: FeedWithSidebarProps) {
-  const { LoadMoreArticles } = require('../LazyWidgets')
-
   const displayArticles = feedArticles.slice(0, 5)
 
   return (
@@ -158,26 +148,6 @@ export function FeedWithSidebar({
           </div>
         </aside>
       </div>
-
-      {/* Full-width sections — di luar grid */}
-      {/* Ad: HOME_FEED_1 */}
-      <div className="mt-6 md:mt-8">
-        <AdSpace type="HOME_FEED_1" />
-      </div>
-
-      {/* Load More */}
-      {!showSavedFeed && (
-        <div className="mt-8 border-t border-black/5 pt-8 dark:border-white/5">
-          <LoadMoreArticles
-            siteId={siteConfigId}
-            category={categoryFilter}
-            search={searchQuery}
-            initialPage={1}
-            remainingArticles={remainingArticles}
-            excludeIds={excludeIds}
-          />
-        </div>
-      )}
     </Container>
   )
 }
