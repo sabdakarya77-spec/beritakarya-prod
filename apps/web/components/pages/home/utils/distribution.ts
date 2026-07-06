@@ -2,11 +2,10 @@
  * apps/web/components/pages/home/utils/distribution.ts
  *
  * Zone allocation engine for the homepage.
- * Logic sederhana: hero = terbaru, fokus = featured, feed = sisa.
  *
  * Prinsip:
- * 1. Hero = 5 artikel terbaru (publishedAt descending), tanpa scoring kompleks
- * 2. Fokus Redaksi = artikel featured (isFeatured), fallback ke terbaru
+ * 1. Hero = 5 artikel terbaru (publishedAt descending), tanpa scoring
+ * 2. Fokus Redaksi = scoring (freshness 40% + engagement 30% + editorial 30%)
  * 3. Feed = sisa setelah hero + fokus, urut by publishedAt descending
  * 4. Editorial extras = pool terpisah, dedup progresif
  * 5. Popular & Trending = fetch terpisah, tetap terpisah
@@ -93,6 +92,46 @@ function dedupById(articles: HomeArticle[]): HomeArticle[] {
 }
 
 // ---------------------------------------------------------------------------
+// Scoring — Fokus Redaksi
+// ---------------------------------------------------------------------------
+// score = (freshness × 0.4) + (engagement × 0.3) + (editorial × 0.3)
+//
+// freshness  = max(0, 1 - daysSincePublish / 7)  → 0–1 (hari ke-7 = 0)
+// engagement = viewCount / maxViewCount (normalised) → 0–1
+// editorial  = isFeatured(0.5) + isExclusive(0.3) + isBreaking(0.2) → 0–1
+
+const SCORE_WEIGHTS = { freshness: 0.4, engagement: 0.3, editorial: 0.3 }
+const FRESHNESS_DECAY_DAYS = 7
+
+function scoreArticle(article: HomeArticle, maxViewCount: number): number {
+  // Freshness: 0 hari = 1.0, 7 hari = 0.0
+  const daysSincePublish = (Date.now() - getPublishedDate(article).getTime()) / (1000 * 60 * 60 * 24)
+  const freshness = Math.max(0, 1 - daysSincePublish / FRESHNESS_DECAY_DAYS)
+
+  // Engagement: normalised viewCount
+  const engagement = maxViewCount > 0 ? (article.viewCount || 0) / maxViewCount : 0
+
+  // Editorial: isFeatured + isExclusive + isBreaking
+  const editorial =
+    (article.isFeatured ? 0.5 : 0) +
+    (article.isExclusive ? 0.3 : 0) +
+    (article.isBreaking ? 0.2 : 0)
+
+  return (freshness * SCORE_WEIGHTS.freshness)
+    + (engagement * SCORE_WEIGHTS.engagement)
+    + (editorial * SCORE_WEIGHTS.editorial)
+}
+
+function scoreAndSort(articles: HomeArticle[]): HomeArticle[] {
+  if (articles.length === 0) return []
+  const maxViewCount = Math.max(...articles.map(a => a.viewCount || 0), 1)
+  return [...articles]
+    .map(a => ({ article: a, score: scoreArticle(a, maxViewCount) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ article }) => article)
+}
+
+// ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
 
@@ -114,17 +153,15 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const heroIds = new Set(hero.map(a => a.id))
 
   // ─────────────────────────────────────────────
-  // 2. FOKUS REDAKSI: featured articles, fallback ke terbaru
-  //    Prioritaskan isFeatured=true, maksimal 4.
-  //    Kalau kurang dari 2 featured, fallback ke terbaru.
+  // 2. FOKUS REDAKSI: scoring-based selection
+  //    score = (freshness × 0.4) + (engagement × 0.3) + (editorial × 0.3)
+  //    Artikel featured tetap punya keunggulan, tapi artikel baru yang
+  //    populer juga bisa naik ke zona ini.
   // ─────────────────────────────────────────────
   const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
   const sortedRemaining = sortByNewest(remainingAfterHero)
 
-  const featured = sortedRemaining.filter(a => a.isFeatured)
-  const fokusRedaksi = featured.length >= 2
-    ? featured.slice(0, 4)
-    : sortedRemaining.slice(0, 4)
+  const fokusRedaksi = scoreAndSort(remainingAfterHero).slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
   // ─────────────────────────────────────────────
