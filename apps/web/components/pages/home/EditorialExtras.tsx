@@ -1,4 +1,4 @@
-import { Zap, Star, Play } from 'lucide-react'
+import { Zap, Cpu, Play } from 'lucide-react'
 import Link from 'next/link'
 import { SmartImage } from '../../ui/SmartImage'
 import FadeInOnScroll from '../../ui/FadeInOnScroll'
@@ -14,12 +14,12 @@ interface ArticleBlock {
 }
 
 interface EditorialExtrasProps {
-  editorChoice: HomeArticle[]
+  technologyArticles: HomeArticle[]
   opinionArticles: HomeArticle[]
   photoJournal: HomeArticle[]
   videoStories: HomeArticle[]
   site: string
-  showEditorChoice: boolean
+  showTechnologySection: boolean
   showOpinionSection: boolean
   showPhotoSection: boolean
   showVideoSection: boolean
@@ -27,29 +27,29 @@ interface EditorialExtrasProps {
 }
 
 export function EditorialExtras({
-  editorChoice, opinionArticles, photoJournal, videoStories, site,
-  showEditorChoice, showOpinionSection, showPhotoSection, showVideoSection,
+  technologyArticles, opinionArticles, photoJournal, videoStories, site,
+  showTechnologySection, showOpinionSection, showPhotoSection, showVideoSection,
   getVideoThumbnail,
 }: EditorialExtrasProps) {
-  if (!showEditorChoice && !showOpinionSection && !showPhotoSection && !showVideoSection) return null
+  if (!showTechnologySection && !showOpinionSection && !showPhotoSection && !showVideoSection) return null
 
   return (
     <div className="border-t border-gray-100 dark:border-white/5">
       <Container className="pt-6 pb-6 space-y-8 md:pt-8 md:pb-8 md:space-y-10">
 
-        {/* Pilihan Editor — portrait cards (3:4) */}
-        {showEditorChoice && (
+        {/* Teknologi — portrait cards (3:4) */}
+        {showTechnologySection && (
           <FadeInOnScroll>
             <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div className="flex items-center gap-2">
-                <Star size={14} className="fill-amber-500 text-amber-500" />
+                <Cpu size={14} className="text-blue-600" />
                 <SectionEyebrow as="h3" className="text-brand-black dark:text-white">
-                  Pilihan Editor
+                  Teknologi
                 </SectionEyebrow>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
-              {editorChoice.map((article: HomeArticle) => (
+              {technologyArticles.map((article: HomeArticle) => (
                 <div key={article.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                   {article.featuredImage && (
                     <SmartImage
@@ -63,8 +63,8 @@ export function EditorialExtras({
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 z-10 w-full p-5 md:p-6">
-                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-brand-red">
-                      {article.categories?.[0]?.category?.name || article.category?.name || 'Pilihan Editor'}
+                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-blue-400">
+                      {article.categories?.[0]?.category?.name || article.category?.name || 'Teknologi'}
                     </span>
                     <Link href={`/${site}/artikel/${article.slug}`}>
                       <h4 className="line-clamp-3 font-sans text-base font-extrabold leading-snug tracking-tight text-white transition-colors hover:text-white/85 md:text-lg">

@@ -39,6 +39,7 @@ interface HomepageConfigData {
   opinionCategories: string[]
   photoCategories: string[]
   videoCategories: string[]
+  technologyCategories: string[]
 }
 
 // ─────────────────────────────────────────────
@@ -120,6 +121,7 @@ function buildWhatsAppUrl(phone?: string | null, siteName?: string) {
 const DEFAULT_OPINION_SLUGS = ['opini', 'kolom-esai', 'analisis', 'kolom']
 const DEFAULT_PHOTO_SLUGS = ['foto-jurnalistik']
 const DEFAULT_VIDEO_SLUGS = ['video', 'dokumenter-reportase', 'podcast-audio']
+const DEFAULT_TECHNOLOGY_SLUGS = ['teknologi', 'gadget-review', 'ai-inovasi', 'startups-digital', 'game-esports']
 
 function hasCategorySlug(a: HomeArticle, slugs: string[]): boolean {
   if (a.categories?.some(c => slugs.includes(c.category?.slug?.toLowerCase() || ''))) return true
@@ -269,19 +271,26 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const configOpinion = homepageConfig?.opinionCategories as string[] | undefined
   const configPhoto = homepageConfig?.photoCategories as string[] | undefined
   const configVideo = homepageConfig?.videoCategories as string[] | undefined
+  const configTechnology = homepageConfig?.technologyCategories as string[] | undefined
 
   const opinionSlugs = configOpinion?.length ? configOpinion : DEFAULT_OPINION_SLUGS
   const photoSlugs = configPhoto?.length ? configPhoto : DEFAULT_PHOTO_SLUGS
   const videoSlugs = configVideo?.length ? configVideo : DEFAULT_VIDEO_SLUGS
+  const technologySlugs = configTechnology?.length ? configTechnology : DEFAULT_TECHNOLOGY_SLUGS
 
   // ── Distribusi artikel (homepage) — zone allocation ──
+  // Artikel teknologi dikecualikan dari main pool supaya hanya tampil di grid Teknologi.
+  // Trending & Paling Dibaca tetap bisa menampilkan teknologi (fetch terpisah by views).
+  const techSlugsSet = new Set(technologySlugs.map((s: string) => s.toLowerCase()))
+  const isTechArticle = (a: HomeArticle) => hasCategorySlug(a, [...techSlugsSet])
+
   const dist = isHomepage ? scoreAndDistribute({
-    main: articlesList,
+    main: articlesList.filter((a: HomeArticle) => !isTechArticle(a)),
     trending: popularArticles as HomeArticle[],
-    editorChoicePool: articlesList.filter((a: HomeArticle) => a.isFeatured),
     opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, opinionSlugs)),
     photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, photoSlugs)),
     videoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'video_exclusive' || hasCategorySlug(a, videoSlugs)),
+    technologyPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, technologySlugs)),
   }, {
     heroMode,
     scoreWeights: {
@@ -296,7 +305,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const feedArticles = isHomepage
     ? (dist?.feed || [])
     : articlesList.slice(0, 8)
-  const editorChoice = dist?.editorChoice || []
+  const technologyArticles = dist?.technology || []
   const opinionArticles = dist?.opinion || []
   const photoJournal = dist?.photoJournal || []
   const videoStories = dist?.videoStories || []
@@ -318,7 +327,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     ...heroArticles,
     ...fokusRedaksi,
     ...feedArticles,
-    ...editorChoice,
+    ...technologyArticles,
     ...opinionArticles,
     ...photoJournal,
     ...videoStories,
@@ -329,7 +338,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const showHomepageHero = isHomepage && heroArticles.length > 0
   const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
   const showTrending = isHomepage && effectiveTrending.length > 0
-  const showEditorChoice = isHomepage && editorChoice.length >= 2
+  const showTechnologySection = isHomepage && technologyArticles.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1
   const showVideoSection = isHomepage && videoStories.length >= 1
@@ -353,10 +362,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             feedArticles={feedArticles}
             trending={trending}
             popular={popular}
-            editorChoice={editorChoice}
             opinionArticles={opinionArticles}
             photoJournal={photoJournal}
             videoStories={videoStories}
+            technologyArticles={technologyArticles}
             site={siteParam}
             searchQuery={searchQuery}
             isCategoryFilter={!!isCategoryFilter}
@@ -370,8 +379,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             marketData={marketData}
             showPhotoSection={showPhotoSection}
             showVideoSection={showVideoSection}
-            showEditorChoice={showEditorChoice}
             showOpinionSection={showOpinionSection}
+            showTechnologySection={showTechnologySection}
             siteSettings={siteSettings}
             siteConfigId={siteConfig.id}
             homeTopAds={homeTopAds}
@@ -389,10 +398,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             feedArticles={articlesList.slice(0, 10)}
             trending={[]}
             popular={articlesList.slice(0, 5)}
-            editorChoice={[]}
             opinionArticles={[]}
             photoJournal={[]}
             videoStories={[]}
+            technologyArticles={[]}
             site={siteParam}
             searchQuery={searchQuery}
             isCategoryFilter={!!isCategoryFilter}
@@ -406,8 +415,8 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
             marketData={marketData}
             showPhotoSection={false}
             showVideoSection={false}
-            showEditorChoice={false}
             showOpinionSection={false}
+            showTechnologySection={false}
             siteSettings={siteSettings}
             siteConfigId={siteConfig.id}
             homeTopAds={homeTopAds}

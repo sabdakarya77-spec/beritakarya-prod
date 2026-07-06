@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { SectionTitle } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { PalingDibacaSidebar, AksesRedaksiSidebar } from './sidebar'
+import { PalingDibacaSidebar, AksesRedaksiSidebar, OpiniSidebar } from './sidebar'
 import { SmartImage } from '../../ui/SmartImage'
 
 interface FeedWithSidebarProps {
   feedArticles: HomeArticle[]
   popular: HomeArticle[]
+  opinionArticles?: HomeArticle[]
   site: string
   searchQuery: string
   isCategoryFilter: boolean
@@ -28,7 +29,7 @@ const getCategoryName = (article: HomeArticle): string =>
   article.categories?.[0]?.category?.name || article.category?.name || 'Umum'
 
 export function FeedWithSidebar({
-  feedArticles, popular, site,
+  feedArticles, popular, opinionArticles, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
   whatsappUrl, telegramUrl, reportUrl, resolveCategoryName,
 }: FeedWithSidebarProps) {
@@ -138,6 +139,11 @@ export function FeedWithSidebar({
         <aside className="lg:col-span-4">
           <div className="sticky top-24 space-y-4">
             <PalingDibacaSidebar articles={popular} site={site} />
+            {opinionArticles && opinionArticles.length > 0 && (
+              <div className="hidden lg:block">
+                <OpiniSidebar articles={opinionArticles} site={site} />
+              </div>
+            )}
             <div className="hidden lg:block">
               <AksesRedaksiSidebar
                 whatsappUrl={whatsappUrl}

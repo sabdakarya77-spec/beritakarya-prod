@@ -26,10 +26,10 @@ import type { TemplateProps } from '../types'
 export function HybridLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
-    popular, editorChoice, opinionArticles, photoJournal, videoStories,
+    popular, opinionArticles, photoJournal, videoStories, technologyArticles,
     site, searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
     whatsappUrl, telegramUrl, reportUrl,
-    showPhotoSection, showEditorChoice, showOpinionSection, showVideoSection,
+    showPhotoSection, showOpinionSection, showVideoSection, showTechnologySection,
     homeTopAds, resolveCategoryName, getVideoThumbnail, remainingArticles, excludeIds,
   } = props
 
@@ -69,6 +69,7 @@ export function HybridLayout(props: TemplateProps) {
       <FeedWithSidebar
         feedArticles={feedArticles}
         popular={popular}
+        opinionArticles={showOpinionSection ? opinionArticles : undefined}
         site={site}
         searchQuery={searchQuery}
         isCategoryFilter={isCategoryFilter}
@@ -91,15 +92,15 @@ export function HybridLayout(props: TemplateProps) {
       {/* AD: HOME_FEED_2 */}
       <AdZone type="HOME_FEED_2" />
 
-      {/* ZONA 5 — EDITORIAL EXTRAS (Editor · Opini · Foto · Video) */}
+      {/* ZONA 5 — EDITORIAL EXTRAS (Teknologi · Foto · Video) */}
       <EditorialExtras
-        editorChoice={editorChoice}
-        opinionArticles={opinionArticles}
+        technologyArticles={technologyArticles}
+        opinionArticles={[]}
         photoJournal={photoJournal}
         videoStories={videoStories}
         site={site}
-        showEditorChoice={showEditorChoice}
-        showOpinionSection={showOpinionSection}
+        showTechnologySection={showTechnologySection}
+        showOpinionSection={false}
         showPhotoSection={showPhotoSection}
         showVideoSection={showVideoSection}
         getVideoThumbnail={getVideoThumbnail}

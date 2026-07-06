@@ -12,10 +12,10 @@ export interface TemplateProps {
   feedArticles: HomeArticle[]
   trending: HomeArticle[]
   popular: HomeArticle[]
-  editorChoice: HomeArticle[]
   opinionArticles: HomeArticle[]
   photoJournal: HomeArticle[]
   videoStories: HomeArticle[]
+  technologyArticles: HomeArticle[]
   site: string
   searchQuery: string
   isCategoryFilter: boolean
@@ -29,8 +29,8 @@ export interface TemplateProps {
   marketData: Record<string, unknown> | null
   showPhotoSection: boolean
   showVideoSection: boolean
-  showEditorChoice: boolean
   showOpinionSection: boolean
+  showTechnologySection: boolean
   siteSettings?: Record<string, unknown>
   siteConfigId: string
   homeTopAds?: unknown[]

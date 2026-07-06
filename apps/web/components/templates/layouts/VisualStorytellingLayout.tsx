@@ -24,10 +24,10 @@ import type { TemplateProps } from '../types'
 export function VisualStorytellingLayout(props: TemplateProps) {
   const {
     heroArticles, fokusRedaksi, trendingArticles, feedArticles,
-    trending, popular, editorChoice, opinionArticles, photoJournal, videoStories,
+    trending, popular, opinionArticles, photoJournal, videoStories, technologyArticles,
     site, searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
     showSavedFeed, whatsappUrl, telegramUrl, reportUrl, siteName,
-    marketData, showPhotoSection, showVideoSection, showEditorChoice, showOpinionSection,
+    marketData, showPhotoSection, showVideoSection, showOpinionSection, showTechnologySection,
     siteSettings, siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
     remainingArticles, excludeIds,
   } = props
@@ -85,12 +85,12 @@ export function VisualStorytellingLayout(props: TemplateProps) {
 
       {/* ZONA 5+ — EDITORIAL EXTRAS */}
       <EditorialExtras
-        editorChoice={editorChoice}
+        technologyArticles={technologyArticles}
         opinionArticles={opinionArticles}
         photoJournal={photoJournal}
         videoStories={videoStories}
         site={site}
-        showEditorChoice={showEditorChoice}
+        showTechnologySection={showTechnologySection}
         showOpinionSection={showOpinionSection}
         showPhotoSection={showPhotoSection}
         showVideoSection={showVideoSection}

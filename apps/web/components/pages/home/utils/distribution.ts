@@ -43,11 +43,11 @@ export interface HomepagePools {
   main: HomeArticle[]
   /** 5 artikel by views — fetch terpisah, TETAP terpisah. */
   trending: HomeArticle[]
-  /** Fetch mandiri, bukan sisa pool utama. */
-  editorChoicePool: HomeArticle[]
   opinionPool: HomeArticle[]
   photoPool: HomeArticle[]
   videoPool: HomeArticle[]
+  /** Pool untuk section Teknologi — filter by category slug. */
+  technologyPool: HomeArticle[]
 }
 
 export interface DistributionOptions {
@@ -64,12 +64,12 @@ export interface DistributionResult {
   hero: HomeArticle[]
   fokusRedaksi: HomeArticle[]
   feed: HomeArticle[]
-  editorChoice: HomeArticle[]
   opinion: HomeArticle[]
   photoJournal: HomeArticle[]
   videoStories: HomeArticle[]
   trending: HomeArticle[]
   popular: HomeArticle[]
+  technology: HomeArticle[]
   /** Semua artikel yang TIDAK dipakai di zona manapun — untuk Load More */
   remainingArticles: HomeArticle[]
 }
@@ -183,7 +183,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
 
   // ─────────────────────────────────────────────
   // 4. EDITORIAL EXTRAS: pool terpisah, dedup progresif
-  //    Urutan: editor choice → opini → foto → video → trending.
+  //    Urutan: teknologi → opini → foto → video → trending.
   //    Prioritas keputusan editor > metric views.
   // ─────────────────────────────────────────────
   const usedIds = new Set([...hero, ...fokusRedaksi, ...feed].map(a => a.id))
@@ -194,7 +194,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     return picked
   }
 
-  const editorChoice = takeUnused(pools.editorChoicePool, 3)
+  const technology = takeUnused(pools.technologyPool, 4)
   const opinion = takeUnused(pools.opinionPool, 3)
   const photoJournal = takeUnused(pools.photoPool, 3)
   const videoStories = takeUnused(pools.videoPool, 3)
@@ -216,7 +216,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     ...hero,
     ...fokusRedaksi,
     ...feed,
-    ...editorChoice,
+    ...technology,
     ...opinion,
     ...photoJournal,
     ...videoStories,
@@ -229,7 +229,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     hero,
     fokusRedaksi,
     feed,
-    editorChoice,
+    technology,
     opinion,
     photoJournal,
     videoStories,
