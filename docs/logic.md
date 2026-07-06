@@ -63,14 +63,16 @@ else:
 ### Scoring Formula
 
 ```
-score = (freshness × 0.4) + (engagement × 0.3) + (editorial × 0.3)
+score = (freshness × Wf) + (engagement × We) + (editorial × Wd)
 ```
 
-| Komponen | Bobot | Formula | Range |
-|----------|-------|---------|-------|
-| **Freshness** | 40% | `max(0, 1 - (daysSincePublish / 7))` | 0–1 (hari ke-7 = 0) |
-| **Engagement** | 30% | `viewCount / maxViewCount` (normalised) | 0–1 |
-| **Editorial** | 30% | `isFeatured(0.5) + isExclusive(0.3) + isBreaking(0.2)` | 0–1 |
+| Komponen | Bobot Default | Formula | Range |
+|----------|---------------|---------|-------|
+| **Freshness** | 40% (Wf) | `max(0, 1 - (daysSincePublish / 7))` | 0–1 (hari ke-7 = 0) |
+| **Engagement** | 30% (We) | `viewCount / maxViewCount` (normalised) | 0–1 |
+| **Editorial** | 30% (Wd) | `isFeatured(0.5) + isExclusive(0.3) + isBreaking(0.2)` | 0–1 |
+
+> **Configurable:** Bobot scoring bisa diubah per site via dashboard (`HomepageConfig.scoreFreshness/scoreEngagement/scoreEditorial`). Default: 0.4/0.3/0.3.
 
 ### Detail Komponen
 

@@ -283,7 +283,14 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
     opinionPool: articlesList.filter((a: HomeArticle) => hasCategorySlug(a, opinionSlugs)),
     photoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'photo_journalism' || hasCategorySlug(a, photoSlugs)),
     videoPool: articlesList.filter((a: HomeArticle) => a.contentType === 'video_exclusive' || hasCategorySlug(a, videoSlugs)),
-  }, { heroMode }) : null
+  }, {
+    heroMode,
+    scoreWeights: {
+      freshness: homepageConfig?.scoreFreshness,
+      engagement: homepageConfig?.scoreEngagement,
+      editorial: homepageConfig?.scoreEditorial,
+    },
+  }) : null
 
   const heroArticles = dist?.hero || []
   const fokusRedaksi = dist?.fokusRedaksi || []

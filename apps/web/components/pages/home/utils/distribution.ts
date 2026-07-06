@@ -52,6 +52,12 @@ export interface HomepagePools {
 
 export interface DistributionOptions {
   heroMode?: HeroMode
+  /** Bobot scoring zona 2 Fokus Redaksi. Default: freshness=0.4, engagement=0.3, editorial=0.3 */
+  scoreWeights?: {
+    freshness?: number
+    engagement?: number
+    editorial?: number
+  }
 }
 
 export interface DistributionResult {
@@ -100,10 +106,10 @@ function dedupById(articles: HomeArticle[]): HomeArticle[] {
 // engagement = viewCount / maxViewCount (normalised) → 0–1
 // editorial  = isFeatured(0.5) + isExclusive(0.3) + isBreaking(0.2) → 0–1
 
-const SCORE_WEIGHTS = { freshness: 0.4, engagement: 0.3, editorial: 0.3 }
+const DEFAULT_SCORE_WEIGHTS = { freshness: 0.4, engagement: 0.3, editorial: 0.3 }
 const FRESHNESS_DECAY_DAYS = 7
 
-function scoreArticle(article: HomeArticle, maxViewCount: number): number {
+function scoreArticle(article: HomeArticle, maxViewCount: number, weights = DEFAULT_SCORE_WEIGHTS): number {
   // Freshness: 0 hari = 1.0, 7 hari = 0.0
   const daysSincePublish = (Date.now() - getPublishedDate(article).getTime()) / (1000 * 60 * 60 * 24)
   const freshness = Math.max(0, 1 - daysSincePublish / FRESHNESS_DECAY_DAYS)
@@ -117,16 +123,16 @@ function scoreArticle(article: HomeArticle, maxViewCount: number): number {
     (article.isExclusive ? 0.3 : 0) +
     (article.isBreaking ? 0.2 : 0)
 
-  return (freshness * SCORE_WEIGHTS.freshness)
-    + (engagement * SCORE_WEIGHTS.engagement)
-    + (editorial * SCORE_WEIGHTS.editorial)
+  return (freshness * weights.freshness)
+    + (engagement * weights.engagement)
+    + (editorial * weights.editorial)
 }
 
-function scoreAndSort(articles: HomeArticle[]): HomeArticle[] {
+function scoreAndSort(articles: HomeArticle[], weights = DEFAULT_SCORE_WEIGHTS): HomeArticle[] {
   if (articles.length === 0) return []
   const maxViewCount = Math.max(...articles.map(a => a.viewCount || 0), 1)
   return [...articles]
-    .map(a => ({ article: a, score: scoreArticle(a, maxViewCount) }))
+    .map(a => ({ article: a, score: scoreArticle(a, maxViewCount, weights) }))
     .sort((a, b) => b.score - a.score)
     .map(({ article }) => article)
 }
@@ -137,6 +143,7 @@ function scoreAndSort(articles: HomeArticle[]): HomeArticle[] {
 
 export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptions = {}): DistributionResult {
   const heroMode: HeroMode = opts.heroMode ?? 'MAGAZINE_COVER_550'
+  const scoreWeights = { ...DEFAULT_SCORE_WEIGHTS, ...opts.scoreWeights }
   const articles = dedupById(pools.main)
 
   // ─────────────────────────────────────────────
@@ -163,8 +170,8 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
 
   const featuredPool = remainingAfterHero.filter(a => a.isFeatured)
   const fokusRedaksi = featuredPool.length >= 2
-    ? scoreAndSort(featuredPool).slice(0, 4)
-    : scoreAndSort(remainingAfterHero).slice(0, 4)
+    ? scoreAndSort(featuredPool, scoreWeights).slice(0, 4)
+    : scoreAndSort(remainingAfterHero, scoreWeights).slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
   // ─────────────────────────────────────────────
