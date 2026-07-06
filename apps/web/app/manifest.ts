@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'BeritaKarya',
     short_name: 'BeritaKarya',
-    description: 'Jernih Melihat Nusantara - Portal Berita Terpercaya',
+    description: 'Nusantara Berbicara - Portal Berita Terpercaya',
     start_url: '/',
     scope: '/',
     display: 'standalone',
