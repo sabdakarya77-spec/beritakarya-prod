@@ -35,8 +35,11 @@ export function TemplateF(props: TemplateProps) {
 
   const { LoadMoreArticles } = require('../../LazyWidgets')
 
-  // Row 2: sisa artikel setelah Row 1 (max 8 artikel = 4 kolom × 2 baris)
-  const row2Articles = remainingArticles?.slice(0, 8) || []
+  // Row 2: sisa dari feed (yang tidak tampil di Row 1) + remainingArticles
+  // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(5) mengambil setelah5 pertama
+  const feedRow1Ids = new Set(feedArticles.slice(0, 5).map((a) => a.id))
+  const feedLeftover = feedArticles.slice(5).filter((a) => !feedRow1Ids.has(a.id))
+  const row2Articles = [...feedLeftover, ...(remainingArticles || [])].slice(0, 8)
 
   // ID untuk exclude dari Load More (semua yang sudah tampil)
   const allExcludeIds = [

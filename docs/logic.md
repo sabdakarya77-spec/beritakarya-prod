@@ -22,7 +22,7 @@ scoreAndDistribute()
         ├── videoStories (3)   ─┘
         ├── trending (5)       → ZONA 3 (weekly, fetch terpisah)
         ├── popular (5)        → Sidebar PalingDibaca (monthly)
-        └── remainingArticles  → ZONA 4 Row 2 (max 8) + Load More
+        └── remainingArticles  → ZONA 4 Row 2 (bersama sisa feed) + Load More
 ```
 
 ---
@@ -192,33 +192,24 @@ Artikel di Row 1 **TIDAK ADA** yang sama dengan Zona 1 (hero) dan Zona 2 (fokusR
 ## ZONA 4 Row 2 — CONTINUED FEED (4 sejajar, full info)
 
 **Jumlah tampil:** max 8 artikel (4 kolom × 2 baris)
-**Pool:** `remainingArticles` — sisa dari Zona 1 + Zona 2 + Row 1
+**Pool:** sisa `feed` (setelah Row 1) + `remainingArticles`
 **Urutan:** `publishedAt` descending
 
 ### Logic
 
 ```typescript
-const allUsedIds = new Set([
-  ...hero,
-  ...fokusRedaksi,
-  ...feedFeatured,
-  ...feedStream,
-  ...editorChoice,
-  ...opinion,
-  ...photoJournal,
-  ...videoStories,
-  ...trending,
-].map(a => a.id))
-
-const remainingArticles = articles.filter(a => !allUsedIds.has(a.id))
+// feed = 16 artikel, Row 1 tampilkan 5 pertama
+// Sisa feed (11 artikel) + remainingArticles → Row 2
+const feedLeftover = feedArticles.slice(5)  // 11 artikel setelah Row 1
+const row2Articles = [...feedLeftover, ...remainingArticles].slice(0, 8)
 ```
 
 ### Dedup
 
 Artikel di Row 2 **TIDAK ADA** yang sama dengan:
-- Zona 1 (hero)
-- Zona 2 (fokusRedaksi)
-- Row 1 (feed)
+- Zona 1 (hero) — sudah di-filter saat distribusi
+- Zona 2 (fokusRedaksi) — sudah di-filter saat distribusi
+- Row 1 (feed 5 pertama) — `feed.slice(5)` mengambil setelah 5 pertama
 
 Artikel yang sama dengan trending/popular **TIDAK masalah** karena zona itu fetch terpisah dan pakai scoring berbeda.
 
