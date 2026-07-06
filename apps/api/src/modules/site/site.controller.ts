@@ -11,7 +11,6 @@ export const siteRouter: Router = Router()
 
 siteRouter.get('/', publicLimiter, asyncHandler(getSites))
 siteRouter.get('/settings', publicLimiter, asyncHandler(getSiteSettings))
-siteRouter.get('/:id', asyncHandler(getSiteById))
 siteRouter.patch('/settings',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
@@ -43,6 +42,8 @@ siteRouter.patch('/kabiro-settings',
 siteRouter.post('/',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(createSite))
+// GET /:id harus SETELAH semua route spesifik agar tidak menangkap /wapimred-settings dll
+siteRouter.get('/:id', asyncHandler(getSiteById))
 siteRouter.put('/:id',
   requireAuth, requireRole(['superadmin']),
   asyncHandler(updateSite))
