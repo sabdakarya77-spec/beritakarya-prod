@@ -1,12 +1,12 @@
 /**
- * TemplateF — Best of (Hybrid) ⭐ DEFAULT
+ * HybridLayout — Best of (Hybrid) ⭐ DEFAULT
  *
  * Layout Final (log.txt):
  *   ZONA 1 — Hero: MAGAZINE_COVER (560px)
  *   AD: HOME_TOP
  *   ZONA 2 — Fokus Redaksi (4 kartu sejajar)
  *   ZONA 3 — Trending: NUMBERED_PODIUM
- *   ZONA 4 Row 1 — Berita Terbaru (70:30 sidebar)
+ *   ZONA 4 Row 1 — Berita Terbaru (8:4 sidebar)
  *   AD: HOME_FEED_1
  *   ZONA 4 Row 2 — Continued Feed (4 sejajar, full info)
  *   AD: HOME_FEED_2
@@ -14,13 +14,13 @@
  *   [Load More Articles]
  */
 
-import AdSpace from '../../ui/AdSpace'
 import { HeroSection } from '../../pages/home/HeroSection'
 import { FokusRedaksiSection } from '../../pages/home/FokusRedaksiSection'
 import { TrendingSection } from '../../pages/home/TrendingSection'
 import { FeedWithSidebar } from '../../pages/home/FeedWithSidebar'
 import { ContinuedFeed } from '../../pages/home/ContinuedFeed'
 import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import { AdZone, LoadMoreZone } from '../zones'
 import type { TemplateProps } from '../types'
 
 export function HybridLayout(props: TemplateProps) {
@@ -33,10 +33,8 @@ export function HybridLayout(props: TemplateProps) {
     homeTopAds, resolveCategoryName, getVideoThumbnail, remainingArticles, excludeIds,
   } = props
 
-  const { LoadMoreArticles } = require('../../pages/LazyWidgets')
-
   // Row 2: sisa dari feed (yang tidak tampil di Row 1) + remainingArticles
-  // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(5) mengambil setelah5 pertama
+  // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(5) mengambil setelah 5 pertama
   const feedRow1Ids = new Set(feedArticles.slice(0, 5).map((a) => a.id))
   const feedLeftover = feedArticles.slice(5).filter((a) => !feedRow1Ids.has(a.id))
   const row2Articles = [...feedLeftover, ...(remainingArticles || [])].slice(0, 8)
@@ -55,7 +53,7 @@ export function HybridLayout(props: TemplateProps) {
       )}
 
       {/* AD: HOME_TOP */}
-      <AdSpace type="HOME_TOP" initialAds={homeTopAds as never} />
+      <AdZone type="HOME_TOP" initialAds={homeTopAds} />
 
       {/* ZONA 2 — FOKUS REDAKSI (4 kartu sejajar) */}
       {fokusRedaksi.length > 0 && (
@@ -67,7 +65,7 @@ export function HybridLayout(props: TemplateProps) {
         <TrendingSection articles={trendingArticles} site={site} />
       )}
 
-      {/* ZONA 4 Row 1 — BERITA TERBARU (70:30 sidebar) */}
+      {/* ZONA 4 Row 1 — BERITA TERBARU (8:4 sidebar) */}
       <FeedWithSidebar
         feedArticles={feedArticles}
         popular={popular}
@@ -83,7 +81,7 @@ export function HybridLayout(props: TemplateProps) {
       />
 
       {/* AD: HOME_FEED_1 */}
-      <AdSpace type="HOME_FEED_1" />
+      <AdZone type="HOME_FEED_1" />
 
       {/* ZONA 4 Row 2 — CONTINUED FEED (4 sejajar, full info) */}
       {row2Articles.length > 0 && (
@@ -91,7 +89,7 @@ export function HybridLayout(props: TemplateProps) {
       )}
 
       {/* AD: HOME_FEED_2 */}
-      <AdSpace type="HOME_FEED_2" />
+      <AdZone type="HOME_FEED_2" />
 
       {/* ZONA 5 — EDITORIAL EXTRAS (Editor · Opini · Foto · Video) */}
       <EditorialExtras
@@ -108,18 +106,13 @@ export function HybridLayout(props: TemplateProps) {
       />
 
       {/* LOAD MORE ARTICLES */}
-      <div className="border-t border-gray-100 dark:border-white/5">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <LoadMoreArticles
-            siteId={props.siteConfigId}
-            category={categoryFilter}
-            search={searchQuery}
-            initialPage={1}
-            remainingArticles={remainingArticles}
-            excludeIds={allExcludeIds}
-          />
-        </div>
-      </div>
+      <LoadMoreZone
+        siteId={props.siteConfigId}
+        category={categoryFilter}
+        search={searchQuery}
+        remainingArticles={remainingArticles}
+        excludeIds={allExcludeIds}
+      />
     </>
   )
 }
