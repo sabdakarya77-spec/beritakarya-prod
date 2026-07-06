@@ -463,7 +463,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const { articleId, siteId } = get()
     if (!articleId) return
     await get().saveArticle()
-    await api.post(`/articles/${articleId}/publish`, undefined, siteId ? { params: { site: siteId } } : undefined)
+    // forcePublish: true — tombol Publish hanya tampil untuk superadmin,
+    // API tetap validasi role di server (wapimred/kaperwil/kabiro tanpa forcePublish akan ditolak).
+    await api.post(`/articles/${articleId}/publish`, { forcePublish: true }, siteId ? { params: { site: siteId } } : undefined)
     set({ status: 'published' })
   },
 

@@ -122,8 +122,9 @@ self.addEventListener('fetch', (event) => {
           }).catch(() => {
             // Fallback untuk gambar yang gagal dimuat
             if (request.url.match(/\.(png|jpg|jpeg|webp)$/)) {
-              return caches.match('/placeholder.jpg');
+              return caches.match('/placeholder.jpg').then((r) => r || new Response('', { status: 404 }));
             }
+            return new Response('', { status: 503 });
           });
         });
       })
@@ -152,8 +153,12 @@ self.addEventListener('fetch', (event) => {
           // Saat offline & membuka HTML, tampilkan shell home situs terkait
           if (request.headers.get('accept')?.includes('text/html')) {
             const homeUrl = site === 'root' ? '/' : `/${site}/`;
-            return caches.match(homeUrl);
+            return caches.match(homeUrl).then((r) => r || new Response('<h1>Offline</h1><p>Anda sedang offline dan halaman ini belum di-cache.</p>', {
+              headers: { 'Content-Type': 'text/html' },
+              status: 503,
+            }));
           }
+          return new Response('', { status: 503 });
         });
       })
   );
