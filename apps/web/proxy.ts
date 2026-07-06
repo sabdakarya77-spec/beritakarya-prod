@@ -100,10 +100,12 @@ export function proxy(req: NextRequest) {
 
   // Reject paths with encoded special characters (e.g. /%26, /%24, /&).
   // These get sanitized away in siteId but still render pages Google shouldn't index.
-  if (rawSiteId !== siteId || /[^a-zA-Z0-9\-/]/.test(pathname)) {
+  // NOTE: dots (.) are intentionally allowed so static files like
+  // /manifest.webmanifest, /robots.txt, /sitemap.xml are not blocked.
+  if (rawSiteId !== siteId || /[^a-zA-Z0-9\-./_]/.test(pathname)) {
     const decoded = decodeURIComponent(pathname).replace(/\/+$/, '')
     const decodedFirst = decoded.split('/').filter(Boolean)[0] || ''
-    if (/[^a-zA-Z0-9-]/.test(decodedFirst) || rawSiteId !== siteId) {
+    if (/[^a-zA-Z0-9-.]/.test(decodedFirst) || rawSiteId !== siteId) {
       const notFoundUrl = new URL(`/${siteId}/404-not-found`, req.url)
       return NextResponse.rewrite(notFoundUrl)
     }
