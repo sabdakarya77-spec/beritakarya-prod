@@ -15,8 +15,7 @@ scoreAndDistribute()
         │
         ├── hero (5)           → ZONA 1 (terbaru)
         ├── fokusRedaksi (4)   → ZONA 2 (scoring)
-        ├── feedFeatured (4)   ─┐
-        ├── feedStream (12)    ─┴→ ZONA 4 Row 1 (tampilkan 5, sisanya ke Row 2)
+        ├── feed (16)          → ZONA 4 Row 1 (tampilkan 5, sisanya ke Row 2)
         ├── editorChoice (3)   ─┐
         ├── opinion (3)        │
         ├── photoJournal (3)   ├→ ZONA 5 (Editorial Extras)
@@ -162,20 +161,14 @@ Trending (weekly) dan Popular (monthly) **boleh overlap**. Ini wajar karena:
 ## ZONA 4 Row 1 — BERITA TERBARU (8:4 sidebar)
 
 **Jumlah tampil:** 5 artikel
-**Pool:** `feedFeatured` (4) + `feedStream` (12) = 16 total
-**Filter:** Sisa dari Zona 1 + Zona 2
+**Pool:** `feed` — 16 artikel sisa dari Zona 1 + Zona 2
 **Urutan:** `publishedAt` descending
 
 ### Logic
 
 ```typescript
-const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
-const sortedRemaining = sortByNewest(remainingAfterHero)
-const fokusRedaksi = scored.slice(0, 4)  // sudah diambil di Zona 2
-
 const feedPool = sortedRemaining.filter(a => !fokusIds.has(a.id))
-const feedFeatured = feedPool.slice(0, 4)
-const feedStream = feedPool.slice(4, 16)
+const feed = feedPool.slice(0, 16)
 ```
 
 ### Dedup
@@ -213,7 +206,7 @@ const remainingArticles = articles.filter(a => !allUsedIds.has(a.id))
 Artikel di Row 2 **TIDAK ADA** yang sama dengan:
 - Zona 1 (hero)
 - Zona 2 (fokusRedaksi)
-- Row 1 (feedFeatured + feedStream)
+- Row 1 (feed)
 
 Artikel yang sama dengan trending/popular **TIDAK masalah** karena zona itu fetch terpisah dan pakai scoring berbeda.
 

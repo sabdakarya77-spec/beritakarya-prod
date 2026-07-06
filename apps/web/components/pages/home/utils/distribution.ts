@@ -58,8 +58,7 @@ export interface DistributionOptions {
 export interface DistributionResult {
   hero: HomeArticle[]
   fokusRedaksi: HomeArticle[]
-  feedFeatured: HomeArticle[]
-  feedStream: HomeArticle[]
+  feed: HomeArticle[]
   editorChoice: HomeArticle[]
   opinion: HomeArticle[]
   photoJournal: HomeArticle[]
@@ -133,15 +132,14 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   //    Urut by publishedAt descending.
   // ─────────────────────────────────────────────
   const feedPool = sortedRemaining.filter(a => !fokusIds.has(a.id))
-  const feedFeatured = feedPool.slice(0, 4)
-  const feedStream = feedPool.slice(4, 16)
+  const feed = feedPool.slice(0, 16)
 
   // ─────────────────────────────────────────────
   // 4. EDITORIAL EXTRAS: pool terpisah, dedup progresif
   //    Urutan: editor choice → opini → foto → video → trending.
   //    Prioritas keputusan editor > metric views.
   // ─────────────────────────────────────────────
-  const usedIds = new Set([...hero, ...fokusRedaksi, ...feedFeatured, ...feedStream].map(a => a.id))
+  const usedIds = new Set([...hero, ...fokusRedaksi, ...feed].map(a => a.id))
 
   const takeUnused = (pool: HomeArticle[], limit: number): HomeArticle[] => {
     const picked = dedupById(pool).filter(a => !usedIds.has(a.id)).slice(0, limit)
@@ -170,8 +168,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const allUsedIds = new Set([
     ...hero,
     ...fokusRedaksi,
-    ...feedFeatured,
-    ...feedStream,
+    ...feed,
     ...editorChoice,
     ...opinion,
     ...photoJournal,
@@ -184,8 +181,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   return {
     hero,
     fokusRedaksi,
-    feedFeatured,
-    feedStream,
+    feed,
     editorChoice,
     opinion,
     photoJournal,

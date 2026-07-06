@@ -280,8 +280,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
 
   const heroArticles = dist?.hero || []
   const fokusRedaksi = dist?.fokusRedaksi || []
-  const feedFeatured = dist?.feedFeatured || []
-  const feedStream = dist?.feedStream || []
+  const feedArticles = isHomepage
+    ? (dist?.feed || [])
+    : articlesList.slice(0, 8)
   const editorChoice = dist?.editorChoice || []
   const opinionArticles = dist?.opinion || []
   const photoJournal = dist?.photoJournal || []
@@ -290,16 +291,10 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const trending = dist?.trending || []
   const remainingArticles = dist?.remainingArticles || []
 
-  // ── Feed: gabungkan featured + stream untuk pattern rotation ──
-  const feedArticles = isHomepage
-    ? [...feedFeatured, ...feedStream]
-    : articlesList.slice(0, 8)
-
-
-  // ── Popular untuk fallback trending interstitial ──
+  // ── Popular untuk sidebar Paling Dibaca (monthly) ──
   const popular = isHomepage ? sidebarPopular : articlesList.slice(0, 5)
 
-  // ── Fallback: jika trending 24jam kosong, pakai popular 7 hari ──
+  // ── Fallback: jika trending weekly kosong, pakai popular monthly ──
   const effectiveTrending = trendingArticles.length > 0
     ? trendingArticles
     : popularArticles
@@ -309,8 +304,7 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const excludeIds = [
     ...heroArticles,
     ...fokusRedaksi,
-    ...feedFeatured,
-    ...feedStream,
+    ...feedArticles,
     ...editorChoice,
     ...opinionArticles,
     ...photoJournal,
