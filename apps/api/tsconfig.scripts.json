@@ -9,7 +9,14 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
-  "include": ["scripts/**/*.ts", "src/db/seed.ts"],
+  "include": [
+    "scripts/**/*.ts",
+    "src/db/seed.ts",
+    "src/types/**/*.ts",
+    "src/lib/**/*.ts",
+    "src/services/**/*.ts",
+    "../prisma/generated/**/*"
+  ],
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": {

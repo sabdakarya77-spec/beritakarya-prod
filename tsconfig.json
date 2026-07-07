@@ -13,12 +13,10 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "incremental": true,
-        "baseUrl": ".",
-        "ignoreDeprecations": "5.0",
     "paths": {
-      "@beritakarya/types": ["packages/types/src"],
-      "@beritakarya/config": ["packages/config/src"],
-      "@beritakarya/utils": ["packages/utils/src"]
+      "@beritakarya/types": ["./packages/types/src"],
+      "@beritakarya/config": ["./packages/config/src"],
+      "@beritakarya/utils": ["./packages/utils/src"]
     }
   },
   "exclude": ["**/node_modules", "**/dist"]

@@ -857,7 +857,16 @@ async function main() {
             slug,
             siteId,
             authorId,
-            categoryId,
+            // [FIX] Schema Article pakai relasi many-to-many lewat ArticleCategory,
+            // bukan field categoryId langsung. Bungkus dengan `categories.create`
+            // hanya jika categoryId ada (skip jika null agar tidak insert baris kosong).
+            ...(categoryId
+              ? {
+                  categories: {
+                    create: [{ categoryId }]
+                  }
+                }
+              : {}),
             blocks: blocks as any,
             status: 'draft',
             publishedAt: article.publishedAt,

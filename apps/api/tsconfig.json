@@ -4,7 +4,6 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "outDir": "./dist",
-    "baseUrl": ".",
     "paths": {
       "@beritakarya/*": ["../../packages/*/src"]
     },
