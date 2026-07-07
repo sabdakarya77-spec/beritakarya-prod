@@ -752,10 +752,17 @@ export async function restoreArticleVersion(versionId: string, siteId: string, u
   return updated
 }
 
-export async function getArticleStats(siteId: string) {
+export async function getArticleStats(siteId: string, user?: JWTPayload) {
+  const where: Prisma.ArticleWhereInput = { siteId, deletedAt: null }
+
+  // If user is a reporter or kontributor, they can only see their own article stats
+  if (user?.role === 'reporter' || user?.role === 'kontributor') {
+    where.authorId = user.userId
+  }
+
   const counts = await prisma.article.groupBy({
     by: ['status'],
-    where: { siteId, deletedAt: null },
+    where,
     _count: { id: true }
   })
 

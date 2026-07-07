@@ -107,6 +107,7 @@ export default function DashboardOverview() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [articleStats, setArticleStats] = useState<Record<string, number>>({});
   const [trafficData, setTrafficData] = useState<TrafficDataPoint[]>([]);
   const [topContent, setTopContent] = useState<TopContentItem[]>([]);
   const [engagementStats, setEngagementStats] = useState<EngagementStats | null>(null);
@@ -139,8 +140,9 @@ export default function DashboardOverview() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [artRes, trafficRes, topRes, engRes] = await Promise.all([
+        const [artRes, statsRes, trafficRes, topRes, engRes] = await Promise.all([
           api.get('/articles', { params: { limit: 50 }, signal: controller.signal }),
+          api.get('/articles/stats', { signal: controller.signal }),
           api.get('/analytics/traffic', { params: { days: 7 }, signal: controller.signal }),
           api.get('/analytics/top-content', { params: { limit: 5 }, signal: controller.signal }),
           api.get('/analytics/engagement', { signal: controller.signal })
@@ -148,6 +150,7 @@ export default function DashboardOverview() {
 
         if (controller.signal.aborted) return;
         setArticles(artRes.data.data.articles || artRes.data.data.items || []);
+        setArticleStats(statsRes.data.data || {});
         setTrafficData(Array.isArray(trafficRes.data.data) ? trafficRes.data.data : []);
         setTopContent(topRes.data.data);
         setEngagementStats(engRes.data.data);
@@ -208,15 +211,15 @@ export default function DashboardOverview() {
     );
   }
 
-  // Computed stats
-  const total       = articles.length;
-  const published   = articles.filter(a => a.status === 'published').length;
-  const drafts      = articles.filter(a => a.status === 'draft').length;
-  const submitted   = articles.filter(a => a.status === 'submitted').length;
-  const inReview    = articles.filter(a => a.status === 'review' || a.status === 'submitted').length;
-  const scheduled   = articles.filter(a => a.status === 'scheduled').length;
-  const approved    = articles.filter(a => a.status === 'approved').length;
-  const revisions   = articles.filter(a => a.status === 'revision').length;
+  // Computed stats — use authoritative stats from /articles/stats (filtered per user role)
+  const total       = Object.values(articleStats).reduce((s, n) => s + n, 0);
+  const published   = articleStats.published || 0;
+  const drafts      = articleStats.draft || 0;
+  const submitted   = articleStats.submitted || 0;
+  const inReview    = (articleStats.review || 0) + (articleStats.submitted || 0);
+  const scheduled   = articleStats.scheduled || 0;
+  const approved    = articleStats.approved || 0;
+  const revisions   = articleStats.revision || 0;
   const totalViews  = articles.reduce((s, a) => s + (a.viewCount || 0), 0);
 
   const getQueueHours = (article: Article) => {

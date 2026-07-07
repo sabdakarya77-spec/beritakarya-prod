@@ -38,7 +38,7 @@ articleRouter.get('/scheduled/due', ...withSite, asyncHandler(async (req: Reques
 }))
 
 articleRouter.get('/stats', ...withSite, asyncHandler(async (req: Request, res: Response) => {
-  const stats = await service.getArticleStats(req.site!)
+  const stats = await service.getArticleStats(req.site!, req.user!)
   res.json({ success: true, data: stats })
 }))
 
