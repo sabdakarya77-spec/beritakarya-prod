@@ -897,23 +897,55 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
       return (
         <div
           className={cn(
-            "flex flex-col gap-6 my-10 items-center w-full",
-            block.align === 'right' ? "md:flex-row-reverse" : "md:flex-row"
+            // [FIX] Layout 'center' ditambahkan — stack vertikal (gambar di atas, teks di bawah).
+            // Sebelumnya 'center' jatuh ke default 'left' karena cn di bawah ini
+            // hanya membedakan 'right'.
+            "flex gap-6 my-10 items-center w-full",
+            block.align === 'right' && "md:flex-row-reverse",
+            block.align === 'center' && "flex-col items-stretch"
           )}
         >
-          {/* Image Column */}
-          <div className="w-full md:w-1/2 min-w-0">
+          {/* Image Column — [FIX] Hapus aspect-[4/3] + object-cover yang menyebabkan
+              gambar terpotong. Sekarang gunakan dimensi asli (jika tersedia) dan
+              object-contain agar gambar tidak di-crop. */}
+          <div
+            className={cn(
+              'w-full min-w-0',
+              block.align === 'center' ? 'md:w-full' : 'md:w-1/2'
+            )}
+          >
             <figure className="m-0">
-              <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
-                <SmartImage
-                  src={block.url || '/placeholder.jpg'}
-                  context="media_text"
-                  alt={block.alt || 'Post image'}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              </div>
+              {(() => {
+                // Tentukan rasio aspek dari dimensi asli (jika ada) — dipakai hanya
+                // untuk placeholder height agar tidak ada layout shift sebelum image
+                // dimuat. TIDAK memaksa crop.
+                const w = typeof block.width === 'number' && block.width > 0 ? block.width : undefined
+                const h = typeof block.height === 'number' && block.height > 0 ? block.height : undefined
+                const aspectStyle =
+                  w && h
+                    ? ({ aspectRatio: `${w} / ${h}` } as React.CSSProperties)
+                    : undefined
+                return (
+                  <div
+                    className="relative w-full rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5"
+                    style={aspectStyle}
+                  >
+                    <SmartImage
+                      src={block.url || '/placeholder.jpg'}
+                      context="media_text"
+                      alt={block.alt || 'Post image'}
+                      // [FIX] fill={false} + width/height → next/image merender pada
+                      // rasio aspek natural, dikombinasikan dengan w-full h-auto di
+                      // className menjadi responsif tanpa crop.
+                      fill={false}
+                      width={w}
+                      height={h}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                )
+              })()}
               {block.caption && (
                 <figcaption className="mt-2.5 text-xs text-brand-text-muted italic text-center">
                   {block.caption}
@@ -923,7 +955,14 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
           </div>
           {/* Text Column */}
           <div
-            className={cn(bodyTextClass, 'w-full md:w-1/2 min-w-0 max-w-full overflow-hidden whitespace-pre-wrap break-words [&_blockquote]:border-l-4 [&_blockquote]:border-brand-red [&_blockquote]:pl-4 [&_blockquote]:my-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 dark:[&_blockquote]:text-brand-text-muted [&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0')}
+            className={cn(
+              bodyTextClass,
+              'w-full min-w-0 max-w-full overflow-hidden whitespace-pre-wrap break-words',
+              '[&_blockquote]:border-l-4 [&_blockquote]:border-brand-red [&_blockquote]:pl-4 [&_blockquote]:my-4',
+              '[&_blockquote]:italic [&_blockquote]:text-gray-600 dark:[&_blockquote]:text-brand-text-muted',
+              '[&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0',
+              block.align === 'center' ? 'md:w-full' : 'md:w-1/2'
+            )}
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(block.content || '') }}
           />
         </div>

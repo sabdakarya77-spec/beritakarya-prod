@@ -3,7 +3,7 @@
 import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { useState, useCallback } from 'react'
-import { Trash2, Upload, Image as ImageIcon, X, AlignLeft, AlignRight } from 'lucide-react'
+import { Trash2, Upload, Image as ImageIcon, X, AlignLeft, AlignRight, AlignCenter } from 'lucide-react'
 import { MediaLibraryModal } from '../MediaLibraryModal'
 import { type MediaItem } from '../../../hooks/useMediaLibrary'
 import { useImageUpload } from '../../../hooks/useImageUpload'
@@ -18,10 +18,14 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
   const { upload, uploading, reset: resetUpload } = useImageUpload()
 
   const handleMediaSelect = useCallback((media: MediaItem) => {
+    // [FIX] Bawa dimensi asli dari media library (jika ada) supaya editor
+    // preview dan halaman publish tidak terpotong.
     updateAttributes({
       imageUrl: media.url,
       altText: media.altText || '',
       caption: media.caption || '',
+      ...(typeof media.width === 'number' && media.width > 0 ? { width: media.width } : {}),
+      ...(typeof media.height === 'number' && media.height > 0 ? { height: media.height } : {})
     })
     setShowMediaLibrary(false)
   }, [updateAttributes])
@@ -32,10 +36,14 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
 
     const result = await upload(file)
     if (result) {
+      // [FIX] useImageUpload sudah mengembalikan width/height, simpan juga
+      // agar renderer tidak perlu fallback hardcoded.
       updateAttributes({
         imageUrl: result.url,
         altText: '',
         caption: '',
+        ...(typeof result.width === 'number' && result.width > 0 ? { width: result.width } : {}),
+        ...(typeof result.height === 'number' && result.height > 0 ? { height: result.height } : {})
       })
     }
     resetUpload()
@@ -45,8 +53,9 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
     updateAttributes({ layout: newLayout })
   }
 
-  const imageOrderClass = layout === 'left' ? 'order-1' : 'order-2'
-  const textOrderClass = layout === 'left' ? 'order-2' : 'order-1'
+  const handleClearImage = useCallback(() => {
+    updateAttributes({ imageUrl: '', altText: '', caption: '', width: 0, height: 0 })
+  }, [updateAttributes])
 
   return (
     <NodeViewWrapper className="my-4">
@@ -60,14 +69,14 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
             </span>
           </div>
           <div className="flex items-center gap-1">
-            {/* Layout Toggle */}
+            {/* Layout Toggle — sekarang termasuk 'center' */}
             <div className="flex border border-gray-200 dark:border-slate-600 rounded-md overflow-hidden mr-2">
               <button
                 onClick={() => toggleLayout('left')}
                 className={cn(
                   'p-1.5 transition-colors',
-                  layout === 'left' 
-                    ? 'bg-brand-red text-white' 
+                  layout === 'left'
+                    ? 'bg-brand-red text-white'
                     : 'hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-400'
                 )}
                 title="Gambar di kiri"
@@ -78,13 +87,25 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
                 onClick={() => toggleLayout('right')}
                 className={cn(
                   'p-1.5 transition-colors',
-                  layout === 'right' 
-                    ? 'bg-brand-red text-white' 
+                  layout === 'right'
+                    ? 'bg-brand-red text-white'
                     : 'hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-400'
                 )}
                 title="Gambar di kanan"
               >
                 <AlignRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => toggleLayout('center')}
+                className={cn(
+                  'p-1.5 transition-colors',
+                  layout === 'center'
+                    ? 'bg-brand-red text-white'
+                    : 'hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-400'
+                )}
+                title="Gambar di tengah (vertikal)"
+              >
+                <AlignCenter className="w-4 h-4" />
               </button>
             </div>
             <button
@@ -96,7 +117,8 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content — [FIX] layout: 'center' ditambahkan, 'h-full min-h-[200px]' dihapus
+            agar gambar tidak dipaksa menutupi area teks (penyebab preview != publish). */}
         <div className={cn(
           'flex',
           layout === 'center' ? 'flex-col' : 'flex-row'
@@ -106,14 +128,14 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
             <div className={cn(
               'relative group',
               layout === 'center' ? 'w-full' : 'flex-1 min-w-0',
-              imageOrderClass
             )}>
               <img
                 src={imageUrl}
                 alt={node.attrs.altText || 'Media'}
                 className={cn(
-                  'w-full object-cover',
-                  layout === 'center' ? 'h-64' : 'h-full min-h-[200px]'
+                  // [FIX] Pakai h-auto + object-contain (bukan object-cover + h-full)
+                  // supaya gambar tidak terpotong di editor preview.
+                  'w-full h-auto object-contain bg-gray-100 dark:bg-slate-800',
                 )}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -125,19 +147,23 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
                     <ImageIcon className="w-5 h-5 text-gray-700" />
                   </button>
                   <button
-                    onClick={() => updateAttributes({ imageUrl: '', altText: '', caption: '' })}
+                    onClick={handleClearImage}
                     className="p-2 bg-red-500 rounded-lg hover:bg-red-600 transition-colors"
                   >
                     <X className="w-5 h-5 text-white" />
                   </button>
                 </div>
               </div>
+              {node.attrs.caption ? (
+                <div className="px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 italic text-center bg-white/70 dark:bg-slate-900/60">
+                  {node.attrs.caption}
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className={cn(
               'flex flex-col items-center justify-center gap-3 p-6 w-full',
               layout === 'center' ? 'w-full' : 'flex-1 min-w-0',
-              imageOrderClass
             )}>
               <div className="flex flex-wrap items-center justify-center gap-2 w-full">
                 <label className="flex items-center justify-center gap-2 px-4 py-2 bg-brand-red text-white rounded-lg text-sm cursor-pointer hover:bg-brand-red/90 transition-colors whitespace-nowrap">
@@ -165,7 +191,6 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
           {/* Text Section */}
           <div className={cn(
             'flex-1 p-4 bg-white dark:bg-slate-800 min-w-0 max-w-full overflow-hidden',
-            textOrderClass
           )}>
             <NodeViewContent
               className="max-w-none break-words focus:outline-none min-h-[100px] text-sm leading-relaxed text-gray-800 dark:text-gray-200"
@@ -203,6 +228,32 @@ export const MediaTextExtension = Node.create({
       layout: {
         default: 'left',
       },
+      // [FIX] Tambahan: dimensi gambar asli untuk pertahankan rasio aspek
+      // saat render di editor dan publish.
+      width: {
+        default: null,
+        parseHTML: (element) => {
+          const v = (element as HTMLElement).getAttribute('data-width')
+          const n = v ? Number(v) : NaN
+          return Number.isFinite(n) && n > 0 ? n : null
+        },
+        renderHTML: (attrs) => {
+          const w = attrs.width as number | null | undefined
+          return typeof w === 'number' && w > 0 ? { 'data-width': String(w) } : {}
+        },
+      },
+      height: {
+        default: null,
+        parseHTML: (element) => {
+          const v = (element as HTMLElement).getAttribute('data-height')
+          const n = v ? Number(v) : NaN
+          return Number.isFinite(n) && n > 0 ? n : null
+        },
+        renderHTML: (attrs) => {
+          const h = attrs.height as number | null | undefined
+          return typeof h === 'number' && h > 0 ? { 'data-height': String(h) } : {}
+        },
+      },
     }
   },
 
@@ -213,11 +264,20 @@ export const MediaTextExtension = Node.create({
         getAttrs: (element) => {
           if (typeof element === 'string') return {}
           const dom = element as HTMLElement
+          const layoutAttr = dom.getAttribute('data-layout')
+          const layout: LayoutType =
+            layoutAttr === 'right' || layoutAttr === 'center' ? layoutAttr : 'left'
+          const widthAttr = dom.getAttribute('data-width')
+          const heightAttr = dom.getAttribute('data-height')
+          const width = widthAttr ? Number(widthAttr) : NaN
+          const height = heightAttr ? Number(heightAttr) : NaN
           return {
             imageUrl: dom.getAttribute('data-image-url') || '',
             altText: dom.getAttribute('data-alt-text') || '',
             caption: dom.getAttribute('data-caption') || '',
-            layout: dom.getAttribute('data-layout') || 'left',
+            layout,
+            ...(Number.isFinite(width) && width > 0 ? { width } : {}),
+            ...(Number.isFinite(height) && height > 0 ? { height } : {}),
           }
         },
       },

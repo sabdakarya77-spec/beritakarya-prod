@@ -83,7 +83,17 @@ export interface MediaTextBlock extends BaseBlock {
   alt: string
   caption?: string
   content: string
-  align: 'left' | 'right'
+  /**
+   * Tata letak gambar terhadap teks.
+   * - 'left'  → gambar di kiri, teks di kanan (default)
+   * - 'right' → gambar di kanan, teks di kiri
+   * - 'center' → gambar di atas, teks di bawah (stack vertikal)
+   */
+  align: 'left' | 'right' | 'center'
+  /** Lebar gambar asli (px) — dipakai untuk hitung rasio aspek agar tidak terpotong. */
+  width?: number
+  /** Tinggi gambar asli (px) — dipakai untuk hitung rasio aspek agar tidak terpotong. */
+  height?: number
 }
 
 export type Block =

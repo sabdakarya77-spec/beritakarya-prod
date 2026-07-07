@@ -72,7 +72,9 @@ export const blockSchema = z.discriminatedUnion('type', [
     alt: z.string(),
     caption: z.string().optional(),
     content: z.string(),
-    align: z.enum(['left', 'right'])
+    align: z.enum(['left', 'right', 'center']),
+    width: z.number().optional(),
+    height: z.number().optional()
   }),
 ])
 

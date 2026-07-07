@@ -328,16 +328,34 @@ function convertTiptapToBlocks(editor: Editor, oldBlocks: Block[] = []): Block[]
           images: (node.attrs?.images as ImageItem[]) || [],
         }
       case 'mediaText':
-        // [FIX] Map Tiptap attrs (imageUrl, altText, layout, caption)
-        // to API block schema (url, alt, content, align, caption) per article.validator.ts
-        // Text content is stored as child nodes (content: 'block+'), not as an attribute
+        // [FIX] Map Tiptap attrs (imageUrl, altText, layout, caption, width, height)
+        // to API block schema (url, alt, content, align, caption, width, height)
+        // per article.validator.ts.
+        // Text content is stored as child nodes (content: 'block+'), not as an attribute.
+        // align: 'left' | 'right' | 'center' — all three are preserved (was previously
+        // dropped to 'left' | 'right', causing 'center' to be silently forced to 'left').
         return {
           ...baseBlock,
           type: 'mediaText' as const,
           url: (node.attrs?.imageUrl as string) || '',
           alt: (node.attrs?.altText as string) || '',
+          // [FIX] Caption was dropped here, so any caption typed in the editor
+          // never reached the published page.
+          caption: ((node.attrs?.caption as string) || '').trim() || undefined,
           content: extractTextContent(node),
-          align: ((node.attrs?.layout as string) || 'left') as 'left' | 'right',
+          align: ((): 'left' | 'right' | 'center' => {
+            const layout = node.attrs?.layout as string | undefined
+            if (layout === 'right' || layout === 'center') return layout
+            return 'left'
+          })(),
+          // [FIX] Carry through original image dimensions so the renderer can
+          // preserve aspect ratio and avoid forced cropping.
+          ...(typeof node.attrs?.width === 'number' && (node.attrs.width as number) > 0
+            ? { width: node.attrs.width as number }
+            : {}),
+          ...(typeof node.attrs?.height === 'number' && (node.attrs.height as number) > 0
+            ? { height: node.attrs.height as number }
+            : {})
         }
       case 'image':
         return {
@@ -508,7 +526,14 @@ function convertBlocksToHTML(blocks: Block[]): string {
           const mtAlt = block.alt || ''
           const mtLayout = block.align || 'left'
           const mtCaption = block.caption || ''
-          return `<div data-media-text="" data-layout="${mtLayout}" data-image-url="${mtUrl}" data-alt-text="${mtAlt}" data-caption="${mtCaption}">${content}</div>`
+          // [FIX] Bawa dimensi asli supaya editor preview konsisten dengan publish
+          // dan tidak memaksa rasio aspek yang berbeda.
+          const mtWidth = typeof block.width === 'number' && block.width > 0 ? block.width : ''
+          const mtHeight = typeof block.height === 'number' && block.height > 0 ? block.height : ''
+          const dimAttrs = mtWidth !== '' || mtHeight !== ''
+            ? ` data-width="${mtWidth}" data-height="${mtHeight}"`
+            : ''
+          return `<div data-media-text="" data-layout="${mtLayout}" data-image-url="${mtUrl}" data-alt-text="${mtAlt}" data-caption="${mtCaption}"${dimAttrs}>${content}</div>`
         }
         default:
           return content ? `<p>${content}</p>` : '<p></p>'

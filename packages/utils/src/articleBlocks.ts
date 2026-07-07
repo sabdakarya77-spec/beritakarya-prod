@@ -31,6 +31,11 @@ function normalizeImageItem(img: unknown): {
   }
 }
 
+function normalizeMediaTextAlign(value: unknown): 'left' | 'right' | 'center' {
+  if (value === 'right' || value === 'center') return value
+  return 'left'
+}
+
 function normalizeBlock(raw: unknown): Record<string, unknown> | null {
   if (!raw || typeof raw !== 'object') return null
   const b = raw as Record<string, unknown>
@@ -138,8 +143,10 @@ function normalizeBlock(raw: unknown): Record<string, unknown> | null {
         url: String(b.url ?? ''),
         content: String(b.content ?? ''),
         alt: String(b.alt ?? ''),
-        align: b.align === 'right' ? 'right' : 'left',
-        ...(b.caption ? { caption: String(b.caption) } : {})
+        align: normalizeMediaTextAlign(b.align),
+        ...(b.caption ? { caption: String(b.caption) } : {}),
+        ...(typeof b.width === 'number' && b.width > 0 ? { width: b.width } : {}),
+        ...(typeof b.height === 'number' && b.height > 0 ? { height: b.height } : {})
       }
     default:
       if (typeof b.content === 'string') {
