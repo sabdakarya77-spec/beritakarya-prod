@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, Users, FileText, ArrowRight, Loader2 } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import { Search, Users, FileText, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ROLE_LABELS } from '@/lib/constants'
 import { API_URL } from '@/lib/api'
@@ -34,6 +34,7 @@ const ITEMS_PER_PAGE = 12
 
 export default function AuthorsPage() {
   const params = useParams()
+  const router = useRouter()
   const siteId = params.site as string
   const _siteName = siteId === 'pusat' ? 'Pusat' : siteId.charAt(0).toUpperCase() + siteId.slice(1)
 
@@ -138,6 +139,13 @@ export default function AuthorsPage() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-[radial-gradient(circle_at_bottom_left,rgba(15,23,42,0.04),transparent_50%)] dark:bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.02),transparent_50%)]" />
         
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <button
+            onClick={() => router.back()}
+            className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-gray-600 backdrop-blur-sm transition-all hover:border-brand-red/30 hover:text-brand-red dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:text-brand-red"
+          >
+            <ArrowLeft size={13} />
+            Kembali
+          </button>
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-red/20 bg-brand-red/5 px-3 py-1">
               <Users size={12} className="text-brand-red" />

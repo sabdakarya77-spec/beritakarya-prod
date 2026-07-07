@@ -258,7 +258,7 @@ export default function Navbar({
                   </h1>
                 )}
                 <span className="hidden sm:block text-[9px] tracking-wide mt-0.5 text-gray-500 dark:text-white/60">
-                  <span className="font-bold text-gray-700 dark:text-white/80 italic">Nusantara Berbicara</span>
+                  <span className="font-bold text-gray-700 dark:text-white/80 italic">Nusantara Bersuara</span>
                   <span className="text-brand-red mx-1.5 font-bold">•</span>
                   <span className="font-normal">{articleTopDate}</span>
                 </span>

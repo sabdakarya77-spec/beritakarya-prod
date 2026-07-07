@@ -231,7 +231,7 @@ Berikut urutan lengkap semua komponen/section yang muncul di halaman homepage (`
 
 | Elemen | Detail |
 |--------|--------|
-| **Logo** | Kiri — `SmartImage` (jika `logoUrl` ada) atau teks "BERITAKARYA" dengan tagline "Nusantara Berbicara • [tanggal]" |
+| **Logo** | Kiri — `SmartImage` (jika `logoUrl` ada) atau teks "BERITAKARYA" dengan tagline "Nusantara Bersuara • [tanggal]" |
 | **Search Bar** | Tengah — input bulat, hidden di mobile, placeholder "Cari berita, topik, penulis..." |
 | **Actions (kanan)** | Search icon (mobile only), Bookmark (dengan badge count), Dark/Lang toggle, Profile dropdown / Login button, Hamburger menu (mobile) |
 | **Profile Dropdown** | Avatar + nama, link Dashboard (role-based), tombol Keluar |

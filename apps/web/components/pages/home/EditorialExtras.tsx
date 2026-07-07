@@ -72,6 +72,13 @@ export function EditorialExtras({
                       </h4>
                     </Link>
                     <div className="mt-3 flex items-center gap-2 border-t border-white/10 pt-3 text-[10px] text-white/60">
+                      {article.author?.avatarUrl ? (
+                        <img src={article.author.avatarUrl} alt={article.author?.name || 'Penulis'} className="h-5 w-5 rounded-full object-cover ring-1 ring-white/20" />
+                      ) : (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-black text-white/70">
+                          {article.author?.name?.charAt(0) || 'S'}
+                        </div>
+                      )}
                       <span className="truncate">{article.author?.name || 'Redaksi'}</span>
                       <span className="opacity-40">•</span>
                       <span>{formatSidebarDate(article.publishedAt || article.createdAt)}</span>
