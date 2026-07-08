@@ -186,8 +186,7 @@ export default function BreakingNewsTicker({
   );
 
   return (
-    {/* overflow-x-hidden containment: the animating absolute strip is min-w-max,
-        which can bleed outside the viewport on mobile if not explicitly clipped here */}
+    // overflow-x containment: animated strip is absolute/min-w-max and can bleed on mobile
     <div className="flex h-8 max-w-full items-center overflow-hidden text-white sm:h-9 lg:h-10" style={{ contain: 'paint' }}>
       <div className="flex items-center gap-1.5 shrink-0 px-2 sm:px-3">
         <span className="relative flex h-2 w-2">
