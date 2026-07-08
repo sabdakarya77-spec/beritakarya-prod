@@ -307,37 +307,37 @@ export default function SettingsPage() {
   if (!isAllowed) return null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-24">
+    <div className="max-w-7xl mx-auto space-y-4 md:space-y-8 pb-24">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200 dark:border-gray-800 pb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 dark:border-gray-800 pb-4 md:pb-8">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-1">
             <div className="p-2 bg-brand-red/10 rounded-lg">
               <SettingsIcon size={20} className="text-brand-red" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white uppercase">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white uppercase">
               Konfigurasi Sistem Portal
             </h1>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 ml-1">
             Manajemen Identitas Cabang Regional <span className="text-brand-red font-bold">#{site}</span>
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           {isDirty && (
             <span className="text-xs font-bold uppercase bg-amber-500/10 text-amber-600 px-3 py-1.5 rounded-full border border-amber-500/20">
-              Ada Perubahan Belum Disimpan
+              Ada Perubahan
             </span>
           )}
           <a
             href={`/${site}`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-3 text-sm font-medium transition-all rounded-lg"
+            className="flex items-center gap-1.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition-all rounded-lg"
           >
             <EyeIcon size={12} />
-            Lihat Portal
+            <span className="hidden sm:inline">Lihat Portal</span>
           </a>
           <button
             onClick={() => {
@@ -350,7 +350,7 @@ export default function SettingsPage() {
               a.click()
               URL.revokeObjectURL(url)
             }}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-4 py-3 text-sm font-medium transition-all rounded-lg"
+            className="hidden sm:flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-3 py-2 text-sm font-medium transition-all rounded-lg"
           >
             <Download size={12} />
             Export
@@ -358,10 +358,10 @@ export default function SettingsPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 text-sm font-medium transition-all rounded-lg shadow-lg disabled:opacity-50"
+            className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-4 md:px-6 py-2 md:py-3 text-sm font-medium transition-all rounded-lg shadow-lg disabled:opacity-50"
           >
             {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-            {saving ? 'Sedang Menyimpan...' : 'Simpan Konfigurasi'}
+            {saving ? 'Menyimpan...' : 'Simpan'}
           </button>
         </div>
       </div>
@@ -378,11 +378,39 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8">
         
-        {/* TAB SISI KIRI */}
+        {/* TAB NAVIGASI — horizontal scroll di mobile, sidebar di desktop */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
+          {/* Mobile: horizontal scrollable pills */}
+          <div className="lg:hidden overflow-x-auto pb-1 -mx-0">
+            <div className="flex gap-2 min-w-max">
+              {tabs.map((t) => {
+                const Icon = t.icon
+                const isActive = activeTab === t.id
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setMessage(null)
+                      setActiveTab(t.id)
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border ${
+                      isActive
+                        ? 'bg-brand-red text-white border-brand-red shadow-md'
+                        : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-brand-red/40'
+                    }`}
+                  >
+                    <Icon size={14} className={isActive ? 'text-white' : 'text-brand-red'} />
+                    {t.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Desktop: sidebar card */}
+          <div className="hidden lg:block bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
             <p className="text-xs font-bold uppercase text-gray-500 mb-3">Kategori Pengaturan</p>
             {tabs.map((t) => {
               const Icon = t.icon
@@ -412,7 +440,7 @@ export default function SettingsPage() {
             })}
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800">
+          <div className="hidden lg:block bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={14} className="text-brand-red" />
               <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Tips Search Engine</h4>
@@ -425,7 +453,7 @@ export default function SettingsPage() {
 
         {/* KONTEN KANAN */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-8 min-h-[500px]">
+          <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-4 md:p-8 min-h-[400px] lg:min-h-[500px]">
             
             {/* TAB 1: IDENTITAS & VISUAL */}
             {activeTab === 'basic' && (
