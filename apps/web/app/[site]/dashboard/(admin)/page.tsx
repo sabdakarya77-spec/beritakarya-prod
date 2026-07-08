@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, TrendingUp, FileText, ArrowRight, Clock3, CheckCircle2, Users, PenSquare } from 'lucide-react';
+import { BarChart3, TrendingUp, FileText, ArrowRight, Clock3, CheckCircle2, Users, PenSquare, Shield } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { GA4AudienceCards } from '../../../../components/dashboard/GA4AudienceCards';
