@@ -79,23 +79,25 @@ export default function CategoriesDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchCategories deps (isGlobalView, siteId) already tracked
   }, [isGlobalView, siteId]);
 
-  // Fetch diff saat Global View ON
-  useEffect(() => {
+  const fetchDiff = async () => {
     if (!isGlobalView) {
       setDiffData(null);
       return;
     }
-    const fetchDiff = async () => {
-      try {
-        const { data } = await api.get('/categories/diff');
-        if (data.success) {
-          setDiffData(data.data);
-        }
-      } catch {
-        // silent — diff is optional info
+    try {
+      const { data } = await api.get('/categories/diff');
+      if (data.success) {
+        setDiffData(data.data);
       }
-    };
+    } catch {
+      // silent — diff is optional info
+    }
+  };
+
+  // Fetch diff saat Global View ON
+  useEffect(() => {
     fetchDiff();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only fetch on view toggle
   }, [isGlobalView]);
 
   // Auto-generate slug from name
@@ -163,6 +165,7 @@ export default function CategoriesDashboard() {
       setEditingCategory(null);
       if (!editingCategory) setShowForm(false); // Close form after creating new
       fetchCategories();
+      fetchDiff();
     } catch (error: unknown) {
       showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || (editingCategory ? 'Gagal memperbarui kategori' : 'Gagal membuat kategori'), 'error');
     } finally {
@@ -206,6 +209,7 @@ export default function CategoriesDashboard() {
       });
       showToast('Kategori berhasil dihapus');
       fetchCategories();
+      fetchDiff();
     } catch (error: unknown) {
       showToast((axios.isAxiosError(error) ? error.response?.data?.error?.message : undefined) || 'Gagal menghapus kategori', 'error');
     } finally {
