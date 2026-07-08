@@ -121,7 +121,7 @@ export function NavbarTicker({ site = 'pusat', initialData }: NavbarTickerProps)
   }, [])
 
   return (
-    <div className="flex h-8 items-center gap-3 overflow-hidden sm:h-9 lg:h-10">
+    <div className="flex h-8 items-center gap-3 overflow-hidden sm:h-9 lg:h-10" style={{ contain: 'paint' }}>
       {/* Label */}
       <span className="flex shrink-0 items-center gap-1.5 px-2 sm:px-3">
         <span className="relative flex h-2 w-2">

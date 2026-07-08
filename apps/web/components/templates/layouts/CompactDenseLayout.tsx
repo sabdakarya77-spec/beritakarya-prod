@@ -58,7 +58,9 @@ export function CompactDenseLayout(props: TemplateProps) {
           Wrapper di sini sengaja menggunakan div biasa (bukan Container)
           untuk menghindari double horizontal padding (bug nested container). */}
       <div className="py-4 md:py-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8 px-4 md:px-8 lg:px-[max(2rem,calc((100vw-1280px)/2+2rem))]">
+        {/* px uses clamp so it is ALWAYS positive (no negative offset on small screens).
+            Old calc((100vw-1280px)/2+2rem) went negative on mobile → horizontal overflow. */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8 px-4 md:px-8 lg:px-[clamp(2rem,calc((100vw-1280px)/2+2rem),8rem)]">
           {/* Feed — 8 kolom */}
           <div className="md:col-span-8">
             <FeedSection

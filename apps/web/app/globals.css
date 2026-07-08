@@ -3,6 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    /* overflow-x: clip is stronger than hidden — blocks horizontal scroll
+       anchoring even from position:absolute/fixed children (e.g. ticker animations) */
+    overflow-x: clip;
+  }
+
   :root {
     /* Core Brand */
     --brand-red: #B91C1C;
@@ -89,6 +95,8 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Belt-and-suspenders: block horizontal overflow at body level too */
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6 {
