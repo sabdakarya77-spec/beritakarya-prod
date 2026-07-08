@@ -330,6 +330,22 @@ export default function CategoriesDashboard() {
         </p>
       </div>
 
+      {/* Info Banner for Site View vs Global View */}
+      {!isGlobalView && (
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-4 flex items-start gap-3 text-blue-800 dark:text-blue-300">
+          <span className="text-xl">💡</span>
+          <div className="text-xs space-y-1">
+            <p className="font-bold">Info: Anda berada di tampilan lokal ({siteId.toUpperCase()})</p>
+            <p>
+              Penambahan, pengubahan, atau penghapusan sub-kategori di sini <strong>hanya berpengaruh pada website ini</strong>.
+            </p>
+            <p className="mt-1">
+              Untuk melakukan perubahan yang berlaku di <strong>semua website sekaligus</strong>, silakan aktifkan <strong>🌐 Global View ON</strong> di kanan atas, lakukan perubahan Anda, lalu klik tombol <strong>🔄 Sync</strong> yang akan muncul.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Action Bar — two rows on mobile, single row on desktop */}
       <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-2xl px-4 py-3 shadow-sm space-y-2 md:space-y-0">
         {/* Row 1 (mobile): Primary action + View toggle */}

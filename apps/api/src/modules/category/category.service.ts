@@ -300,9 +300,16 @@ export class CategoryService {
       )
     }
 
-    await prisma.category.delete({
-      where: { id: categoryId }
-    })
+    if (existing.isGlobal) {
+      // Hapus kategori global dan seluruh salinan lokalnya di semua site
+      await prisma.category.deleteMany({
+        where: { slug: existing.slug }
+      })
+    } else {
+      await prisma.category.delete({
+        where: { id: categoryId }
+      })
+    }
 
     return { success: true, message: 'Category deleted' }
   }
@@ -968,10 +975,12 @@ export class CategoryService {
       select: { id: true, name: true }
     })
 
-    // 3. Build global lookup by slug
+    // 3. Build global lookup by slug and id
     const globalBySlug = new Map<string, typeof globalCategories[0]>()
+    const globalById = new Map<string, typeof globalCategories[0]>()
     for (const cat of globalCategories) {
       globalBySlug.set(cat.slug, cat)
+      globalById.set(cat.id, cat)
     }
 
     const result: Array<{
@@ -988,12 +997,14 @@ export class CategoryService {
     for (const site of sites) {
       const localCategories = await prisma.category.findMany({
         where: { siteId: site.id, isGlobal: false, deletedAt: null },
-        select: { slug: true, name: true, description: true, color: true }
+        select: { id: true, slug: true, name: true, description: true, color: true, parentId: true, order: true }
       })
 
       const localBySlug = new Map<string, typeof localCategories[0]>()
+      const localById = new Map<string, typeof localCategories[0]>()
       for (const cat of localCategories) {
         localBySlug.set(cat.slug, cat)
+        localById.set(cat.id, cat)
       }
 
       const newCats: Array<{ slug: string; name: string }> = []
@@ -1032,6 +1043,25 @@ export class CategoryService {
             field: 'color',
             globalValue: globalCat.color || '',
             localValue: localCat.color || ''
+          })
+        }
+        if (localCat.order !== globalCat.order) {
+          updatedCats.push({
+            slug: globalCat.slug,
+            field: 'order',
+            globalValue: String(globalCat.order),
+            localValue: String(localCat.order)
+          })
+        }
+        // Bandingkan parentId berdasarkan parent slug masing-masing (karena ID lokal/global berbeda)
+        const localParentSlug = localCat.parentId ? (localById.get(localCat.parentId)?.slug || null) : null
+        const globalParentSlug = globalCat.parentId ? (globalById.get(globalCat.parentId)?.slug || null) : null
+        if (localParentSlug !== globalParentSlug) {
+          updatedCats.push({
+            slug: globalCat.slug,
+            field: 'parentId',
+            globalValue: globalParentSlug || 'none',
+            localValue: localParentSlug || 'none'
           })
         }
       }
@@ -1073,6 +1103,11 @@ export class CategoryService {
       return { sitesProcessed: 0, totalAdded: 0, totalUpdated: 0, errors: [] }
     }
 
+    const globalById = new Map<string, typeof globalCategories[0]>()
+    for (const cat of globalCategories) {
+      globalById.set(cat.id, cat)
+    }
+
     const sorted = this.sortTopological(globalCategories)
 
     // 2. Ambil semua site
@@ -1094,8 +1129,10 @@ export class CategoryService {
           })
 
           const localBySlug = new Map<string, typeof localCategories[0]>()
+          const localById = new Map<string, typeof localCategories[0]>()
           for (const cat of localCategories) {
             localBySlug.set(cat.slug, cat)
+            localById.set(cat.id, cat)
           }
 
           // Build slug → localId mapping (termasuk yang baru dibuat)
@@ -1114,7 +1151,7 @@ export class CategoryService {
               // Baru: buat kategori lokal
               let localParentId: string | null = null
               if (globalCat.parentId) {
-                const parentGlobal = globalCategories.find(g => g.id === globalCat.parentId)
+                const parentGlobal = globalById.get(globalCat.parentId)
                 if (parentGlobal) {
                   localParentId = slugToLocalId.get(parentGlobal.slug) || null
                 }
@@ -1135,25 +1172,42 @@ export class CategoryService {
               })
 
               slugToLocalId.set(globalCat.slug, newCat.id)
+              localById.set(newCat.id, newCat)
+              localBySlug.set(newCat.slug, newCat)
               added++
             } else {
               // Sudah ada: cek apakah ada perubahan
+              const localParentSlug = localCat.parentId ? (localById.get(localCat.parentId)?.slug || null) : null
+              const globalParentSlug = globalCat.parentId ? (globalById.get(globalCat.parentId)?.slug || null) : null
+
               const needsUpdate =
                 localCat.name !== globalCat.name ||
                 (localCat.description || '') !== (globalCat.description || '') ||
                 (localCat.color || '') !== (globalCat.color || '') ||
-                localCat.order !== globalCat.order
+                localCat.order !== globalCat.order ||
+                localParentSlug !== globalParentSlug
 
               if (needsUpdate) {
-                await tx.category.update({
+                let localParentId: string | null = null
+                if (globalCat.parentId) {
+                  const parentGlobal = globalById.get(globalCat.parentId)
+                  if (parentGlobal) {
+                    localParentId = slugToLocalId.get(parentGlobal.slug) || null
+                  }
+                }
+
+                const updatedCat = await tx.category.update({
                   where: { id: localCat.id },
                   data: {
                     name: globalCat.name,
                     description: globalCat.description,
                     color: globalCat.color,
-                    order: globalCat.order
+                    order: globalCat.order,
+                    parentId: localParentId
                   }
                 })
+                localById.set(updatedCat.id, updatedCat)
+                localBySlug.set(updatedCat.slug, updatedCat)
                 updated++
               }
             }
