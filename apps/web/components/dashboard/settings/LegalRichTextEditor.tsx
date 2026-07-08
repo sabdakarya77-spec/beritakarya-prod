@@ -267,7 +267,8 @@ export function LegalRichTextEditor({
     <div className="space-y-3">
       <label className="text-sm font-bold text-gray-700 dark:text-gray-300">{label}</label>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-900/60">
+        <div className="overflow-x-auto border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/60">
+        <div className="flex min-w-max items-center gap-2 px-3 py-3">
           <button
             type="button"
             onMouseDown={preserveSelection}
@@ -401,6 +402,7 @@ export function LegalRichTextEditor({
           >
             <AlignJustify size={16} />
           </button>
+        </div>
         </div>
         <div
           ref={editorRef}
