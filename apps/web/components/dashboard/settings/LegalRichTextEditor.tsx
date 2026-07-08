@@ -16,7 +16,7 @@ import {
 import { legalProseClassName } from '../../legal/legalStyles'
 import { parseLegalContent, serializeLegalContent, type LegalAlignment } from '../../../lib/legalUtils'
 
-const LEGAL_EDITOR_MIN_HEIGHT = 'min-h-[350px]'
+const LEGAL_EDITOR_MIN_HEIGHT = 'min-h-[550px]'
 
 export function LegalRichTextEditor({
   label,

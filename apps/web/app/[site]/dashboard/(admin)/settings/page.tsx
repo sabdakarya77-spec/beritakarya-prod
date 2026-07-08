@@ -453,7 +453,9 @@ export default function SettingsPage() {
 
         {/* KONTEN KANAN */}
         <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-4 md:p-8 min-h-[400px] lg:min-h-[500px]">
+          <div className={`bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl min-h-[400px] lg:min-h-[500px] ${
+              activeTab === 'info' ? 'p-0 overflow-hidden' : 'p-4 md:p-8'
+            }`}>
             
             {/* TAB 1: IDENTITAS & VISUAL */}
             {activeTab === 'basic' && (
@@ -990,8 +992,8 @@ export default function SettingsPage() {
 
             {/* TAB 4: HALAMAN INFORMASI PORTAL */}
             {activeTab === 'info' && isSuperadmin && (
-              <div className="space-y-6">
-                <div>
+              <div className="space-y-0">
+                <div className="px-4 md:px-6 pt-5 pb-4">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <BookOpen size={18} className="text-brand-red" /> Halaman Informasi & Legalitas
                   </h3>
@@ -1001,7 +1003,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Sub-Tabs Navigation — dihasilkan otomatis dari ALL_LEGAL_PAGES */}
-                <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 pb-3">
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 px-4 md:px-6">
                   {ALL_LEGAL_PAGES.map((legalPage) => {
                     const isSubActive = activeLegalSubTab === legalPage.id
                     return (
@@ -1023,7 +1025,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Sub-Tabs Content — dihasilkan otomatis dari ALL_LEGAL_PAGES */}
-                <div className="pt-2">
+                <div className="pt-2 [&_.space-y-3]:px-0">
                   {ALL_LEGAL_PAGES.map((legalPage) => {
                     if (activeLegalSubTab !== legalPage.id) return null
                     const fieldKey = legalPage.settingsKey as keyof typeof settings
