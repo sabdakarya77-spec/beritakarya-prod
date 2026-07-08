@@ -7,6 +7,11 @@ interface TopContentItem {
   id: string;
   title: string;
   category?: { name?: string };
+  categories?: {
+    category?: {
+      name?: string;
+    };
+  }[];
   viewCount?: number;
 }
 
@@ -32,7 +37,9 @@ export function TopContent({ topContent, site }: TopContentProps) {
               <span className="text-sm font-black text-gray-300 group-hover:text-brand-red transition-colors w-4">0{i+1}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-brand-black dark:text-white line-clamp-1">{item.title}</p>
-                <p className="text-[10px] text-brand-red font-bold uppercase tracking-widest mt-0.5">{item.category?.name || 'NASIONAL'}</p>
+                <p className="text-[10px] text-brand-red font-bold uppercase tracking-widest mt-0.5">
+                  {item.categories?.[0]?.category?.name || item.category?.name || 'NASIONAL'}
+                </p>
               </div>
               <div className="flex items-center gap-1.5 text-gray-400">
                 <Eye size={12} />

@@ -74,6 +74,12 @@ interface TopContentItem {
   slug?: string
   views?: number
   viewCount?: number
+  category?: { name?: string }
+  categories?: {
+    category?: {
+      name?: string
+    }
+  }[]
 }
 
 interface EngagementStats {
@@ -120,6 +126,10 @@ export default function DashboardOverview() {
   const [gscQueries, setGscQueries] = useState<{ query: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
   const [gscPages, setGscPages] = useState<{ page: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
   const [analyticsTab, setAnalyticsTab] = useState<'internal' | 'ga4' | 'gsc'>('internal');
+  const [isGa4Configured, setIsGa4Configured] = useState(false);
+  const [isGscConfigured, setIsGscConfigured] = useState(false);
+  const [ga4Error, setGa4Error] = useState<string | null>(null);
+  const [gscError, setGscError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('Selamat');
   const [currentDate, setCurrentDate] = useState('');
@@ -165,13 +175,55 @@ export default function DashboardOverview() {
           api.get('/analytics/gsc/pages', { params: { limit: 10 }, signal: controller.signal }),
         ]).then(([ga4TrafficRes, ga4AudienceRes, ga4RealtimeRes, gscPerfRes, gscQueriesRes, gscPagesRes]) => {
           if (controller.signal.aborted) return;
-          if (ga4TrafficRes.status === 'fulfilled' && ga4TrafficRes.value.data.success) setGa4Traffic(ga4TrafficRes.value.data.data || []);
-          if (ga4AudienceRes.status === 'fulfilled' && ga4AudienceRes.value.data.success) setGa4Audience(ga4AudienceRes.value.data.data);
-          if (ga4RealtimeRes.status === 'fulfilled' && ga4RealtimeRes.value.data.success) setGa4Realtime(ga4RealtimeRes.value.data.data);
-          if (gscPerfRes.status === 'fulfilled' && gscPerfRes.value.data.success) setGscPerformance(gscPerfRes.value.data.data);
-          if (gscQueriesRes.status === 'fulfilled' && gscQueriesRes.value.data.success) setGscQueries(gscQueriesRes.value.data.data || []);
-          if (gscPagesRes.status === 'fulfilled' && gscPagesRes.value.data.success) setGscPages(gscPagesRes.value.data.data || []);
-        }).catch(() => { /* GA4/GSC not configured — silent fail */ });
+          
+          // Process GA4
+          if (ga4TrafficRes.status === 'fulfilled') {
+            const res = ga4TrafficRes.value.data;
+            if (res.success) {
+              setIsGa4Configured(true);
+              setGa4Traffic(res.data || []);
+            } else if (res.message && res.message.includes('tidak dikonfigurasi')) {
+              setIsGa4Configured(false);
+            } else {
+              setIsGa4Configured(true);
+              setGa4Error(res.error || res.message || 'Gagal memuat data Google Analytics');
+            }
+          } else {
+            setIsGa4Configured(true);
+            setGa4Error('Gagal menghubungi API analitik server');
+          }
+
+          if (ga4AudienceRes.status === 'fulfilled' && ga4AudienceRes.value.data.success) {
+            setGa4Audience(ga4AudienceRes.value.data.data);
+          }
+          if (ga4RealtimeRes.status === 'fulfilled' && ga4RealtimeRes.value.data.success) {
+            setGa4Realtime(ga4RealtimeRes.value.data.data);
+          }
+
+          // Process GSC
+          if (gscPerfRes.status === 'fulfilled') {
+            const res = gscPerfRes.value.data;
+            if (res.success) {
+              setIsGscConfigured(true);
+              setGscPerformance(res.data);
+            } else if (res.message && res.message.includes('tidak dikonfigurasi')) {
+              setIsGscConfigured(false);
+            } else {
+              setIsGscConfigured(true);
+              setGscError(res.error || res.message || 'Gagal memuat data Search Console');
+            }
+          } else {
+            setIsGscConfigured(true);
+            setGscError('Gagal menghubungi API Search Console server');
+          }
+
+          if (gscQueriesRes.status === 'fulfilled' && gscQueriesRes.value.data.success) {
+            setGscQueries(gscQueriesRes.value.data.data || []);
+          }
+          if (gscPagesRes.status === 'fulfilled' && gscPagesRes.value.data.success) {
+            setGscPages(gscPagesRes.value.data.data || []);
+          }
+        }).catch(() => { /* Silent fail */ });
 
         if (user?.role === 'superadmin') {
           try {
@@ -570,14 +622,14 @@ export default function DashboardOverview() {
       </div>
 
       {/* ── Google Analytics & Search Console ─────────────────────────── */}
-      {(ga4Traffic.length > 0 || ga4Audience || gscPerformance || gscQueries.length > 0) && (
+      {(isGa4Configured || isGscConfigured) && (
         <div className="rounded-2xl border border-gray-100 bg-white dark:border-white/5 dark:bg-white/[0.02]">
           <div className="flex items-center gap-1 border-b border-gray-100 px-2 pt-2 dark:border-white/5">
             {([
               { key: 'internal', label: 'Internal' },
-              { key: 'ga4', label: 'Google Analytics' },
-              { key: 'gsc', label: 'Search Console' },
-            ] as const).map((tab) => (
+              ...(isGa4Configured ? [{ key: 'ga4', label: 'Google Analytics' }] : []),
+              ...(isGscConfigured ? [{ key: 'gsc', label: 'Search Console' }] : []),
+            ] as { key: 'internal' | 'ga4' | 'gsc'; label: string }[]).map((tab) => (
               <button
                 key={tab.key}
                 type="button"
@@ -595,22 +647,74 @@ export default function DashboardOverview() {
           <div className="p-6">
             {analyticsTab === 'ga4' && (
               <div className="space-y-6">
-                {ga4Audience && <GA4AudienceCards data={{ ...ga4Audience, realtimeUsers: ga4Realtime?.activeUsers }} />}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <GA4TrafficChart data={ga4Traffic} />
+                {ga4Error ? (
+                  <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Shield size={20} className="text-red-600 dark:text-red-400" />
+                    </div>
+                    <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Analytics</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
+                      {ga4Error}
+                    </p>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
+                      <p className="text-left font-bold">Langkah Solusi:</p>
+                      <ul className="list-disc list-inside text-left space-y-1">
+                        <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Viewer</strong> di Google Analytics Admin &rarr; Property Access Management.</li>
+                        <li>Pastikan GA4 Property ID (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">properties/XXXXXXXXX</code>) sudah diisi dengan benar di Pengaturan Situs.</li>
+                      </ul>
+                    </div>
                   </div>
-                  {ga4Audience?.sources && <GA4SourceTable sources={ga4Audience.sources} />}
-                </div>
+                ) : ga4Audience ? (
+                  <>
+                    {ga4Audience && <GA4AudienceCards data={{ ...ga4Audience, realtimeUsers: ga4Realtime?.activeUsers }} />}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="lg:col-span-2">
+                        <GA4TrafficChart data={ga4Traffic} />
+                      </div>
+                      {ga4Audience?.sources && <GA4SourceTable sources={ga4Audience.sources} />}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
+                    <p className="text-xs text-gray-500">Menghubungkan ke Google Analytics...</p>
+                  </div>
+                )}
               </div>
             )}
             {analyticsTab === 'gsc' && (
               <div className="space-y-6">
-                {gscPerformance && <GSCPerformanceChart data={gscPerformance} />}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <GSCTopQueries data={gscQueries} />
-                  <GSCTopPages data={gscPages} />
-                </div>
+                {gscError ? (
+                  <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Shield size={20} className="text-red-600 dark:text-red-400" />
+                    </div>
+                    <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Search Console</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
+                      {gscError}
+                    </p>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
+                      <p className="text-left font-bold">Langkah Solusi:</p>
+                      <ul className="list-disc list-inside text-left space-y-1">
+                        <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Owner</strong> (Pemilik) di Google Search Console &rarr; Settings &rarr; Users and permissions.</li>
+                        <li>Pastikan URL situs Search Console di Pengaturan Situs (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">https://domain.com/</code> atau <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">sc-domain:domain.com</code>) sudah sesuai.</li>
+                      </ul>
+                    </div>
+                  </div>
+                ) : gscPerformance ? (
+                  <>
+                    {gscPerformance && <GSCPerformanceChart data={gscPerformance} />}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <GSCTopQueries data={gscQueries} />
+                      <GSCTopPages data={gscPages} />
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
+                    <p className="text-xs text-gray-500">Menghubungkan ke Google Search Console...</p>
+                  </div>
+                )}
               </div>
             )}
             {analyticsTab === 'internal' && (
