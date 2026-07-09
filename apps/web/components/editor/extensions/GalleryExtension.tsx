@@ -169,12 +169,21 @@ const GalleryComponent = ({ node, updateAttributes, deleteNode }: NodeViewProps)
           </button>
         </div>
 
-        {/* Caption */}
-        {currentImage.caption && (
-          <div className="px-4 py-2 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700">
-            <p className="text-xs text-gray-600 dark:text-gray-400">{currentImage.caption}</p>
-          </div>
-        )}
+        {/* Caption input — editable directly in editor */}
+        <div className="px-4 py-2 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700">
+          <input
+            type="text"
+            value={currentImage.caption || ''}
+            onChange={(e) => {
+              const newImages = images.map((img, i) =>
+                i === currentIndex ? { ...img, caption: e.target.value } : img
+              )
+              updateAttributes({ images: newImages })
+            }}
+            placeholder="Ketik keterangan gambar (caption)..."
+            className="w-full text-xs italic text-center text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-dashed border-gray-200 dark:border-slate-700 focus:border-brand-red focus:outline-none pb-1 placeholder:text-gray-300 dark:placeholder:text-slate-600 transition-colors"
+          />
+        </div>
 
         {/* Thumbnails Strip */}
         {images.length > 1 && (

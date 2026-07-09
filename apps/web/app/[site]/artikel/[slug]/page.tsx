@@ -822,25 +822,57 @@ function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
         </div>
       )
     case 'gallery':
+      // Single image: render full-width like a normal article image block
+      if (block.images.length === 1) {
+        const singleImg = block.images[0]
+        return (
+          <figure className="my-10">
+            <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
+              <SmartImage
+                src={singleImg.url}
+                context="article_block"
+                alt={singleImg.caption || singleImg.alt || 'Foto'}
+                fill
+                sizes="(max-width: 768px) 100vw, 640px"
+                className="object-cover"
+              />
+            </div>
+            {singleImg.caption && (
+              <figcaption className="mt-4 flex justify-between items-start border-b border-gray-100 dark:border-white/5 pb-4">
+                <span className="text-xs text-brand-text-muted italic leading-relaxed max-w-[80%]">{singleImg.caption}</span>
+                <span className="text-[8px] text-brand-text-muted uppercase tracking-widest font-bold shrink-0">Foto / BeritaKarya</span>
+              </figcaption>
+            )}
+          </figure>
+        )
+      }
+      // Multiple images: responsive grid with per-image captions
       return (
-        <div className="my-10 space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="my-10">
+          <div className={cn(
+            "grid gap-3",
+            block.images.length === 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-3"
+          )}>
             {block.images.map((img, i) => (
-              <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-100 dark:border-white/5">
-                <SmartImage
-                  src={img.url}
-                  context="gallery_thumb"
-                  alt={img.alt || `Gallery image ${i + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                  className="object-cover cursor-pointer hover:scale-110 transition-transform"
-                />
-              </div>
+              <figure key={i} className="m-0">
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-md border border-gray-100 dark:border-white/5">
+                  <SmartImage
+                    src={img.url}
+                    context="article_block"
+                    alt={img.caption || img.alt || `Foto ${i + 1}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                {img.caption && (
+                  <figcaption className="mt-2 text-xs text-brand-text-muted italic text-center px-1">
+                    {img.caption}
+                  </figcaption>
+                )}
+              </figure>
             ))}
           </div>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-brand-text-muted text-center italic">
-            Klik gambar untuk memperbesar galeri
-          </p>
         </div>
       )
     case 'list':

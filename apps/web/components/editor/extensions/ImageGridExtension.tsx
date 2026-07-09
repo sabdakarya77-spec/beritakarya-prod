@@ -92,18 +92,36 @@ const ImageGridComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
         {images.length > 0 ? (
           <div className={cn('grid gap-2 p-3', gridColsClass)}>
             {images.map((img, index) => (
-              <div key={index} className="relative group aspect-square">
-                <img
-                  src={img.url}
-                  alt={img.alt || `Image ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg"
+              <div
+                key={index}
+                className="flex flex-col gap-1.5"
+              >
+                <div className="relative group aspect-square rounded-lg overflow-hidden border-2 border-transparent">
+                  <img
+                    src={img.url}
+                    alt={img.alt || `Image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute top-1 right-1 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+                {/* Caption input — tampil di bawah SETIAP gambar, tanpa perlu klik */}
+                <input
+                  type="text"
+                  value={img.caption || ''}
+                  onChange={(e) => {
+                    const newImages = images.map((it, i) =>
+                      i === index ? { ...it, caption: e.target.value } : it
+                    )
+                    updateAttributes({ images: newImages })
+                  }}
+                  placeholder="Keterangan..."
+                  className="w-full text-[10px] italic text-center text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-dashed border-gray-200 dark:border-slate-700 focus:border-brand-red focus:outline-none pb-0.5 placeholder:text-gray-300 dark:placeholder:text-slate-600 transition-colors"
                 />
-                <button
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
               </div>
             ))}
           </div>

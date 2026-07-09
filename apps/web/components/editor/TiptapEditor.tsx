@@ -6,7 +6,7 @@ import type { Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
-import Image from '@tiptap/extension-image'
+import { CustomImageExtension } from './extensions/CustomImageExtension'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
@@ -103,13 +103,7 @@ export function TiptapEditor({
           target: '_blank',
         },
       }),
-      Image.configure({
-        inline: false,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg',
-        },
-      }),
+      CustomImageExtension,
       TextAlign.configure({
         types: ['heading', 'paragraph', 'quote'],
         alignments: ['left', 'center', 'right', 'justify'],
@@ -363,7 +357,9 @@ function convertTiptapToBlocks(editor: Editor, oldBlocks: Block[] = []): Block[]
           type: 'image' as const,
           url: (node.attrs?.src as string) || '',
           alt: (node.attrs?.alt as string) || '',
-          caption: (node.attrs?.title as string) || '',
+          // caption is stored in node.attrs.caption (CustomImageExtension)
+          // Fallback: also check title for backward compat with old nodes
+          caption: ((node.attrs?.caption as string) || (node.attrs?.title as string) || '').trim() || undefined,
         }
       case 'bulletList':
         return {
@@ -511,8 +507,8 @@ function convertBlocksToHTML(blocks: Block[]): string {
         }
         case 'image': {
           const alt = block.alt || ''
-          const caption = block.caption ? `<p>${block.caption}</p>` : ''
-          return block.url ? `<img src="${block.url}" alt="${alt}" />${caption}` : ''
+          const captionAttr = block.caption ? ` data-caption="${block.caption}"` : ''
+          return block.url ? `<img src="${block.url}" alt="${alt}"${captionAttr} />` : ''
         }
         case 'list': {
           const tag = block.ordered ? 'ol' : 'ul'

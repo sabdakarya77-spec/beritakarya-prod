@@ -73,8 +73,9 @@ export function FloatingMenuBar({ editor }: FloatingMenuBarProps) {
     if (media.url && editor) {
       editor.chain().focus().setImage({
         src: media.url,
-        alt: media.altText || ''
-      }).run()
+        alt: media.altText || '',
+        caption: media.caption || '',
+      } as Parameters<ReturnType<typeof editor.chain>['setImage']>[0]).run()
     }
     setShowMediaLibrary(false)
   }, [editor])

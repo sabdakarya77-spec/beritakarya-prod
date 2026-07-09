@@ -154,11 +154,16 @@ const MediaTextComponent = ({ node, updateAttributes, deleteNode }: NodeViewProp
                   </button>
                 </div>
               </div>
-              {node.attrs.caption ? (
-                <div className="px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 italic text-center bg-white/70 dark:bg-slate-900/60">
-                  {node.attrs.caption}
-                </div>
-              ) : null}
+              {/* Caption input — always visible so user can type it */}
+              <div className="px-2 py-1.5 bg-white/70 dark:bg-slate-900/60">
+                <input
+                  type="text"
+                  value={node.attrs.caption || ''}
+                  onChange={(e) => updateAttributes({ caption: e.target.value })}
+                  placeholder="Ketik keterangan gambar (caption)..."
+                  className="w-full text-xs italic text-center text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-dashed border-gray-200 dark:border-slate-700 focus:border-brand-red focus:outline-none pb-1 placeholder:text-gray-300 dark:placeholder:text-slate-600 transition-colors"
+                />
+              </div>
             </div>
           ) : (
             <div className={cn(
