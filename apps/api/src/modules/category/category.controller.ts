@@ -182,8 +182,14 @@ export async function getCategoryTree(req: Request, res: Response) {
       categories = await categoryService.getCategoryTree(siteId)
     }
 
-    // Cache: 1 jam di browser, 1 jam di CDN/proxy. Categories jarang berubah.
-    res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600')
+    // Caching strategy:
+    // 1. Dashboard / Admin / Superadmin views must never be cached
+    // 2. Public view (no user, no view param) cached for a shorter time (5 minutes)
+    if (user || view) {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    } else {
+      res.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=60')
+    }
     res.set('Vary', 'Accept-Encoding')
     res.json({ success: true, data: categories })
   } catch (error: unknown) {
