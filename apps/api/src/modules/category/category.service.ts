@@ -2,6 +2,39 @@ import { prisma } from '../../db/client'
 import { CATEGORY_TREE_CONFIG } from '@beritakarya/config'
 import type { Prisma } from '@prisma/client'
 
+/**
+ * Memberitahu Next.js frontend untuk mem-flush Data Cache kategori.
+ * Dipanggil setelah create / update / delete kategori agar homepage
+ * langsung merefleksikan perubahan tanpa menunggu revalidate interval.
+ *
+ * Jika REVALIDATE_SECRET atau FRONTEND_URL tidak tersedia, fungsi ini
+ * gagal secara silent agar tidak mengganggu operasi utama.
+ */
+async function revalidateNextCache(siteId?: string | null): Promise<void> {
+  const secret = process.env.REVALIDATE_SECRET
+  const frontendUrl = process.env.FRONTEND_URL
+
+  if (!secret || !frontendUrl) return
+
+  const tagsToInvalidate = ['categories']
+  if (siteId) tagsToInvalidate.push(`categories-${siteId}`)
+
+  // Fire-and-forget: jalankan semua revalidasi secara paralel
+  await Promise.allSettled(
+    tagsToInvalidate.map((tag) =>
+      fetch(`${frontendUrl}/api/revalidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag, secret }),
+        signal: AbortSignal.timeout(5000)
+      }).then((res) => {
+        if (!res.ok) console.warn(`[Revalidate] Failed for tag "${tag}": HTTP ${res.status}`)
+        else console.log(`[Revalidate] Invalidated tag "${tag}"`)
+      })
+    )
+  )
+}
+
 const categoryInclude = {
   site: true,
   parent: true
@@ -201,6 +234,9 @@ export class CategoryService {
       include: { site: true, parent: true }
     })
 
+    // Flush Next.js server cache agar homepage langsung update
+    revalidateNextCache(data.siteId).catch(() => {})
+
     return category
   }
 
@@ -278,6 +314,9 @@ export class CategoryService {
       include: { site: true, parent: true }
     })
 
+    // Flush Next.js server cache agar homepage langsung update
+    revalidateNextCache(category.siteId).catch(() => {})
+
     return category
   }
 
@@ -310,6 +349,10 @@ export class CategoryService {
         where: { id: categoryId }
       })
     }
+
+    // Flush Next.js server cache agar homepage langsung update
+    // Untuk kategori global, invalidasi semua tag (tidak ada siteId spesifik)
+    revalidateNextCache(existing.isGlobal ? null : existing.siteId).catch(() => {})
 
     return { success: true, message: 'Category deleted' }
   }

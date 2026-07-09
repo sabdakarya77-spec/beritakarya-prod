@@ -206,7 +206,9 @@ async function getPopularArticles(siteId: string) {
 
 async function getCategories(siteId: string) {
   try {
-    const res = await fetch(`${API_URL}/api/v1/categories/tree?site=${siteId}`, { next: { revalidate: 60 } })
+    const res = await fetch(`${API_URL}/api/v1/categories/tree?site=${siteId}`, {
+      next: { revalidate: 60, tags: [`categories`, `categories-${siteId}`] }
+    })
     if (!res.ok) return []
     const json = await res.json()
     return json?.data || []
