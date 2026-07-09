@@ -168,12 +168,32 @@ export const ImageGridExtension = Node.create({
     return [
       {
         tag: 'div[data-image-grid]',
+        getAttrs: (element) => {
+          if (typeof element === 'string') return {}
+          const el = element as HTMLElement
+          const raw = el.getAttribute('data-images')
+          const colsRaw = el.getAttribute('data-cols')
+          let images = []
+          if (raw) {
+            try { images = JSON.parse(raw) } catch {}
+          }
+          const cols = colsRaw ? parseInt(colsRaw, 10) : 2
+          return { images, cols }
+        },
       },
     ]
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-image-grid': '' })]
+    const { images, cols, ...rest } = HTMLAttributes
+    return [
+      'div',
+      mergeAttributes(rest, {
+        'data-image-grid': '',
+        'data-images': JSON.stringify(images || []),
+        'data-cols': String(cols ?? 2),
+      }),
+    ]
   },
 
   addNodeView() {

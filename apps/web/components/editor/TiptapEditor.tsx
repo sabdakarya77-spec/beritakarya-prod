@@ -478,6 +478,14 @@ function extractListItems(node: JSONNode): string[] {
 }
 
 /**
+ * Safely encode a value as a JSON string for use inside an HTML attribute.
+ * Double-quotes are replaced with &quot; so the attribute value doesn't break.
+ */
+function encodeJsonAttr(value: unknown): string {
+  return JSON.stringify(value).replace(/"/g, '&quot;')
+}
+
+/**
  * Convert Block[] to HTML for Tiptap
  */
 function convertBlocksToHTML(blocks: Block[]): string {
@@ -520,6 +528,15 @@ function convertBlocksToHTML(blocks: Block[]): string {
           const embedUrl = block.url || ''
           const embedType = block.embedType || 'other'
           return `<div data-embed-type="${embedType}">${embedUrl}</div>`
+        }
+        case 'gallery': {
+          const galleryImages = block.images || []
+          return `<div data-gallery="" data-images="${encodeJsonAttr(galleryImages)}"></div>`
+        }
+        case 'imageGrid': {
+          const gridImages = block.images || []
+          const gridCols = block.columns ?? 2
+          return `<div data-image-grid="" data-images="${encodeJsonAttr(gridImages)}" data-cols="${gridCols}"></div>`
         }
         case 'mediaText': {
           const mtUrl = block.url || ''

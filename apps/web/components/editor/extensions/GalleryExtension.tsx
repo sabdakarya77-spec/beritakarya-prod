@@ -258,12 +258,29 @@ export const GalleryExtension = Node.create({
     return [
       {
         tag: 'div[data-gallery]',
+        getAttrs: (element) => {
+          if (typeof element === 'string') return {}
+          const el = element as HTMLElement
+          const raw = el.getAttribute('data-images')
+          let images = []
+          if (raw) {
+            try { images = JSON.parse(raw) } catch {}
+          }
+          return { images }
+        },
       },
     ]
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-gallery': '' })]
+    const { images, ...rest } = HTMLAttributes
+    return [
+      'div',
+      mergeAttributes(rest, {
+        'data-gallery': '',
+        'data-images': JSON.stringify(images || []),
+      }),
+    ]
   },
 
   addNodeView() {
