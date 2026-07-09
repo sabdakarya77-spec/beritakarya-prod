@@ -80,15 +80,15 @@ export default function MediaManagerPage() {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-10 max-w-7xl mx-auto space-y-6 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-slate-900 dark:bg-white/10 flex items-center justify-center shadow-lg">
-            <ImageIcon size={22} className="text-white" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        <div className="flex items-center gap-3 md:gap-4 min-w-0">
+          <div className="w-11 h-11 md:w-12 md:h-12 rounded-2xl bg-slate-900 dark:bg-white/10 flex items-center justify-center shadow-lg shrink-0">
+            <ImageIcon size={20} className="text-white" />
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-brand-black dark:text-white tracking-tight">Media Manager</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-black text-brand-black dark:text-white tracking-tight truncate">Media Manager</h1>
             <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Asset & Galeri Berita</p>
             {restrictedToOwnMedia && (
               <div className="mt-2 inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:ring-amber-900/30">
@@ -98,9 +98,9 @@ export default function MediaManagerPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <label htmlFor="media-upload" className={cn(
-            "flex items-center gap-2 px-5 py-2.5 bg-brand-red text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-brand-red/20 cursor-pointer",
+            "flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 bg-brand-red text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-brand-red/20 cursor-pointer",
             uploading && "opacity-50 pointer-events-none"
           )}>
             {uploading ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
@@ -203,30 +203,30 @@ export default function MediaManagerPage() {
       {/* Detail Sidebar / Modal Overlay */}
       <AnimatePresence>
         {selectedMedia && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[80vh]"
+              className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[95vh] md:h-[80vh]"
             >
               {/* Preview Area */}
-              <div className="flex-1 bg-slate-100 dark:bg-black/40 relative flex items-center justify-center overflow-hidden p-6">
-                <img 
-                  src={selectedMedia.url} 
+              <div className="h-[40vh] md:h-auto md:flex-1 bg-slate-100 dark:bg-black/40 relative flex items-center justify-center overflow-hidden p-4 md:p-6 shrink-0">
+                <img
+                  src={selectedMedia.url}
                   className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
                   alt="Preview"
                 />
-                <button 
+                <button
                   onClick={() => setSelectedMedia(null)}
-                  className="absolute top-6 left-6 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg text-gray-500 hover:text-brand-red transition-all"
+                  className="absolute top-3 left-3 md:top-6 md:left-6 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg text-gray-500 hover:text-brand-red transition-all"
                 >
                   <X size={20} />
                 </button>
               </div>
 
               {/* Info Sidebar */}
-              <div className="w-full md:w-80 border-l border-gray-100 dark:border-white/5 flex flex-col bg-white dark:bg-slate-900 overflow-y-auto">
+              <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-gray-100 dark:border-white/5 flex flex-col bg-white dark:bg-slate-900 overflow-y-auto flex-1 md:flex-initial">
                 <div className="p-6 border-b border-gray-100 dark:border-white/5">
                   <h3 className="text-sm font-black text-brand-black dark:text-white uppercase tracking-tight">Detail Media</h3>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Informasi & Metadata</p>
