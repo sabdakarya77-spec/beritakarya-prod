@@ -72,7 +72,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${playfair.variable} ${lora.variable} font-sans antialiased overflow-x-hidden`}>
+      <body className={`${inter.variable} ${playfair.variable} ${lora.variable} font-sans antialiased overflow-x-clip`}>
         <AuthCheck />
         <ScrollReset />
         {children}
