@@ -27,6 +27,7 @@ export function PWAInstallPrompt({
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -47,6 +48,16 @@ export function PWAInstallPrompt({
       if (Date.now() - parsedTime < oneDayInMs) {
         return // Belum lewat 24 jam, jangan munculkan
       }
+    }
+
+    // Deteksi jika perangkat adalah iOS (iPhone/iPad/iPod)
+    const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent.toLowerCase() : ''
+    const iosDetected = /iphone|ipad|ipod/.test(userAgent) || 
+      (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 && userAgent.includes('macintosh'))
+    
+    if (iosDetected) {
+      setIsIOS(true)
+      setIsVisible(true)
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -97,11 +108,11 @@ export function PWAInstallPrompt({
   }
 
   // Hindari mismatch hidrasi antara server-render dan client-render
-  if (!mounted || !isVisible || !deferredPrompt) return null
+  if (!mounted || !isVisible || (!deferredPrompt && !isIOS)) return null
 
   return (
-    <div className="fixed bottom-20 sm:bottom-6 right-4 left-4 sm:left-auto sm:w-[420px] z-50 animate-fade-in">
-      <div className="relative overflow-hidden bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-gray-200 dark:border-white/10 p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+    <div className="fixed bottom-24 sm:bottom-6 right-4 left-4 sm:left-auto sm:w-[420px] z-[9999] animate-fade-in">
+      <div className="relative overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-gray-200 dark:border-white/10 p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
         
         {/* Tombol Tutup (X) di Pojok Kanan Atas */}
         <button
@@ -150,22 +161,47 @@ export function PWAInstallPrompt({
           </span>
         </div>
 
-        {/* Tombol Aksi */}
-        <div className="grid grid-cols-2 gap-3 mt-5">
-          <button
-            onClick={handleDismiss}
-            className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 bg-gray-50/50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            Nanti Saja
-          </button>
-          <button
-            onClick={handleInstall}
-            className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 text-white bg-brand-red hover:bg-red-700 active:scale-[0.98] shadow-lg shadow-brand-red/20 transition-all"
-          >
-            <Download size={14} />
-            Instal Aplikasi
-          </button>
-        </div>
+        {/* Tombol Aksi atau Panduan iOS */}
+        {isIOS ? (
+          <div className="mt-5 p-3.5 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-white/5 text-xs text-brand-text-muted space-y-2.5">
+            <p className="font-extrabold text-gray-900 dark:text-white">
+              Cara instal di iOS / Safari:
+            </p>
+            <ol className="list-decimal list-inside space-y-1.5 text-[11px] leading-relaxed">
+              <li>
+                Ketuk tombol bagikan/share <span className="inline-flex items-center justify-center w-5 h-5 bg-gray-200 dark:bg-slate-700 rounded text-gray-800 dark:text-gray-200 font-mono text-[10px] align-middle">⎋</span> di bagian bawah Safari.
+              </li>
+              <li>
+                Pilih menu <span className="font-bold text-gray-900 dark:text-white">Add to Home Screen</span> (Tambahkan ke Layar Utama).
+              </li>
+              <li>
+                Ketuk <span className="font-bold text-brand-red">Add</span> (Tambah) di pojok kanan atas.
+              </li>
+            </ol>
+            <button
+              onClick={handleDismiss}
+              className="w-full mt-2 py-2 px-4 rounded-xl text-xs font-bold text-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-white/10 transition-colors"
+            >
+              Mengerti
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <button
+              onClick={handleDismiss}
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 bg-gray-50/50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              Nanti Saja
+            </button>
+            <button
+              onClick={handleInstall}
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 text-white bg-brand-red hover:bg-red-700 active:scale-[0.98] shadow-lg shadow-brand-red/20 transition-all"
+            >
+              <Download size={14} />
+              Instal Aplikasi
+            </button>
+          </div>
+        )}
 
       </div>
     </div>
