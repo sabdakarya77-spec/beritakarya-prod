@@ -1,6 +1,6 @@
 'use client'
 
-import { Node, mergeAttributes, type NodeViewProps } from '@tiptap/core'
+import { Node, mergeAttributes, type NodeViewProps, type CommandProps } from '@tiptap/core'
 import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
 import { useState, useCallback } from 'react'
 import { Trash2, Upload, Image as ImageIcon } from 'lucide-react'
@@ -99,7 +99,6 @@ const CustomImageComponent = ({ node, updateAttributes, deleteNode }: NodeViewPr
       <figure className="not-prose m-0">
         {/* Image wrapper with hover overlay */}
         <div className="relative group rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 shadow-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt}
@@ -222,7 +221,7 @@ export const CustomImageExtension = Node.create({
     return {
       setImage:
         (options: { src: string; alt?: string; caption?: string }) =>
-        ({ commands }: { commands: any }) => {
+        ({ commands }: CommandProps) => {
           return commands.insertContent({
             type: 'image',
             attrs: {
