@@ -424,6 +424,7 @@ export class SiteService {
       trendingTopics: site.trendingTopics,
       googleIndexingConfig: site.googleIndexingConfig,
       ga4PropertyId: site.ga4PropertyId,
+      gaMeasurementId: site.gaMeasurementId,
       gscSiteUrl: site.gscSiteUrl,
       wapimredSettings: site.wapimredSettings,
       kaperwilSettings: site.kaperwilSettings,
