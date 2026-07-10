@@ -38,17 +38,14 @@ export function GoogleAnalytics({ gaMeasurementId }: GoogleAnalyticsProps) {
 
     // 2) Inisialisasi window.dataLayer & fungsi gtag
     window.dataLayer = window.dataLayer || []
-    window.gtag = function gtag() {
-      window.dataLayer.push(arguments)
+    window.gtag = function gtag(...args: unknown[]) {
+      window.dataLayer.push(args)
     }
     window.gtag('js', new Date())
-    window.gtag('config', gaMeasurementId, {
-      // Kirim page_path agar GA4 tahu URL lengkap saat SPA navigation
-      page_path: pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ''),
-    })
+    // Initial config will be sent by the navigation tracking effect below
   }, [gaMeasurementId])
 
-  // Track SPA navigation (pathname atau searchParams berubah)
+  // Track SPA navigation (pathname atau searchParams berubah) + initial config
   useEffect(() => {
     if (!gaMeasurementId || !window.gtag) return
 
