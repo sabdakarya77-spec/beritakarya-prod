@@ -72,6 +72,7 @@ model Site {
   kaperwilSettings     Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
   kabiroSettings       Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
   ga4PropertyId        String?   // e.g. "properties/123456789"
+  gaMeasurementId      String?   // BARU: "G-XXXXXXXXXX" - untuk gtag.js tracking script di halaman publik
   gscSiteUrl           String?   // e.g. "sc-domain:beritakarya.co" or "https://beritakarya.co/"
   deletedAt            DateTime?
   createdAt            DateTime  @default(now())
@@ -702,15 +703,15 @@ model HomepageConfig {
   videoCategories   Json     @default("[]") // ["video", "dokumenter-reportase"]
 
   // Section visibility & order (Level 2: Template + Customize)
-  sectionOrder      Json     @default("[]") // Default set di service code
-  sectionVisibility Json     @default("{}") // Default set di service code
+  sectionOrder      Json     @default("[]") // Default set in service code
+  sectionVisibility Json     @default("{}") // Default set in service code
 
   // Feed detail
   feedColumns       Int      @default(2) // 1 | 2 | 3
   showExcerpt       Boolean  @default(true)
 
   // Interstitial placement (JSON: [{id, afterCardIndex, widget, enabled}])
-  interstitials     Json     @default("[]") // Default set di service code
+  interstitials     Json     @default("[]") // Default set in service code
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

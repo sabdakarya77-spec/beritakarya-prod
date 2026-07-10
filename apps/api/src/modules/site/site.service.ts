@@ -461,7 +461,7 @@ export class SiteService {
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
       'socialLinks', 'appearance', 'trendingTopics',
-      'googleIndexingConfig', 'ga4PropertyId', 'gscSiteUrl',
+      'googleIndexingConfig', 'ga4PropertyId', 'gaMeasurementId', 'gscSiteUrl',   // gaMeasurementId BARU
       'wapimredSettings', 'kaperwilSettings', 'kabiroSettings'
     ]
 

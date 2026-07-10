@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { PWAInstallPrompt } from '../../components/pwa/PWAInstallPrompt'
 import { SwRegister } from '../SwRegister'
+import { fetchSiteSettings, buildPublicSiteConfig } from '../../lib/siteSettings'
+import { GoogleAnalytics } from '../../components/layout/GoogleAnalytics'
 
 export async function generateMetadata({
   params,
@@ -44,11 +46,18 @@ export default async function SiteLayout({
   const displayName =
     site === 'pusat' ? 'BeritaKarya' : `BeritaKarya ${siteName}`
 
+  // Fetch site settings untuk GA measurement ID
+  const siteSettings = await fetchSiteSettings(site)
+  const siteConfig = buildPublicSiteConfig(site, siteSettings)
+
   return (
     <>
       <SwRegister site={site} />
       {children}
       <PWAInstallPrompt site={site} siteName={displayName} />
+      {siteConfig.gaMeasurementId && (
+        <GoogleAnalytics gaMeasurementId={siteConfig.gaMeasurementId} />
+      )}
     </>
   )
 }

@@ -19,6 +19,8 @@ export type PublicSiteConfig = {
   editorial?: string | null
   advertising?: string | null
   devDomain: string
+  // Google Analytics gtag.js Measurement ID (format: "G-XXXXXXXXXX")
+  gaMeasurementId?: string | null
 }
 
 export async function fetchSiteSettings(site: string) {
@@ -78,5 +80,7 @@ export function buildPublicSiteConfig(
     editorial: (siteSettings?.editorial as string) || null,
     advertising: (siteSettings?.advertising as string) || null,
     devDomain,
+    // Google Analytics gtag.js Measurement ID
+    gaMeasurementId: (siteSettings?.gaMeasurementId as string) || null,
   }
 }

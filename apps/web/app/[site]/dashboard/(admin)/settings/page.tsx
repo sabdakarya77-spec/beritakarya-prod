@@ -89,6 +89,7 @@ export default function SettingsPage() {
       isActive: false
     },
     ga4PropertyId: '',
+    gaMeasurementId: '',   // BARU: untuk gtag.js tracking
     gscSiteUrl: ''
   })
 
@@ -210,6 +211,7 @@ export default function SettingsPage() {
           trendingTopics: data.data.trendingTopics || [],
           googleIndexingConfig: data.data.googleIndexingConfig || { clientEmail: '', privateKey: '', isActive: false },
           ga4PropertyId: data.data.ga4PropertyId || '',
+          gaMeasurementId: data.data.gaMeasurementId || '',   // BARU
           gscSiteUrl: data.data.gscSiteUrl || ''
         }
         setSettings(mappedSettings)
@@ -948,37 +950,52 @@ export default function SettingsPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6">
-                    <div className="space-y-3">
-                      <label htmlFor="settings-ga4-id" className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Property ID</label>
-                      <input
-                        id="settings-ga4-id"
-                        type="text"
-                        value={settings.ga4PropertyId}
-                        onChange={(e) => setSettings({ ...settings, ga4PropertyId: e.target.value })}
-                        placeholder="properties/123456789"
-                        className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Ditemukan di Google Analytics → Admin → Property Settings → Property ID (format: properties/XXXXXXXXX)
-                      </p>
-                    </div>
+                    <div className="grid grid-cols-1 gap-6">
+                      <div className="space-y-3">
+                        <label htmlFor="settings-ga4-id" className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Property ID</label>
+                        <input
+                          id="settings-ga4-id"
+                          type="text"
+                          value={settings.ga4PropertyId}
+                          onChange={(e) => setSettings({ ...settings, ga4PropertyId: e.target.value })}
+                          placeholder="properties/123456789"
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Ditemukan di Google Analytics → Admin → Property Settings → Property ID (format: properties/XXXXXXXXX)
+                        </p>
+                      </div>
 
-                    <div className="space-y-3">
-                      <label htmlFor="settings-gsc-url" className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Search Console Site URL</label>
-                      <input
-                        id="settings-gsc-url"
-                        type="text"
-                        value={settings.gscSiteUrl}
-                        onChange={(e) => setSettings({ ...settings, gscSiteUrl: e.target.value })}
-                        placeholder="sc-domain:beritakarya.co atau https://beritakarya.co/"
-                        className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Format: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">sc-domain:domain.com</code> untuk domain property, atau URL lengkap untuk URL prefix property.
-                      </p>
+                      <div className="space-y-3">
+                        <label htmlFor="settings-ga-measurement-id" className="text-sm font-medium text-gray-700 dark:text-gray-300">GA4 Measurement ID (gtag.js)</label>
+                        <input
+                          id="settings-ga-measurement-id"
+                          type="text"
+                          value={settings.gaMeasurementId || ''}
+                          onChange={(e) => setSettings({ ...settings, gaMeasurementId: e.target.value })}
+                          placeholder="G-XXXXXXXXXX"
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Ditemukan di Google Analytics → Admin → Data Streams → Pilih stream → Measurement ID (format: G-XXXXXXXXXX). Dipakai untuk tracking gtag.js di halaman publik.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label htmlFor="settings-gsc-url" className="text-sm font-medium text-gray-700 dark:text-gray-300">Google Search Console Site URL</label>
+                        <input
+                          id="settings-gsc-url"
+                          type="text"
+                          value={settings.gscSiteUrl}
+                          onChange={(e) => setSettings({ ...settings, gscSiteUrl: e.target.value })}
+                          placeholder="sc-domain:beritakarya.co atau https://beritakarya.co/"
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Format: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">sc-domain:domain.com</code> untuk domain property, atau URL lengkap untuk URL prefix property.
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl dark:bg-blue-900/20 dark:border-blue-800">
                     <p className="text-sm text-blue-800 dark:text-blue-400">
