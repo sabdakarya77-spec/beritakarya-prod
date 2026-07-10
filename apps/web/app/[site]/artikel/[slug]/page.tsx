@@ -378,26 +378,6 @@ export default async function ArticlePage({ params }: Props) {
                             if (block.type === 'paragraph') {
                               paragraphCount++;
 
-                              // After 3rd paragraph: insert pull quote highlight
-                              if (paragraphCount === 3) {
-                                const quoteBlock = blocks.find((b: Block) => b.type === 'quote');
-                                if (quoteBlock && quoteBlock.type === 'quote') {
-                                  elements.push(
-                                    <div key="visual-break-quote" className="relative my-10 py-8 px-8 md:px-12 border-y-2 border-brand-red/10 bg-brand-red/[0.02] rounded-xl">
-                                      <span className="absolute -top-3 left-6 text-7xl font-serif text-brand-red opacity-10 leading-none select-none">&ldquo;</span>
-                                      <blockquote className="relative z-10 font-serif text-xl md:text-2xl italic leading-relaxed text-brand-black dark:text-white/90">
-                                        <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(quoteBlock.content || '') }} />
-                                      </blockquote>
-                                      {quoteBlock.attribution && (
-                                        <footer className="mt-4 text-[9px] font-bold uppercase tracking-[0.2em] text-brand-red">
-                                          — {quoteBlock.attribution}
-                                        </footer>
-                                      )}
-                                    </div>
-                                  );
-                                }
-                              }
-
                               // After 5th paragraph: insert inline related article
                               if (paragraphCount === 5 && relatedArticles.length > 0) {
                                 const rel = relatedArticles[0];
