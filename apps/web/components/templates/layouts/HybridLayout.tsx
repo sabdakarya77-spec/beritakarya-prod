@@ -34,9 +34,9 @@ export function HybridLayout(props: TemplateProps) {
   } = props
 
   // Row 2: sisa dari feed (yang tidak tampil di Row 1) + remainingArticles
-  // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(5) mengambil setelah 5 pertama
-  const feedRow1Ids = new Set(feedArticles.slice(0, 5).map((a) => a.id))
-  const feedLeftover = feedArticles.slice(5).filter((a) => !feedRow1Ids.has(a.id))
+  // Dedup: tidak ada overlap dengan Row 1 karena feed.slice(4) mengambil setelah 4 pertama
+  const feedRow1Ids = new Set(feedArticles.slice(0, 4).map((a) => a.id))
+  const feedLeftover = feedArticles.slice(4).filter((a) => !feedRow1Ids.has(a.id))
   const row2Articles = [...feedLeftover, ...(remainingArticles || [])].slice(0, 8)
 
   // ID untuk exclude dari Load More (semua yang sudah tampil)
