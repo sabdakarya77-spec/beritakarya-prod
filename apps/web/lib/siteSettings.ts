@@ -58,7 +58,7 @@ export function buildPublicSiteConfig(
 
   const name = (siteSettings?.name as string) || fallback?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1))
   const domain = (siteSettings?.domain as string) || fallback?.domain || `${siteParam}.beritakarya.co`
-  const description = (siteSettings?.description as string) || fallback?.description || `Portal berita resmi ${siteParam}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`
+  const description = (siteSettings?.description as string) || fallback?.description || `Portal berita independen ${name} menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.`
   const footerText = (siteSettings?.footerText as string) || fallback?.footerText || `© ${new Date().getFullYear()} BERITA KARYA. ALL RIGHTS RESERVED.`
   const devDomain = fallback?.devDomain || `${siteParam}.localhost:3000`
 

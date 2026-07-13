@@ -12,7 +12,7 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
   const hasCategoryFilter = Boolean(resolvedSearchParams?.cat);
 
   let siteName = siteParam.charAt(0).toUpperCase() + siteParam.slice(1);
-  let description = `Portal berita resmi ${siteName}. Menyajikan informasi terbaru, investigasi, dan analisis tajam dari seluruh Nusantara.`;
+  let description = `Portal berita independen ${siteName} menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.`;
   let faviconUrl = '/favicon.ico';
   let ogImageUrl = '/logo.png';
 
