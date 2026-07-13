@@ -137,11 +137,11 @@ export function FeedWithSidebar({
         </div>
 
         {/* Sidebar — 30% (4 kolom) */}
-        <aside className="lg:col-span-4">
-          <div className="sticky top-24 space-y-6">
+        <aside className="lg:col-span-4 self-start">
+          <div className="space-y-6">
             <PalingDibacaSidebar articles={popular} site={site} />
-            
-            {/* Opsi A: HOME_FEED_1 masuk ke sidebar di desktop & mobile */}
+
+            {/* HOME_FEED_1 — 300x600 half page portrait */}
             <div className="mt-6">
               <AdZone type="HOME_FEED_1" />
             </div>
