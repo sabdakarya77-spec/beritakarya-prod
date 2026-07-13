@@ -2,13 +2,12 @@ import Link from 'next/link'
 import { SectionTitle } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { PalingDibacaSidebar, AksesRedaksiSidebar } from './sidebar'
+import { AksesRedaksiSidebar } from './sidebar'
 import { SmartImage } from '../../ui/SmartImage'
 import { AdZone } from '../../templates/zones'
 
 interface FeedWithSidebarProps {
   feedArticles: HomeArticle[]
-  popular: HomeArticle[]
 
   site: string
   searchQuery: string
@@ -30,7 +29,7 @@ const getCategoryName = (article: HomeArticle): string =>
   article.categories?.[0]?.category?.name || article.category?.name || 'Umum'
 
 export function FeedWithSidebar({
-  feedArticles, popular, site,
+  feedArticles, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
   whatsappUrl, telegramUrl, reportUrl, resolveCategoryName,
 }: FeedWithSidebarProps) {
@@ -139,12 +138,8 @@ export function FeedWithSidebar({
         {/* Sidebar — 30% (4 kolom) */}
         <aside className="lg:col-span-4 self-start">
           <div className="space-y-6">
-            <PalingDibacaSidebar articles={popular} site={site} />
-
             {/* HOME_FEED_1 — 300x600 half page portrait */}
-            <div className="mt-6">
-              <AdZone type="HOME_FEED_1" />
-            </div>
+            <AdZone type="HOME_FEED_1" />
 
             {/* Akses Redaksi (Tetap disembunyikan di HP) */}
             <div className="hidden lg:block">

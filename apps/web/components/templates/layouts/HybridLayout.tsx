@@ -68,7 +68,6 @@ export function HybridLayout(props: TemplateProps) {
       {/* ZONA 4 Row 1 — BERITA TERBARU (8:4 sidebar) */}
       <FeedWithSidebar
         feedArticles={feedArticles}
-        popular={popular}
         site={site}
         searchQuery={searchQuery}
         isCategoryFilter={isCategoryFilter}
@@ -96,6 +95,7 @@ export function HybridLayout(props: TemplateProps) {
         opinionArticles={opinionArticles}
         photoJournal={photoJournal}
         videoStories={videoStories}
+        popularArticles={popular}
         site={site}
         showTechnologySection={showTechnologySection}
         showOpinionSection={showOpinionSection}
