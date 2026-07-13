@@ -69,7 +69,7 @@ export function buildPublicSiteConfig(
     description,
     logoUrl: (siteSettings?.logoUrl as string) || fallback?.logoUrl || null,
     footerText,
-    address: (siteSettings?.address as string) || fallback?.address || 'Jl. Merdeka No. 123, Jakarta Pusat, Indonesia',
+    address: (siteSettings?.address as string) || fallback?.address || 'Jl Semeru No.54 Wonotakan Kecamatan Berbek Kabupaten Nganjuk',
     contactEmail: (siteSettings?.contactEmail as string) || fallback?.contactEmail || 'support.beritakarya@gmail.com',
     phone: (siteSettings?.phone as string) || fallback?.phone || null,
     appearance: (siteSettings?.appearance as PublicSiteConfig['appearance']) || fallback?.appearance || { primaryColor: '#e11d48' },

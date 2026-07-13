@@ -35,6 +35,7 @@ import { Toaster } from '../components/ui/Toaster'
 import { AuthCheck } from '../components/AuthInit'
 import ScrollReset from '../components/layout/ScrollReset'
 import { SwRegister } from './SwRegister'
+import { ReactQueryProvider } from '../components/providers/ReactQueryProvider'
 
 export default function RootLayout({
   children,
@@ -73,11 +74,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${playfair.variable} ${lora.variable} font-sans antialiased overflow-x-clip`}>
-        <AuthCheck />
-        <ScrollReset />
-        {children}
-        <Toaster />
-        <SwRegister site="pusat" />
+        <ReactQueryProvider>
+          <AuthCheck />
+          <ScrollReset />
+          {children}
+          <Toaster />
+          <SwRegister site="pusat" />
+        </ReactQueryProvider>
       </body>
     </html>
   )

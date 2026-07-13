@@ -115,7 +115,7 @@ export default function SiteFooter({ siteConfig, categories }: SiteFooterProps) 
             <div className="space-y-1.5">
               <p className="flex items-start gap-2 text-[13px] leading-6 text-brand-text-muted">
                 <MapPin size={12} className="shrink-0 mt-0.5 text-brand-red" />
-                <span>{siteConfig?.address || "Jl. Merdeka No. 123, Jakarta Pusat, Indonesia"}</span>
+                <span>{siteConfig?.address || "Jl Semeru No.54 Wonotakan Kecamatan Berbek Kabupaten Nganjuk"}</span>
               </p>
               <p className="flex items-center gap-2 text-[13px] text-brand-text-muted">
                 <Phone size={12} className="text-brand-text-muted opacity-60" /> {siteConfig?.phone || "+62 815 9921 922"}

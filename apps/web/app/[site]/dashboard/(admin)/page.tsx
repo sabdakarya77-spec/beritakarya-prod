@@ -3,19 +3,9 @@
 import { BarChart3, TrendingUp, FileText, ArrowRight, Clock3, CheckCircle2, Users, PenSquare, Shield } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { GA4AudienceCards } from '../../../../components/dashboard/GA4AudienceCards';
-import { GA4SourceTable } from '../../../../components/dashboard/GA4SourceTable';
-import { GSCTopQueries } from '../../../../components/dashboard/GSCTopQueries';
-import { GSCTopPages } from '../../../../components/dashboard/GSCTopPages';
+import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-
-// Dynamic imports untuk chart components (recharts ~200 KB gzipped)
-const TrafficChart = dynamic(() => import('../../../../components/dashboard/TrafficChart'), { ssr: false });
-const GA4TrafficChart = dynamic(() => import('../../../../components/dashboard/GA4TrafficChart').then(mod => ({ default: mod.GA4TrafficChart })), { ssr: false });
-const GSCPerformanceChart = dynamic(() => import('../../../../components/dashboard/GSCPerformanceChart').then(mod => ({ default: mod.GSCPerformanceChart })), { ssr: false });
-import { useEffect, useState } from 'react';
-import Skeleton from '../../../../components/ui/Skeleton';
-import { api } from '../../../../lib/api';
+import { useDashboardData } from '../../../../lib/queries/dashboard';
 import { useAuthStore } from '../../../../store/authStore';
 import { ROLE_LABELS } from '@beritakarya/config';
 
@@ -31,21 +21,18 @@ import { QuickActions } from '../../../../components/dashboard/QuickActions';
 import { AdvertiserDashboardOverview } from '../../../../components/dashboard/AdvertiserDashboardOverview';
 import { KYCRequestsWidget } from '../../../../components/dashboard/KYCRequestsWidget';
 import { AuditLogsWidget } from '../../../../components/dashboard/AuditLogsWidget';
+import { GA4AudienceCards } from '../../../../components/dashboard/GA4AudienceCards';
+import { GA4SourceTable } from '../../../../components/dashboard/GA4SourceTable';
+import { GSCTopQueries } from '../../../../components/dashboard/GSCTopQueries';
+import { GSCTopPages } from '../../../../components/dashboard/GSCTopPages';
+import Skeleton from '../../../../components/ui/Skeleton';
+
+// Dynamic imports untuk chart components (recharts ~200 KB gzipped)
+const TrafficChart = dynamic(() => import('../../../../components/dashboard/TrafficChart'), { ssr: false });
+const GA4TrafficChart = dynamic(() => import('../../../../components/dashboard/GA4TrafficChart').then(mod => ({ default: mod.GA4TrafficChart })), { ssr: false });
+const GSCPerformanceChart = dynamic(() => import('../../../../components/dashboard/GSCPerformanceChart').then(mod => ({ default: mod.GSCPerformanceChart })), { ssr: false });
 
 // ─── Types ──────────────────────────────────────────────────────
-interface Article {
-  id: string;
-  title: string;
-  status: string;
-  category?: { name: string };
-  author?: { name: string };
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt?: string;
-  viewCount?: number;
-  isBreaking?: boolean;
-}
-
 interface DashboardFocusCard {
   title: string;
   description: string;
@@ -63,192 +50,59 @@ interface DashboardRoleSignal {
   tone: string;
 }
 
-interface TrafficDataPoint {
-  date: string
-  views: number
-}
-
-interface TopContentItem {
-  id: string
-  title: string
-  slug?: string
-  views?: number
-  viewCount?: number
-  category?: { name?: string }
-  categories?: {
-    category?: {
-      name?: string
-    }
-  }[]
-}
-
-interface EngagementStats {
-  rate: number
-  [key: string]: unknown
-}
-
-interface KYCRequest {
-  id: string
-  name: string
-  email: string
-  kycSubmittedAt?: string | null
-  userId?: string
-  status?: string
-  createdAt?: string
-  user?: { name?: string; email?: string }
-}
-
-interface AuditLog {
-  id: string
-  action: string
-  userId: string
-  createdAt: string
-  user?: { name?: string }
-  entityType?: string
-  entityId?: string
-  details?: string
-}
-
 export default function DashboardOverview() {
   const { site } = useParams() as { site: string };
   const { user } = useAuthStore();
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [articleStats, setArticleStats] = useState<Record<string, number>>({});
-  const [trafficData, setTrafficData] = useState<TrafficDataPoint[]>([]);
-  const [topContent, setTopContent] = useState<TopContentItem[]>([]);
-  const [engagementStats, setEngagementStats] = useState<EngagementStats | null>(null);
-  const [kycRequests, setKycRequests] = useState<KYCRequest[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [ga4Traffic, setGa4Traffic] = useState<{ date: string; sessions: number; pageviews: number }[]>([]);
-  const [ga4Audience, setGa4Audience] = useState<{ totalUsers: number; totalSessions: number; avgSessionDuration: number; bounceRate: number; realtimeUsers?: number; sources: { source: string; sessions: number; percentage: number }[] } | null>(null);
-  const [ga4Realtime, setGa4Realtime] = useState<{ activeUsers: number } | null>(null);
-  const [gscPerformance, setGscPerformance] = useState<{ totalImpressions: number; totalClicks: number; avgCtr: number; avgPosition: number; overTime: { date: string; impressions: number; clicks: number; ctr: number; position: number }[] } | null>(null);
-  const [gscQueries, setGscQueries] = useState<{ query: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
-  const [gscPages, setGscPages] = useState<{ page: string; impressions: number; clicks: number; ctr: number; position: number }[]>([]);
   const [analyticsTab, setAnalyticsTab] = useState<'internal' | 'ga4' | 'gsc'>('internal');
-  const [isGa4Configured, setIsGa4Configured] = useState(false);
-  const [isGscConfigured, setIsGscConfigured] = useState(false);
-  const [ga4Error, setGa4Error] = useState<string | null>(null);
-  const [gscError, setGscError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [greeting, setGreeting] = useState('Selamat');
-  const [currentDate, setCurrentDate] = useState('');
-  const [currentTimestamp] = useState(() => Date.now());
-
-  useEffect(() => {
+  
+  // Get greeting and date
+  const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    setGreeting(hour < 11 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam');
-    setCurrentDate(new Date().toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' }));
+    return hour < 11 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
   }, []);
+  
+  const currentDate = useMemo(() => {
+    return new Date().toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }, []);
+  
+  const currentTimestamp = useMemo(() => Date.now(), []);
+  
+  // ─── React Query Data ─────────────────────────────────────────
+  const {
+    articles,
+    articlesIsLoading,
+    articleStats,
+    trafficData,
+    topContent,
+    engagementStats,
+    ga4Traffic,
+    ga4Audience,
+    ga4Realtime,
+    isGa4Configured,
+    ga4Error,
+    gscPerformance,
+    gscQueries,
+    gscPages,
+    isGscConfigured,
+    gscError,
+    kycRequests,
+    auditLogs,
+    isLoading,
+  } = useDashboardData(site, user?.role);
 
-  useEffect(() => {
-    if (user?.role === 'advertiser') {
-      setLoading(false);
-      return;
-    }
-    const controller = new AbortController();
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [artRes, statsRes, trafficRes, topRes, engRes] = await Promise.all([
-          api.get('/articles', { params: { limit: 50 }, signal: controller.signal }),
-          api.get('/articles/stats', { signal: controller.signal }),
-          api.get('/analytics/traffic', { params: { days: 7 }, signal: controller.signal }),
-          api.get('/analytics/top-content', { params: { limit: 5 }, signal: controller.signal }),
-          api.get('/analytics/engagement', { signal: controller.signal })
-        ]);
+  // Advertiser view
+  if (user?.role === 'advertiser') {
+    return (
+      <AdvertiserDashboardOverview
+        greeting={greeting}
+        userName={user?.name || 'Mitra Bisnis'}
+        site={site}
+      />
+    );
+  }
 
-        if (controller.signal.aborted) return;
-        setArticles(artRes.data.data.articles || artRes.data.data.items || []);
-        setArticleStats(statsRes.data.data || {});
-        setTrafficData(Array.isArray(trafficRes.data.data) ? trafficRes.data.data : []);
-        setTopContent(topRes.data.data);
-        setEngagementStats(engRes.data.data);
-
-        // Load GA4 and GSC data (fire-and-forget, don't block dashboard)
-        Promise.allSettled([
-          api.get('/analytics/ga4/traffic', { params: { days: 7 }, signal: controller.signal }),
-          api.get('/analytics/ga4/audience', { params: { days: 7 }, signal: controller.signal }),
-          api.get('/analytics/ga4/realtime', { signal: controller.signal }),
-          api.get('/analytics/gsc/performance', { params: { days: 28 }, signal: controller.signal }),
-          api.get('/analytics/gsc/queries', { params: { limit: 10 }, signal: controller.signal }),
-          api.get('/analytics/gsc/pages', { params: { limit: 10 }, signal: controller.signal }),
-        ]).then(([ga4TrafficRes, ga4AudienceRes, ga4RealtimeRes, gscPerfRes, gscQueriesRes, gscPagesRes]) => {
-          if (controller.signal.aborted) return;
-          
-          // Process GA4
-          if (ga4TrafficRes.status === 'fulfilled') {
-            const res = ga4TrafficRes.value.data;
-            if (res.success) {
-              setIsGa4Configured(true);
-              setGa4Traffic(res.data || []);
-            } else if (res.message && res.message.includes('tidak dikonfigurasi')) {
-              setIsGa4Configured(false);
-            } else {
-              setIsGa4Configured(true);
-              setGa4Error(res.error || res.message || 'Gagal memuat data Google Analytics');
-            }
-          } else {
-            setIsGa4Configured(true);
-            setGa4Error('Gagal menghubungi API analitik server');
-          }
-
-          if (ga4AudienceRes.status === 'fulfilled' && ga4AudienceRes.value.data.success) {
-            setGa4Audience(ga4AudienceRes.value.data.data);
-          }
-          if (ga4RealtimeRes.status === 'fulfilled' && ga4RealtimeRes.value.data.success) {
-            setGa4Realtime(ga4RealtimeRes.value.data.data);
-          }
-
-          // Process GSC
-          if (gscPerfRes.status === 'fulfilled') {
-            const res = gscPerfRes.value.data;
-            if (res.success) {
-              setIsGscConfigured(true);
-              setGscPerformance(res.data);
-            } else if (res.message && res.message.includes('tidak dikonfigurasi')) {
-              setIsGscConfigured(false);
-            } else {
-              setIsGscConfigured(true);
-              setGscError(res.error || res.message || 'Gagal memuat data Search Console');
-            }
-          } else {
-            setIsGscConfigured(true);
-            setGscError('Gagal menghubungi API Search Console server');
-          }
-
-          if (gscQueriesRes.status === 'fulfilled' && gscQueriesRes.value.data.success) {
-            setGscQueries(gscQueriesRes.value.data.data || []);
-          }
-          if (gscPagesRes.status === 'fulfilled' && gscPagesRes.value.data.success) {
-            setGscPages(gscPagesRes.value.data.data || []);
-          }
-        }).catch(() => { /* Silent fail */ });
-
-        if (user?.role === 'superadmin') {
-          try {
-            const [kycRes, auditRes] = await Promise.all([
-              api.get('/kyc', { params: { status: 'pending', limit: 5 }, signal: controller.signal }),
-              api.get('/audit', { params: { limit: 5 }, signal: controller.signal })
-            ]);
-            if (controller.signal.aborted) return;
-            setKycRequests(kycRes.data.data || []);
-            setAuditLogs(auditRes.data.data?.items || []);
-          } catch (err: unknown) {
-            if ((err as { name?: string })?.name !== 'CanceledError') console.error('Failed to load admin stats:', err);
-          }
-        }
-      } catch (err: unknown) {
-        if ((err as { name?: string })?.name !== 'CanceledError') console.error('Failed to load dashboard data:', err);
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
-    loadData();
-    return () => { controller.abort(); };
-  }, [site, user]);
-
-  if (loading) {
+  // Loading state
+  if (isLoading || articlesIsLoading) {
     return (
       <div className="space-y-8">
         <Skeleton variant="text" className="h-8 w-72" />
@@ -263,7 +117,7 @@ export default function DashboardOverview() {
     );
   }
 
-  // Computed stats — use authoritative stats from /articles/stats (filtered per user role)
+  // ─── Computed Stats ───────────────────────────────────────────
   const total       = Object.values(articleStats).reduce((s, n) => s + n, 0);
   const published   = articleStats.published || 0;
   const drafts      = articleStats.draft || 0;
@@ -274,34 +128,48 @@ export default function DashboardOverview() {
   const revisions   = articleStats.revision || 0;
   const totalViews  = articles.reduce((s, a) => s + (a.viewCount || 0), 0);
 
-  const getQueueHours = (article: Article) => {
+  const getQueueHours = (article: { updatedAt?: string; createdAt: string }) => {
     const queueDate = new Date(article.updatedAt || article.createdAt).getTime();
     return Math.max(1, Math.floor((currentTimestamp - queueDate) / (1000 * 60 * 60)));
   };
 
-  const reviewQueue = [...articles]
-    .filter(a => a.status === 'review' || a.status === 'submitted')
-    .sort((a, b) => {
-      if (Number(b.isBreaking) !== Number(a.isBreaking)) {
-        return Number(b.isBreaking) - Number(a.isBreaking);
-      }
-      return getQueueHours(b) - getQueueHours(a);
-    })
-    .slice(0, 4);
-  const recentActivityList = [...articles].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
+  const reviewQueue = useMemo(() => {
+    return [...articles]
+      .filter(a => a.status === 'review' || a.status === 'submitted')
+      .sort((a, b) => {
+        if (Number(b.isBreaking) !== Number(a.isBreaking)) {
+          return Number(b.isBreaking) - Number(a.isBreaking);
+        }
+        return getQueueHours(b) - getQueueHours(a);
+      })
+      .slice(0, 4);
+  }, [articles, currentTimestamp]);
+
+  const recentActivityList = useMemo(() => {
+    return [...articles]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+  }, [articles]);
 
   // Category breakdown
-  const catMap: Record<string, number> = {};
-  articles.forEach(a => {
-    const cat = a.category?.name || 'Umum';
-    catMap[cat] = (catMap[cat] || 0) + 1;
-  });
-  const catEntries = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const catMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    articles.forEach(a => {
+      const cat = a.category?.name || 'Umum';
+      map[cat] = (map[cat] || 0) + 1;
+    });
+    return map;
+  }, [articles]);
+  
+  const catEntries = useMemo(() => {
+    return Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [catMap]);
+  
   const catMax = catEntries[0]?.[1] || 1;
 
-  // Sparkline data from real traffic
-  const trafficSpark = Array.isArray(trafficData) && trafficData.length > 0 ? trafficData.map(d => d.views) : [0,0,0,0,0,0,0];
-  const publishedSpark = Array.isArray(trafficData) && trafficData.length > 0 ? trafficData.map(d => Math.floor(d.views / 20)) : [0,0,0,0,0,0,0];
+  // Sparkline data
+  const trafficSpark = trafficData.length > 0 ? trafficData.map(d => d.views) : [0,0,0,0,0,0,0];
+  const publishedSpark = trafficData.length > 0 ? trafficData.map(d => Math.floor(d.views / 20)) : [0,0,0,0,0,0,0];
 
   const supportEmail = 'support.beritakarya@gmail.com';
   const supportSubject = encodeURIComponent(`Bantuan Dashboard ${site}`);
@@ -309,7 +177,9 @@ export default function DashboardOverview() {
     status ? `/${site}/dashboard/articles?status=${status}` : `/${site}/dashboard/articles`;
   const reviewHref = (tab?: 'submitted' | 'review' | 'revision' | 'approved') =>
     tab ? `/${site}/dashboard/review?tab=${tab}` : `/${site}/dashboard/review`;
-  const roleFocusText: Record<string, string> = {
+
+  // Role-specific content
+  const roleFocusText: Record<string, string> = useMemo(() => ({
     reporter: drafts > 0
       ? `Fokus hari ini: lanjutkan ${drafts} draft yang belum selesai dan kirim artikel yang sudah siap ke meja editor.`
       : 'Fokus hari ini: cek artikel yang sudah dikirim, tanggapi revisi editor, atau mulai post baru bila agenda liputan sudah siap.',
@@ -322,9 +192,9 @@ export default function DashboardOverview() {
     superadmin: kycRequests.length > 0
       ? `Fokus hari ini: amankan operasional redaksi dengan memproses ${inReview} antrean review dan ${kycRequests.length} verifikasi KYC.`
       : 'Fokus hari ini: pantau kesehatan operasional, cek audit sistem, dan pastikan alur editorial berjalan tanpa hambatan.',
-  };
+  }), [drafts, inReview, kycRequests]);
 
-  const roleSignals: DashboardRoleSignal[] = (() => {
+  const roleSignals: DashboardRoleSignal[] = useMemo(() => {
     switch (user?.role) {
       case 'reporter':
       case 'kontributor':
@@ -393,9 +263,9 @@ export default function DashboardOverview() {
       default:
         return [];
     }
-  })();
+  }, [user?.role, drafts, revisions, submitted, inReview, approved, scheduled, kycRequests, totalViews]);
 
-  const focusCards: DashboardFocusCard[] = (() => {
+  const focusCards: DashboardFocusCard[] = useMemo(() => {
     switch (user?.role) {
       case 'reporter':
       case 'kontributor':
@@ -476,17 +346,10 @@ export default function DashboardOverview() {
       default:
         return [];
     }
-  })();
+  }, [user?.role, drafts, revisions, inReview, approved, kycRequests, site]);
 
-  if (user?.role === 'advertiser') {
-    return (
-      <AdvertiserDashboardOverview
-        greeting={greeting}
-        userName={user?.name || 'Mitra Bisnis'}
-        site={site}
-      />
-    );
-  }
+  // Total views from traffic data
+  const totalViewsFromTraffic = trafficData.reduce((acc, curr) => acc + curr.views, 0);
 
   return (
     <div className="space-y-8">
@@ -594,7 +457,7 @@ export default function DashboardOverview() {
             <div>
               <p className="dash-label mb-1">Total Views (7 Hari)</p>
               <p className="text-4xl font-black text-brand-black dark:text-white tabular-nums">
-                {(Array.isArray(trafficData) ? trafficData.reduce((acc, curr) => acc + curr.views, 0) : 0).toLocaleString('id-ID')}
+                {totalViewsFromTraffic.toLocaleString('id-ID')}
               </p>
             </div>
             <div>
@@ -731,8 +594,8 @@ export default function DashboardOverview() {
           )}
           {user?.role === 'superadmin' && (
             <>
-              <KYCRequestsWidget requests={kycRequests} site={site} />
-              <AuditLogsWidget logs={auditLogs} site={site} />
+              <KYCRequestsWidget requests={kycRequests || []} site={site} />
+              <AuditLogsWidget logs={auditLogs || []} site={site} />
             </>
           )}
           <RecentActivity articles={recentActivityList} site={site} />
@@ -773,4 +636,3 @@ export default function DashboardOverview() {
     </div>
   );
 }
-
