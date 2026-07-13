@@ -1,4 +1,4 @@
-import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api';
 
 // ─── Types ──────────────────────────────────────────────────────────
@@ -355,7 +355,7 @@ export function useGSCPages(site: string) {
  * Get KYC requests (superadmin only)
  * @param site - Site ID
  */
-export function useKYCRequests(site: string) {
+export function useKYCRequests(site: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.kycRequests(site),
     queryFn: () =>
@@ -364,7 +364,7 @@ export function useKYCRequests(site: string) {
         limit: 5,
         site,
       }).then((res) => res.data || []),
-    enabled: !!site,
+    enabled: !!site && enabled,
     staleTime: 2 * 60 * 1000,
   });
 }
@@ -373,7 +373,7 @@ export function useKYCRequests(site: string) {
  * Get audit logs (superadmin only)
  * @param site - Site ID
  */
-export function useAuditLogs(site: string) {
+export function useAuditLogs(site: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.auditLogs(site),
     queryFn: () =>
@@ -381,7 +381,7 @@ export function useAuditLogs(site: string) {
         limit: 5,
         site,
       }).then((res) => res.data?.items || []),
-    enabled: !!site,
+    enabled: !!site && enabled,
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
@@ -452,9 +452,9 @@ export function useDashboardData(site: string, userRole?: string): DashboardData
     gscPages: useGSCPages(site),
   };
 
-  // Admin-only queries - only run for superadmin
-  const kycRequestsQuery = userRole === 'superadmin' ? useKYCRequests(site) : null;
-  const auditLogsQuery = userRole === 'superadmin' ? useAuditLogs(site) : null;
+  // Admin-only queries - run unconditionally, controlled by enabled flag
+  const kycRequestsQuery = useKYCRequests(site, userRole === 'superadmin');
+  const auditLogsQuery = useAuditLogs(site, userRole === 'superadmin');
 
   return {
     // Core data

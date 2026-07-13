@@ -65,7 +65,7 @@ export default function DashboardOverview() {
     return new Date().toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   }, []);
   
-  const currentTimestamp = useMemo(() => Date.now(), []);
+  const [currentTimestamp] = useState(() => Date.now());
   
   // ─── React Query Data ─────────────────────────────────────────
   const {
@@ -89,33 +89,6 @@ export default function DashboardOverview() {
     auditLogs,
     isLoading,
   } = useDashboardData(site, user?.role);
-
-  // Advertiser view
-  if (user?.role === 'advertiser') {
-    return (
-      <AdvertiserDashboardOverview
-        greeting={greeting}
-        userName={user?.name || 'Mitra Bisnis'}
-        site={site}
-      />
-    );
-  }
-
-  // Loading state
-  if (isLoading || articlesIsLoading) {
-    return (
-      <div className="space-y-8">
-        <Skeleton variant="text" className="h-8 w-72" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <Skeleton key={i} variant="text" className="h-36 w-full rounded-lg" />)}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2"><Skeleton variant="text" className="h-72 w-full rounded-lg" /></div>
-          <Skeleton variant="text" className="h-72 w-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
 
   // ─── Computed Stats ───────────────────────────────────────────
   const total       = Object.values(articleStats).reduce((s, n) => s + n, 0);
@@ -347,6 +320,33 @@ export default function DashboardOverview() {
         return [];
     }
   }, [user?.role, drafts, revisions, inReview, approved, kycRequests, site]);
+
+  // Advertiser view early return
+  if (user?.role === 'advertiser') {
+    return (
+      <AdvertiserDashboardOverview
+        greeting={greeting}
+        userName={user?.name || 'Mitra Bisnis'}
+        site={site}
+      />
+    );
+  }
+
+  // Loading state early return
+  if (isLoading || articlesIsLoading) {
+    return (
+      <div className="space-y-8">
+        <Skeleton variant="text" className="h-8 w-72" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <Skeleton key={i} variant="text" className="h-36 w-full rounded-lg" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2"><Skeleton variant="text" className="h-72 w-full rounded-lg" /></div>
+          <Skeleton variant="text" className="h-72 w-full rounded-lg" />
+        </div>
+      </div>
+    );
+  }
 
   // Total views from traffic data
   const totalViewsFromTraffic = trafficData.reduce((acc, curr) => acc + curr.views, 0);
