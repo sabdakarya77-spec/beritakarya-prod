@@ -69,7 +69,6 @@ export function HybridLayout(props: TemplateProps) {
       <FeedWithSidebar
         feedArticles={feedArticles}
         popular={popular}
-        opinionArticles={showOpinionSection ? opinionArticles : undefined}
         site={site}
         searchQuery={searchQuery}
         isCategoryFilter={isCategoryFilter}

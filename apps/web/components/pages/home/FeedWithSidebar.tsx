@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { SectionTitle } from '../../ui/Typography'
 import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
-import { PalingDibacaSidebar, AksesRedaksiSidebar, OpiniSidebar } from './sidebar'
+import { PalingDibacaSidebar, AksesRedaksiSidebar } from './sidebar'
 import { SmartImage } from '../../ui/SmartImage'
 import { AdZone } from '../../templates/zones'
 
 interface FeedWithSidebarProps {
   feedArticles: HomeArticle[]
   popular: HomeArticle[]
-  opinionArticles?: HomeArticle[]
+
   site: string
   searchQuery: string
   isCategoryFilter: boolean
@@ -30,7 +30,7 @@ const getCategoryName = (article: HomeArticle): string =>
   article.categories?.[0]?.category?.name || article.category?.name || 'Umum'
 
 export function FeedWithSidebar({
-  feedArticles, popular, opinionArticles, site,
+  feedArticles, popular, site,
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
   whatsappUrl, telegramUrl, reportUrl, resolveCategoryName,
 }: FeedWithSidebarProps) {
