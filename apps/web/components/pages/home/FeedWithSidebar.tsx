@@ -33,7 +33,7 @@ export function FeedWithSidebar({
   searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
   whatsappUrl, telegramUrl, reportUrl, resolveCategoryName,
 }: FeedWithSidebarProps) {
-  const displayArticles = feedArticles.slice(0, 5)
+  const displayArticles = feedArticles.slice(0, 4)
 
   return (
     <Container className="border-t border-gray-100 pt-6 pb-6 dark:border-white/5 md:pt-8 md:pb-8">
