@@ -138,14 +138,14 @@ export function FeedWithSidebar({
 
         {/* Sidebar — 30% (4 kolom) */}
         <aside className="lg:col-span-4">
-          <div className="sticky top-24 space-y-4">
+          <div className="sticky top-24 space-y-6">
             <PalingDibacaSidebar articles={popular} site={site} />
             
             {/* Opsi A: HOME_FEED_1 masuk ke sidebar di desktop & mobile */}
-            <AdZone type="HOME_FEED_1" className="my-2" />
+            <div className="mt-6">
+              <AdZone type="HOME_FEED_1" />
+            </div>
 
-
-            
             {/* Akses Redaksi (Tetap disembunyikan di HP) */}
             <div className="hidden lg:block">
               <AksesRedaksiSidebar
