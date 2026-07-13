@@ -91,15 +91,15 @@ export function HybridLayout(props: TemplateProps) {
       {/* AD: HOME_FEED_2 */}
       <AdZone type="HOME_FEED_2" />
 
-      {/* ZONA 5 — EDITORIAL EXTRAS (Teknologi · Foto · Video) */}
+      {/* ZONA 5 — EDITORIAL EXTRAS (Teknologi · Opini · Foto · Video) */}
       <EditorialExtras
         technologyArticles={technologyArticles}
-        opinionArticles={[]}
+        opinionArticles={opinionArticles}
         photoJournal={photoJournal}
         videoStories={videoStories}
         site={site}
         showTechnologySection={showTechnologySection}
-        showOpinionSection={false}
+        showOpinionSection={showOpinionSection}
         showPhotoSection={showPhotoSection}
         showVideoSection={showVideoSection}
         getVideoThumbnail={getVideoThumbnail}

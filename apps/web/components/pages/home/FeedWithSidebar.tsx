@@ -144,10 +144,7 @@ export function FeedWithSidebar({
             {/* Opsi A: HOME_FEED_1 masuk ke sidebar di desktop & mobile */}
             <AdZone type="HOME_FEED_1" className="my-2" />
 
-            {/* Opini & Analisis (Selalu tampil di desktop & mobile) */}
-            {opinionArticles && opinionArticles.length > 0 && (
-              <OpiniSidebar articles={opinionArticles} site={site} />
-            )}
+
             
             {/* Akses Redaksi (Tetap disembunyikan di HP) */}
             <div className="hidden lg:block">
