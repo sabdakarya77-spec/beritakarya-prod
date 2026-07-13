@@ -823,19 +823,54 @@ export class SiteService {
       where: { siteId }
     })
 
-    // Jika belum ada config, buat default (Design F)
+    // Jika belum ada config, coba copy dari pusat JIKA siteId !== 'pusat'
     if (!config) {
-      config = await prisma.homepageConfig.create({
-        data: {
-          siteId,
-          template: 'F',
-          heroMode: 'MAGAZINE_COVER_550',
-          feedLayout: 'pattern_rotation',
-          trendingStyle: 'numbered_podium',
-          sectionOrder: this.HOMEPAGE_DEFAULTS.sectionOrder,
-          sectionVisibility: this.HOMEPAGE_DEFAULTS.sectionVisibility,
-          interstitials: this.HOMEPAGE_DEFAULTS.interstitials,
+      let dataToCreate: any = {
+        siteId,
+        template: 'F',
+        heroMode: 'MAGAZINE_COVER_550',
+        feedLayout: 'pattern_rotation',
+        trendingStyle: 'numbered_podium',
+        sectionOrder: this.HOMEPAGE_DEFAULTS.sectionOrder,
+        sectionVisibility: this.HOMEPAGE_DEFAULTS.sectionVisibility,
+        interstitials: this.HOMEPAGE_DEFAULTS.interstitials,
+      }
+
+      if (siteId !== 'pusat') {
+        try {
+          const pusatConfig = await prisma.homepageConfig.findUnique({
+            where: { siteId: 'pusat' }
+          })
+          if (pusatConfig) {
+            dataToCreate = {
+              siteId,
+              template: pusatConfig.template,
+              heroMode: pusatConfig.heroMode,
+              heroAutoRotate: pusatConfig.heroAutoRotate,
+              heroIntervalMs: pusatConfig.heroIntervalMs,
+              feedLayout: pusatConfig.feedLayout,
+              trendingStyle: pusatConfig.trendingStyle,
+              scoreFreshness: pusatConfig.scoreFreshness,
+              scoreEngagement: pusatConfig.scoreEngagement,
+              scoreEditorial: pusatConfig.scoreEditorial,
+              scoreRelevance: pusatConfig.scoreRelevance,
+              opinionCategories: pusatConfig.opinionCategories || [],
+              photoCategories: pusatConfig.photoCategories || [],
+              videoCategories: pusatConfig.videoCategories || [],
+              sectionOrder: pusatConfig.sectionOrder || this.HOMEPAGE_DEFAULTS.sectionOrder,
+              sectionVisibility: pusatConfig.sectionVisibility || this.HOMEPAGE_DEFAULTS.sectionVisibility,
+              feedColumns: pusatConfig.feedColumns,
+              showExcerpt: pusatConfig.showExcerpt,
+              interstitials: pusatConfig.interstitials || this.HOMEPAGE_DEFAULTS.interstitials,
+            }
+          }
+        } catch (err) {
+          logger.error(`[Site] Failed to inherit homepage config from pusat for site "${siteId}":`, err)
         }
+      }
+
+      config = await prisma.homepageConfig.create({
+        data: dataToCreate
       })
       return config
     }

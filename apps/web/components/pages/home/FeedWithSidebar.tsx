@@ -4,6 +4,7 @@ import { Container } from '../../layout/Container'
 import type { HomeArticle } from './utils/distribution'
 import { PalingDibacaSidebar, AksesRedaksiSidebar, OpiniSidebar } from './sidebar'
 import { SmartImage } from '../../ui/SmartImage'
+import { AdZone } from '../../templates/zones'
 
 interface FeedWithSidebarProps {
   feedArticles: HomeArticle[]
@@ -139,11 +140,16 @@ export function FeedWithSidebar({
         <aside className="lg:col-span-4">
           <div className="sticky top-24 space-y-4">
             <PalingDibacaSidebar articles={popular} site={site} />
+            
+            {/* Opsi A: HOME_FEED_1 masuk ke sidebar di desktop & mobile */}
+            <AdZone type="HOME_FEED_1" className="my-2" />
+
+            {/* Opini & Analisis (Selalu tampil di desktop & mobile) */}
             {opinionArticles && opinionArticles.length > 0 && (
-              <div className="hidden lg:block">
-                <OpiniSidebar articles={opinionArticles} site={site} />
-              </div>
+              <OpiniSidebar articles={opinionArticles} site={site} />
             )}
+            
+            {/* Akses Redaksi (Tetap disembunyikan di HP) */}
             <div className="hidden lg:block">
               <AksesRedaksiSidebar
                 whatsappUrl={whatsappUrl}

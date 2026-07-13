@@ -51,16 +51,18 @@ export function EditorialExtras({
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
               {technologyArticles.map((article: HomeArticle) => (
                 <div key={article.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
-                  {article.featuredImage && (
-                    <SmartImage
-                      src={article.featuredImage}
-                      context="gallery_full"
-                      alt={article.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  )}
+                  <SmartImage
+                    src={
+                      article.featuredImage ||
+                      (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'image')?.url ||
+                      '/placeholder.jpg'
+                    }
+                    context="gallery_full"
+                    alt={article.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 z-10 w-full p-5 md:p-6">
                     <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-blue-400">

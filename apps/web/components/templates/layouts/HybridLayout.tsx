@@ -81,8 +81,7 @@ export function HybridLayout(props: TemplateProps) {
         resolveCategoryName={resolveCategoryName}
       />
 
-      {/* AD: HOME_FEED_1 */}
-      <AdZone type="HOME_FEED_1" />
+
 
       {/* ZONA 4 Row 2 — CONTINUED FEED (4 sejajar, full info) */}
       {row2Articles.length > 0 && (
