@@ -51,7 +51,7 @@ export function EditorialExtras({
               </SectionEyebrow>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
             {technologyArticles.map((article: HomeArticle) => (
               <div key={article.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                 <SmartImage

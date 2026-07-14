@@ -194,7 +194,7 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
     return picked
   }
 
-  const technology = takeUnused(pools.technologyPool, 4)
+  const technology = takeUnused(pools.technologyPool, 6)
   const opinion = takeUnused(pools.opinionPool, 3)
   const photoJournal = takeUnused(pools.photoPool, 3)
   const videoStories = takeUnused(pools.videoPool, 3)
