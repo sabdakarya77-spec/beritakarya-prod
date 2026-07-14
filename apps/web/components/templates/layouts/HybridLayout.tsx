@@ -86,8 +86,7 @@ export function HybridLayout(props: TemplateProps) {
         <ContinuedFeed articles={row2Articles} site={site} />
       )}
 
-      {/* AD: HOME_FEED_2 */}
-      <AdZone type="HOME_FEED_2" />
+
 
       {/* ZONA 5 — EDITORIAL EXTRAS (Teknologi · Opini · Foto · Video) */}
       <EditorialExtras

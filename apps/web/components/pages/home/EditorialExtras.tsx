@@ -8,6 +8,7 @@ import type { HomeArticle } from './utils/distribution'
 import { sectionMetaClass, formatSidebarDate } from './constants'
 import { InterstitialPhoto } from './interstitials/InterstitialPhoto'
 import { PalingDibacaSidebar } from './sidebar'
+import { AdZone } from '../../templates/zones'
 
 interface ArticleBlock {
   type: string
@@ -37,7 +38,7 @@ export function EditorialExtras({
 
   const hasSidebar = !!(popularArticles && popularArticles.length > 0)
 
-  const content = (
+  const row1Content = (
     <>
       {/* Teknologi — portrait cards (3:4) */}
       {showTechnologySection && (
@@ -50,7 +51,7 @@ export function EditorialExtras({
               </SectionEyebrow>
             </div>
           </div>
-          <div className={`grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 ${!hasSidebar ? '2xl:grid-cols-4' : ''}`}>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
             {technologyArticles.map((article: HomeArticle) => (
               <div key={article.id} className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-md">
                 <SmartImage
@@ -105,7 +106,7 @@ export function EditorialExtras({
               </SectionEyebrow>
             </div>
           </div>
-          <div className={`grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 ${!hasSidebar ? '2xl:grid-cols-4' : ''}`}>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
             {opinionArticles.map((article: HomeArticle) => (
               <div key={article.id} className="flex h-full flex-col justify-between gap-3">
                 <div>
@@ -136,7 +137,11 @@ export function EditorialExtras({
           </div>
         </FadeInOnScroll>
       )}
+    </>
+  )
 
+  const row2Content = (
+    <>
       {/* Foto Jurnalistik */}
       {showPhotoSection && photoJournal.length > 0 && (
         <FadeInOnScroll>
@@ -155,7 +160,7 @@ export function EditorialExtras({
               </SectionEyebrow>
             </div>
           </div>
-          <div className={`grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 ${!hasSidebar ? '2xl:grid-cols-4' : ''}`}>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6 2xl:grid-cols-4">
             {videoStories.map((article: HomeArticle) => {
               const videoImg = getVideoThumbnail(article)
               return (
@@ -186,24 +191,36 @@ export function EditorialExtras({
 
   return (
     <div className="border-t border-gray-100 dark:border-white/5">
-      <Container className="pt-6 pb-6 md:pt-8 md:pb-8">
+      <Container className="pt-6 pb-6 md:pt-8 md:pb-8 space-y-8 md:space-y-10">
         {hasSidebar ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 md:gap-8">
-            {/* Left Column — 8 kolom */}
-            <div className="lg:col-span-8 space-y-8 md:space-y-10">
-              {content}
+          <>
+            {/* ROW 1: 8:4 Grid */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 md:gap-8">
+              {/* Left Column — 8 kolom (Teknologi & Opini) */}
+              <div className="lg:col-span-8 space-y-8 md:space-y-10">
+                {row1Content}
+              </div>
+
+              {/* Right Column — 4 kolom (Paling Dibaca & Iklan HOME_FEED_2) */}
+              <aside className="lg:col-span-4 self-start">
+                <div className="sticky top-24 space-y-6">
+                  <PalingDibacaSidebar articles={popularArticles!} site={site} />
+                  <div className="pt-2">
+                    <AdZone type="HOME_FEED_2" />
+                  </div>
+                </div>
+              </aside>
             </div>
 
-            {/* Right Column — 4 kolom */}
-            <aside className="lg:col-span-4 self-start">
-              <div className="sticky top-24">
-                <PalingDibacaSidebar articles={popularArticles!} site={site} />
-              </div>
-            </aside>
-          </div>
+            {/* ROW 2: Full Width (Foto & Video) */}
+            <div className="space-y-8 md:space-y-10 border-t border-gray-100 pt-8 dark:border-white/5">
+              {row2Content}
+            </div>
+          </>
         ) : (
           <div className="space-y-8 md:space-y-10">
-            {content}
+            {row1Content}
+            {row2Content}
           </div>
         )}
       </Container>
