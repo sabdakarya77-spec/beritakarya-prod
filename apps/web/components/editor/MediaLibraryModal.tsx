@@ -42,6 +42,7 @@ export function MediaLibraryModal({
   const [activeTab, setActiveTab] = useState<'gallery' | 'upload'>('gallery')
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const [formatFilter, setFormatFilter] = useState<FormatFilter>('all')
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
 
   const restrictedRoles = ['reporter', 'kontributor']
   const isRestricted = restrictedRoles.includes(user?.role || '')
@@ -154,41 +155,41 @@ export function MediaLibraryModal({
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-6xl h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-6xl h-[90vh] bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-2xl shadow-2xl flex flex-col overflow-hidden max-sm:bg-[#0d1527] max-sm:text-white max-sm:rounded-[32px]"
             onClick={(e) => e.stopPropagation()}
           >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 max-sm:border-slate-800/80 max-sm:px-5 max-sm:py-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-red/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-brand-red/10 flex items-center justify-center max-sm:w-12 max-sm:h-12 max-sm:bg-red-500/10 max-sm:border max-sm:border-red-500/20 max-sm:rounded-2xl">
                 <FolderOpen className="w-5 h-5 text-brand-red" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white max-sm:text-white max-sm:text-lg max-sm:font-bold">
                   Galeri Media
                 </h2>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 max-sm:text-slate-400 max-sm:text-[11px]">
                   {isRestricted ? 'Hanya menampilkan media Anda' : 'Seluruh media situs'}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors max-sm:text-slate-400 max-sm:hover:bg-slate-800/50"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-gray-500 max-sm:text-slate-400" />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 dark:border-slate-700">
+          <div className="flex border-b border-gray-200 dark:border-slate-700 max-sm:border-slate-800/80">
             <button
               onClick={() => setActiveTab('gallery')}
               className={cn(
-                'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors border-b-2',
+                'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors border-b-2 max-sm:border-b-2',
                 activeTab === 'gallery'
                   ? 'border-brand-red text-brand-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 max-sm:text-slate-400 max-sm:hover:text-slate-200'
               )}
             >
               <ImageIcon className="w-4 h-4" />
@@ -197,10 +198,10 @@ export function MediaLibraryModal({
             <button
               onClick={() => setActiveTab('upload')}
               className={cn(
-                'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors border-b-2',
+                'flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors border-b-2 max-sm:border-b-2',
                 activeTab === 'upload'
                   ? 'border-brand-red text-brand-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 max-sm:text-slate-400 max-sm:hover:text-slate-200'
               )}
             >
               <UploadCloud className="w-4 h-4" />
@@ -215,7 +216,8 @@ export function MediaLibraryModal({
               {activeTab === 'gallery' ? (
                 <>
                   {/* Search, Filter & View Toggle */}
-                  <div className="flex items-center gap-4 px-6 py-3 border-b border-gray-100 dark:border-slate-800">
+                  {/* Desktop Toolbar */}
+                  <div className="hidden sm:flex items-center gap-4 px-6 py-3 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex-1 relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
@@ -268,8 +270,69 @@ export function MediaLibraryModal({
                     </div>
                   </div>
 
+                  {/* Mobile Toolbar */}
+                  <div className="flex sm:hidden items-center w-full">
+                    {showMobileSearch ? (
+                      <div className="flex items-center gap-3 w-full px-5 py-3 border-b border-slate-800/60 bg-[#0d1527] transition-all duration-300">
+                        <button 
+                          onClick={() => { setShowMobileSearch(false); setSearch(''); }}
+                          className="p-2 bg-slate-800/80 rounded-xl text-slate-400 hover:text-white"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                        <div className="flex-1 relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Cari media..."
+                            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/35"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 w-full px-5 py-3 border-b border-slate-800/60 bg-[#0d1527]">
+                        {/* Square Search Button */}
+                        <button
+                          onClick={() => setShowMobileSearch(true)}
+                          className="w-12 h-12 flex items-shrink-0 items-center justify-center bg-slate-800/50 border border-slate-700/40 rounded-xl text-slate-400 hover:bg-slate-800/80 transition-colors"
+                        >
+                          <Search className="w-5 h-5" />
+                        </button>
+                        
+                        {/* Funnel Icon */}
+                        <div className="flex items-center justify-center text-slate-400 shrink-0 pl-1">
+                          <Filter className="w-5 h-5" />
+                        </div>
+                        
+                        {/* Horizontal Filter List */}
+                        <div 
+                          className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar scrollbar-none whitespace-nowrap py-1"
+                          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                          {formatFilters.map((filter) => (
+                            <button
+                              key={filter.value}
+                              onClick={() => setFormatFilter(filter.value)}
+                              className={cn(
+                                "transition-all shrink-0 px-3.5 py-1.5 rounded-xl text-sm",
+                                formatFilter === filter.value
+                                  ? "bg-brand-red/20 border border-brand-red/30 text-brand-red font-semibold"
+                                  : "text-slate-400 hover:text-slate-200 font-medium"
+                              )}
+                            >
+                              {filter.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Media Grid/List */}
-                  <div className="flex-1 overflow-y-auto p-6">
+                  <div className="flex-1 overflow-y-auto p-6 max-sm:px-5 max-sm:py-5 max-sm:overflow-x-hidden">
                     {loading && items.length === 0 ? (
                       <div className="flex items-center justify-center h-64">
                         <Loader2 className="w-8 h-8 animate-spin text-brand-red" />
@@ -288,7 +351,7 @@ export function MediaLibraryModal({
                         </button>
                       </div>
                     ) : viewMode === 'grid' ? (
-                      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-sm:-mr-6 max-sm:grid-cols-[repeat(3,115px)]">
                         {filteredItems.map((item) => {
                           const isSelected = selectedItems.some(i => i.id === item.id)
                           return (
@@ -297,8 +360,8 @@ export function MediaLibraryModal({
                               onClick={() => handleSelect(item)}
                               onDoubleClick={() => setPreviewItem(item)}
                               className={cn(
-                                'relative aspect-square rounded-xl overflow-hidden group transition-all cursor-pointer',
-                                'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900',
+                                'relative aspect-square rounded-xl max-sm:rounded-2xl overflow-hidden group transition-all cursor-pointer',
+                                'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 max-sm:ring-offset-[#0d1527]',
                                 isSelected
                                   ? 'ring-brand-red scale-[0.98]'
                                   : 'ring-transparent hover:ring-brand-red/50'
@@ -431,12 +494,12 @@ export function MediaLibraryModal({
 
             {/* Preview Panel */}
             {previewItem && (
-              <div className="w-80 border-l border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 p-4 overflow-y-auto">
+              <div className="max-sm:fixed max-sm:inset-0 max-sm:z-[110] max-sm:bg-[#0d1527] max-sm:text-white max-sm:p-5 w-80 border-l border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 p-4 overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Detail</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white max-sm:text-white">Detail</h3>
                   <button
                     onClick={() => setPreviewItem(null)}
-                    className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700 rounded"
+                    className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700 rounded max-sm:text-slate-400 max-sm:hover:bg-slate-800/50"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -513,14 +576,14 @@ export function MediaLibraryModal({
 
           {/* Footer - Multi-select actions */}
           {allowMultiple && selectedItems.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 max-sm:bg-[#0d1527] max-sm:border-slate-800/80 max-sm:px-5">
+              <p className="text-sm text-gray-600 dark:text-gray-400 max-sm:text-slate-400">
                 {selectedItems.length} media dipilih
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setSelectedItems([])}
-                  className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors max-sm:text-slate-400 max-sm:hover:bg-slate-800/50"
                 >
                   Batal
                 </button>
