@@ -79,7 +79,7 @@ interface InFeedShowcaseProps {
 
 const SLOT_HEIGHTS: Record<string, string> = {
   HOME_FEED_1:    'h-[150px] min-h-[150px] lg:h-[600px] lg:min-h-[600px]',
-  HOME_FEED_2:    'h-[100px] min-h-[100px] md:h-[250px] md:min-h-[250px]',
+  HOME_FEED_2:    'h-[250px] min-h-[250px]',
   ARTICLE_TOP:    'h-[250px] min-h-[250px]',
   ARTICLE_MIDDLE: 'h-[200px] min-h-[200px]',
   ARTICLE_BOTTOM: 'h-[150px] min-h-[150px]',
