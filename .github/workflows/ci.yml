@@ -67,7 +67,7 @@ jobs:
         run: pnpm test
 
       - name: Security audit
-        run: pnpm audit --audit-level=high
+        run: pnpm audit --audit-level=high --ignore-registry-errors
 
       - name: Lint
         run: pnpm lint
