@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Camera } from 'lucide-react'
 import { SmartImage } from '../../../ui/SmartImage'
+import { SectionEyebrow } from '../../../ui/Typography'
 import type { HomeArticle } from '../utils/distribution'
 
 interface InterstitialPhotoProps {
@@ -24,20 +25,27 @@ function getPhotoUrl(article: HomeArticle): string {
 export function InterstitialPhoto({ articles, site }: InterstitialPhotoProps) {
   if (!articles || articles.length === 0) return null
 
-  const photos = articles.slice(0, 3)
+  const photos = articles.slice(0, 4)
 
   return (
-    <section className="my-8 rounded-2xl bg-slate-900 px-5 py-6 md:px-6 md:py-8">
-      {/* Header */}
+    <section>
+      {/* Header — konsisten dengan zona lain */}
       <div className="mb-5 flex items-center gap-2">
         <Camera size={14} className="text-brand-red" />
-        <h3 className="text-[10px] font-black uppercase tracking-[0.16em] text-white">
+        <SectionEyebrow as="h3" className="text-brand-black dark:text-white">
           Foto Jurnalistik
-        </h3>
+        </SectionEyebrow>
       </div>
 
-      {/* Grid: 3 kartu landscape */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* Desktop: 4 kolom grid | Mobile: horizontal scroll 1 card full-width */}
+      <div
+        className="
+          flex gap-4 overflow-x-auto pb-2
+          snap-x snap-mandatory
+          scrollbar-hide
+          md:grid md:grid-cols-4 md:overflow-visible md:pb-0
+        "
+      >
         {photos.map((article) => {
           const imageUrl = getPhotoUrl(article)
           const categoryName =
@@ -49,30 +57,35 @@ export function InterstitialPhoto({ articles, site }: InterstitialPhotoProps) {
             <Link
               key={article.id}
               href={`/${site}/artikel/${article.slug}`}
-              className="group relative block overflow-hidden rounded-xl"
+              className="
+                group flex-none w-[85vw] snap-start
+                md:w-auto md:flex-auto
+                flex flex-col
+              "
             >
-              {/* Gambar landscape */}
-              <div className="relative aspect-[3/2] w-full bg-slate-800">
+              {/* Gambar 3:4 portrait — tanpa border/card wrapper */}
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
                 <SmartImage
                   src={imageUrl}
                   context="card"
                   alt={article.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  sizes="(max-width: 768px) 85vw, 25vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                {/* Gradient overlay bawah */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
 
-              {/* Caption + Photographer */}
-              <div className="mt-2.5">
-                <span className="mb-1 block text-[9px] font-black uppercase tracking-[0.14em] text-brand-red/80">
+              {/* Caption — di luar gambar, tidak ada wrapper tambahan */}
+              <div className="mt-3 space-y-1">
+                <span className="block text-[9px] font-black uppercase tracking-[0.14em] text-brand-red">
                   {categoryName}
                 </span>
-                <h4 className="line-clamp-2 font-sans text-xs font-bold leading-snug tracking-tight text-white/90 transition-colors group-hover:text-white md:text-[13px]">
+                <h4 className="line-clamp-2 font-sans text-[13px] font-bold leading-snug tracking-tight text-brand-black transition-colors group-hover:text-brand-red dark:text-white">
                   {article.title}
                 </h4>
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-white/50">
+                <div className="flex items-center gap-1.5 text-[10px] text-brand-text-muted dark:text-white/50">
                   <span className="truncate">{article.author?.name || 'Fotografer'}</span>
                 </div>
               </div>
