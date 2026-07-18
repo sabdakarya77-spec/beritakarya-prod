@@ -12,7 +12,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'superadmin' | 'wapimred' | 'kaperwil' | 'kabiro' | 'reporter' | 'kontributor' | 'reader' | 'advertiser';
+  role: 'superadmin' | 'wapimred' | 'kaperwil' | 'korwil' | 'kabiro' | 'reporter' | 'kontributor' | 'reader' | 'advertiser';
   avatarUrl?: string | null;
   siteId?: string | null;
   createdAt: string;
@@ -74,6 +74,7 @@ export default function UsersDashboard() {
       superadmin: 'bg-red-100 text-red-800 border-red-300',
       wapimred: 'bg-blue-100 text-blue-800 border-blue-300',
       kaperwil: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+      korwil: 'bg-cyan-100 text-cyan-800 border-cyan-300',
       kabiro: 'bg-purple-100 text-purple-800 border-purple-300',
       reporter: 'bg-green-100 text-green-800 border-green-300',
       kontributor: 'bg-teal-100 text-teal-800 border-teal-300',
@@ -88,6 +89,7 @@ export default function UsersDashboard() {
       superadmin: 'Superadmin',
       wapimred: 'Wapimred',
       kaperwil: 'Kaperwil',
+      korwil: 'Korwil',
       kabiro: 'Kabiro',
       reporter: 'Reporter (Internal)',
       kontributor: 'Kontributor (Lepas)',
@@ -284,6 +286,7 @@ export default function UsersDashboard() {
                         <option value="kontributor">Kontributor (Lepas)</option>
                         <option value="advertiser">Pengiklan</option>
                         <option value="kabiro">Kabiro</option>
+                        <option value="korwil">Korwil</option>
                         <option value="kaperwil">Kaperwil</option>
                         <option value="wapimred">Wapimred</option>
                         <option value="superadmin">Superadmin</option>
