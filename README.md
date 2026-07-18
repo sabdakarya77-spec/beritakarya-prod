@@ -87,6 +87,9 @@ Dokumentasi interaktif: **http://localhost:3001/api-docs** (Swagger).
 | `wapimred`     | Review/approve artikel, kategori, pengaturan situs |
 | `advertiser`   | Memesan & mengelola kampanye iklan (dashboard ads) |
 | `superadmin`   | Akses penuh semua situs & user |
+| `kaperwil`     | **Kepala Wilayah** - Koordinasi multi-site wilayah, review/approve artikel, kelola kategori & pengaturan situs (site-scoped, ditugaskan superadmin via dashboard users) |
+| `korwil`       | **Koordinator Wilayah** - Koordinasi operasional wilayah, review/approve artikel, kelola kategori & pengaturan situs (site-scoped, ditugaskan superadmin via dashboard users) |
+| `kabiro`       | **Kepala Biro** - Kelola biro editorial, review/approve artikel, kategori, pengaturan situs (site-scoped permissions) |
 
 > Role lama `jurnalis` telah dimigrasi ke `reporter` (lihat migrasi Prisma).
 

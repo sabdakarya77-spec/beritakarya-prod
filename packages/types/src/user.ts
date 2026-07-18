@@ -1,4 +1,4 @@
-export type UserRole = 'reader' | 'reporter' | 'kontributor' | 'wapimred' | 'superadmin' | 'advertiser' | 'kaperwil' | 'kabiro'
+export type UserRole = 'reader' | 'reporter' | 'kontributor' | 'wapimred' | 'superadmin' | 'advertiser' | 'kaperwil' | 'kabiro' | 'korwil'
 
 export interface User {
   id: string

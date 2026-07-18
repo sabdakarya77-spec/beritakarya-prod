@@ -25,6 +25,7 @@ enum Role {
   advertiser
   kaperwil
   kabiro
+  korwil
 }
 
 enum ArticleStatus {
@@ -70,6 +71,7 @@ model Site {
   googleIndexingConfig Json?     @default("{}")
   wapimredSettings     Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
   kaperwilSettings     Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
+  korwilSettings       Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
   kabiroSettings       Json?     @default("{\"canPublish\":false,\"canSchedule\":false,\"canForcePublish\":false,\"canDeletePublished\":false,\"canManageCategories\":false,\"canTransferUser\":false,\"canDeleteUser\":false,\"notifyPimredOnSubmit\":true,\"notifyPimredOnApprove\":true}")
   ga4PropertyId        String?   // e.g. "properties/123456789"
   gaMeasurementId      String?   // BARU: "G-XXXXXXXXXX" - untuk gtag.js tracking script di halaman publik
