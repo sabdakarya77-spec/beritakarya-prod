@@ -30,7 +30,7 @@ interface Comment {
 }
 
 export default function ModerationPage() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
   const { site } = useParams() as { site: string };
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);

@@ -23,6 +23,14 @@ const ROLES = [
     hoverBorder: 'hover:border-indigo-400 dark:hover:border-indigo-600',
   },
   {
+    id: 'korwil',
+    label: 'Korwil',
+    description: 'Koordinator Wilayah',
+    color: 'from-cyan-500 to-cyan-600',
+    borderColor: 'border-cyan-200 dark:border-cyan-800',
+    hoverBorder: 'hover:border-cyan-400 dark:hover:border-cyan-600',
+  },
+  {
     id: 'kabiro',
     label: 'Kabiro',
     description: 'Kepala Biro',

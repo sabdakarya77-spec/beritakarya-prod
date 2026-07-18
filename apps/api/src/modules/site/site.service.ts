@@ -428,6 +428,7 @@ export class SiteService {
       gscSiteUrl: site.gscSiteUrl,
       wapimredSettings: site.wapimredSettings,
       kaperwilSettings: site.kaperwilSettings,
+      korwilSettings: site.korwilSettings,
       kabiroSettings: site.kabiroSettings
     }
   }
@@ -463,7 +464,7 @@ export class SiteService {
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
       'socialLinks', 'appearance', 'trendingTopics',
       'googleIndexingConfig', 'ga4PropertyId', 'gaMeasurementId', 'gscSiteUrl',   // gaMeasurementId BARU
-      'wapimredSettings', 'kaperwilSettings', 'kabiroSettings'
+      'wapimredSettings', 'kaperwilSettings', 'korwilSettings', 'kabiroSettings'
     ]
 
     for (const field of allowedFields) {
@@ -724,6 +725,73 @@ export class SiteService {
     })
 
     await this.logAudit(actorUserId, 'site.kaperwil_settings_updated', {
+      siteId,
+      changes: filtered
+    })
+
+    return merged
+  }
+
+  /**
+   * GET korwil settings for a site.
+   * Returns defaults if not yet set.
+   */
+  async getKorwilSettings(siteId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId },
+      select: { korwilSettings: true }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const defaults = {
+      canPublish: false,
+      canSchedule: false,
+      canForcePublish: false,
+      canDeletePublished: false,
+      canManageCategories: false,
+      canTransferUser: false,
+      canDeleteUser: false,
+      notifyPimredOnSubmit: true,
+      notifyPimredOnApprove: true
+    }
+
+    const settings = (site.korwilSettings as Record<string, boolean>) || {}
+    return { ...defaults, ...settings }
+  }
+
+  /**
+   * UPDATE korwil settings for a site (superadmin-only).
+   * Merges with existing settings.
+   */
+  async updateKorwilSettings(siteId: string, data: Record<string, boolean>, actorUserId: string) {
+    const site = await prisma.site.findUnique({
+      where: { id: siteId }
+    })
+
+    if (!site) {
+      throw Object.assign(new Error('Site not found'), { statusCode: 404 })
+    }
+
+    const allowedKeys = ['canPublish', 'canSchedule', 'canForcePublish', 'canDeletePublished', 'canManageCategories', 'canTransferUser', 'canDeleteUser', 'notifyPimredOnSubmit', 'notifyPimredOnApprove']
+    const filtered: Record<string, boolean> = {}
+    for (const key of allowedKeys) {
+      if (data[key] !== undefined) {
+        filtered[key] = data[key]
+      }
+    }
+
+    const current = (site.korwilSettings as Record<string, boolean>) || {}
+    const merged = { ...current, ...filtered }
+
+    await prisma.site.update({
+      where: { id: siteId },
+      data: { korwilSettings: merged }
+    })
+
+    await this.logAudit(actorUserId, 'site.korwil_settings_updated', {
       siteId,
       changes: filtered
     })

@@ -247,7 +247,7 @@ export async function createKycViewLog(data: {
 
 export async function findAdminsBySite(siteId: string | null) {
   const where = siteId
-    ? { siteId, role: { in: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] as Role[] } }
+    ? { siteId, role: { in: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] as Role[] } }
     : { role: { in: ['superadmin'] as Role[] } }
   return prisma.user.findMany({
     where,

@@ -597,7 +597,7 @@ mediaRouter.patch(
     if (!media)
       return res.status(404).json({ success: false, error: { message: 'Media tidak ditemukan' } })
 
-    const isAdmin = ['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(req.user!.role)
+    const isAdmin = ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(req.user!.role)
     if (media.userId !== req.user!.userId && !isAdmin) {
       return res.status(403).json({ success: false, error: { message: 'Akses ditolak' } })
     }
@@ -620,7 +620,7 @@ mediaRouter.delete(
     if (!media)
       return res.status(404).json({ success: false, error: { message: 'Media tidak ditemukan' } })
 
-    const isAdmin = ['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(req.user!.role)
+    const isAdmin = ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(req.user!.role)
     if (media.userId !== req.user!.userId && !isAdmin) {
       return res.status(403).json({ success: false, error: { message: 'Akses ditolak' } })
     }

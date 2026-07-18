@@ -506,12 +506,12 @@ userRouter.put('/:id/role',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { role, siteId } = req.body
 
-    const validRoles = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser', 'kaperwil', 'kabiro']
+    const validRoles = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser', 'kaperwil', 'korwil', 'kabiro']
     if (!validRoles.includes(role)) {
       return res.status(400).json({
         success: false,
@@ -553,13 +553,15 @@ userRouter.put('/:id/role',
     // Only superadmin can assign/change branches (siteId)
     // Wapimred can do so only if canTransferUser toggle is ON
     let canTransferSiteId = req.user!.role === 'superadmin'
-    if (req.user!.role === 'wapimred' && siteId !== undefined && siteId !== '') {
+    const nonSuperRoles = ['wapimred', 'kaperwil', 'korwil', 'kabiro'] as const
+    if ((nonSuperRoles as readonly string[]).includes(req.user!.role) && siteId !== undefined && siteId !== '') {
+      const roleKey = `${req.user!.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings'
       const siteForToggle = await prisma.site.findUnique({
         where: { id: currentRequestSiteId || '' },
-        select: { wapimredSettings: true }
+        select: { [roleKey]: true }
       })
-      const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
-      canTransferSiteId = !!wapimredSettings.canTransferUser
+      const roleSettings = (siteForToggle?.[roleKey] as unknown as Record<string, boolean>) || {}
+      canTransferSiteId = !!roleSettings.canTransferUser
     }
     if (canTransferSiteId) {
       if (siteId === '' || siteId === null || siteId === undefined) {
@@ -651,22 +653,24 @@ userRouter.delete('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
 
-    // Cek toggle canDeleteUser untuk wapimred
-    if (req.user!.role === 'wapimred') {
+    // Cek toggle canDeleteUser untuk non-superadmin roles
+    const nonSuperDeleteRoles = ['wapimred', 'kaperwil', 'korwil', 'kabiro'] as const
+    if ((nonSuperDeleteRoles as readonly string[]).includes(req.user!.role)) {
+      const roleKey = `${req.user!.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings'
       const siteForToggle = await prisma.site.findUnique({
         where: { id: siteId || '' },
-        select: { wapimredSettings: true }
+        select: { [roleKey]: true }
       })
-      const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
-      if (!wapimredSettings.canDeleteUser) {
+      const roleSettings = (siteForToggle?.[roleKey] as unknown as Record<string, boolean>) || {}
+      if (!roleSettings.canDeleteUser) {
         return res.status(403).json({
           success: false,
-          error: { code: 'FORBIDDEN', message: 'Wapimred tidak memiliki izin untuk menghapus user. Hubungi Pimred.' }
+          error: { code: 'FORBIDDEN', message: `${req.user!.role} tidak memiliki izin untuk menghapus user. Hubungi Pimred.` }
         })
       }
     }

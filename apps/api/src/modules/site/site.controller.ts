@@ -13,11 +13,11 @@ siteRouter.get('/', publicLimiter, asyncHandler(getSites))
 siteRouter.get('/settings', publicLimiter, asyncHandler(getSiteSettings))
 siteRouter.patch('/settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(updateSiteSettings))
 siteRouter.get('/wapimred-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(getWapimredSettings))
 siteRouter.patch('/wapimred-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
@@ -25,15 +25,23 @@ siteRouter.patch('/wapimred-settings',
   asyncHandler(updateWapimredSettings))
 siteRouter.get('/kaperwil-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(getKaperwilSettings))
 siteRouter.patch('/kaperwil-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
   requireRole(['superadmin']),
   asyncHandler(updateKaperwilSettings))
+siteRouter.get('/korwil-settings',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  asyncHandler(getKorwilSettings))
+siteRouter.patch('/korwil-settings',
+  requireAuth, siteMiddleware, requireSiteAccess,
+  requireRole(['superadmin']),
+  asyncHandler(updateKorwilSettings))
 siteRouter.get('/kabiro-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(getKabiroSettings))
 siteRouter.patch('/kabiro-settings',
   requireAuth, siteMiddleware, requireSiteAccess,
@@ -303,6 +311,57 @@ export async function updateKaperwilSettings(req: Request, res: Response) {
     res.status(statusCode).json({
       success: false,
       error: { code: 'KAPERWIL_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * GET /api/v1/sites/korwil-settings
+ * Get korwil permission settings for current site
+ */
+export async function getKorwilSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+
+    const settings = await siteService.getKorwilSettings(siteId)
+    res.json({ success: true, data: settings })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'KORWIL_SETTINGS_FETCH_FAILED', message: getErrorMessage(error) }
+    })
+  }
+}
+
+/**
+ * PATCH /api/v1/sites/korwil-settings
+ * Update korwil permission settings (superadmin-only)
+ */
+export async function updateKorwilSettings(req: Request, res: Response) {
+  try {
+    const siteId = (req.query.site as string) || (req.headers['x-site-id'] as string)
+    if (!siteId) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_SITE_ID', message: 'Parameter site required' }
+      })
+    }
+
+    const actorUserId = req.user!.userId
+    const settings = await siteService.updateKorwilSettings(siteId, req.body, actorUserId)
+    res.json({ success: true, data: settings })
+  } catch (error: unknown) {
+    const statusCode = getErrorStatus(error)
+    res.status(statusCode).json({
+      success: false,
+      error: { code: 'KORWIL_SETTINGS_UPDATE_FAILED', message: getErrorMessage(error) }
     })
   }
 }

@@ -7,15 +7,17 @@ import { publicLimiter } from '../../lib/rateLimit'
 import { asyncHandler } from '../../utils/asyncHandler'
 import { prisma } from '../../db/client'
 
-async function assertWapimredCanManageCategories(siteId: string) {
+async function assertRoleCanManageCategories(siteId: string, role: string) {
+  if (role === 'superadmin') return
+  const roleSettingsKey = `${role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings'
   const site = await prisma.site.findUnique({
     where: { id: siteId },
-    select: { wapimredSettings: true }
+    select: { [roleSettingsKey]: true }
   })
-  const settings = (site?.wapimredSettings as Record<string, boolean>) || {}
+  const settings = (site?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
   if (!settings.canManageCategories) {
     throw new AppError(
-      'Wapimred tidak memiliki izin untuk mengelola kategori. Hubungi Pimred.',
+      `${role.toUpperCase()} tidak memiliki izin untuk mengelola kategori. Hubungi Pimred.`,
       403
     )
   }
@@ -49,15 +51,15 @@ categoryRouter.post('/sync-all',
   asyncHandler(syncAllSites))
 categoryRouter.post('/',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(createCategory))
 categoryRouter.put('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(updateCategory))
 categoryRouter.delete('/:id',
   requireAuth, siteMiddleware, requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(deleteCategory))
 
 /**
@@ -212,11 +214,11 @@ export async function createCategory(req: Request, res: Response) {
     const user = req.user
     const actorUserId = user!.userId
 
-    // Cek toggle canManageCategories untuk wapimred
-    if (user?.role === 'wapimred') {
+    // Cek toggle canManageCategories untuk wewenang manajerial
+    if (user && ['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
       const effectiveSiteId = siteId || req.site
       if (effectiveSiteId) {
-        await assertWapimredCanManageCategories(effectiveSiteId)
+        await assertRoleCanManageCategories(effectiveSiteId, user.role)
       }
     }
 
@@ -273,11 +275,11 @@ export async function updateCategory(req: Request, res: Response) {
     const user = req.user
     const actorUserId = user!.userId
 
-    // Cek toggle canManageCategories untuk wapimred
-    if (user?.role === 'wapimred') {
+    // Cek toggle canManageCategories untuk wewenang manajerial
+    if (user && ['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
       const effectiveSiteId = siteId || req.site
       if (effectiveSiteId) {
-        await assertWapimredCanManageCategories(effectiveSiteId)
+        await assertRoleCanManageCategories(effectiveSiteId, user.role)
       }
     }
 
@@ -336,11 +338,11 @@ export async function deleteCategory(req: Request, res: Response) {
     const user = req.user
     const actorUserId = user!.userId
 
-    // Cek toggle canManageCategories untuk wapimred
-    if (user?.role === 'wapimred') {
+    // Cek toggle canManageCategories untuk wewenang manajerial
+    if (user && ['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
       const effectiveSiteId = req.site
       if (effectiveSiteId) {
-        await assertWapimredCanManageCategories(effectiveSiteId)
+        await assertRoleCanManageCategories(effectiveSiteId, user.role)
       }
     }
 

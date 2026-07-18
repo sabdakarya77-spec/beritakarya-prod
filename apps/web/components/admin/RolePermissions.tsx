@@ -43,6 +43,12 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     color: 'text-indigo-600',
     bgGradient: 'from-indigo-500 to-indigo-600',
   },
+  korwil: {
+    label: 'Korwil',
+    description: 'Koordinator Wilayah',
+    color: 'text-cyan-600',
+    bgGradient: 'from-cyan-500 to-cyan-600',
+  },
   kabiro: {
     label: 'Kabiro',
     description: 'Kepala Biro',
@@ -79,7 +85,7 @@ const NOTIFICATION_ITEMS = [
 ]
 
 interface RolePermissionsProps {
-  role: 'wapimred' | 'kaperwil' | 'kabiro'
+  role: 'wapimred' | 'kaperwil' | 'korwil' | 'kabiro'
 }
 
 export default function RolePermissions({ role }: RolePermissionsProps) {

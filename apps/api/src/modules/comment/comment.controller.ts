@@ -166,7 +166,7 @@ commentRouter.patch('/:id/approve',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['wapimred', 'superadmin', 'kaperwil', 'kabiro']),
+  requireRole(['wapimred', 'superadmin', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site!
@@ -187,7 +187,7 @@ commentRouter.patch('/:id/reject',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['wapimred', 'superadmin', 'kaperwil', 'kabiro']),
+  requireRole(['wapimred', 'superadmin', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site!

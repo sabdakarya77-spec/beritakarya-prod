@@ -131,7 +131,7 @@ adRouter.get('/public',
 adRouter.get('/',
   requireAuth,
   siteMiddleware,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const result = await repo.findAdsBySite(req.site!, {
@@ -145,7 +145,7 @@ adRouter.get('/',
 adRouter.post('/',
   requireAuth,
   siteMiddleware,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { slot, code, imageUrl, imageUrlTablet, imageUrlMobile, linkUrl, isActive } = req.body
@@ -179,7 +179,7 @@ adRouter.post('/',
 adRouter.patch('/:id',
   requireAuth,
   siteMiddleware,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
@@ -211,7 +211,7 @@ adRouter.patch('/:id',
 adRouter.delete('/:id',
   requireAuth,
   siteMiddleware,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
@@ -224,7 +224,7 @@ adRouter.delete('/:id',
 adRouter.patch('/reorder',
   requireAuth,
   siteMiddleware,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
     const { items } = req.body
@@ -692,7 +692,7 @@ adRouter.delete('/packages/:id',
 // 8. GET /bookings/all — Superadmin/Wapimred to view all incoming ad bookings
 adRouter.get('/bookings/all',
   requireAuth,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const bookings = await repo.findAllBookings()
     res.json({ success: true, data: bookings })
@@ -823,7 +823,7 @@ adRouter.post('/bookings/:id/reject',
 adRouter.get(
   '/production/providers',
   requireAuth,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   asyncHandler(async (_req: Request, res: Response) => {
     const providers = await getProviderList()
     res.json({ success: true, data: providers })
@@ -885,7 +885,7 @@ adRouter.delete(
 adRouter.post(
   '/production/:bookingId/generate',
   requireAuth,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   siteMiddleware,
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {
@@ -961,7 +961,7 @@ adRouter.post(
 adRouter.post(
   '/production/:bookingId/publish',
   requireAuth,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
   siteMiddleware,
   requireSiteAccess,
   asyncHandler(async (req: Request, res: Response) => {

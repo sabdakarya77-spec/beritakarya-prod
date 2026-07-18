@@ -109,7 +109,7 @@ export async function getArticleById(id: string, siteId: string, user?: JWTPaylo
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization: Reporters and kontributors can only view their own articles (unless published, but dashboard usually shows drafts)
-  if (user && !['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
+  if (user && !['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
@@ -284,7 +284,7 @@ export async function updateArticle(
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization
-  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Anda tidak punya akses ke post ini', 403)
   }
 
@@ -315,16 +315,17 @@ export async function updateArticle(
      }
   }
 
-  // Cek toggle canSchedule untuk wapimred
-  if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role) && input.status === 'scheduled') {
+  // Cek toggle canSchedule untuk wewenang manajerial
+  if (['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role) && input.status === 'scheduled') {
+    const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';
     const siteForToggle = await prisma.site.findUnique({
       where: { id: siteId },
-      select: { wapimredSettings: true }
+      select: { [roleSettingsKey]: true }
     })
-    const wapimredSettings = (siteForToggle?.wapimredSettings as Record<string, boolean>) || {}
-    if (!wapimredSettings.canSchedule) {
+    const settings = (siteForToggle?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
+    if (!settings.canSchedule) {
       throw new AppError(
-        'Wapimred tidak memiliki izin untuk menjadwalkan artikel. Hubungi Pimred.',
+        `${user.role.toUpperCase()} tidak memiliki izin untuk menjadwalkan artikel. Hubungi Pimred.`,
         403
       )
     }
@@ -446,7 +447,7 @@ export async function updateArticle(
     const notifyPimredOnSubmit = wapimredSettings.notifyPimredOnSubmit !== false // default true
 
     // Filter editor berdasarkan toggle
-    const editorRoles: string[] = ['wapimred', 'kaperwil', 'kabiro']
+    const editorRoles: string[] = ['wapimred', 'kaperwil', 'korwil', 'kabiro']
     if (notifyPimredOnSubmit) {
       editorRoles.push('superadmin')
     }
@@ -466,14 +467,15 @@ export async function updateArticle(
       })
     }
   } else if (input.status === 'approved') {
-    // Notifikasi ke pimred saat wapimred approve artikel
-    if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
+    // Notifikasi ke pimred saat editor approve artikel
+    if (['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
+      const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';
       const siteData = await prisma.site.findUnique({
         where: { id: siteId },
-        select: { wapimredSettings: true }
+        select: { [roleSettingsKey]: true }
       })
-      const wapimredSettings = (siteData?.wapimredSettings as Record<string, boolean>) || {}
-      if (wapimredSettings.notifyPimredOnApprove !== false) {
+      const settings = (siteData?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
+      if (settings.notifyPimredOnApprove !== false) {
         const superadmins = await prisma.user.findMany({
           where: { siteId, role: 'superadmin' },
           select: { id: true }
@@ -549,27 +551,28 @@ export async function publishArticle(
   const article = await repo.findArticleById(id, siteId)
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
-  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
-    throw new AppError('Akses ditolak: Hanya Wapimred, Kaperwil, Kabiro, dan Superadmin yang dapat mem-publish post', 403)
+  if (!['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
+    throw new AppError('Akses ditolak: Hanya Wapimred, Kaperwil, Korwil, Kabiro, dan Superadmin yang dapat mem-publish post', 403)
   }
 
-  // Cek toggle wapimred_can_publish dari site settings
-  if (['wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
+  // Cek toggle canPublish dari site settings
+  if (['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
+    const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';
     const site = await prisma.site.findUnique({
       where: { id: siteId },
-      select: { wapimredSettings: true }
+      select: { [roleSettingsKey]: true }
     })
-    const wapimredSettings = (site?.wapimredSettings as Record<string, boolean>) || {}
-    if (!wapimredSettings.canPublish) {
+    const settings = (site?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
+    if (!settings.canPublish) {
       throw new AppError(
-        'Wapimred tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.',
+        `${user.role.toUpperCase()} tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.`,
         403
       )
     }
     // Cek toggle canForcePublish jika menggunakan forcePublish
-    if (options?.forcePublish && !wapimredSettings.canForcePublish) {
+    if (options?.forcePublish && !settings.canForcePublish) {
       throw new AppError(
-        'Wapimred tidak memiliki izin untuk force-publish. Hubungi Pimred.',
+        `${user.role.toUpperCase()} tidak memiliki izin untuk force-publish. Hubungi Pimred.`,
         403
       )
     }
@@ -587,7 +590,7 @@ export async function publishArticle(
 }
 
 export async function getDueScheduledArticles(siteId: string, user: JWTPayload) {
-  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
     throw new AppError('Akses ditolak', 403)
   }
 
@@ -635,7 +638,7 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
   // siteMiddleware + requireSiteAccess sudah memastikan user berada di situs
   // yang sesuai; di sini kita hanya mengatur per-status & ownership.
   const isSuperadmin = user.role === 'superadmin'
-  const isWapimred = user.role === 'wapimred' || user.role === 'kaperwil' || user.role === 'kabiro'
+  const isWapimred = ['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)
   const isReporterOrKontributor = user.role === 'reporter' || user.role === 'kontributor'
   const isAuthor = article.authorId === user.userId
   const isPublished = article.status === 'published'
@@ -648,16 +651,17 @@ export async function deleteArticle(id: string, siteId: string, user: JWTPayload
     allowed = true
   } else if (isWapimred) {
     if (isPublished) {
-      // Cek toggle canDeletePublished dari site settings
+      // Cek toggle canDeletePublished dari site settings masing-masing role
+      const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';
       const site = await prisma.site.findUnique({
         where: { id: siteId },
-        select: { wapimredSettings: true }
+        select: { [roleSettingsKey]: true }
       })
-      const wapimredSettings = (site?.wapimredSettings as Record<string, boolean>) || {}
-      if (wapimredSettings.canDeletePublished) {
+      const settings = (site?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
+      if (settings.canDeletePublished) {
         allowed = true
       } else {
-        denyReason = 'Wapimred tidak dapat menghapus post yang sudah diterbitkan. Hubungi Superadmin.'
+        denyReason = `${user.role.toUpperCase()} tidak dapat menghapus post yang sudah diterbitkan. Hubungi Superadmin.`
       }
     } else {
       allowed = true
@@ -730,7 +734,7 @@ export async function restoreArticleVersion(versionId: string, siteId: string, u
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
   // Authorization check
-  if (!['superadmin', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
+  if (!['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role) && article.authorId !== user.userId) {
     throw new AppError('Akses ditolak', 403)
   }
 

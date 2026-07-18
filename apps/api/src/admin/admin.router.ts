@@ -6,7 +6,7 @@ import { asyncHandler } from '../utils/asyncHandler'
 
 const adminRouter = Router()
 
-const requireAdmin = requireRole(['superadmin', 'wapimred', 'kaperwil', 'kabiro'])
+const requireAdmin = requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'])
 
 // ── USAGE DASHBOARD ─────────────────────────────────────────────────────
 adminRouter.get('/ai-usage', requireAuth, requireAdmin, asyncHandler(async (req: Request, res: Response) => {
@@ -335,7 +335,7 @@ adminRouter.patch('/roles/:role/quota', requireAuth, requireAdmin, asyncHandler(
   const role = req.params.role as Role
   
   // Basic validation to prevent Prisma errors with invalid role strings
-  const validRoles: Role[] = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser']
+  const validRoles: Role[] = ['reader', 'reporter', 'kontributor', 'wapimred', 'superadmin', 'advertiser', 'kaperwil', 'korwil', 'kabiro']
   if (!validRoles.includes(role)) {
     return res.status(400).json({
       success: false,

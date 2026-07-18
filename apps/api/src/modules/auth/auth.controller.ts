@@ -179,7 +179,7 @@ authRouter.post('/upgrade-to-advertiser', requireAuth, asyncHandler(async (req: 
   try {
     const admins = await prisma.user.findMany({
       where: {
-        role: { in: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
+        role: { in: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
         OR: [
           { siteId: updatedUser.siteId },
           { siteId: null },

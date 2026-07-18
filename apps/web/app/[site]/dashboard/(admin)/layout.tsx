@@ -84,13 +84,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setLastActiveSite(site)
         }
 
-        const allowedRoles = ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor', 'advertiser']
+        const allowedRoles = ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor', 'advertiser']
         if (!allowedRoles.includes(user.role)) {
           router.push(`/${site}`)
           return
         }
 
-        const isKycRequired = ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
+        const isKycRequired = ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)
         const targetKycPath = `/${site}/dashboard/kyc`
 
         if (isKycRequired && !user.isVerified && pathname !== targetKycPath) {
@@ -122,31 +122,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     {
       label: 'Utama',
       items: [
-        { name: 'Ringkasan', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
-        { name: 'Post', href: `/${site}/dashboard/articles`, icon: FileText, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
-        { name: 'Media', href: `/${site}/dashboard/media`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
-        { name: 'Profil Saya', href: `/${site}/dashboard/profile`, icon: User, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] },
-        ...(user && !user.isVerified ? [{ name: 'Verifikasi KYC', href: `/${site}/dashboard/kyc`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro', 'reporter', 'kontributor'] }] : []),
+        { name: 'Ringkasan', href: `/${site}/dashboard`, icon: LayoutDashboard, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Post', href: `/${site}/dashboard/articles`, icon: FileText, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Media', href: `/${site}/dashboard/media`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor'] },
+        { name: 'Profil Saya', href: `/${site}/dashboard/profile`, icon: User, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor'] },
+        ...(user && !user.isVerified ? [{ name: 'Verifikasi KYC', href: `/${site}/dashboard/kyc`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro', 'reporter', 'kontributor'] }] : []),
       ]
     },
     {
       label: 'Editorial',
       items: [
-        { name: 'Antrian Review', href: `/${site}/dashboard/review`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
-        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred', 'kaperwil'] },
-        { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
+        { name: 'Antrian Review', href: `/${site}/dashboard/review`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
         { name: 'Kategori', href: `/${site}/dashboard/categories`, icon: Tag, roles: ['superadmin'] },
-        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
-        { name: 'Komentar', href: `/${site}/dashboard/comments`, icon: MessageSquare, roles: ['superadmin', 'wapimred', 'kaperwil', 'kabiro'] },
+        { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Komentar', href: `/${site}/dashboard/comments`, icon: MessageSquare, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
       ]
     },
     {
       label: 'Administrasi',
       items: [
-        { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
-        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil'] },
-        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kaperwil'] },
-        { name: 'Audit Log', href: `/${site}/dashboard/audit`, icon: Shield, roles: ['superadmin'] },
+        { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
         { name: 'Pengaturan', href: `/${site}/dashboard/settings`, icon: Settings, roles: ['superadmin', 'wapimred'] },
       ]
     },
@@ -163,6 +162,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           children: [
             { name: 'Wapimred', href: `/${site}/dashboard/admin/permissions/wapimred`, roles: ['superadmin'] },
             { name: 'Kaperwil', href: `/${site}/dashboard/admin/permissions/kaperwil`, roles: ['superadmin'] },
+            { name: 'Korwil', href: `/${site}/dashboard/admin/permissions/korwil`, roles: ['superadmin'] },
             { name: 'Kabiro', href: `/${site}/dashboard/admin/permissions/kabiro`, roles: ['superadmin'] },
           ]
         },
@@ -346,7 +346,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     const isActive = item.href === activeHref
                     const isChildActive = item.children?.some((child: { href: string }) => pathname === child.href || pathname.startsWith(child.href + '/'))
                     const isExpanded = expandedMenus.includes(item.name) || isChildActive
-                    const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
+                    const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)
                     const isLocked = isKycRequired && !user.isVerified && item.href !== `/${site}/dashboard/kyc`
                     const isExternal = item.href.startsWith('http')
                     const Icon = isLocked ? Lock : item.icon
@@ -560,7 +560,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   const isActive = item.href === activeHref
                   const isChildActive = item.children?.some((child: { href: string }) => pathname === child.href || pathname.startsWith(child.href + '/'))
                   const isExpanded = expandedMenus.includes(item.name) || isChildActive
-                  const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'kabiro'].includes(user.role)
+                  const isKycRequired = user && ['reporter', 'kontributor', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)
                   const isLocked = isKycRequired && !user.isVerified && item.href !== `/${site}/dashboard/kyc`
                   const Icon = isLocked ? Lock : item.icon
 
