@@ -65,9 +65,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
   gaya_hidup: 'text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/30',
 }
 
-export function getCategoryColor(categoryName: string = 'umum'): string {
-  const key = categoryName.toLowerCase().replace(/\s+/g, '-').replace(/^-|-$/g, '').trim()
-  return CATEGORY_COLORS[key] || CATEGORY_COLORS[categoryName.toLowerCase().replace(/\s+/g, '_').replace(/^-|-$/g, '').trim()] || 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30'
+export function getCategoryColor(categoryName?: string | null): string {
+  const safeName = categoryName || 'umum'
+  const key = safeName.toLowerCase().replace(/\s+/g, '-').replace(/^-|-$/g, '').trim()
+  return CATEGORY_COLORS[key] || CATEGORY_COLORS[safeName.toLowerCase().replace(/\s+/g, '_').replace(/^-|-$/g, '').trim()] || 'text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30'
 }
 
 export type SubCategory = CategoryConfigItem
