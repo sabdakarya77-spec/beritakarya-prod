@@ -16,20 +16,11 @@ import AdSpace from '../../ui/AdSpace'
 import { HeroSection } from '../../pages/home/HeroSection'
 import { FokusRedaksiAsymmetric } from '../../pages/home/FokusRedaksiAsymmetric'
 import { TrendingSection } from '../../pages/home/TrendingSection'
-import { FeedSection } from '../../pages/home/FeedSection'
-import { EditorialExtras } from '../../pages/home/EditorialExtras'
+import { StandardFeedAndExtras } from '../shared/StandardFeedAndExtras'
 import type { TemplateProps } from '../types'
 
 export function MagazineBoldLayout(props: TemplateProps) {
-  const {
-    heroArticles, fokusRedaksi, trendingArticles, feedArticles,
-    trending, popular, opinionArticles, photoJournal, videoStories, technologyArticles,
-    site, searchQuery, isCategoryFilter, categoryFilter, categoriesTree,
-    showSavedFeed, whatsappUrl, telegramUrl, reportUrl, siteName,
-    marketData, showPhotoSection, showVideoSection, showOpinionSection, showTechnologySection,
-    siteSettings, siteConfigId, homeTopAds, resolveCategoryName, getVideoThumbnail,
-    remainingArticles, excludeIds,
-  } = props
+  const { heroArticles, fokusRedaksi, trendingArticles, site, homeTopAds } = props
 
   return (
     <>
@@ -51,46 +42,8 @@ export function MagazineBoldLayout(props: TemplateProps) {
         <TrendingSection articles={trendingArticles} site={site} />
       )}
 
-      {/* ZONA 4 — FEED + INTERSTITIALS */}
-      <FeedSection
-        feedArticles={feedArticles}
-        trending={trending}
-        popular={popular}
-        site={site}
-        searchQuery={searchQuery}
-        isCategoryFilter={isCategoryFilter}
-        categoryFilter={categoryFilter}
-        categoriesTree={categoriesTree}
-        showSavedFeed={showSavedFeed}
-        whatsappUrl={whatsappUrl}
-        telegramUrl={telegramUrl}
-        reportUrl={reportUrl}
-        siteName={siteName}
-        marketData={marketData}
-        photoJournal={photoJournal}
-        showPhotoSection={showPhotoSection}
-        videoStories={videoStories}
-        showVideoSection={showVideoSection}
-        siteSettings={siteSettings as never}
-        siteConfigId={siteConfigId}
-        resolveCategoryName={resolveCategoryName}
-        remainingArticles={remainingArticles}
-        excludeIds={excludeIds}
-      />
-
-      {/* ZONA 5+ — EDITORIAL EXTRAS */}
-      <EditorialExtras
-        technologyArticles={technologyArticles}
-        opinionArticles={opinionArticles}
-        photoJournal={photoJournal}
-        videoStories={videoStories}
-        site={site}
-        showTechnologySection={showTechnologySection}
-        showOpinionSection={showOpinionSection}
-        showPhotoSection={showPhotoSection}
-        showVideoSection={showVideoSection}
-        getVideoThumbnail={getVideoThumbnail}
-      />
+      {/* ZONA 4 + 5 — FEED + EDITORIAL EXTRAS */}
+      <StandardFeedAndExtras {...props} />
     </>
   )
 }
