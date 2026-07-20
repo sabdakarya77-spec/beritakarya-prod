@@ -205,7 +205,9 @@ export default function RolePermissions({ role }: RolePermissionsProps) {
           Wewenang Editorial
         </h3>
         <div className="space-y-4">
-          {PERMISSION_ITEMS.map((item) => (
+          {PERMISSION_ITEMS.filter(
+            (item) => item.key === 'canSchedule' || item.key === 'canTransferUser'
+          ).map((item) => (
             <div
               key={item.key}
               className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"

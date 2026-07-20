@@ -33,7 +33,7 @@ const withSite = [requireAuth, siteMiddleware, requireSiteAccess]
 
 kycRouter.get('/',
   ...withSite,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site!
     const page = parseInt(req.query.page as string) || 1
@@ -96,7 +96,7 @@ kycRouter.get('/',
 // GET /stats - Get KYC editorial metrics
 kycRouter.get('/stats',
   ...withSite,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site!
     const now = new Date()
@@ -181,7 +181,7 @@ kycRouter.get('/stats',
 
 kycRouter.get('/:id',
   ...withSite,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const user = await prisma.user.findFirst({
@@ -471,7 +471,7 @@ kycRouter.patch('/:userId/reset-lock',
 // PATCH /:userId/verify - Admin verify KYC (approve/reject)
 kycRouter.patch('/:userId/verify',
   ...withSite,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params
     const { status, notes } = req.body // status: 'approved' | 'rejected'
@@ -550,7 +550,7 @@ kycRouter.patch('/:userId/verify',
 // GET /view/:userId/:type - Securely serve KYC documents
 kycRouter.get('/view/:userId/:type',
   ...withSite,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { userId, type } = req.params // type: 'idCard' | 'familyCard'
     

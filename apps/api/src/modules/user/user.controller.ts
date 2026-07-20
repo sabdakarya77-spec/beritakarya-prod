@@ -195,6 +195,7 @@ userRouter.get('/',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const siteId = req.site
     const page = parseInt(req.query.page as string) || 1
@@ -477,6 +478,7 @@ userRouter.get('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
@@ -506,7 +508,7 @@ userRouter.put('/:id/role',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const { role, siteId } = req.body
@@ -653,15 +655,15 @@ userRouter.delete('/:id',
   requireAuth,
   siteMiddleware,
   requireSiteAccess,
-  requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']),
+  requireRole(['superadmin', 'wapimred', 'kabiro']),
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params
     const siteId = req.site
 
     // Cek toggle canDeleteUser untuk non-superadmin roles
-    const nonSuperDeleteRoles = ['wapimred', 'kaperwil', 'korwil', 'kabiro'] as const
+    const nonSuperDeleteRoles = ['wapimred', 'kabiro'] as const
     if ((nonSuperDeleteRoles as readonly string[]).includes(req.user!.role)) {
-      const roleKey = `${req.user!.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings'
+      const roleKey = `${req.user!.role}Settings` as 'wapimredSettings' | 'kabiroSettings'
       const siteForToggle = await prisma.site.findUnique({
         where: { id: siteId || '' },
         select: { [roleKey]: true }

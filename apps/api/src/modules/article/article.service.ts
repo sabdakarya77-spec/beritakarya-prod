@@ -551,13 +551,13 @@ export async function publishArticle(
   const article = await repo.findArticleById(id, siteId)
   if (!article) throw new AppError('Post tidak ditemukan', 404)
 
-  if (!['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
-    throw new AppError('Akses ditolak: Hanya Wapimred, Kaperwil, Korwil, Kabiro, dan Superadmin yang dapat mem-publish post', 403)
+  if (!['superadmin', 'wapimred'].includes(user.role)) {
+    throw new AppError('Akses ditolak: Hanya Wapimred dan Superadmin yang dapat mem-publish post', 403)
   }
 
   // Cek toggle canPublish dari site settings
-  if (['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
-    const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';
+  if (user.role === 'wapimred') {
+    const roleSettingsKey = 'wapimredSettings';
     const site = await prisma.site.findUnique({
       where: { id: siteId },
       select: { [roleSettingsKey]: true }
@@ -565,14 +565,14 @@ export async function publishArticle(
     const settings = (site?.[roleSettingsKey] as unknown as Record<string, boolean>) || {}
     if (!settings.canPublish) {
       throw new AppError(
-        `${user.role.toUpperCase()} tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.`,
+        `WAPIMRED tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.`,
         403
       )
     }
     // Cek toggle canForcePublish jika menggunakan forcePublish
     if (options?.forcePublish && !settings.canForcePublish) {
       throw new AppError(
-        `${user.role.toUpperCase()} tidak memiliki izin untuk force-publish. Hubungi Pimred.`,
+        `WAPIMRED tidak memiliki izin untuk force-publish. Hubungi Pimred.`,
         403
       )
     }

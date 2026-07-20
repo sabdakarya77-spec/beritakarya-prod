@@ -203,13 +203,13 @@ export default function ReviewQueuePage() {
     }
   };
 
-  if (!user || !['superadmin', 'wapimred'].includes(user.role)) {
+  if (!user || !['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role)) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center space-y-3">
           <AlertCircle size={40} className="text-red-400 mx-auto" />
           <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Akses Terbatas</p>
-          <p className="text-xs text-gray-300">Halaman ini hanya untuk Wapimred dan Superadmin.</p>
+          <p className="text-xs text-gray-300">Halaman ini hanya untuk Redaksi.</p>
         </div>
       </div>
     );
@@ -473,14 +473,16 @@ export default function ReviewQueuePage() {
                         )}
                         {activeTab === 'approved' && (
                           <>
-                            <button
-                              onClick={() => handleAction(article.id, 'publish')}
-                              disabled={!!actionLoading}
-                              className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
-                            >
-                              {actionLoading === article.id + 'publish' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-                              {getPrimaryActionLabel()}
-                            </button>
+                            {['superadmin', 'wapimred'].includes(user.role) && (
+                              <button
+                                onClick={() => handleAction(article.id, 'publish')}
+                                disabled={!!actionLoading}
+                                className="flex-1 min-w-[120px] md:min-w-[140px] flex items-center justify-center gap-1.5 px-3 md:px-3.5 py-2 md:py-2.5 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 shadow-sm"
+                              >
+                                {actionLoading === article.id + 'publish' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
+                                {getPrimaryActionLabel()}
+                              </button>
+                            )}
                             <button
                               onClick={() => handleAction(article.id, 'request_revision')}
                               disabled={!!actionLoading}

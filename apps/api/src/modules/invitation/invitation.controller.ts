@@ -17,7 +17,7 @@ function generateInvitationToken(): string {
 export const invitationRouter = Router()
 
 const withSite = [requireAuth, siteMiddleware, requireSiteAccess]
-const adminOnly = requireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'])
+const adminOnly = requireRole(['superadmin', 'wapimred', 'kabiro'])
 
 // POST /invitations - Create a new invitation (admin only)
 invitationRouter.post('/',

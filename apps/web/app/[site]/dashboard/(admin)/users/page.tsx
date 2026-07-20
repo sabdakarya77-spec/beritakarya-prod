@@ -19,7 +19,7 @@ interface User {
 }
 
 export default function UsersDashboard() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kabiro']);
   const [users, setUsers] = useState<User[]>([]);
   const [sites, setSites] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);

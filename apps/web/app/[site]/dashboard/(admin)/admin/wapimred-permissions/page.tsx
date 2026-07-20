@@ -139,7 +139,9 @@ export default function WapimredPermissionsPage() {
           { key: 'canManageCategories' as const, label: 'Boleh Kelola Kategori', desc: 'Wapimred bisa membuat, mengedit, dan menghapus kategori di situs ini.' },
           { key: 'canTransferUser' as const, label: 'Boleh Pindah Cabang User', desc: 'Wapimred bisa memindahkan user ke situs lain.' },
           { key: 'canDeleteUser' as const, label: 'Boleh Hapus User', desc: 'Wapimred bisa menghapus (soft-delete) user di situs ini.' },
-        ].map((item) => (
+        ].filter(
+          (item) => item.key === 'canSchedule' || item.key === 'canTransferUser'
+        ).map((item) => (
           <div
             key={item.key}
             className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5"

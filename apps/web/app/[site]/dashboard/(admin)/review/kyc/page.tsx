@@ -44,7 +44,7 @@ interface KYCStats {
 }
 
 export default function KYCReviewPage() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kabiro']);
   const params = useParams()
   const siteId = params.site as string
   const [users, setUsers] = useState<KYCUser[]>([])

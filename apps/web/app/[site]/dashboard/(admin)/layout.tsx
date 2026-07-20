@@ -133,7 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: 'Editorial',
       items: [
         { name: 'Antrian Review', href: `/${site}/dashboard/review`, icon: ClipboardCheck, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
-        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Antrian KYC', href: `/${site}/dashboard/review/kyc`, icon: Shield, roles: ['superadmin', 'wapimred', 'kabiro'] },
         { name: 'Kalender', href: `/${site}/dashboard/calendar`, icon: Calendar, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
         { name: 'Kategori', href: `/${site}/dashboard/categories`, icon: Tag, roles: ['superadmin'] },
         { name: 'Iklan & Banner', href: `/${site}/dashboard/ads`, icon: ImageIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
@@ -144,8 +144,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: 'Administrasi',
       items: [
         { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
-        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
-        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
+        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kabiro'] },
+        { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kabiro'] },
         { name: 'Pengaturan', href: `/${site}/dashboard/settings`, icon: Settings, roles: ['superadmin', 'wapimred'] },
       ]
     },

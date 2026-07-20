@@ -35,7 +35,7 @@ interface KYCUser {
 }
 
 export default function KYCDetailReviewPage() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kabiro']);
   const params = useParams()
   const siteId = params.site as string
   const userId = params.userId as string

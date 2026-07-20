@@ -23,7 +23,7 @@ interface Invitation {
 }
 
 export default function InvitationsDashboard() {
-  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
+  const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kabiro']);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
