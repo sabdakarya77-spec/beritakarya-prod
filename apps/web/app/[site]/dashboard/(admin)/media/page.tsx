@@ -111,8 +111,8 @@ export default function MediaManagerPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-white/5">
-        <div className="relative w-full sm:w-80">
+      <div className="flex items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl border border-gray-100 dark:border-white/5">
+        <div className="relative flex-grow sm:flex-grow-0 sm:w-80">
           <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           <input 
             type="text"
@@ -122,12 +122,12 @@ export default function MediaManagerPage() {
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-transparent rounded-xl text-xs outline-none focus:border-brand-red transition-all"
           />
         </div>
-        <div className="flex items-center gap-2">
-           <button className="p-2.5 text-gray-400 hover:text-brand-black dark:hover:text-white transition-colors">
-              <Filter size={18} />
+        <div className="flex items-center gap-1 shrink-0">
+           <button className="p-2 text-gray-400 hover:text-brand-black dark:hover:text-white transition-colors">
+              <Filter size={16} />
            </button>
-           <button onClick={refresh} className="p-2.5 text-gray-400 hover:text-brand-red transition-colors">
-              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+           <button onClick={refresh} className="p-2 text-gray-400 hover:text-brand-red transition-colors">
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
            </button>
         </div>
       </div>

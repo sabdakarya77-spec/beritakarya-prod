@@ -28,14 +28,7 @@ userRouter.get('/public/:id',
         OR: [
           { siteId },
           { siteId: null }
-        ],
-        articles: {
-          some: {
-            siteId,
-            status: 'published',
-            deletedAt: null
-          }
-        }
+        ]
       },
       select: {
         id: true,

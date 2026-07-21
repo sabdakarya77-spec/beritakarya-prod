@@ -27,6 +27,7 @@ interface KYCUser {
   name: string
   email: string
   role: string
+  avatarUrl?: string | null
   isVerified: boolean
   kycSubmittedAt: string | null
   kycReviewedAt: string | null
@@ -239,9 +240,17 @@ export default function KYCReviewPage() {
                   <tr key={user.id} className="group hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold group-hover:bg-brand-red group-hover:text-white transition-colors">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
+                        {user.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.name}
+                            className="w-10 h-10 rounded-xl object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold group-hover:bg-brand-red group-hover:text-white transition-colors">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div>
                           <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{user.name}</p>
                           <p className="text-[10px] text-slate-500 font-medium">{user.email}</p>

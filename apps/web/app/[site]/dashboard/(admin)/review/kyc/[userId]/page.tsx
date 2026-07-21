@@ -25,6 +25,7 @@ interface KYCUser {
   email: string
   role: string
   bio: string | null
+  avatarUrl?: string | null
   isVerified: boolean
   kycStatus: string
   kycSubmittedAt: string | null
@@ -130,6 +131,17 @@ export default function KYCDetailReviewPage() {
             label="Kembali ke Antrian"
           />
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            )}
             Tinjau Identitas: {user.name}
           </h1>
           <p className="text-xs text-slate-500">ID: {user.id}</p>
