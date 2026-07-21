@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,6 +11,8 @@ import {
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { useMounted } from '../../hooks/useMounted'
+import { EmptyChartState } from './shared/EmptyChartState'
 
 interface TrafficData {
   date: string;
@@ -19,18 +20,10 @@ interface TrafficData {
 }
 
 export default function TrafficChart({ data }: { data: TrafficData[] }) {
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   if (!mounted || !Array.isArray(data) || data.length === 0) {
-    return (
-      <div className="h-[300px] flex items-center justify-center text-gray-400 text-xs uppercase tracking-widest font-bold">
-        Data tidak tersedia
-      </div>
-    );
+    return <EmptyChartState message="Data tidak tersedia" />;
   }
 
   return (

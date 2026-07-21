@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import {
   AreaChart,
   Area,
@@ -13,6 +12,8 @@ import {
 } from 'recharts'
 import { format, parse } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
+import { useMounted } from '../../hooks/useMounted'
+import { EmptyChartState } from './shared/EmptyChartState'
 
 interface GA4TrafficData {
   date: string
@@ -25,16 +26,12 @@ interface GA4TrafficChartProps {
 }
 
 export function GA4TrafficChart({ data }: GA4TrafficChartProps) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useMounted()
 
   if (!mounted || !Array.isArray(data) || data.length === 0) {
-    return (
-      <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-white/10">
-        <p className="text-sm text-brand-text-muted">Data GA4 tidak tersedia</p>
-      </div>
-    )
+    return <EmptyChartState message="Data GA4 tidak tersedia" />
   }
+
 
   const formatDate = (dateStr: string) => {
     try {
