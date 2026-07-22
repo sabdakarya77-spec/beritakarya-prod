@@ -52,6 +52,8 @@ export interface HomepagePools {
 
 export interface DistributionOptions {
   heroMode?: HeroMode
+  /** Batas usia maksimal artikel (dalam hari) untuk kandidat Fokus Redaksi. Default: 14 hari */
+  maxFokusAgeDays?: number
   /** Bobot scoring zona 2 Fokus Redaksi. Default: freshness=0.4, engagement=0.3, editorial=0.3 */
   scoreWeights?: {
     freshness?: number
@@ -160,18 +162,27 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
   const heroIds = new Set(hero.map(a => a.id))
 
   // ─────────────────────────────────────────────
-  // 2. FOKUS REDAKSI: filter isFeatured + scoring
-  //    Filter dulu: hanya artikel featured yang masuk zona ini.
-  //    Di antara featured, pakai scoring untuk urutan supaya rotasi.
-  //    Fallback: jika featured kurang dari 2, pakai scoring semua sisa.
+  // 2. FOKUS REDAKSI: hard cutoff usia + filter isFeatured + scoring
+  //    Hard cutoff: Hanya artikel bertanda isFeatured yang terbit <= maxFokusAgeDays (default 14 hari) yang masuk candidate pool.
+  //    Di antara candidate, pakai scoring untuk rotasi.
+  //    Fallback: Jika artikel dalam batas usia fresh < 2 (mis. di environment test), gunakan artikel sisa tanpa hard cutoff.
   // ─────────────────────────────────────────────
   const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
   const sortedRemaining = sortByNewest(remainingAfterHero)
 
-  const featuredPool = remainingAfterHero.filter(a => a.isFeatured)
+  const maxFokusAgeDays = opts.maxFokusAgeDays ?? 14
+  const isFreshForFokus = (a: HomeArticle) => {
+    const ageInDays = (Date.now() - getPublishedDate(a).getTime()) / (1000 * 60 * 60 * 24)
+    return ageInDays <= maxFokusAgeDays
+  }
+
+  const freshRemaining = remainingAfterHero.filter(isFreshForFokus)
+  const candidatePool = freshRemaining.length >= 2 ? freshRemaining : remainingAfterHero
+
+  const featuredPool = candidatePool.filter(a => a.isFeatured)
   const fokusRedaksi = featuredPool.length >= 2
     ? scoreAndSort(featuredPool, scoreWeights).slice(0, 4)
-    : scoreAndSort(remainingAfterHero, scoreWeights).slice(0, 4)
+    : scoreAndSort(candidatePool, scoreWeights).slice(0, 4)
   const fokusIds = new Set(fokusRedaksi.map(a => a.id))
 
   // ─────────────────────────────────────────────
