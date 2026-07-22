@@ -78,6 +78,19 @@ export class GoogleAnalyticsService {
     return data.access_token
   }
 
+  private normalizePropertyId(raw: string): string {
+    // Mendukung berbagai format input yang mungkin dimasukkan pengguna:
+    //   "properties/546626684"  → sudah benar
+    //   "properties(546626684)" → salah (tanda kurung, dari typo)
+    //   "546626684"             → kurang prefix
+    const numeric = raw.trim().replace(/^properties[/(]?(\d+)[)]?$/, '$1')
+    if (/^\d+$/.test(numeric)) {
+      return `properties/${numeric}`
+    }
+    // Fallback: kembalikan apa adanya agar error aslinya tetap terlihat
+    return raw.trim()
+  }
+
   private async getConfig(siteId: string): Promise<{ config: GoogleServiceConfig; propertyId: string } | null> {
     const site = await prisma.site.findUnique({ where: { id: siteId } })
 
@@ -90,7 +103,7 @@ export class GoogleAnalyticsService {
 
     if (!config?.clientEmail || !config?.privateKey || !config?.isActive) return null
 
-    return { config, propertyId: site.ga4PropertyId }
+    return { config, propertyId: this.normalizePropertyId(site.ga4PropertyId) }
   }
 
   private async runReport(
