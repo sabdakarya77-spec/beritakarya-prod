@@ -485,107 +485,105 @@ export default function DashboardOverview() {
       </div>
 
       {/* ── Google Analytics & Search Console ─────────────────────────── */}
-      {(isGa4Configured || isGscConfigured) && (
-        <div className="rounded-2xl border border-gray-100 bg-white dark:border-white/5 dark:bg-white/[0.02]">
-          <div className="flex items-center gap-1 border-b border-gray-100 px-2 pt-2 dark:border-white/5">
-            {([
-              { key: 'internal', label: 'Internal' },
-              ...(isGa4Configured ? [{ key: 'ga4', label: 'Google Analytics' }] : []),
-              ...(isGscConfigured ? [{ key: 'gsc', label: 'Search Console' }] : []),
-            ] as { key: 'internal' | 'ga4' | 'gsc'; label: string }[]).map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setAnalyticsTab(tab.key)}
-                className={`rounded-t-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                  analyticsTab === tab.key
-                    ? 'bg-brand-red/10 text-brand-red'
-                    : 'text-brand-text-muted hover:text-brand-black dark:hover:text-white'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="p-6">
-            {analyticsTab === 'ga4' && (
-              <div className="space-y-6">
-                {ga4Error ? (
-                  <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
-                    <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Shield size={20} className="text-red-600 dark:text-red-400" />
-                    </div>
-                    <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Analytics</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
-                      {ga4Error}
-                    </p>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
-                      <p className="text-left font-bold">Langkah Solusi:</p>
-                      <ul className="list-disc list-inside text-left space-y-1">
-                        <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Viewer</strong> di Google Analytics Admin &rarr; Property Access Management.</li>
-                        <li>Pastikan GA4 Property ID (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">properties/XXXXXXXXX</code>) sudah diisi dengan benar di Pengaturan Situs.</li>
-                      </ul>
-                    </div>
-                  </div>
-                ) : ga4Audience ? (
-                  <>
-                    {ga4Audience && <GA4AudienceCards data={{ ...ga4Audience, realtimeUsers: ga4Realtime?.activeUsers }} />}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      <div className="lg:col-span-2">
-                        <GA4TrafficChart data={ga4Traffic} />
-                      </div>
-                      {ga4Audience?.sources && <GA4SourceTable sources={ga4Audience.sources} />}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
-                    <p className="text-xs text-gray-500">Menghubungkan ke Google Analytics...</p>
-                  </div>
-                )}
-              </div>
-            )}
-            {analyticsTab === 'gsc' && (
-              <div className="space-y-6">
-                {gscError ? (
-                  <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
-                    <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Shield size={20} className="text-red-600 dark:text-red-400" />
-                    </div>
-                    <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Search Console</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
-                      {gscError}
-                    </p>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
-                      <p className="text-left font-bold">Langkah Solusi:</p>
-                      <ul className="list-disc list-inside text-left space-y-1">
-                        <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Owner</strong> (Pemilik) di Google Search Console &rarr; Settings &rarr; Users and permissions.</li>
-                        <li>Pastikan URL situs Search Console di Pengaturan Situs (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">https://domain.com/</code> atau <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">sc-domain:domain.com</code>) sudah sesuai.</li>
-                      </ul>
-                    </div>
-                  </div>
-                ) : gscPerformance ? (
-                  <>
-                    {gscPerformance && <GSCPerformanceChart data={gscPerformance} />}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <GSCTopQueries data={gscQueries} />
-                      <GSCTopPages data={gscPages} />
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
-                    <p className="text-xs text-gray-500">Menghubungkan ke Google Search Console...</p>
-                  </div>
-                )}
-              </div>
-            )}
-            {analyticsTab === 'internal' && (
-              <p className="text-sm text-brand-text-muted">Data internal (PageView) ditampilkan di bagian atas.</p>
-            )}
-          </div>
+      <div className="rounded-2xl border border-gray-100 bg-white dark:border-white/5 dark:bg-white/[0.02]">
+        <div className="flex items-center gap-1 border-b border-gray-100 px-2 pt-2 dark:border-white/5">
+          {([
+            { key: 'internal', label: 'Internal' },
+            { key: 'ga4', label: 'Google Analytics' },
+            { key: 'gsc', label: 'Search Console' },
+          ] as { key: 'internal' | 'ga4' | 'gsc'; label: string }[]).map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setAnalyticsTab(tab.key)}
+              className={`rounded-t-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                analyticsTab === tab.key
+                  ? 'bg-brand-red/10 text-brand-red'
+                  : 'text-brand-text-muted hover:text-brand-black dark:hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      )}
+        <div className="p-6">
+          {analyticsTab === 'ga4' && (
+            <div className="space-y-6">
+              {ga4Error ? (
+                <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
+                  <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield size={20} className="text-red-600 dark:text-red-400" />
+                  </div>
+                  <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Analytics</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
+                    {ga4Error}
+                  </p>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
+                    <p className="text-left font-bold">Langkah Solusi:</p>
+                    <ul className="list-disc list-inside text-left space-y-1">
+                      <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Viewer</strong> di Google Analytics Admin &rarr; Property Access Management.</li>
+                      <li>Pastikan GA4 Property ID (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">properties/XXXXXXXXX</code>) sudah diisi dengan benar di Pengaturan Situs.</li>
+                    </ul>
+                  </div>
+                </div>
+              ) : ga4Audience ? (
+                <>
+                  {ga4Audience && <GA4AudienceCards data={{ ...ga4Audience, realtimeUsers: ga4Realtime?.activeUsers }} />}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <GA4TrafficChart data={ga4Traffic} />
+                    </div>
+                    {ga4Audience?.sources && <GA4SourceTable sources={ga4Audience.sources} />}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
+                  <p className="text-xs text-gray-500">Menghubungkan ke Google Analytics...</p>
+                </div>
+              )}
+            </div>
+          )}
+          {analyticsTab === 'gsc' && (
+            <div className="space-y-6">
+              {gscError ? (
+                <div className="p-8 text-center border border-red-100 dark:border-red-950/30 bg-red-50/30 dark:bg-red-950/10 rounded-2xl max-w-2xl mx-auto my-4">
+                  <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield size={20} className="text-red-600 dark:text-red-400" />
+                  </div>
+                  <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-2">Gagal Menghubungkan Google Search Console</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-6 bg-white dark:bg-white/5 p-3 rounded-lg border border-red-100/50 dark:border-red-950/20 font-mono text-left break-all select-all">
+                    {gscError}
+                  </p>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed space-y-2 max-w-md mx-auto">
+                    <p className="text-left font-bold">Langkah Solusi:</p>
+                    <ul className="list-disc list-inside text-left space-y-1">
+                      <li>Pastikan email Service Account Google Indexing Anda sudah ditambahkan sebagai <strong className="text-gray-700 dark:text-gray-300">Owner</strong> (Pemilik) di Google Search Console &rarr; Settings &rarr; Users and permissions.</li>
+                      <li>Pastikan URL situs Search Console di Pengaturan Situs (<code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">https://domain.com/</code> atau <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded font-mono text-brand-red font-bold">sc-domain:domain.com</code>) sudah sesuai.</li>
+                    </ul>
+                  </div>
+                </div>
+              ) : gscPerformance ? (
+                <>
+                  {gscPerformance && <GSCPerformanceChart data={gscPerformance} />}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <GSCTopQueries data={gscQueries} />
+                    <GSCTopPages data={gscPages} />
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-8 h-8 border-2 border-brand-red border-t-transparent rounded-full animate-spin mb-3" />
+                  <p className="text-xs text-gray-500">Menghubungkan ke Google Search Console...</p>
+                </div>
+              )}
+            </div>
+          )}
+          {analyticsTab === 'internal' && (
+            <p className="text-sm text-brand-text-muted">Data internal (PageView) ditampilkan di bagian atas.</p>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

@@ -235,13 +235,13 @@ export function useGA4Traffic(site: string, days = 7) {
   return useQuery({
     queryKey: queryKeys.ga4Traffic(site, days),
     queryFn: () =>
-      fetchJSON<{ success: boolean; data: GA4Data[]; message?: string }>(
+      fetchJSON<{ success: boolean; data: GA4Data[]; message?: string; error?: string }>(
         '/analytics/ga4/traffic',
         { days, site }
       ).then((res) => ({
         data: res.data || [],
-        isConfigured: res.success && !res.message?.includes('tidak dikonfigurasi'),
-        error: res.success ? null : res.message || 'Gagal memuat data GA4',
+        isConfigured: !res.message?.includes('tidak dikonfigurasi'),
+        error: res.success ? null : res.error || res.message || 'Gagal memuat data GA4',
       })),
     enabled: !!site,
     staleTime: 10 * 60 * 1000, // 10 minutes for external API data
@@ -302,10 +302,11 @@ export function useGSCPerformance(site: string, days = 28) {
         success: boolean;
         data: GSCPerformance;
         message?: string;
+        error?: string;
       }>('/analytics/gsc/performance', { days, site }).then((res) => ({
         data: res.data,
-        isConfigured: res.success && !res.message?.includes('tidak dikonfigurasi'),
-        error: res.success ? null : res.message || 'Gagal memuat data Search Console',
+        isConfigured: !res.message?.includes('tidak dikonfigurasi'),
+        error: res.success ? null : res.error || res.message || 'Gagal memuat data Search Console',
       })),
     enabled: !!site,
     staleTime: 15 * 60 * 1000, // 15 minutes for GSC data
