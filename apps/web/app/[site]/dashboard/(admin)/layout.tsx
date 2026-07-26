@@ -144,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       label: 'Administrasi',
       items: [
         { name: 'Monitor Tim', href: `/${site}/dashboard/team`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
-        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kabiro'] },
+        { name: 'Pengguna', href: `/${site}/dashboard/users`, icon: UsersIcon, roles: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
         { name: 'Undangan', href: `/${site}/dashboard/invitations`, icon: Mail, roles: ['superadmin', 'wapimred', 'kabiro'] },
         { name: 'Pengaturan', href: `/${site}/dashboard/settings`, icon: Settings, roles: ['superadmin', 'wapimred'] },
       ]
