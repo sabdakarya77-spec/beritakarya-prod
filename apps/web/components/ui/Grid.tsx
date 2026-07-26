@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { ReactNode, CSSProperties } from 'react';
+import type { ReactNode } from 'react';
 
 /* ─────────────────────────────────────────────
    Grid & Stack layout primitives — sesuai design-system.md

@@ -491,7 +491,7 @@ export class SiteService {
     return this.getSiteSettings(siteId) // return standardized format
   }
 
-  async deleteSite(siteId: string, actorUserId: string) {
+  async deleteSite(siteId: string, _actorUserId: string) {
     const site = await prisma.site.findUnique({
       where: { id: siteId }
     })
@@ -893,6 +893,7 @@ export class SiteService {
 
     // Jika belum ada config, coba copy dari pusat JIKA siteId !== 'pusat'
     if (!config) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let dataToCreate: any = {
         siteId,
         template: 'F',

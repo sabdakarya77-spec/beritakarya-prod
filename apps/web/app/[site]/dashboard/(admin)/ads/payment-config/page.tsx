@@ -9,7 +9,6 @@ import {
   Settings,
   Building2,
   QrCode,
-  CreditCard,
   RefreshCw,
   Plus,
   Trash2,

@@ -15,7 +15,7 @@ interface GA4Result {
   error?: string
 }
 
-interface GA4ReportRow {
+interface _GA4ReportRow {
   date?: string
   pagePath?: string
   sessionSource?: string

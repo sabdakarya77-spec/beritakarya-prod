@@ -343,9 +343,9 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   ].map((a) => a.id)
 
   // ── Conditional flags ──
-  const showHomepageHero = isHomepage && heroArticles.length > 0
-  const showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
-  const showTrending = isHomepage && effectiveTrending.length > 0
+  const _showHomepageHero = isHomepage && heroArticles.length > 0
+  const _showFokusRedaksi = isHomepage && fokusRedaksi.length > 0
+  const _showTrending = isHomepage && effectiveTrending.length > 0
   const showTechnologySection = isHomepage && technologyArticles.length >= 2
   const showOpinionSection = isHomepage && opinionArticles.length >= 2
   const showPhotoSection = isHomepage && photoJournal.length >= 1

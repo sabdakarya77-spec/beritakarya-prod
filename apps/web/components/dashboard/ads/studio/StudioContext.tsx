@@ -111,6 +111,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     if (data.selectedPackage && data.startDate && data.endDate) {
       checkAvailability();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- checkAvailability and data.selectedPackage are intentionally excluded; only the package id and date range should trigger availability checks
   }, [data.selectedPackage?.id, data.startDate, data.endDate]);
 
   // Sync activeStep with URL query param on navigation

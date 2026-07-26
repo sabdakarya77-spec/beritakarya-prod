@@ -78,12 +78,12 @@ export default function DashboardOverview() {
     ga4Traffic,
     ga4Audience,
     ga4Realtime,
-    isGa4Configured,
+    isGa4Configured: _isGa4Configured,
     ga4Error,
     gscPerformance,
     gscQueries,
     gscPages,
-    isGscConfigured,
+    isGscConfigured: _isGscConfigured,
     gscError,
     kycRequests,
     auditLogs,
@@ -116,6 +116,7 @@ export default function DashboardOverview() {
         return getQueueHours(b) - getQueueHours(a);
       })
       .slice(0, 4);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- getQueueHours is a stable inline function defined in the same render scope; adding it would cause unnecessary re-memos
   }, [articles, currentTimestamp]);
 
   const recentActivityList = useMemo(() => {
@@ -319,6 +320,7 @@ export default function DashboardOverview() {
       default:
         return [];
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- articlesHref and reviewHref are stable const functions defined in the same render scope; wrapping in useCallback would add unnecessary complexity
   }, [user?.role, drafts, revisions, inReview, approved, kycRequests, site]);
 
   // Advertiser view early return

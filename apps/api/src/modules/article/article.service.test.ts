@@ -210,6 +210,7 @@ describe('publishArticle', () => {
       id: 'bandung',
       domain: 'bandung.beritakarya.co',
       wapimredSettings: { canPublish: true, canSchedule: true, canForcePublish: true }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     vi.mocked(repo.getNextVersionNumber).mockResolvedValue(1)
     vi.mocked(repo.createVersion).mockResolvedValue({ id: 'v-1' } as unknown as CreateVersionReturn)

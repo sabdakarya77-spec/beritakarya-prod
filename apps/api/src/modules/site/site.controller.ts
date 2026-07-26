@@ -85,7 +85,7 @@ function getErrorMessage(error: unknown): string {
   return String(error)
 }
 
-function getErrorCode(error: unknown, fallback: string): string {
+function _getErrorCode(error: unknown, fallback: string): string {
   if (error instanceof AppError) return error.code
   if (error instanceof Error && 'code' in error) return (error as Error & { code: string }).code
   return fallback

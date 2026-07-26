@@ -39,6 +39,7 @@ export function createAIHook<TInput, TOutput, TMethodName extends string>(config
   endpoint: string
   methodName: TMethodName
   buildPayload: (input: TInput) => Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transformResult: (raw: any, input: TInput) => TOutput
   errorMessage: string
 }) {
@@ -54,6 +55,7 @@ export function createAIHook<TInput, TOutput, TMethodName extends string>(config
 
       try {
         const payload = config.buildPayload(input)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rawData = await callBackendAPI<any>(config.endpoint, payload)
         const transformed = config.transformResult(rawData, input)
 

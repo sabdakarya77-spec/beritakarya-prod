@@ -10,7 +10,7 @@
  */
 
 import sharp from 'sharp'
-import { AD_SLOT_CONFIG, type SlotId, type SlotDimensions } from '../config/ad-slots'
+import { AD_SLOT_CONFIG, type SlotDimensions } from '../config/ad-slots'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -79,7 +79,6 @@ export async function extractPalette(buffer: Buffer): Promise<ColorPalette> {
     .raw()
     .toBuffer()
 
-  const pixels: Array<{ r: number; g: number; b: number; count: number }> = []
   const colorMap = new Map<string, { r: number; g: number; b: number; count: number }>()
 
   // Sample setiap pixel, quantize ke kelipatan 16 untuk mengurangi noise
@@ -168,9 +167,9 @@ const ASPECT_RATIO_TOLERANCE = 1.0 // 100% — selalu gunakan smart_crop (cover+
 // ─── Upscale: Replicate API (AI) + Sharp (Fallback) ─────────────────────────
 
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
-const UPSCALE_MIN_WIDTH = 300
-const UPSCALE_MIN_HEIGHT = 200
-const UPSCALE_FACTOR = 4 // Real-ESRGAN x4plus
+const _UPSCALE_MIN_WIDTH = 300
+const _UPSCALE_MIN_HEIGHT = 200
+const _UPSCALE_FACTOR = 4 // Real-ESRGAN x4plus
 
 /**
  * Upscale gambar menggunakan Replicate API (Real-ESRGAN x4plus).

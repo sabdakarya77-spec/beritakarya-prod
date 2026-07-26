@@ -44,7 +44,7 @@ const PROVIDER_BADGES: Record<string, { label: string; color: string }> = {
   runway: { label: '💎 Premium', color: 'bg-rose-500/10 text-rose-600' },
 };
 
-export function ProductionCard({ booking, site, isProcessing, setProcessingId, onRefresh }: Props) {
+export function ProductionCard({ booking, site: _site, isProcessing, setProcessingId, onRefresh }: Props) {
   const { addToast } = useToastStore();
   const [prompt, setPrompt] = useState('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);

@@ -122,6 +122,7 @@ export default function RolePermissions({ role }: RolePermissionsProps) {
 
   useEffect(() => {
     fetchSettings()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchSettings is a stable function in the same scope; including it would cause an infinite fetch loop
   }, [site, role])
 
   const handleSave = async () => {

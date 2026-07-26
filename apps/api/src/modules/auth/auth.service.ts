@@ -60,7 +60,7 @@ export async function registerUser(
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
-  const user = await prisma.user.create({
+  const _user = await prisma.user.create({
     data: { email: normalizedEmail, passwordHash, name, role, siteId }
   })
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
 import { useToastStore } from '../../../../store/toastStore';
-import { RefreshCw, AlertCircle, ArrowLeft, Plus } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
 import type { Ad } from '../types';
 import { HeroBannerManager } from '../HeroBannerManager';

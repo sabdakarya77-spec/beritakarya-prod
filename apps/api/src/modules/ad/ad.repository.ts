@@ -283,7 +283,7 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
   const impressionsMap: Record<string, number> = {}
   const clicksMap: Record<string, number> = {}
 
-  const now = new Date()
+  const _now = new Date()
   for (let i = 0; i < days; i++) {
     const d = new Date(startDate)
     d.setDate(d.getDate() + i)

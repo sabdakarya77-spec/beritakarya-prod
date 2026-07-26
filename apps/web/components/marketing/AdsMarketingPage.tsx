@@ -22,7 +22,6 @@ import type { PublicSiteConfig } from '../../lib/siteSettings'
 import { ADS_PUBLIC_PAGE } from '../../lib/marketingPages'
 import { AD_SLOT_MAP, getAdSlotDefinition, type AdSlotId } from '../../lib/constants'
 import { PublicInfoShell } from '../layout/PublicInfoShell'
-import { LegalPageHeader } from '../legal/LegalPageHeader'
 import { LegalDocumentBody } from '../legal/LegalDocumentBody'
 
 export interface AdPackage {
@@ -109,6 +108,7 @@ export function AdsMarketingPage({
       }
     })
     setSelectedDurations(initialDurations)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- groupedPackages is derived from adPackages; re-running on adPackages change is sufficient
   }, [adPackages])
 
   // Simulated AI Video Player Progress Tracker

@@ -453,6 +453,7 @@ export async function updateArticle(
     }
 
     const editors = await prisma.user.findMany({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       where: { siteId, role: { in: editorRoles as any[] } },
       select: { id: true }
     })
