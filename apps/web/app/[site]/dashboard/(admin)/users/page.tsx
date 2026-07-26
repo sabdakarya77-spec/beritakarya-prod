@@ -18,6 +18,36 @@ interface User {
   createdAt: string;
 }
 
+const getRoleBadge = (role: string) => {
+  const styles = {
+    superadmin: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50',
+    wapimred: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50',
+    kaperwil: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50',
+    korwil: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-900/50',
+    kabiro: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900/50',
+    reporter: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50',
+    kontributor: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-900/50',
+    advertiser: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/50',
+    reader: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
+  };
+  return styles[role as keyof typeof styles] || styles.reader;
+};
+
+const getRoleLabel = (role: string) => {
+  const labels = {
+    superadmin: 'Superadmin',
+    wapimred: 'Wapimred',
+    kaperwil: 'Kaperwil',
+    korwil: 'Korwil',
+    kabiro: 'Kabiro',
+    reporter: 'Reporter (Internal)',
+    kontributor: 'Kontributor (Lepas)',
+    advertiser: 'Pengiklan',
+    reader: 'Pembaca'
+  };
+  return labels[role as keyof typeof labels] || role;
+};
+
 export default function UsersDashboard() {
   const { isAllowed } = useRequireRole(['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro']);
   const [users, setUsers] = useState<User[]>([]);
