@@ -444,7 +444,11 @@ userRouter.post('/avatar',
     // Upload to public media bucket
     await StorageService.uploadBuffer(buffer, key, 'image/webp', StorageService.mediaBucket, { isPublic: true })
 
-    const avatarUrl = StorageService.getPublicUrl(StorageService.mediaBucket, key)
+    // Cache-bust: the storage key is deterministic (avatars/{userId}.webp),
+    // so re-uploading overwrites the same object at the same URL. Without a
+    // changing query param, browsers and the storage CDN keep serving the
+    // previously cached image even after a successful re-upload.
+    const avatarUrl = `${StorageService.getPublicUrl(StorageService.mediaBucket, key)}?v=${Date.now()}`
 
     // Update user record
     const user = await prisma.user.update({
