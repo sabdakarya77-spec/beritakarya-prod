@@ -15,6 +15,7 @@ interface AuthState {
   upgradeToAdvertiser: () => Promise<void>
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
+  updateUser: (partial: Partial<AuthUser>) => void
   setLastActiveSite: (siteId: string) => void
   clearError: () => void
 }
@@ -118,6 +119,16 @@ export const useAuthStore = create<AuthState>()(
       set({ user: null, isLoading: false })
     }
   },
+
+  // Merge a partial update (e.g. new avatarUrl, name, bio) into the current
+  // user object without needing a full re-login or /auth/me round trip.
+  // Use this anywhere the profile is edited (avatar upload, save profile, etc.)
+  // so that every component reading from useAuthStore() (Navbar, dashboard
+  // sidebar, etc.) reflects the change immediately.
+  updateUser: (partial: Partial<AuthUser>) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...partial } : state.user
+    })),
 
   setLastActiveSite: (siteId: string) => set({ lastActiveSite: siteId }),
 

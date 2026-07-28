@@ -40,6 +40,7 @@ export default function ProfilePage() {
   const params = useParams();
   const siteId = params.site as string;
   const { user } = useAuthStore();
+  const updateUser = useAuthStore((state) => state.updateUser);
 
   // State
   const [loading, setLoading] = useState(true);
@@ -124,6 +125,11 @@ export default function ProfilePage() {
       });
 
       if (response.data.success) {
+        // Keep the global auth store (Navbar, dashboard sidebar, etc.) in
+        // sync so the new name shows up everywhere immediately, not just
+        // on this page. (Bio isn't part of AuthUser - it's only shown on
+        // the public author page, which reads fresh data from the API.)
+        updateUser({ name: name.trim() });
         setProfileMessage({ type: 'success', text: 'Profil berhasil disimpan' });
       }
     } catch (err: unknown) {
@@ -190,8 +196,13 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       if (response.data.success) {
-        setAvatarUrl(response.data.data.avatarUrl);
+        const newAvatarUrl = response.data.data.avatarUrl;
+        setAvatarUrl(newAvatarUrl);
         setAvatarPreview(null);
+        // Sync into the global auth store so the Navbar and dashboard
+        // sidebar avatar update right away instead of waiting for the
+        // next login / checkAuth() refresh.
+        updateUser({ avatarUrl: newAvatarUrl });
         setProfileMessage({ type: 'success', text: 'Foto profil berhasil diunggah' });
       }
     } catch (err: unknown) {
