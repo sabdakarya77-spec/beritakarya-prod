@@ -289,7 +289,7 @@ export default async function ArticlePage({ params }: Props) {
                   </h1>
 
                   {article.excerpt && (
-                    <p className={cn("text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl line-clamp-3 md:line-clamp-none", article.coverLayout === 'center' && 'md:mx-auto md:text-center')}>
+                    <p className={cn("text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl", article.coverLayout === 'center' && 'md:mx-auto md:text-center')}>
                       {article.excerpt}
                     </p>
                   )}
