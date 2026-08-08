@@ -1,4 +1,3 @@
-import { prisma } from '../../db/client'
 import { getCache, setCache } from '../../lib/redis'
 import { logger } from '../../lib/logger'
 
@@ -22,70 +21,10 @@ export async function isDuplicateImpression(adId: string, ip: string): Promise<b
   }
 }
 
-// ─── Sync Tracking ke AdBooking ───────────────────────────────────────────────
-// Saat impression/click di-track, increment counter di AdBooking yang terkait.
-// Prioritas: gunakan bookingId dari Advertisement (link langsung).
-// Fallback: cari berdasarkan siteId+slot+tanggal (untuk data lama yang belum punya bookingId).
-
-export async function syncTrackingToBooking(
-  siteId: string,
-  slot: string,
-  action: 'impression' | 'click',
-  bookingId?: string | null,
-  adId?: string
-) {
-  try {
-    const field = action === 'impression' ? 'impressions' : 'clicks'
-
-    // Prioritas 1: gunakan bookingId langsung dari Advertisement
-    if (bookingId) {
-      await prisma.adBooking.update({
-        where: { id: bookingId },
-        data: { [field]: { increment: 1 } },
-      })
-      // Log event untuk time-series analytics
-      if (adId) {
-        await prisma.adEventLog.create({
-          data: { adId, bookingId, siteId, action },
-        }).catch(() => {}) // non-critical
-      }
-      return
-    }
-
-    // Fallback: cari booking aktif yang paling relevan (data lama tanpa bookingId)
-    const now = new Date()
-    const booking = await prisma.adBooking.findFirst({
-      where: {
-        siteId,
-        package: { slot },
-        status: 'ACTIVE',
-        startDate: { lte: now },
-        endDate: { gte: now },
-      },
-      orderBy: { startDate: 'asc' },
-    })
-
-    if (booking) {
-      await prisma.adBooking.update({
-        where: { id: booking.id },
-        data: { [field]: { increment: 1 } },
-      })
-      // Log event untuk time-series analytics
-      if (adId) {
-        await prisma.adEventLog.create({
-          data: { adId, bookingId: booking.id, siteId, action },
-        }).catch(() => {})
-      }
-    }
-  } catch (err) {
-    // Non-critical: jangan ganggu tracking utama jika ini gagal
-    logger.warn('[AdService] Failed to sync tracking to booking:', err)
-  }
-}
-
 // ─── HTML Code Sanitization ───────────────────────────────────────────────────
-// Validasi field `code` di Advertisement untuk mencegah XSS.
-// Hanya allow pola yang aman (AdSense, tagihan script standar).
+// Validasi field `code` lama di Advertisement untuk mencegah XSS.
+// Field `code` sudah dihapus (full image only) — fungsi ini dipertahankan
+// untuk backward compatibility bila ada data lama yang masih memakai code.
 
 const DANGEROUS_PATTERNS: RegExp[] = [
   /eval\s*\(/i,

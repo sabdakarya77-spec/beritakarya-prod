@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import {
   Upload,
   Trash2,
@@ -10,7 +10,6 @@ import {
   BarChart3,
   MousePointerClick,
   Image as ImageIcon,
-  Code as CodeIcon,
   AlertCircle,
   Plus,
   ChevronUp,
@@ -35,7 +34,6 @@ interface AdSlotCardProps {
 
 export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [targetAdId, setTargetAdId] = useState<string | null>(null);
@@ -48,33 +46,16 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
 
   // Preview modal state
   const [previewAd, setPreviewAd] = useState<Ad | null>(null);
-  const closePreview = useCallback(() => setPreviewAd(null), []);
-  useEffect(() => {
-    if (!previewAd) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closePreview(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [previewAd, closePreview]);
+  const closePreview = () => setPreviewAd(null);
 
   // Dynamic aspect ratio per slot
   const aspectRatioClass: Record<string, string> = {
-    HOME_TOP: 'aspect-[4/1]',
-    HOME_FEED_1: 'aspect-[300/200]',
-    ARTICLE_TOP: 'aspect-[300/200]',
-    HOME_FEED_2: 'aspect-[300/150]',
-    ARTICLE_MIDDLE: 'aspect-[300/150]',
-    ARTICLE_BOTTOM: 'aspect-[300/150]',
-  };
-
-  // Deteksi file video berdasarkan ekstensi di pathname (abaikan query params)
-  const isVideoFile = (url: string): boolean => {
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    try {
-      const pathname = new URL(url).pathname.toLowerCase();
-      return videoExtensions.some(ext => pathname.endsWith(ext));
-    } catch {
-      return videoExtensions.some(ext => url.toLowerCase().endsWith(ext));
-    }
+    HOME_TOP: 'aspect-[970/250]',
+    HOME_FEED_1: 'aspect-[300/250]',
+    ARTICLE_TOP: 'aspect-[300/250]',
+    HOME_FEED_2: 'aspect-[300/250]',
+    ARTICLE_MIDDLE: 'aspect-[300/250]',
+    ARTICLE_BOTTOM: 'aspect-[300/250]',
   };
 
   // Total stats
@@ -99,7 +80,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
     if (!file) return;
 
     setUploadingId(adId || 'new');
-    setProcessing(true);
     setWarnings([]);
 
     try {
@@ -114,15 +94,11 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
         if (adId) {
           await api.patch(`/ads/${adId}`, {
             imageUrl: d.desktop?.url || null,
-            imageUrlTablet: d.tablet?.url || null,
-            imageUrlMobile: d.mobile?.url || null,
           });
         } else {
           await api.post('/ads', {
             slot: slot.id,
             imageUrl: d.desktop?.url || null,
-            imageUrlTablet: d.tablet?.url || null,
-            imageUrlMobile: d.mobile?.url || null,
             isActive: true,
           });
         }
@@ -133,7 +109,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
       setWarnings([msg]);
     } finally {
       setUploadingId(null);
-      setProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -168,20 +143,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
 
     try {
       await api.patch('/ads/reorder', { items: reorderPayload });
-      onRefresh();
-    } catch { /* ignore */ }
-  };
-
-  // Script mode
-  const handleScriptMode = async (adId?: string) => {
-    const code = prompt('Tempel kode script iklan (HTML/JS):');
-    if (!code) return;
-    try {
-      if (adId) {
-        await api.patch(`/ads/${adId}`, { code, imageUrl: null, linkUrl: null });
-      } else {
-        await api.post('/ads', { slot: slot.id, code, isActive: true });
-      }
       onRefresh();
     } catch { /* ignore */ }
   };
@@ -242,7 +203,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                 {slot.publicSize || slot.size}
               </span>
               <span className="text-[8px] font-black px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
-                {slot.format === 'VIDEO' ? '🎥 Video' : '🖼️ Banner'}
+                🖼️ Banner
               </span>
               <span className="text-[9px] font-black px-2 py-0.5 bg-brand-red/10 text-brand-red rounded-full">
                 {ads.length} Iklan
@@ -299,7 +260,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
             Belum Ada Iklan
           </p>
           <p className="text-[8px] text-gray-300 dark:text-gray-700 mt-1">
-            Klik &quot;Tambah&quot; untuk menambah iklan ke slot ini
+            Klik "Tambah" untuk menambah iklan ke slot ini
           </p>
         </div>
       ) : (
@@ -332,31 +293,11 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                   onClick={() => ad.imageUrl && setPreviewAd(ad)}
                   className={cn(
                     "w-24 flex-shrink-0 bg-gray-50 dark:bg-black/20 rounded-lg border border-gray-100 dark:border-white/5 overflow-hidden relative group cursor-pointer",
-                    aspectRatioClass[slot.id] || 'aspect-[300/200]',
+                    aspectRatioClass[slot.id] || 'aspect-[300/250]',
                     !ad.imageUrl && 'cursor-default'
                   )}
                 >
-                  {ad.code ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <CodeIcon size={16} className="text-gray-300" />
-                    </div>
-                  ) : ad.imageUrl && isVideoFile(ad.imageUrl) ? (
-                    <video
-                      src={ad.imageUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const el = e.currentTarget;
-                        if (!el.dataset.retried) {
-                          el.dataset.retried = 'true';
-                          el.load();
-                        }
-                      }}
-                    />
-                  ) : ad.imageUrl ? (
+                  {ad.imageUrl ? (
                     <img src={ad.imageUrl} alt={slot.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -408,7 +349,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                     <input
                       ref={targetAdId === ad.id ? fileInputRef : undefined}
                       type="file"
-                      accept="image/*,video/mp4,video/webm"
+                      accept="image/*"
                       onChange={(e) => handleUpload(e, ad.id)}
                       className="hidden"
                     />
@@ -443,13 +384,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                       <Trash2 size={12} />
                     </button>
                     <button
-                      onClick={() => handleScriptMode(ad.id)}
-                      className="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-brand-red transition-all"
-                      title="Script Mode"
-                    >
-                      <CodeIcon size={12} />
-                    </button>
-                    <button
                       onClick={() => editingId === ad.id ? handleEditCancel() : handleEditStart(ad)}
                       className={cn(
                         "p-1.5 rounded transition-all",
@@ -471,47 +405,15 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div>
-                        <label className="dash-label mb-1 block">URL Media (Gambar/Video)</label>
+                        <label className="dash-label mb-1 block">URL Media (Gambar)</label>
                         <div className="flex gap-2">
                           <input
                             type="text"
                             value={editImageUrl}
                             onChange={(e) => setEditImageUrl(e.target.value)}
-                            placeholder="https://... (JPG/PNG/WebP/MP4)"
+                            placeholder="https://... (JPG/PNG/WebP)"
                             className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 border border-gray-200 dark:border-white/10 rounded-lg text-xs outline-none focus:border-brand-red transition-all"
                           />
-                          <input
-                            ref={editingId === ad.id ? fileInputRef : undefined}
-                            type="file"
-                            accept="image/*,video/mp4,video/webm"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              setUploadingId(ad.id);
-                              try {
-                                const formData = new FormData();
-                                formData.append('file', file);
-                                const res = await api.post(`/media/upload-ad?slot=${slot.id}`, formData, {
-                                  headers: { 'Content-Type': 'multipart/form-data' },
-                                });
-                                if (res.data?.success) {
-                                  setEditImageUrl(res.data.data.desktop?.url || '');
-                                }
-                              } finally {
-                                setUploadingId(null);
-                                if (fileInputRef.current) fileInputRef.current.value = '';
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={uploadingId === ad.id}
-                            className="p-2 bg-gray-100 dark:bg-white/5 rounded-lg text-gray-500 hover:text-brand-red transition-all disabled:opacity-50"
-                            title="Upload file"
-                          >
-                            {uploadingId === ad.id ? <RefreshCw size={14} className="animate-spin" /> : <Upload size={14} />}
-                          </button>
                         </div>
                       </div>
                       <div>
@@ -541,11 +443,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                     {/* Preview */}
                     <div className="aspect-video bg-gray-50 dark:bg-black/20 rounded-lg border border-dashed border-gray-100 dark:border-white/5 flex items-center justify-center overflow-hidden">
                       {editImageUrl ? (
-                        isVideoFile(editImageUrl) ? (
-                          <video src={editImageUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-                        ) : (
-                          <img src={editImageUrl} alt="Preview" className="w-full h-full object-cover" />
-                        )
+                        <img src={editImageUrl} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-[9px] text-gray-400">Preview</span>
                       )}
@@ -572,16 +470,6 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
               )}
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Processing overlay */}
-      {processing && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center z-10">
-          <div className="text-center">
-            <RefreshCw size={20} className="animate-spin text-brand-red mx-auto mb-2" />
-            <p className="text-[10px] font-bold text-brand-black dark:text-white">Memproses...</p>
-          </div>
         </div>
       )}
 
@@ -616,24 +504,13 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
                 <X size={16} />
               </button>
             </div>
-            {/* Image — rasio sesuai slot, object-cover match published */}
-            <div className={cn("w-full", aspectRatioClass[slot.id] || 'aspect-[300/200]')}>
-              {isVideoFile(previewAd.imageUrl) ? (
-                <video
-                  src={previewAd.imageUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={previewAd.imageUrl}
-                  alt={slot.name}
-                  className="w-full h-full object-cover"
-                />
-              )}
+            {/* Image — rasio sesuai slot */}
+            <div className={cn("w-full", aspectRatioClass[slot.id] || 'aspect-[300/250]')}>
+              <img
+                src={previewAd.imageUrl}
+                alt={slot.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             {/* Footer info */}
             <div className="px-5 py-3 border-t border-gray-100 dark:border-white/5 flex items-center justify-between gap-4">

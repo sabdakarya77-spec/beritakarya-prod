@@ -8,6 +8,10 @@
  * - Ubah ukuran tanpa migrasi database
  * - Satu sumber kebenaran untuk semua slot
  * - Developer langsung tahu format (VIDEO/IMAGE) dari config ini
+ *
+ * Perubahan (SIMPLIFIKASI-IKLAN.md):
+ * - Semua slot full IMAGE (drop video)
+ * - Ukuran disamakan ke standar Google AdSense
  */
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -20,7 +24,7 @@ export type SlotId =
   | 'ARTICLE_MIDDLE'
   | 'ARTICLE_BOTTOM'
 
-export type SlotFormat = 'VIDEO' | 'IMAGE'
+export type SlotFormat = 'IMAGE' // Semua slot full image (drop VIDEO)
 
 export type SlotTier = 'PREMIUM' | 'TINGGI' | 'MENENGAH' | 'EKONOMI'
 
@@ -48,11 +52,11 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     id: 'HOME_TOP',
     name: 'Hero Banner',
     tier: 'PREMIUM',
-    format: 'VIDEO',
+    format: 'IMAGE',
     dimensions: {
-      desktop: { width: 880, height: 220, minWidth: 300, minHeight: 80 },
-      tablet:  { width: 728, height: 182, minWidth: 250, minHeight: 60 },
-      mobile:  { width: 320, height: 80,  minWidth: 200, minHeight: 50 },
+      desktop: { width: 970, height: 250, minWidth: 300, minHeight: 80 },
+      tablet:  { width: 728, height: 90,  minWidth: 250, minHeight: 60 },
+      mobile:  { width: 320, height: 100, minWidth: 200, minHeight: 50 },
     },
   },
   HOME_FEED_1: {
@@ -61,9 +65,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'TINGGI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+      desktop: { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
     },
   },
   HOME_FEED_2: {
@@ -72,9 +76,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'MENENGAH',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
     },
   },
   ARTICLE_TOP: {
@@ -83,9 +87,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'TINGGI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      tablet:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
-      mobile:  { width: 300, height: 200, minWidth: 150, minHeight: 100 },
+      desktop: { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
     },
   },
   ARTICLE_MIDDLE: {
@@ -94,9 +98,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'MENENGAH',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
     },
   },
   ARTICLE_BOTTOM: {
@@ -105,9 +109,9 @@ export const AD_SLOT_CONFIG: Record<SlotId, SlotConfig> = {
     tier: 'EKONOMI',
     format: 'IMAGE',
     dimensions: {
-      desktop: { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      tablet:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
-      mobile:  { width: 300, height: 150, minWidth: 150, minHeight: 75 },
+      desktop: { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      tablet:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
+      mobile:  { width: 300, height: 250, minWidth: 150, minHeight: 100 },
     },
   },
 }
@@ -125,7 +129,7 @@ export function getSlotDimensions(slotId: string, device: DeviceVariant): SlotDi
   return config?.dimensions[device] || null
 }
 
-/** Ambil format slot (VIDEO/IMAGE) */
+/** Ambil format slot (IMAGE) */
 export function getSlotFormat(slotId: string): SlotFormat | null {
   return getSlotConfig(slotId)?.format || null
 }
@@ -138,12 +142,7 @@ export function getSlotTier(slotId: string): SlotTier | null {
 /** Daftar semua slot ID */
 export const ALL_SLOT_IDS: SlotId[] = Object.keys(AD_SLOT_CONFIG) as SlotId[]
 
-/** Slot yang menggunakan VIDEO */
-export const VIDEO_SLOTS: SlotId[] = ALL_SLOT_IDS.filter(
-  id => AD_SLOT_CONFIG[id].format === 'VIDEO'
-)
-
-/** Slot yang menggunakan IMAGE */
+/** Slot yang menggunakan IMAGE (semua slot sekarang IMAGE) */
 export const IMAGE_SLOTS: SlotId[] = ALL_SLOT_IDS.filter(
   id => AD_SLOT_CONFIG[id].format === 'IMAGE'
 )

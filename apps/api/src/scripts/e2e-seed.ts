@@ -131,54 +131,46 @@ async function main() {
   })
   console.log('[E2E Seed] Article OK:', article.id)
 
-  // 5. Upsert ad packages
-  const pkg1 = await prisma.adPackage.upsert({
-    where: { id: `${E2E_PREFIX}pkg-home-top-30` },
+  // 5. Upsert test advertisements (full image only — SIMPLIFIKASI-IKLAN.md)
+  const ad1 = await prisma.advertisement.upsert({
+    where: { id: `${E2E_PREFIX}ad-home-top-1` },
     update: {
-      name: 'Hero Banner Pusat',
-      slot: 'HOME_TOP',
-      durationDays: 30,
-      price: 1500000,
-      description: 'Impresi tertinggi di first-fold bagian atas homepage.',
-      allowedFormat: 'ALL',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168d5c',
+      linkUrl: 'https://example.com',
       isActive: true,
+      order: 0,
     },
     create: {
-      id: `${E2E_PREFIX}pkg-home-top-30`,
-      name: 'Hero Banner Pusat',
+      id: `${E2E_PREFIX}ad-home-top-1`,
+      siteId: 'pusat',
       slot: 'HOME_TOP',
-      durationDays: 30,
-      price: 1500000,
-      description: 'Impresi tertinggi di first-fold bagian atas homepage.',
-      allowedFormat: 'ALL',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168d5c',
+      linkUrl: 'https://example.com',
       isActive: true,
+      order: 0,
     },
   })
-  console.log('[E2E Seed] AdPackage HOME_TOP OK:', pkg1.id)
+  console.log('[E2E Seed] Advertisement HOME_TOP OK:', ad1.id)
 
-  const pkg2 = await prisma.adPackage.upsert({
-    where: { id: `${E2E_PREFIX}pkg-home-feed1-14` },
+  const ad2 = await prisma.advertisement.upsert({
+    where: { id: `${E2E_PREFIX}ad-home-feed1-1` },
     update: {
-      name: 'Feed Atas',
-      slot: 'HOME_FEED_1',
-      durationDays: 14,
-      price: 500000,
-      description: 'Slot iklan di tengah feed homepage.',
-      allowedFormat: 'IMAGE',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168d5c',
+      linkUrl: 'https://example.com',
       isActive: true,
+      order: 0,
     },
     create: {
-      id: `${E2E_PREFIX}pkg-home-feed1-14`,
-      name: 'Feed Atas',
+      id: `${E2E_PREFIX}ad-home-feed1-1`,
+      siteId: 'pusat',
       slot: 'HOME_FEED_1',
-      durationDays: 14,
-      price: 500000,
-      description: 'Slot iklan di tengah feed homepage.',
-      allowedFormat: 'IMAGE',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168d5c',
+      linkUrl: 'https://example.com',
       isActive: true,
+      order: 0,
     },
   })
-  console.log('[E2E Seed] AdPackage HOME_FEED_1 OK:', pkg2.id)
+  console.log('[E2E Seed] Advertisement HOME_FEED_1 OK:', ad2.id)
 
   // 6. Ensure site 'pusat' has legal page content (for /pusat/p/about etc.)
   await prisma.site.update({

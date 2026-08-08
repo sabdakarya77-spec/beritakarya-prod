@@ -48,6 +48,13 @@ export default function RootLayout({
         <meta name="theme-color" content="#B91C1C" />
         <link rel="preconnect" href="https://media.beritakarya.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://media.beritakarya.co" />
+        {process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `

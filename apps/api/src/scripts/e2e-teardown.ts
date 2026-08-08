@@ -25,31 +25,25 @@ async function main() {
   })
   console.log(`[E2E Teardown] Articles deleted: ${article.count}`)
 
-  // 2. Delete ad bookings (if any)
-  const bookings = await prisma.adBooking.deleteMany({
-    where: { siteId: 'pusat', userId: { in: await getE2EUserIds() } },
-  })
-  console.log(`[E2E Teardown] AdBookings deleted: ${bookings.count}`)
-
-  // 3. Delete ad packages
-  const packages = await prisma.adPackage.deleteMany({
+  // 2. Delete test advertisements (SIMPLIFIKASI-IKLAN.md — AdBooking/AdPackage dihapus)
+  const ads = await prisma.advertisement.deleteMany({
     where: { id: { startsWith: E2E_PREFIX } },
   })
-  console.log(`[E2E Teardown] AdPackages deleted: ${packages.count}`)
+  console.log(`[E2E Teardown] Advertisements deleted: ${ads.count}`)
 
-  // 4. Delete category
+  // 3. Delete category
   const category = await prisma.category.deleteMany({
     where: { slug: 'politik', siteId: 'pusat' },
   })
   console.log(`[E2E Teardown] Categories deleted: ${category.count}`)
 
-  // 5. Delete users
+  // 4. Delete users
   const users = await prisma.user.deleteMany({
     where: { email: { startsWith: E2E_PREFIX } },
   })
   console.log(`[E2E Teardown] Users deleted: ${users.count}`)
 
-  // 6. Reset site legal pages (don't delete the site itself)
+  // 5. Reset site legal pages (don't delete the site itself)
   await prisma.site.update({
     where: { id: 'pusat' },
     data: {
@@ -64,14 +58,6 @@ async function main() {
   console.log('[E2E Teardown] Site legal pages reset')
 
   console.log('[E2E Teardown] ✅ All test data cleaned up')
-}
-
-async function getE2EUserIds(): Promise<string[]> {
-  const users = await prisma.user.findMany({
-    where: { email: { startsWith: E2E_PREFIX } },
-    select: { id: true },
-  })
-  return users.map((u) => u.id)
 }
 
 main()

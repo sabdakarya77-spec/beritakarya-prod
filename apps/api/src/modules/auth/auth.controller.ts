@@ -11,7 +11,6 @@ import { AppError } from '../../utils/AppError'
 import { logger } from '../../lib/logger'
 import { extractSiteIdFromRequest } from '../../lib/siteFromRequest'
 import bcrypt from 'bcryptjs'
-import { sendNotification } from '../notification/notification.controller'
 
 export const authRouter: Router = Router()
 
@@ -61,8 +60,7 @@ const registerSchema = z.object({
     .regex(/[0-9]/, 'Harus mengandung angka')
     .regex(/[^A-Za-z0-9]/, 'Harus mengandung karakter spesial'),
   name: z.string().min(2),
-  siteId: z.string().nullable().default(null),
-  role: z.enum(['reader', 'advertiser']).optional().default('reader')
+  siteId: z.string().nullable().default(null)
 })
 
 const forgotPasswordSchema = z.object({
@@ -147,63 +145,12 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
 
 authRouter.post('/register', asyncHandler(async (req: Request, res: Response) => {
   const input = registerSchema.parse(req.body)
-  const role = input.role === 'advertiser' ? 'advertiser' : 'reader'
   const result = await authService.registerUser(
     input.email, input.password, input.name,
-    role as Role, input.siteId
+    'reader' as Role, input.siteId
   )
 
   res.status(201).json(result)
-}))
-
-authRouter.post('/upgrade-to-advertiser', requireAuth, asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.user!.userId
-  const currentRole = req.user!.role
-
-  if (currentRole !== 'reader') {
-    return res.status(400).json({
-      success: false,
-      message: 'Hanya Pembaca yang bisa upgrade ke Pengiklan. Role saat ini: ' + currentRole
-    })
-  }
-
-  const updatedUser = await prisma.user.update({
-    where: { id: userId },
-    data: { role: 'advertiser' },
-    select: { id: true, email: true, name: true, role: true, siteId: true, avatarUrl: true }
-  })
-
-  logger.info(`User ${userId} upgraded from reader to advertiser via self-service`)
-
-  // Send notification to superadmins/wapimreds of this site
-  try {
-    const admins = await prisma.user.findMany({
-      where: {
-        role: { in: ['superadmin', 'wapimred', 'kaperwil', 'korwil', 'kabiro'] },
-        OR: [
-          { siteId: updatedUser.siteId },
-          { siteId: null },
-          { siteId: 'pusat' }
-        ]
-      },
-      select: { id: true }
-    })
-
-    for (const admin of admins) {
-      await sendNotification({
-        userId: admin.id,
-        siteId: updatedUser.siteId || 'pusat',
-        type: 'user_upgraded_to_advertiser',
-        title: 'Pengiklan Baru Terdaftar',
-        message: `User ${updatedUser.name} (${updatedUser.email}) telah terdaftar sebagai pengiklan secara mandiri.`,
-        link: `/${updatedUser.siteId || 'pusat'}/dashboard/users`
-      })
-    }
-  } catch (err) {
-    logger.warn('Failed to send upgrade notification to admin:', err)
-  }
-
-  res.json({ success: true, data: { user: updatedUser }, message: 'Berhasil menjadi Pengiklan!' })
 }))
 
 authRouter.post('/verify-email', asyncHandler(async (req: Request, res: Response) => {

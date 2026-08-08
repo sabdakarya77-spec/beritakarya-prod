@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { cn } from '../../lib/utils';
-import { Volume2, VolumeX } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 import type { AdSlotId } from '../../lib/constants';
 import { SmartImage } from './SmartImage';
-import BillboardShowcase from './BillboardShowcase';
-import InFeedShowcase from './InFeedShowcase';
+import { AdSenseUnit } from './AdSenseUnit';
 import { Container } from '../layout/Container';
 
 export interface AdSpaceProps {
@@ -23,19 +21,8 @@ export interface AdSpaceProps {
 export interface AdItem {
   id: string;
   slot: string;
-  code: string | null;
   imageUrl: string | null;
-  imageUrlTablet?: string | null;
-  imageUrlMobile?: string | null;
-  // Multi‑size IAB alternative URLs
-  imageUrlTabletAlt?: string | null;
-  imageUrlMobileAlt?: string | null;
-  // A/B testing URLs
-  variantAUrl?: string | null;
-  variantBUrl?: string | null;
-  winnerVariant?: string | null;
   linkUrl: string | null;
-  animationEffect?: string | null;
   isActive: boolean;
   order: number;
 }
@@ -47,171 +34,42 @@ interface FallbackAd {
   [key: string]: unknown;
 }
 
-// Mapping of animation effect keys to CSS class names (defined in globals.css)
-const ANIM_CLASS_MAP: Record<string, string> = {
-  ken_burns: 'ad-ken-burns',
-  fade_slide: 'ad-fade-slide',
-  parallax: 'ad-parallax',
-  pulse_scale: 'ad-pulse-scale',
-};
-
 /**
- * Sub‑component rendering a single ad slide.
- * Handles script ads, image/video, multi‑size IAB sources, and simple A/B testing.
+ * Sub‑component rendering a single ad slide (full image only — SIMPLIFIKASI-IKLAN.md).
  */
 function AdSlide({
   ad,
-  type,
   label,
   onAdClick,
 }: {
   ad: AdItem;
-  type: string;
   label: string;
   onAdClick: (ad: AdItem) => void;
 }) {
-  const [muted, setMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
-  const [videoInView, setVideoInView] = useState(false);
+  if (!ad.imageUrl) return null;
 
-  const isVideoFile = (url: string | null) => {
-    if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
-    return videoExtensions.some(ext => url.toLowerCase().endsWith(ext)) || url.toLowerCase().includes('video');
-  };
-
-  // Lazy load video: only start loading when container is near viewport
-  useEffect(() => {
-    const container = videoContainerRef.current;
-    if (!container) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVideoInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
-  // Auto-play when video enters view, pause when it leaves
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !videoInView) return;
-    video.play().catch(() => {});
-  }, [videoInView]);
-
-  const toggleMute = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setMuted(video.muted);
-  };
-
-  // A/B testing – use winner if set, otherwise persist a random pick per ad ID
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
-  useEffect(() => {
-    if (ad.winnerVariant) {
-      setSelectedVariant(ad.winnerVariant);
-    } else if (ad.variantAUrl && ad.variantBUrl) {
-      const storageKey = `ad-ab-${ad.id}`;
-      const stored = sessionStorage.getItem(storageKey);
-      if (stored === 'A' || stored === 'B') {
-        setSelectedVariant(stored);
-      } else {
-        const pick: string = Math.random() < 0.5 ? 'A' : 'B';
-        sessionStorage.setItem(storageKey, pick);
-        setSelectedVariant(pick);
-      }
-    }
-  }, [ad.id, ad.winnerVariant, ad.variantAUrl, ad.variantBUrl]);
-
-  // Resolve the URL to use (variant or primary image)
-  const resolveUrl = () => {
-    if (selectedVariant === 'A' && ad.variantAUrl) return ad.variantAUrl;
-    if (selectedVariant === 'B' && ad.variantBUrl) return ad.variantBUrl;
-    return ad.imageUrl;
-  };
-
-  // Script ad – sandboxed iframe
-  if (ad.code) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-transparent">
-        <iframe
-          srcDoc={`<!DOCTYPE html><html><head><style>body{margin:0;display:flex;align-items:center;justify-content:center;}</style></head><body>${ad.code}</body></html>`}
-          sandbox="allow-scripts allow-popups"
-          className="w-full h-full border-0"
-          title={label}
-          scrolling="no"
-        />
-      </div>
-    );
-  }
-
-  const effectiveUrl = resolveUrl();
-  if (effectiveUrl) {
-    const isVideo = isVideoFile(effectiveUrl);
-    return (
-      <a
-        href={ad.linkUrl || '#'}
-        onClick={() => onAdClick(ad)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
-      >
-        <span className="absolute right-1.5 top-1.5 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/70">
-          {label}
-        </span>
-        {isVideo ? (
-          <>
-            <div ref={videoContainerRef} className="w-full h-full">
-              <video
-                ref={videoRef}
-                src={videoInView ? effectiveUrl : undefined}
-                loop
-                muted
-                playsInline
-                preload="none"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={toggleMute}
-              className="absolute bottom-2 right-2 z-10 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
-              aria-label={muted ? 'Nyalakan suara' : 'Matikan suara'}
-            >
-              {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-          </>
-        ) : (
-          <SmartImage
-            src={effectiveUrl}
-            context={type === 'HOME_TOP' ? 'hero_lead' : 'card'}
-            alt={label}
-            fill
-            priority={type === 'HOME_TOP'}
-            sizes={type === 'HOME_TOP'
-              ? '(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 880px'
-              : '(max-width: 640px) 100vw, 360px'
-            }
-            className={cn(
-              "transition-transform duration-700 group-hover:scale-105",
-              ad.animationEffect && ANIM_CLASS_MAP[ad.animationEffect]
-            )}
-          />
-        )}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-      </a>
-    );
-  }
-  return null;
+  return (
+    <a
+      href={ad.linkUrl || '#'}
+      onClick={() => onAdClick(ad)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
+    >
+      <span className="absolute right-1.5 top-1.5 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/70">
+        {label}
+      </span>
+      <SmartImage
+        src={ad.imageUrl}
+        context="card"
+        alt={label}
+        fill
+        sizes="(max-width: 640px) 100vw, 360px"
+        className="transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+    </a>
+  );
 }
 
 /** Lazy‑loading video wrapper for fallback ads. Only loads src when near viewport. */
@@ -271,12 +129,6 @@ export default function AdSpace({
   const [fallbackAds, setFallbackAds] = useState<FallbackAd[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showCloseBtn, setShowCloseBtn] = useState(false);
-  const [isStickyClosed, setIsStickyClosed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return sessionStorage.getItem(`ad-sticky-closed-${type}`) === '1';
-  });
-  const containerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const trackedRef = useRef<Set<string>>(new Set());
 
@@ -317,10 +169,8 @@ export default function AdSpace({
   }, [site, slotName, initialAds]);
 
   // Carousel: auto-rotate (only if multiple ads)
-  // HOME_TOP (video): 15 detik (video durasi 10-15 detik + buffer 3 detik agar video selesai penuh)
-  // Slot banner lainnya: 7 detik
   const isCarousel = ads.length > 1;
-  const CAROUSEL_INTERVAL = type === 'HOME_TOP' ? 15000 : 7000;
+  const CAROUSEL_INTERVAL = 7000;
 
   const stopRotation = useCallback(() => {
     if (intervalRef.current) {
@@ -366,24 +216,11 @@ export default function AdSpace({
   useEffect(() => {
     const ad = ads[currentIndex];
     if (!ad || trackedRef.current.has(ad.id)) return;
-    // Since the ad element is always in view when its slide is active, we can record the impression directly.
     trackedRef.current.add(ad.id);
     fetch(`${API_URL}/api/v1/ads/track/${ad.id}?action=impression`, {
       method: 'POST'
     }).catch(() => {});
   }, [ads, currentIndex]);
-
-  // Show close button after 5s for sticky HOME_TOP
-  useEffect(() => {
-    if (type !== 'HOME_TOP' || ads.length === 0 || isStickyClosed) return;
-    const timer = setTimeout(() => setShowCloseBtn(true), 5000);
-    return () => clearTimeout(timer);
-  }, [type, ads.length, isStickyClosed]);
-
-  const handleStickyClose = () => {
-    setIsStickyClosed(true);
-    sessionStorage.setItem(`ad-sticky-closed-${type}`, '1');
-  };
 
   const handleAdClick = (ad: AdItem) => {
     const url = `${API_URL}/api/v1/ads/track/${ad.id}?action=click`;
@@ -395,12 +232,12 @@ export default function AdSpace({
   };
 
   const styles: Record<AdSlotId, string> = {
-    HOME_TOP:       "w-full max-w-[880px] aspect-[4/1] mx-auto rounded-xl overflow-hidden",
-    HOME_FEED_1:    "w-full max-w-[360px] aspect-[2/1] lg:aspect-[1/2] mx-auto rounded-lg overflow-hidden",
-    HOME_FEED_2:    "w-full max-w-[360px] aspect-[6/5] mx-auto rounded-lg overflow-hidden",
-    ARTICLE_TOP:    "w-full max-w-[360px] aspect-[3/2] mx-auto rounded-lg overflow-hidden mb-8",
-    ARTICLE_MIDDLE: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-12",
-    ARTICLE_BOTTOM: "w-full max-w-[360px] aspect-[2/1] mx-auto rounded-lg overflow-hidden mb-6",
+    HOME_TOP:       "w-full max-w-[970px] aspect-[970/250] mx-auto rounded-xl overflow-hidden",
+    HOME_FEED_1:    "w-full max-w-[360px] aspect-[300/250] mx-auto rounded-lg overflow-hidden",
+    HOME_FEED_2:    "w-full max-w-[360px] aspect-[300/250] mx-auto rounded-lg overflow-hidden",
+    ARTICLE_TOP:    "w-full max-w-[360px] aspect-[300/250] mx-auto rounded-lg overflow-hidden mb-8",
+    ARTICLE_MIDDLE: "w-full max-w-[360px] aspect-[300/250] mx-auto rounded-lg overflow-hidden mb-12",
+    ARTICLE_BOTTOM: "w-full max-w-[360px] aspect-[300/250] mx-auto rounded-lg overflow-hidden mb-6",
   };
 
   // Loading state
@@ -454,7 +291,7 @@ export default function AdSpace({
                   alt={ad.headline || 'Iklan'}
                   fill
                   priority
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 880px"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 970px"
                 />
               ) : null}
               {/* Simple overlay with headline */}
@@ -469,20 +306,20 @@ export default function AdSpace({
       );
     }
 
-    // Default static fallback for HOME_TOP when no CMS data
+    // HOME_TOP: fallback ke Google AdSense (slot kosong → AdSense)
     if (type === 'HOME_TOP') {
       return (
         <section className="py-8 md:py-12">
           <Container>
-            <BillboardShowcase site={site || 'pusat'} className={className} />
+            <AdSenseUnit slot="HOME_TOP" className={className} />
           </Container>
         </section>
       );
     }
 
-    // In-feed style slots: native content-style showcase
+    // In-feed style slots: Google AdSense fallback (slot kosong → AdSense)
     if (type === 'HOME_FEED_1' || type === 'HOME_FEED_2' || type === 'ARTICLE_MIDDLE' || type === 'ARTICLE_TOP' || type === 'ARTICLE_BOTTOM') {
-      return <InFeedShowcase site={site || 'pusat'} className={className} slot={type} />;
+      return <AdSenseUnit slot={type} className={className} />;
     }
 
     // Generic fallback for any other type
@@ -504,137 +341,77 @@ export default function AdSpace({
     );
   }
 
-  // Sticky + close button wrapper for HOME_TOP on mobile
-  const isSticky = type === 'HOME_TOP' && ads.length > 0 && !isStickyClosed;
-  const stickyClasses = isSticky ? 'md:relative fixed bottom-[72px] left-0 right-0 z-30 md:z-auto' : '';
-  const stickyBg = isSticky ? 'bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] md:border-0 md:shadow-none md:bg-transparent' : '';
-
-  // For HOME_TOP: wrap ad in a Container with balanced internal padding (desktop only, sticky handles mobile)
-  const homeTopAdBox = (
-    <>
-      {/* Single ad — render directly (no carousel) */}
-      {!isCarousel ? (
-        <div
-          className={cn("relative overflow-hidden", styles[type], className)}
-          onMouseEnter={stopRotation}
-          onMouseLeave={startRotation}
-        >
-          <AdSlide ad={ads[0]} type={type} label={label} onAdClick={handleAdClick} />
-        </div>
-      ) : (
-        /* Multiple ads — carousel */
-        <div
-          className={cn("relative overflow-hidden", styles[type], className)}
-          onMouseEnter={stopRotation}
-          onMouseLeave={startRotation}
-        >
-          {ads.map((ad, index) => (
-            <div
-              key={ad.id}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-700 ease-in-out",
-                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-              )}
-            >
-              <AdSlide ad={ad} type={type} label={label} onAdClick={handleAdClick} />
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  );
-
-  const adContent = (
-    <>
-      {/* Single ad — render directly (no carousel) */}
-      {!isCarousel ? (
-        <div
-          ref={containerRef}
-          className={cn("relative overflow-hidden", styles[type], isSticky && 'mb-0', className)}
-          onMouseEnter={stopRotation}
-          onMouseLeave={startRotation}
-        >
-          <AdSlide ad={ads[0]} type={type} label={label} onAdClick={handleAdClick} />
-        </div>
-      ) : (
-        /* Multiple ads — carousel */
-        <div
-          ref={containerRef}
-          className={cn("relative overflow-hidden", styles[type], isSticky && 'mb-0', className)}
-          onMouseEnter={stopRotation}
-          onMouseLeave={startRotation}
-        >
-          {ads.map((ad, index) => (
-            <div
-              key={ad.id}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-700 ease-in-out",
-                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-              )}
-            >
-              <AdSlide ad={ad} type={type} label={label} onAdClick={handleAdClick} />
-            </div>
-          ))}
-        </div>
-      )}
-    </>
-  );
-
   // HOME_TOP active ad — wrap in section with balanced padding and Container
   if (type === 'HOME_TOP') {
     return (
-      <>
-        {/* Desktop/tablet inline block — hidden on mobile when sticky is active */}
-        <section className={cn("py-8 md:py-12", isSticky && "hidden md:block")}>
-          <Container>
-            {homeTopAdBox}
-          </Container>
-        </section>
-
-        {/* Sticky bar — mobile only */}
-        {isSticky && (
-          <div className={cn(stickyClasses, stickyBg, "md:hidden")}>
-            <div className="relative">
-              {adContent}
-              {/* Close button — appears after 5s */}
-              {showCloseBtn && (
-                <button
-                  type="button"
-                  onClick={handleStickyClose}
-                  className="absolute top-1 right-1 z-20 w-6 h-6 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
-                  aria-label="Tutup iklan"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
-
-  // Wrap with sticky container for mobile HOME_TOP (legacy fallback, shouldn't reach here for HOME_TOP)
-  if (isSticky) {
-    return (
-      <div className={cn(stickyClasses, stickyBg)}>
-        <div className="relative">
-          {adContent}
-          {/* Close button — appears after 5s */}
-          {showCloseBtn && (
-            <button
-              type="button"
-              onClick={handleStickyClose}
-              className="absolute top-1 right-1 z-20 md:hidden w-6 h-6 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
-              aria-label="Tutup iklan"
+      <section className="py-8 md:py-12">
+        <Container>
+          {/* Single ad — render directly (no carousel) */}
+          {!isCarousel ? (
+            <div
+              className={cn("relative overflow-hidden", styles[type], className)}
+              onMouseEnter={stopRotation}
+              onMouseLeave={startRotation}
             >
-              ×
-            </button>
+              <AdSlide ad={ads[0]} label={label} onAdClick={handleAdClick} />
+            </div>
+          ) : (
+            /* Multiple ads — carousel */
+            <div
+              className={cn("relative overflow-hidden", styles[type], className)}
+              onMouseEnter={stopRotation}
+              onMouseLeave={startRotation}
+            >
+              {ads.map((ad, index) => (
+                <div
+                  key={ad.id}
+                  className={cn(
+                    "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                    index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                  )}
+                >
+                  <AdSlide ad={ad} label={label} onAdClick={handleAdClick} />
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-      </div>
+        </Container>
+      </section>
     );
   }
-  // Non‑sticky rendering
-  return adContent;
+
+  // Non‑HOME_TOP: render ad content directly (no sticky wrapper)
+  return (
+    <>
+      {/* Single ad — render directly (no carousel) */}
+      {!isCarousel ? (
+        <div
+          className={cn("relative overflow-hidden", styles[type], className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          <AdSlide ad={ads[0]} label={label} onAdClick={handleAdClick} />
+        </div>
+      ) : (
+        /* Multiple ads — carousel */
+        <div
+          className={cn("relative overflow-hidden", styles[type], className)}
+          onMouseEnter={stopRotation}
+          onMouseLeave={startRotation}
+        >
+          {ads.map((ad, index) => (
+            <div
+              key={ad.id}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-700 ease-in-out",
+                index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+              )}
+            >
+              <AdSlide ad={ad} label={label} onAdClick={handleAdClick} />
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
 }

@@ -1,8 +1,7 @@
 import { Metadata } from 'next'
-import { API_URL } from '../../../../lib/api'
 import { notFound } from 'next/navigation'
 import { LegalStandardPage } from '../../../../components/legal'
-import { AdsMarketingPage, type AdPackage } from '../../../../components/marketing'
+import { AdsMarketingPage } from '../../../../components/marketing'
 import { LEGAL_SLUG_TITLES, isLegalSlug, resolveLegalPage } from '../../../../lib/legalPages'
 import {
   ADS_PUBLIC_PAGE,
@@ -13,18 +12,6 @@ import { buildPublicSiteConfig, fetchSiteSettings } from '../../../../lib/siteSe
 import { constructMetadata } from '../../../../lib/metadata'
 
 export const dynamic = 'force-dynamic'
-
-async function getAdPackages(site: string): Promise<AdPackage[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/v1/ads/packages?site=${site}`, { next: { revalidate: 60 } })
-    if (!res.ok) return []
-    const json = await res.json()
-    return json.data?.filter((pkg: AdPackage) => pkg.isActive) || []
-  } catch (e) {
-    console.error('Error fetching ad packages:', e)
-    return []
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -78,12 +65,10 @@ export default async function InfoPage({ params }: { params: { site: string; slu
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   if (isAdsPublicSlug(slug)) {
-    const adPackages = await getAdPackages(siteParam)
     return (
       <AdsMarketingPage
         siteConfig={siteConfig}
         siteParam={siteParam}
-        adPackages={adPackages}
         termsContent={resolveAdsTermsContent(siteSettings)}
       />
     )

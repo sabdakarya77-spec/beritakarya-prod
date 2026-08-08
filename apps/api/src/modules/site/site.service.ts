@@ -520,7 +520,6 @@ export class SiteService {
       prisma.newsletterSubscriber.count({ where: { siteId } }),
       prisma.kYCViewLog.count({ where: { siteId } }),
       prisma.advertisement.count({ where: { siteId } }),
-      prisma.adBooking.count({ where: { siteId } }),
     ])
 
     const [
@@ -533,7 +532,6 @@ export class SiteService {
       newsletterCount,
       kycViewLogCount,
       adCount,
-      adBookingCount,
     ] = checks
 
     const blockers: string[] = []
@@ -546,7 +544,6 @@ export class SiteService {
     if (newsletterCount > 0) blockers.push(`${newsletterCount} subscriber newsletter`)
     if (kycViewLogCount > 0) blockers.push(`${kycViewLogCount} KYC view log`)
     if (adCount > 0) blockers.push(`${adCount} iklan`)
-    if (adBookingCount > 0) blockers.push(`${adBookingCount} booking iklan`)
 
     if (blockers.length > 0) {
       throw Object.assign(

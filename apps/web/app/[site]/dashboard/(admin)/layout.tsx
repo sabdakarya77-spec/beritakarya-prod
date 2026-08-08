@@ -167,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ]
         },
         { name: 'AI Dashboard', href: `/${site}/dashboard/admin/ai-usage`, icon: Activity, roles: ['superadmin'] },
-        { name: 'Setelan Iklan', href: `/${site}/dashboard/ads/payment-config`, icon: Settings, roles: ['superadmin'] },
+        { name: 'Kelola Iklan', href: `/${site}/dashboard/ads`, icon: Settings, roles: ['superadmin'] },
       ]
     }] : [])
   ]

@@ -5,11 +5,9 @@ import { useParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/authStore';
-import { useToastStore } from '../../../../store/toastStore';
 import { RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { AD_SLOT_DEFINITIONS } from '../../../../lib/constants';
 import type { Ad } from '../types';
-import { HeroBannerManager } from '../HeroBannerManager';
 import { AdSlotCard } from '../AdSlotCard';
 
 export default function AdsSlotsContent() {
@@ -17,10 +15,8 @@ export default function AdsSlotsContent() {
   const pathname = usePathname();
   const backHref = pathname.includes('/dashboard/') ? `/${site}/dashboard/ads` : `/${site}/ads`;
   const { user } = useAuthStore();
-  const { addToast } = useToastStore();
   const [loading, setLoading] = useState(true);
   const [ads, setAds] = useState<Ad[]>([]);
-  const [savingAdId, setSavingAdId] = useState<string | null>(null);
 
   const fetchAds = async (signal?: AbortSignal) => {
     setLoading(true);
@@ -42,76 +38,6 @@ export default function AdsSlotsContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [site]);
 
-  // HOME_TOP-specific handlers (multi-banner carousel)
-  const handleAddLeaderboardBanner = async () => {
-    try {
-      await api.post('/ads', { slot: 'HOME_TOP', isActive: true });
-      await fetchAds();
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal menambah banner', 'error');
-    }
-  };
-
-  const handleUpdateAd = async (adId: string, payload: Partial<Ad>) => {
-    setSavingAdId(adId);
-    try {
-      await api.patch(`/ads/${adId}`, payload);
-      await fetchAds();
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal menyimpan iklan', 'error');
-    } finally {
-      setSavingAdId(null);
-    }
-  };
-
-  const handleDeleteAd = async (adId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus banner iklan ini?')) return;
-    try {
-      await api.delete(`/ads/${adId}`);
-      addToast('Banner iklan berhasil dihapus', 'success');
-      await fetchAds();
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal menghapus iklan', 'error');
-    }
-  };
-
-  const handleReorderAds = async (slotId: string, direction: 'up' | 'down', adIndex: number) => {
-    const slotAds = ads.filter(a => a.slot === slotId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const targetIndex = direction === 'up' ? adIndex - 1 : adIndex + 1;
-    if (targetIndex < 0 || targetIndex >= slotAds.length) return;
-
-    const items = [...slotAds];
-    [items[adIndex], items[targetIndex]] = [items[targetIndex], items[adIndex]];
-    const reorderPayload = items.map((item, idx) => ({ id: item.id, order: idx }));
-
-    try {
-      await api.patch('/ads/reorder', { items: reorderPayload });
-      await fetchAds();
-    } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message;
-      addToast(msg || 'Gagal mengurutkan iklan', 'error');
-    }
-  };
-
-  // Upload handler for HeroBannerManager (single variant upload)
-  const uploadAdFile = async (file: File, slotId?: string): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const slotParam = slotId ? `?slot=${slotId}` : '';
-    try {
-      const res = await api.post(`/media/upload-ad${slotParam}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      return res.data?.data?.desktop?.url || '';
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
-      throw new Error(axiosErr?.response?.data?.error?.message || 'Upload gagal');
-    }
-  };
-
   if (user?.role !== 'superadmin' && user?.role !== 'wapimred') {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -121,9 +47,6 @@ export default function AdsSlotsContent() {
       </div>
     );
   }
-
-  const heroBannerAds = ads.filter(a => a.slot === 'HOME_TOP').sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  const otherSlots = AD_SLOT_DEFINITIONS.filter(s => s.id !== 'HOME_TOP');
 
   return (
     <div className="space-y-6">
@@ -140,22 +63,10 @@ export default function AdsSlotsContent() {
         </div>
       ) : (
         <>
-          {/* HOME_TOP — carousel manager (special layout) */}
-          <HeroBannerManager
-            ads={heroBannerAds}
-            slotDef={AD_SLOT_DEFINITIONS.find(s => s.id === 'HOME_TOP')!}
-            onAdd={handleAddLeaderboardBanner}
-            onUpdate={handleUpdateAd}
-            onDelete={handleDeleteAd}
-            onReorder={handleReorderAds}
-            onUpload={uploadAdFile}
-            savingId={savingAdId}
-          />
-
-          {/* Card Grid — 3 kolom untuk slot lainnya */}
+          {/* Card Grid — semua slot (termasuk HOME_TOP) pakai AdSlotCard */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {otherSlots.map(slot => {
-              const slotAds = ads.filter(a => a.slot === slot.id);
+            {AD_SLOT_DEFINITIONS.map(slot => {
+              const slotAds = ads.filter(a => a.slot === slot.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
               return (
                 <AdSlotCard
                   key={slot.id}

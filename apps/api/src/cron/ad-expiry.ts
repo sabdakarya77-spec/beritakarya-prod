@@ -1,73 +1,23 @@
-import { prisma } from '../db/client'
 import { logger } from '../lib/logger'
 
 /**
  * ad-expiry.ts
  *
- * Cron job yang berjalan setiap jam untuk:
- * 1. Mengubah status AdBooking yang endDate-nya sudah lewat dari ACTIVE → COMPLETED
- * 2. Menonaktifkan Advertisement slot yang terkait
+ * Cron job yang berjalan setiap jam untuk auto-nonaktifkan iklan expired.
+ *
+ * CATATAN (SIMPLIFIKASI-IKLAN.md):
+ * Model `AdBooking` sudah dihapus dan model `Advertisement` yang baru
+ * tidak lagi memiliki `startDate`/`endDate` — iklan diaktifkan/nonaktifkan
+ * manual oleh admin via toggle `isActive`.
+ *
+ * Cron ini dipertahankan sebagai no-op agar route `/api/cron/ad-expiry`
+ * tetap berfungsi tanpa error, namun tidak melakukan apa-apa.
  *
  * Dipanggil via POST /api/cron/ad-expiry
  */
 export async function runAdExpiry() {
-  const now = new Date()
-
-  // Cari semua booking ACTIVE yang sudah lewat endDate
-  const expiredBookings = await prisma.adBooking.findMany({
-    where: {
-      status: 'ACTIVE',
-      endDate: { lt: now },
-    },
-    include: { package: true },
-  })
-
-  let expiredCount = 0
-
-  for (const booking of expiredBookings) {
-    try {
-      // 1. Set booking ke COMPLETED
-      await prisma.adBooking.update({
-        where: { id: booking.id },
-        data: { status: 'COMPLETED' },
-      })
-
-      // 2. Nonaktifkan Advertisement slot terkait
-      //    Gunakan bookingId untuk link langsung, fallback ke imageUrl match
-      let adv = await prisma.advertisement.findFirst({
-        where: {
-          bookingId: booking.id,
-          isActive: true,
-        },
-      })
-
-      // Fallback: jika bookingId belum di-backfill (data lama), coba match via imageUrl
-      if (!adv) {
-        adv = await prisma.advertisement.findFirst({
-          where: {
-            siteId: booking.siteId,
-            slot: booking.package.slot,
-            imageUrl: booking.imageUrl,
-            isActive: true,
-          },
-        })
-      }
-
-      if (adv) {
-        await prisma.advertisement.update({
-          where: { id: adv.id },
-          data: { isActive: false },
-        })
-      }
-
-      expiredCount++
-    } catch (err) {
-      logger.error(`[AdExpiry] Failed to process booking ${booking.id}:`, err)
-    }
-  }
-
-  logger.info(`[AdExpiry] Processed ${expiredCount}/${expiredBookings.length} expired bookings`)
-  return { expired: expiredCount, total: expiredBookings.length }
+  logger.info('[AdExpiry] No-op — AdBooking dihapus, iklan dikelola manual via toggle isActive')
+  return { expired: 0, total: 0 }
 }
 
 // Allow standalone execution for manual trigger

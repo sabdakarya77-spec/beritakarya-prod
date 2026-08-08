@@ -1,6 +1,5 @@
 import { prisma } from '../../db/client'
-import { PaymentStatus } from '@prisma/client'
-import type { Prisma, AdStatus } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { parsePagination, buildPaginatedResponse } from '@beritakarya/utils'
 
 // ─── Advertisement CRUD ───────────────────────────────────────────────────────
@@ -33,39 +32,18 @@ export async function findAdsBySite(siteId: string, params: { page?: number; lim
 export async function createAd(data: {
   siteId: string
   slot: string
-  code?: string | null
   imageUrl?: string | null
-  imageUrlTablet?: string | null
-  imageUrlMobile?: string | null
-  // New multi‑size fields (optional)
-  imageUrlTabletAlt?: string | null
-  imageUrlMobileAlt?: string | null
-  // A/B testing fields (optional)
-  variantAUrl?: string | null
-  variantBUrl?: string | null
-  winnerVariant?: string | null
   linkUrl?: string | null
-  animationEffect?: string | null
   isActive?: boolean
   order?: number
-  bookingId?: string | null
 }) {
   return prisma.advertisement.create({
     data,
     select: {
       id: true,
       slot: true,
-      code: true,
       imageUrl: true,
-      imageUrlTablet: true,
-      imageUrlMobile: true,
-      imageUrlTabletAlt: true,
-      imageUrlMobileAlt: true,
-      variantAUrl: true,
-      variantBUrl: true,
-      winnerVariant: true,
       linkUrl: true,
-      animationEffect: true,
       isActive: true,
       order: true,
       impressions: true,
@@ -82,16 +60,7 @@ export async function updateAd(id: string, data: Prisma.AdvertisementUpdateInput
     select: {
       id: true,
       slot: true,
-      code: true,
       imageUrl: true,
-      imageUrlTablet: true,
-      imageUrlMobile: true,
-      // new fields
-      imageUrlTabletAlt: true,
-      imageUrlMobileAlt: true,
-      variantAUrl: true,
-      variantBUrl: true,
-      winnerVariant: true,
       linkUrl: true,
       isActive: true,
       order: true,
@@ -132,136 +101,17 @@ export async function reorderAds(items: { id: string; order: number }[]) {
   )
 }
 
-// ─── Ad Packages ──────────────────────────────────────────────────────────────
+// ─── Ad Event Logs ────────────────────────────────────────────────────────────
 
-export async function findActivePackages() {
-  return prisma.adPackage.findMany({
-    where: { isActive: true },
-    orderBy: { price: 'asc' },
-  })
-}
-
-export async function findPackageById(id: string) {
-  return prisma.adPackage.findUnique({ where: { id } })
-}
-
-export async function createPackage(data: {
-  name: string
-  slot: string
-  allowedFormat?: string
-  durationDays: number
-  price: number
-  description?: string | null
-}) {
-  return prisma.adPackage.create({ data })
-}
-
-export async function updatePackage(id: string, data: Prisma.AdPackageUpdateInput) {
-  return prisma.adPackage.update({ where: { id }, data })
-}
-
-export async function deletePackage(id: string) {
-  return prisma.adPackage.delete({ where: { id } })
-}
-
-// ─── Ad Bookings ──────────────────────────────────────────────────────────────
-
-export async function findBookingById<T extends Record<string, boolean> | undefined>(id: string, include?: T) {
-  return prisma.adBooking.findUnique({ where: { id }, include }) as Promise<Record<string, unknown>>
-}
-
-export async function findBookingByExternalOrderId(externalOrderId: string) {
-  return prisma.adBooking.findUnique({ where: { externalOrderId } })
-}
-
-export async function findBookingsByUser(userId: string) {
-  return prisma.adBooking.findMany({
-    where: { userId },
-    include: { package: true, site: true },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
-export async function findAllBookings() {
-  return prisma.adBooking.findMany({
-    include: { package: true, site: true, user: true },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
-export async function createBooking(data: {
-  userId: string
+export async function createAdEventLog(data: {
+  adId: string
   siteId: string
-  packageId: string
-  campaignName?: string | null
-  imageUrl?: string | null
-  imageUrlTablet?: string | null
-  imageUrlMobile?: string | null
-  logoUrl?: string | null
-  fotoUrl?: string | null
-  linkUrl?: string | null
-  animationEffect?: string | null
-  startDate: Date
-  endDate: Date
-  paymentStatus?: PaymentStatus
-  status?: AdStatus
+  action: 'impression' | 'click'
 }) {
-  return prisma.adBooking.create({ data })
+  return prisma.adEventLog.create({ data })
 }
 
-export async function updateBooking(id: string, data: Prisma.AdBookingUpdateInput) {
-  return prisma.adBooking.update({ where: { id }, data })
-}
-
-export async function findOverlappingBooking(siteId: string, slot: string, excludeId: string, startDate: Date, endDate: Date) {
-  return prisma.adBooking.findFirst({
-    where: {
-      siteId,
-      status: 'ACTIVE',
-      id: { not: excludeId },
-      package: { slot },
-      startDate: { lte: endDate },
-      endDate: { gte: startDate },
-    },
-    include: { package: true },
-  })
-}
-
-/**
- * Find any conflicting booking for a slot (ACTIVE or PENDING_REVIEW).
- * Used for pre-submission availability checks.
- */
-export async function findConflictingBooking(siteId: string, slot: string, startDate: Date, endDate: Date) {
-  return prisma.adBooking.findFirst({
-    where: {
-      siteId,
-      status: { in: ['ACTIVE', 'PENDING_REVIEW'] },
-      package: { slot },
-      startDate: { lte: endDate },
-      endDate: { gte: startDate },
-    },
-    include: { package: true },
-    orderBy: { endDate: 'desc' },
-  })
-}
-
-// ─── Ad Slot Management (for booking approval) ───────────────────────────────
-
-export async function findAdBySiteAndSlot(siteId: string, slot: string) {
-  return prisma.advertisement.findFirst({ where: { siteId, slot } })
-}
-
-export async function createOrUpdateAdForSlot(siteId: string, slot: string, data: Prisma.AdvertisementUpdateInput) {
-  const existing = await findAdBySiteAndSlot(siteId, slot)
-  if (existing) {
-    return prisma.advertisement.update({ where: { id: existing.id }, data })
-  }
-  return prisma.advertisement.create({ data: { siteId, slot, ...data } as Prisma.AdvertisementCreateInput })
-}
-
-// ─── Ad Event Logs (Time-Series Analytics) ───────────────────────────────────
-
-export async function getAdStatsByBooking(bookingId: string, days: number = 30) {
+export async function getAdStatsById(adId: string, days: number = 30) {
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
   startDate.setHours(0, 0, 0, 0)
@@ -273,7 +123,7 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
       "action",
       COUNT(*) as count
     FROM "AdEventLog"
-    WHERE "bookingId" = ${bookingId}
+    WHERE "adId" = ${adId}
       AND "createdAt" >= ${startDate}
     GROUP BY date, "action"
     ORDER BY date ASC
@@ -283,7 +133,6 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
   const impressionsMap: Record<string, number> = {}
   const clicksMap: Record<string, number> = {}
 
-  const _now = new Date()
   for (let i = 0; i < days; i++) {
     const d = new Date(startDate)
     d.setDate(d.getDate() + i)
@@ -304,14 +153,14 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
   const impressions = Object.entries(impressionsMap).map(([date, value]) => ({ date, value }))
   const clicks = Object.entries(clicksMap).map(([date, value]) => ({ date, value }))
 
-  // Get totals from booking
-  const booking = await prisma.adBooking.findUnique({
-    where: { id: bookingId },
+  // Get totals from advertisement
+  const ad = await prisma.advertisement.findUnique({
+    where: { id: adId },
     select: { impressions: true, clicks: true },
   })
 
-  const totalImpressions = booking?.impressions ?? impressions.reduce((s, d) => s + d.value, 0)
-  const totalClicks = booking?.clicks ?? clicks.reduce((s, d) => s + d.value, 0)
+  const totalImpressions = ad?.impressions ?? impressions.reduce((s, d) => s + d.value, 0)
+  const totalClicks = ad?.clicks ?? clicks.reduce((s, d) => s + d.value, 0)
 
   return {
     impressions,
@@ -323,110 +172,3 @@ export async function getAdStatsByBooking(bookingId: string, days: number = 30) 
     },
   }
 }
-
-// ─── VideoPrompt (Prompt Library) ────────────────────────────────────────────
-
-export async function createVideoPrompt(data: {
-  bookingId: string
-  prompt: string
-  videoUrl?: string | null
-  category?: string | null
-}) {
-  return prisma.videoPrompt.create({
-    data: {
-      bookingId: data.bookingId,
-      prompt: data.prompt,
-      videoUrl: data.videoUrl || null,
-      category: data.category || null,
-    },
-  })
-}
-
-export async function updateVideoPromptByBooking(
-  bookingId: string,
-  data: { videoUrl?: string; rating?: number | null }
-) {
-  return prisma.videoPrompt.updateMany({
-    where: { bookingId },
-    data: {
-      ...(data.videoUrl && { videoUrl: data.videoUrl }),
-      ...(data.rating !== undefined && { rating: data.rating }),
-    },
-  })
-}
-
-export async function findVideoPromptsByCategory(category: string) {
-  return prisma.videoPrompt.findMany({
-    where: { category },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-  })
-}
-
-export async function findVideoPromptById(id: string) {
-  return prisma.videoPrompt.findUnique({ where: { id } })
-}
-
-// ─── VideoProviderConfig (API Keys) ──────────────────────────────────────────
-
-export async function getProviderConfig(provider: string) {
-  return prisma.videoProviderConfig.findUnique({ where: { provider } })
-}
-
-export async function getAllProviderConfigs() {
-  return prisma.videoProviderConfig.findMany()
-}
-
-export async function upsertProviderConfig(provider: string, apiKey: string) {
-  return prisma.videoProviderConfig.upsert({
-    where: { provider },
-    update: { apiKey, isActive: true, updatedAt: new Date() },
-    create: { provider, apiKey, isActive: true },
-  })
-}
-
-export async function deleteProviderConfig(provider: string) {
-  return prisma.videoProviderConfig.delete({ where: { provider } })
-}
-
-// ─── Slot Availability ───────────────────────────────────────────────────────
-
-export async function countActiveBookingsForSlot(
-  slot: string,
-  siteId: string,
-  startDate: Date,
-  endDate: Date
-): Promise<number> {
-  return prisma.adBooking.count({
-    where: {
-      siteId,
-      status: 'ACTIVE',
-      package: { slot },
-      startDate: { lte: endDate },
-      endDate: { gte: startDate },
-    },
-  })
-}
-
-// ─── AdPaymentConfig ──────────────────────────────────────────────────────────
-
-export async function findPaymentConfigBySite(siteId: string) {
-  return prisma.adPaymentConfig.findUnique({
-    where: { siteId }
-  })
-}
-
-export async function upsertPaymentConfig(siteId: string, data: {
-  midtransUrl?: string | null
-  midtransClientKey?: string | null
-  bankAccounts?: Prisma.InputJsonValue
-  qrisImageUrl?: string | null
-  whatsappSupport?: string | null
-}) {
-  return prisma.adPaymentConfig.upsert({
-    where: { siteId },
-    update: { ...data, updatedAt: new Date() },
-    create: { siteId, ...data }
-  })
-}
-

@@ -5,10 +5,6 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Target,
-  Package,
-  ClipboardList,
-  History,
-  Video,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -24,11 +20,6 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Overview', href: '/ads', icon: LayoutDashboard },
   // Superadmin/Wapimred only
   { name: 'Slot Iklan', href: '/ads/slots', icon: Target, roles: ['superadmin', 'wapimred'] },
-  { name: 'Paket', href: '/ads/packages', icon: Package, roles: ['superadmin'] },
-  { name: 'Booking', href: '/ads/bookings', icon: ClipboardList, roles: ['superadmin'] },
-  { name: 'Produksi Video', href: '/ads/production', icon: Video, roles: ['superadmin', 'wapimred'] },
-  // Advertiser only
-  { name: 'Riwayat', href: '/ads/history', icon: History, roles: ['advertiser'] },
 ];
 
 interface AdsSubNavProps {
