@@ -260,7 +260,7 @@ export function AdSlotCard({ slot, ads, onRefresh }: AdSlotCardProps) {
             Belum Ada Iklan
           </p>
           <p className="text-[8px] text-gray-300 dark:text-gray-700 mt-1">
-            Klik "Tambah" untuk menambah iklan ke slot ini
+            Klik &quot;Tambah&quot; untuk menambah iklan ke slot ini
           </p>
         </div>
       ) : (
