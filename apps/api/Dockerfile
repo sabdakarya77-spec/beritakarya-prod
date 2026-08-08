@@ -32,9 +32,9 @@ RUN pnpm install --frozen-lockfile
 RUN cd packages/types && pnpm run build
 RUN cd packages/config && pnpm run build
 RUN cd packages/utils && pnpm run build
-# Generate Prisma Client and build API
+# Generate Prisma Client and build API (only API and its dependencies)
 RUN cd apps/api && npx prisma generate
-RUN cd apps/api && pnpm run build
+RUN cd apps/api && pnpm run build --filter=@beritakarya/api...
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
