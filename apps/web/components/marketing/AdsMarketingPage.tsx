@@ -12,6 +12,7 @@ import {
   MessageCircle,
   type LucideIcon,
 } from 'lucide-react'
+import type { PublicSiteConfig } from '../../lib/siteSettings'
 import { AD_SLOT_MAP, type AdSlotId } from '../../lib/constants'
 import { PublicInfoShell } from '../layout/PublicInfoShell'
 import { LegalDocumentBody } from '../legal/LegalDocumentBody'
