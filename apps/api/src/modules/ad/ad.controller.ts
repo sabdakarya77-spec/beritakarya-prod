@@ -102,7 +102,7 @@ adRouter.post('/',
     const ad = await repo.createAd({
       siteId: req.site!,
       slot,
-      imageUrl: imageUrl || null,
+      imageUrl,
       linkUrl: linkUrl || null,
       isActive: isActive ?? true,
       order: nextOrder,

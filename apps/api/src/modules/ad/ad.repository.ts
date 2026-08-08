@@ -32,13 +32,20 @@ export async function findAdsBySite(siteId: string, params: { page?: number; lim
 export async function createAd(data: {
   siteId: string
   slot: string
-  imageUrl?: string | null
+  imageUrl: string
   linkUrl?: string | null
   isActive?: boolean
   order?: number
 }) {
   return prisma.advertisement.create({
-    data,
+    data: {
+      siteId: data.siteId,
+      slot: data.slot,
+      imageUrl: data.imageUrl,
+      linkUrl: data.linkUrl,
+      isActive: data.isActive,
+      order: data.order,
+    },
     select: {
       id: true,
       slot: true,
