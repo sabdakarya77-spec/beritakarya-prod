@@ -34,7 +34,7 @@ RUN cd packages/config && pnpm run build
 RUN cd packages/utils && pnpm run build
 # Generate Prisma Client and build API (only API and its dependencies)
 RUN cd apps/api && npx prisma generate
-RUN cd apps/api && pnpm run build --filter=@beritakarya/api...
+RUN cd apps/api && pnpm run build
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
