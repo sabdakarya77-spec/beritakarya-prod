@@ -3,20 +3,22 @@
 -- Sederhanakan model Advertisement (drop kolom script/AB/variant/booking)
 -- Sederhanakan model AdEventLog (drop kolom bookingId + relasi)
 
--- 1. Hapus tabel dependen terlebih dahulu (sesuai urutan relasi FK)
-DROP TABLE IF EXISTS "VideoPrompt";
-DROP TABLE IF EXISTS "VideoProviderConfig";
-DROP TABLE IF EXISTS "AdPaymentConfig";
-DROP TABLE IF EXISTS "AdBooking";
-DROP TABLE IF EXISTS "AdPackage";
-
--- 2. Hapus relasi FK lama di Advertisement ke AdBooking
+-- 1. Hapus relasi FK lama ke AdBooking dan AdPackage terlebih dahulu
 ALTER TABLE "Advertisement" DROP CONSTRAINT IF EXISTS "Advertisement_bookingId_fkey";
-
--- 3. Hapus relasi FK lama di AdEventLog ke AdBooking
 ALTER TABLE "AdEventLog" DROP CONSTRAINT IF EXISTS "AdEventLog_bookingId_fkey";
+ALTER TABLE "VideoPrompt" DROP CONSTRAINT IF EXISTS "VideoPrompt_bookingId_fkey";
+ALTER TABLE "AdBooking" DROP CONSTRAINT IF EXISTS "AdBooking_packageId_fkey";
+ALTER TABLE "AdBooking" DROP CONSTRAINT IF EXISTS "AdBooking_siteId_fkey";
+ALTER TABLE "AdBooking" DROP CONSTRAINT IF EXISTS "AdBooking_userId_fkey";
 
--- 4. Sederhanakan Advertisement: drop kolom yang tidak dipakai
+-- 2. Hapus tabel yang tidak lagi digunakan (dengan CASCADE untuk menjamin keamanan FK)
+DROP TABLE IF EXISTS "VideoPrompt" CASCADE;
+DROP TABLE IF EXISTS "VideoProviderConfig" CASCADE;
+DROP TABLE IF EXISTS "AdPaymentConfig" CASCADE;
+DROP TABLE IF EXISTS "AdBooking" CASCADE;
+DROP TABLE IF EXISTS "AdPackage" CASCADE;
+
+-- 3. Sederhanakan Advertisement: drop kolom yang tidak dipakai
 ALTER TABLE "Advertisement"
   DROP COLUMN IF EXISTS "code",
   DROP COLUMN IF EXISTS "imageUrlTablet",
@@ -29,15 +31,15 @@ ALTER TABLE "Advertisement"
   DROP COLUMN IF EXISTS "animationEffect",
   DROP COLUMN IF EXISTS "bookingId";
 
--- 5. Sederhanakan AdEventLog: drop kolom bookingId
+-- 4. Sederhanakan AdEventLog: drop kolom bookingId
 ALTER TABLE "AdEventLog"
   DROP COLUMN IF EXISTS "bookingId";
 
--- 6. Hapus index yang merujuk kolom yang dihapus
+-- 5. Hapus index yang merujuk kolom yang dihapus
 DROP INDEX IF EXISTS "Advertisement_bookingId_idx";
 DROP INDEX IF EXISTS "AdEventLog_bookingIdCreatedAt_idx";
 
--- 7. Hapus enum yang tidak lagi dipakai (PaymentStatus, AdStatus)
+-- 6. Hapus enum yang tidak lagi dipakai (PaymentStatus, AdStatus)
 --    Catatan: hanya dihapus jika tidak ada kolom lain yang memakai enum ini
 DROP TYPE IF EXISTS "PaymentStatus";
 DROP TYPE IF EXISTS "AdStatus";
