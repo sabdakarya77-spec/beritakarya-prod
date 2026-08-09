@@ -50,25 +50,6 @@ adRouter.get('/public',
   })
 )
 
-// Public endpoint for fetching fallback ads (e.g., static examples for empty slots)
-adRouter.get('/fallback',
-  asyncHandler(async (req: Request, res: Response) => {
-    const slot = req.query.slot as string || 'HOME_TOP'
-    // Minimal static fallback data – matches the shape used by the front‑end fallback UI.
-    const fallbackAds = [
-      {
-        id: 'fallback-1',
-        slot,
-        mediaType: 'image',
-        mediaUrl: '/fallbacks/home-top.svg',
-        headline: 'Ruang Iklan Premium',
-        subheadline: 'Jangkau audiens luas dengan banner berkualitas tinggi di BeritaKarya',
-      }
-    ]
-    res.json({ success: true, data: fallbackAds })
-  })
-)
-
 // Admin: list ads
 adRouter.get('/',
   requireAuth,

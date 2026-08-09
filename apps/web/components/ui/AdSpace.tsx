@@ -27,13 +27,6 @@ export interface AdItem {
   order: number;
 }
 
-interface FallbackAd {
-  mediaType?: string;
-  mediaUrl?: string;
-  headline?: string;
-  [key: string]: unknown;
-}
-
 /**
  * Sub‑component rendering a single ad slide (full image only — SIMPLIFIKASI-IKLAN.md).
  */
@@ -72,49 +65,6 @@ function AdSlide({
   );
 }
 
-/** Lazy‑loading video wrapper for fallback ads. Only loads src when near viewport. */
-function FallbackVideo({ src }: { src: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (inView && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [inView]);
-
-  return (
-    <div ref={containerRef} className="w-full h-full">
-      <video
-        ref={videoRef}
-        src={inView ? src : undefined}
-        loop
-        muted
-        playsInline
-        preload="none"
-        className="w-full h-full object-cover"
-      />
-    </div>
-  );
-}
-
 export default function AdSpace({
   type,
   slot,
@@ -125,8 +75,6 @@ export default function AdSpace({
   const params = useParams();
   const site = params?.site as string | undefined;
   const [ads, setAds] = useState<AdItem[]>([]);
-  // Fallback ads fetched from CMS when no ads are configured for the slot
-  const [fallbackAds, setFallbackAds] = useState<FallbackAd[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -192,26 +140,6 @@ export default function AdSpace({
     return stopRotation;
   }, [startRotation, stopRotation]);
 
-  // Fetch CMS fallback ads when there are no ads for the slot (only for HOME_TOP)
-  useEffect(() => {
-    if (loading) return;
-    if (ads.length === 0 && type === 'HOME_TOP') {
-      const fetchFallback = async () => {
-        try {
-          const res = await fetch(`${API_URL}/api/v1/ads/fallback?slot=HOME_TOP`);
-          if (!res.ok) return;
-          const json = await res.json();
-          if (json.success && Array.isArray(json.data)) {
-            setFallbackAds(json.data);
-          }
-        } catch {
-          // ignore errors – fallback will remain empty
-        }
-      };
-      fetchFallback();
-    }
-  }, [ads, loading, type]);
-
   // Track impression for each displayed ad (one‑time per ad ID)
   useEffect(() => {
     const ad = ads[currentIndex];
@@ -270,42 +198,6 @@ export default function AdSpace({
 
   // No ads at all — render fallback handling
   if (ads.length === 0) {
-    // HOME_TOP: try to render CMS‑configured fallback ads
-    if (type === 'HOME_TOP' && fallbackAds.length > 0) {
-      const ad = fallbackAds[0];
-      return (
-        <section className="py-8 md:py-12">
-          <Container>
-            <div className={cn(
-              "relative overflow-hidden",
-              styles[type],
-              className
-            )}>
-              {/* Media (image or video) */}
-              {ad.mediaType === 'video' && ad.mediaUrl ? (
-                <FallbackVideo src={ad.mediaUrl} />
-              ) : ad.mediaUrl ? (
-                <SmartImage
-                  src={ad.mediaUrl}
-                  context="hero_lead"
-                  alt={ad.headline || 'Iklan'}
-                  fill
-                  priority
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 970px"
-                />
-              ) : null}
-              {/* Simple overlay with headline */}
-              {ad.headline && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                  <h3 className="text-white text-center text-lg md:text-2xl font-black">{ad.headline}</h3>
-                </div>
-              )}
-            </div>
-          </Container>
-        </section>
-      );
-    }
-
     // HOME_TOP: fallback ke Google AdSense (slot kosong → AdSense)
     if (type === 'HOME_TOP') {
       return (
