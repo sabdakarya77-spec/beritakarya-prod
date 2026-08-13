@@ -47,12 +47,15 @@ const AD_UNIT_ENV_MAP: Record<string, string | undefined> = {
 export function AdSenseUnit({ slot, className }: AdSenseUnitProps) {
   const pushedRef = useRef(false);
 
-  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
+  const rawPub = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
   const adUnitId = AD_UNIT_ENV_MAP[slot];
+
+  const cleanPub = rawPub ? rawPub.replace(/^ca-/, '') : '';
+  const clientParam = cleanPub ? (cleanPub.startsWith('pub-') ? `ca-${cleanPub}` : `ca-pub-${cleanPub}`) : '';
 
   // Daftarkan unit ke adsbygoogle — hanya sekali per instance, hanya di client
   useEffect(() => {
-    if (!publisherId || !adUnitId) return;
+    if (!clientParam || !adUnitId) return;
     if (typeof window === 'undefined') return;
 
     try {
@@ -65,10 +68,10 @@ export function AdSenseUnit({ slot, className }: AdSenseUnitProps) {
       // eslint-disable-next-line no-console
       console.error('[AdSense] Gagal memuat unit:', err);
     }
-  }, [publisherId, adUnitId]);
+  }, [clientParam, adUnitId]);
 
   // Belum ada Publisher ID ATAU Ad Unit ID untuk slot ini → placeholder kosong, tidak error
-  if (!publisherId || !adUnitId) {
+  if (!clientParam || !adUnitId) {
     return null;
   }
 
@@ -82,7 +85,7 @@ export function AdSenseUnit({ slot, className }: AdSenseUnitProps) {
       <ins
         className="adsbygoogle"
         style={{ display: 'block', minWidth: '300px' }}
-        data-ad-client={`ca-${publisherId}`}
+        data-ad-client={clientParam}
         data-ad-slot={adUnitId}
         data-ad-format="auto"
         data-full-width-responsive="true"

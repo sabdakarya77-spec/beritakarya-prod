@@ -69,7 +69,7 @@ const nextConfig = {
     const isProd = process.env.NODE_ENV === 'production'
 
     // CSP directives — sesuaikan dengan environment
-    const googleAdSenseDomains = "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://www.google.com"
+    const googleAdSenseDomains = "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://www.google.com https://*.adtrafficquality.google https://adtrafficquality.google"
 
     const cspDirectives = [
       "default-src 'self'",

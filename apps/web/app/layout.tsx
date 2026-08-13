@@ -48,13 +48,19 @@ export default function RootLayout({
         <meta name="theme-color" content="#B91C1C" />
         <link rel="preconnect" href="https://media.beritakarya.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://media.beritakarya.co" />
-        {process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID}`}
-            crossOrigin="anonymous"
-          />
-        )}
+        {(() => {
+          const rawPub = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
+          if (!rawPub) return null
+          const cleanPub = rawPub.replace(/^ca-/, '')
+          const clientParam = cleanPub.startsWith('pub-') ? `ca-${cleanPub}` : `ca-pub-${cleanPub}`
+          return (
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientParam}`}
+              crossOrigin="anonymous"
+            />
+          )
+        })()}
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -34,7 +34,7 @@ export function proxy(req: NextRequest) {
   // Path root yang BUKAN site prefix (login, register, dll) di-skip.
   const RESERVED_ROOT_SEGMENTS = new Set([
     'login', 'register', 'forgot-password', 'reset-password',
-    'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'dashboard',
+    'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'ads.txt', 'dashboard',
     'api', '_next', 'favicon.ico',
   ])
   const SITE_SUBPATHS = new Set([

@@ -6,7 +6,8 @@ import { NextResponse } from 'next/server'
  * Format: google.com, <publisher-id>, DIRECT, f08c47fec0942fa0
  */
 export function GET() {
-  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'pub-XXXXXXXXXXXXXXXX'
+  const rawPub = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || 'pub-XXXXXXXXXXXXXXXX'
+  const publisherId = rawPub.replace(/^ca-/, '')
 
   const content = `google.com, ${publisherId}, DIRECT, f08c47fec0942fa0\n`
 
