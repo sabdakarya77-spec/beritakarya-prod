@@ -81,7 +81,7 @@ const nextConfig = {
       "font-src 'self' data:",
       `connect-src 'self' https://*.beritakarya.co https://beritakarya.co wss://*.beritakarya.co https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com ${googleAdSenseDomains} ws://localhost:*`,
       "media-src 'self' https://media.beritakarya.co https://*.beritakarya.co blob:",
-      `frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.doubleclick.net https://www.google.com`,
+      `frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.doubleclick.net https://www.google.com ${googleAdSenseDomains}`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
