@@ -69,16 +69,19 @@ const nextConfig = {
     const isProd = process.env.NODE_ENV === 'production'
 
     // CSP directives — sesuaikan dengan environment
+    const googleAdSenseDomains = "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://www.google.com"
+
     const cspDirectives = [
       "default-src 'self'",
       isProd
-        ? "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com"
-        : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+        ? `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com ${googleAdSenseDomains}`
+        : `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com ${googleAdSenseDomains}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.beritakarya.co https://beritakarya.co wss://*.beritakarya.co https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com ws://localhost:*",
+      `connect-src 'self' https://*.beritakarya.co https://beritakarya.co wss://*.beritakarya.co https://www.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com ${googleAdSenseDomains} ws://localhost:*`,
       "media-src 'self' https://media.beritakarya.co https://*.beritakarya.co blob:",
+      `frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.doubleclick.net https://www.google.com`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
