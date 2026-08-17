@@ -56,7 +56,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     fetchSiteSettings(siteParam)
   ])
 
-  if (!article) return { title: 'Post Tidak Ditemukan' }
+  // Artikel tidak ada atau masih draft → beri noindex agar Google tidak mengindeks halaman 404
+  if (!article || article.status !== 'published') {
+    return { title: 'Post Tidak Ditemukan', robots: { index: false, follow: false } }
+  }
 
   const fallbackConfig = SITE_MAP[siteParam] || SITE_MAP['pusat']
   const siteName = siteSettings?.name || fallbackConfig?.name || (siteParam.charAt(0).toUpperCase() + siteParam.slice(1));

@@ -91,11 +91,29 @@ export function proxy(req: NextRequest) {
     'privacy': 'kebijakan-privasi',
     'terms': 'p/terms',
     'cookies': 'cookies',
+    'bantuan': 'bantuan',
+    'arsip': 'arsip',
   }
   const firstSegment = pathname.split('/').filter(Boolean)[0]?.toLowerCase()
   if (firstSegment && ROOT_REDIRECTS[firstSegment] && !subdomain) {
     const target = `/${siteId}/${ROOT_REDIRECTS[firstSegment]}`
     return NextResponse.redirect(new URL(target, req.url), 301)
+  }
+
+  // Block literal placeholder query strings that leaked from sitemap templates.
+  // e.g. ?q={search_term_string} should return 404 — not a real page.
+  const rawQuery = req.nextUrl.search
+  if (rawQuery.includes('{') || rawQuery.includes('}')) {
+    const notFoundUrl = new URL(`/${siteId}/404-not-found`, req.url)
+    return NextResponse.rewrite(notFoundUrl)
+  }
+
+  // Redirect /login?next=... and /register?next=... to the clean auth page.
+  // Google was crawling these URLs (with #comment fragments) as separate indexable pages.
+  // Stripping ?next= removes the confusion; the redirect logic is handled client-side anyway.
+  if ((firstSegment === 'login' || firstSegment === 'register') && url.searchParams.has('next')) {
+    const cleanUrl = new URL(`/${firstSegment}`, req.url)
+    return NextResponse.redirect(cleanUrl, 301)
   }
 
   // Reject paths with encoded special characters (e.g. /%26, /%24, /&).

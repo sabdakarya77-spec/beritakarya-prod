@@ -162,7 +162,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico'
 
   if (!profileData) {
-    return { title: 'Profil Penulis Tidak Ditemukan', description: 'Profil penulis yang Anda cari tidak tersedia.', icons: faviconUrl }
+    return { title: 'Profil Penulis Tidak Ditemukan', description: 'Profil penulis yang Anda cari tidak tersedia.', icons: faviconUrl, robots: { index: false, follow: false } }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'

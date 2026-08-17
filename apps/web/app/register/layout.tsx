@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
+  title: 'Daftar — BeritaKarya',
+  description: 'Buat akun BeritaKarya untuk bergabung dengan komunitas dan berkomentar pada artikel.',
   robots: { index: false, follow: false },
 }
 

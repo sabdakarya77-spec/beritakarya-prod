@@ -38,6 +38,9 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
     icons: faviconUrl,
     siteParam,
     noIndex: hasCategoryFilter,
+    // Saat filter ?cat= aktif, arahkan canonical ke URL induk tanpa query string.
+    // Ini memberi tahu Google bahwa halaman kanonik adalah /{site} bukan /{site}?cat=...
+    ...(hasCategoryFilter && { canonicalPath: `/${siteParam}` }),
   })
 }
 
