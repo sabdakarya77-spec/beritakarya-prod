@@ -209,10 +209,12 @@ export default function MobileMenu({
                       <div
                         className={cn(
                           'overflow-hidden transition-all duration-200 ease-in-out',
-                          isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          isExpanded ? 'max-h-[60vh] opacity-100' : 'max-h-0 opacity-0'
                         )}
                       >
-                        <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-l-2 border-gray-100 pl-3 pb-1 dark:border-white/5">
+                        <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-l-2 border-gray-100 pl-3 pb-1 dark:border-white/5 max-h-[55vh] overflow-y-auto overscroll-contain"
+                          style={{ scrollbarWidth: 'thin' }}
+                        >
                           <button
                             onClick={() => handleLeafClick(cat.slug)}
                             className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[10px] font-semibold tracking-[0.04em] text-brand-red hover:bg-brand-red/5 transition-colors"
