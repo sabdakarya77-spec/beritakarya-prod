@@ -138,14 +138,12 @@ export function FeedWithSidebar({
         {/* Sidebar — 30% (4 kolom) */}
         <aside className="lg:col-span-4 self-start">
           <div className="space-y-6">
-            {/* Akses Redaksi (Tetap disembunyikan di HP) */}
-            <div className="hidden lg:block">
-              <AksesRedaksiSidebar
-                whatsappUrl={whatsappUrl}
-                telegramUrl={telegramUrl}
-                reportUrl={reportUrl}
-              />
-            </div>
+            {/* Akses Redaksi — tampil di semua ukuran layar */}
+            <AksesRedaksiSidebar
+              whatsappUrl={whatsappUrl}
+              telegramUrl={telegramUrl}
+              reportUrl={reportUrl}
+            />
 
             {/* HOME_FEED_1 — 300x600 half page portrait */}
             <AdZone type="HOME_FEED_1" />
