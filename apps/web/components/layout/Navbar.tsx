@@ -450,7 +450,7 @@ export default function Navbar({
                 {(hoveredCategory === cat.name || keyboardExpanded === cat.name) && hasSub && (
                   <div
                     className="absolute left-1/2 top-full z-50 mt-1 -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#111827] transition-all duration-150 opacity-100 translate-y-0"
-                    style={{ minWidth: '240px', maxWidth: '480px' }}
+                    style={{ minWidth: '380px', maxWidth: '640px' }}
                   >
                     {/* Header label */}
                     <div className="px-3 pb-1.5 pt-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-brand-red border-b border-gray-100 dark:border-white/10 mb-1">
@@ -483,7 +483,7 @@ export default function Navbar({
                                   isSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
                                 )}
                               >
-                                <span className="truncate">{sub.name}</span>
+                                <span>{sub.name}</span>
                                 <span className={cn(
                                   "ml-1 shrink-0 w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
                                   isSubActive ? "scale-100" : ""
@@ -507,7 +507,7 @@ export default function Navbar({
                                           isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
                                         )}
                                       >
-                                        <span className="truncate">{subsub.name}</span>
+                                        <span>{subsub.name}</span>
                                         <span className={cn(
                                           "ml-1 shrink-0 w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
                                           isSubSubActive ? "scale-100" : ""
