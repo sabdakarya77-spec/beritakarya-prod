@@ -449,62 +449,79 @@ export default function Navbar({
                 {/* Subcategory dropdown */}
                 {(hoveredCategory === cat.name || keyboardExpanded === cat.name) && hasSub && (
                   <div
-                    className="absolute left-1/2 top-full z-50 mt-1 flex min-w-[200px] -translate-x-1/2 flex-col gap-0.5 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#111827] transition-all duration-150 opacity-100 translate-y-0"
+                    className="absolute left-1/2 top-full z-50 mt-1 -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#111827] transition-all duration-150 opacity-100 translate-y-0"
+                    style={{ minWidth: '240px', maxWidth: '480px' }}
                   >
-                    {cat.subCategories?.map((sub) => {
-                      const isSubActive = selectedCategory === sub.slug;
-                      const hasSubSub = sub.subCategories && sub.subCategories.length > 0;
-                      return (
-                        <div key={sub.slug}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCategoryClick(sub.slug);
-                              setHoveredCategory(null);
-                              setKeyboardExpanded(null);
-                            }}
-                            className={cn(
-                              "group/sub flex items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10",
-                              isSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
-                            )}
-                          >
-                            <span>{sub.name}</span>
-                            <span className={cn(
-                              "w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
-                              isSubActive ? "scale-100" : ""
-                            )} />
-                          </button>
-                          {hasSubSub && (
-                            <div className="ml-3 border-l border-gray-200 pl-2 py-0.5 dark:border-white/10">
-                              {sub.subCategories!.map((subsub) => {
-                                const isSubSubActive = selectedCategory === subsub.slug;
-                                return (
-                                  <button
-                                    key={subsub.slug}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleCategoryClick(subsub.slug);
-                                      setHoveredCategory(null);
-                                      setKeyboardExpanded(null);
-                                    }}
-                                    className={cn(
-                                      "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10 w-full",
-                                      isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
-                                    )}
-                                  >
-                                    <span>{subsub.name}</span>
-                                    <span className={cn(
-                                      "w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
-                                      isSubSubActive ? "scale-100" : ""
-                                    )} />
-                                  </button>
-                                );
-                              })}
+                    {/* Header label */}
+                    <div className="px-3 pb-1.5 pt-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-brand-red border-b border-gray-100 dark:border-white/10 mb-1">
+                      {cat.name}
+                    </div>
+                    {/* Scrollable 2-column grid */}
+                    <div className="max-h-[min(60vh,320px)] overflow-y-auto overscroll-contain pr-0.5"
+                      style={{ scrollbarWidth: 'thin' }}
+                    >
+                      <div className={cn(
+                        "gap-0.5",
+                        (cat.subCategories?.length ?? 0) > 6
+                          ? "grid grid-cols-2"
+                          : "flex flex-col"
+                      )}>
+                        {cat.subCategories?.map((sub) => {
+                          const isSubActive = selectedCategory === sub.slug;
+                          const hasSubSub = sub.subCategories && sub.subCategories.length > 0;
+                          return (
+                            <div key={sub.slug}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCategoryClick(sub.slug);
+                                  setHoveredCategory(null);
+                                  setKeyboardExpanded(null);
+                                }}
+                                className={cn(
+                                  "group/sub flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10",
+                                  isSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
+                                )}
+                              >
+                                <span className="truncate">{sub.name}</span>
+                                <span className={cn(
+                                  "ml-1 shrink-0 w-1 h-1 rounded-full bg-brand-red scale-0 transition-transform group-hover/sub:scale-100",
+                                  isSubActive ? "scale-100" : ""
+                                )} />
+                              </button>
+                              {hasSubSub && (
+                                <div className="ml-3 border-l border-gray-200 pl-2 py-0.5 dark:border-white/10">
+                                  {sub.subCategories!.map((subsub) => {
+                                    const isSubSubActive = selectedCategory === subsub.slug;
+                                    return (
+                                      <button
+                                        key={subsub.slug}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleCategoryClick(subsub.slug);
+                                          setHoveredCategory(null);
+                                          setKeyboardExpanded(null);
+                                        }}
+                                        className={cn(
+                                          "group/subsub flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[9px] font-bold uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-white/10 w-full",
+                                          isSubSubActive ? "text-brand-red bg-brand-red/5" : "text-gray-500 hover:text-gray-900 dark:text-white/60 dark:hover:text-white"
+                                        )}
+                                      >
+                                        <span className="truncate">{subsub.name}</span>
+                                        <span className={cn(
+                                          "ml-1 shrink-0 w-0.5 h-0.5 rounded-full bg-brand-red scale-0 transition-transform group-hover/subsub:scale-100",
+                                          isSubSubActive ? "scale-100" : ""
+                                        )} />
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
