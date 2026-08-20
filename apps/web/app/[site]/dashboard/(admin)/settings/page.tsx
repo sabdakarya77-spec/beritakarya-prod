@@ -741,7 +741,7 @@ export default function SettingsPage() {
                       type="text"
                       value={settings.address}
                       onChange={(e) => setSettings({...settings, address: e.target.value})}
-                      placeholder="Contoh: Gedung BeritaKarya Lt. 3, Jl. Asia Afrika No. 45, Bandung"
+                      placeholder="Contoh: Jl. Semeru No.54, Wonotakan, Kec. Berbek, Kabupaten Nganjuk"
                       className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
                     />
                   </div>
@@ -759,7 +759,7 @@ export default function SettingsPage() {
                         type="email"
                         value={settings.contactEmail}
                         onChange={(e) => setSettings({...settings, contactEmail: e.target.value})}
-                        placeholder="redaksi.bandung@beritakarya.co"
+                        placeholder="supportberitakarya@gmail.com"
                         className={`w-full bg-gray-50 dark:bg-gray-950 border rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none transition-all ${
                           isValidEmail(settings.contactEmail) 
                             ? 'border-gray-200 dark:border-gray-800 focus:border-brand-red focus:ring-1 focus:ring-brand-red/20' 
@@ -1060,42 +1060,35 @@ export default function SettingsPage() {
                                   setSettings({
                                     ...settings,
                                     editorial: `PT SABDA KARYA MEDIA (BERITAKARYA.CO)
-SK MENKUMHAM: AHU-0012345.AH.01.01.TAHUN 2026
+Badan Hukum Pers: PT Sabda Karya Media
 
-SUSUNAN REDAKSI & TATA KELOLA PERUSAHAAN
+SUSUNAN REDAKSI & TATA KELOLA
 
-Penerbit / Badan Hukum:
+Penerbit:
 PT Sabda Karya Media
 
-Dewan Pembina / Penasihat:
-- [Nama Dewan Pembina]
-
-Pemimpin Umum / Direktur Utama:
-- [Nama Pemimpin Umum]
+Pemimpin Umum:
+Direksi PT Sabda Karya Media
 
 Pemimpin Redaksi / Penanggung Jawab:
-- [Nama Pemimpin Redaksi]
+Dewan Redaksi BeritaKarya
 
-Redaktur Pelaksana (Redpel):
-- [Nama Redaktur Pelaksana]
+Redaktur Pelaksana:
+Tim Redaktur BeritaKarya
 
-Redaktur Senior & Editor:
-- [Nama Editor 1]
-- [Nama Editor 2]
+Redaktur & Editor:
+Tim Editor BeritaKarya
 
-Reporter Lapangan:
-- [Nama Reporter 1]
-- [Nama Reporter 2]
+Wartawan & Koresponden:
+Tim Liputan Daerah BeritaKarya
 
-Desain Grafis, IT & Multimedia:
-- [Nama Tim IT/Desain]
+Divisi IT & Multimedia:
+Tim Teknologi & Desain BeritaKarya
 
-Alamat Kantor Redaksi Pusat:
-Gedung BeritaKarya, Lt. 3, Jl. Asia Afrika No. 45, Bandung
-Email: redaksi@beritakarya.co | Telp: +62 812-3456-7890
-
-Penasihat Hukum:
-- [Nama Advokat], S.H., M.H.`
+Kantor Redaksi Pusat:
+Jl. Semeru No.54, Wonotakan, Kec. Berbek, Kabupaten Nganjuk, Jawa Timur
+Telepon / Hotline: +628159921922
+Email Redaksi: supportberitakarya@gmail.com`
                                   })
                                 }
                               }}

@@ -137,138 +137,158 @@ export function isLegalSlug(slug: string): slug is LegalSlug {
 /** Professional fallback content for legal pages (Dewan Pers Indonesia standards) */
 const FALLBACK_CONTENT: Record<LegalSlug, string> = {
   about: `<h2>Visi Kami</h2>
-<p>Menjadi portal berita independen yang menyajikan informasi akurat, berimbang, dan terpercaya untuk masyarakat Nusantara. Kami berkomitmen menjadi sumber informasi yang dapat dipercaya dalam memberikan pemberitaan yang bertanggung jawab.</p>
+<p>Menjadi portal berita independen, terdepan, dan tepercaya yang menyajikan informasi akurat, berimbang, dan berintegritas untuk seluruh masyarakat di berbagai penjuru daerah. Kami berkomitmen menjadi pilar informasi publik yang menjunjung tinggi kebenaran dan etika jurnalistik.</p>
 
 <h2>Misi Kami</h2>
-<p>1. Menyajikan berita yang akurat dan dapat diverifikasi dari berbagai sumber terpercaya.</p>
-<p>2. Memberikan pemberitaan berimbang dengan mewakili berbagai sudut pandang yang relevan.</p>
-<p>3. Menjaga independensi редакции dari pengaruh politik dan komersial.</p>
-<p>4. Mengutamakan kepentingan publik dalam setiap keputusan editorial.</p>
-<p>5. Meningkatkan literasi media dan kemampuan masyarakat dalam menyaring informasi.</p>
+<p>1. Menyajikan karya jurnalistik yang terverifikasi, faktual, dan mendalam dari sumber-sumber yang kredibel.</p>
+<p>2. Menegakkan prinsip keberimbangan dengan mewakili seluruh sudut pandang publik yang relevan secara adil.</p>
+<p>3. Menjaga independensi ruang redaksi dari segala bentuk intervensi politik, kekuasaan, maupun kepentingan komersial.</p>
+<p>4. Mengutamakan kepentingan publik, keadilan sosial, dan supremasi hukum dalam setiap pemberitaan.</p>
+<p>5. Mendorong literasi informasi masyarakat guna menangkal penyebaran disinformasi dan berita bohong (hoaks).</p>
 
-<h2>Nilai-Nilai Editorial</h2>
-<p>Kami menjunjung tinggi prinsip-prinsip jurnalistik yang bertanggung jawab sesuai dengan Kode Etik Jurnalistik Dewan Pers dan Pedoman Pemberitaan Media Siber. Setiap berita yang kami publikasikan melewati proses verifikasi yang ketat untuk memastikan akurasi dan kebenaran informasi.</p>`,
+<h2>Nilai & Standar Editorial</h2>
+<p>BeritaKarya beroperasi di bawah payung Undang-Undang Republik Indonesia Nomor 40 Tahun 1999 tentang Pers. Setiap produk jurnalistik yang diterbitkan melalui proses verifikasi, penyuntingan berlapis, dan mematuhi Kode Etik Jurnalistik (KEJ) serta Pedoman Pemberitaan Media Siber (PPMS) yang ditetapkan oleh Dewan Pers.</p>`,
 
-  editorial: `<h2>Struktur Redaksi</h2>
-<p>Portal Berita Karya berkomitmen untuk menjaga transparansi dalam struktur organisasi редакции kami demi membangun kepercayaan publik.</p>
+  editorial: `<h2>Susunan Redaksi & Tata Kelola</h2>
+<p>Sebagai wujud transparansi dan akuntabilitas pers nasional sesuai amanat Undang-Undang Pers No. 40 Tahun 1999 dan Pedoman Dewan Pers, berikut adalah struktur organisasi dan manajemen redaksi BeritaKarya:</p>
 
-<h3>Penanggung Jawab</h3>
-<p>Penanggung jawab memiliki peran dalam memastikan seluruh operasional редакции berjalan sesuai dengan aturan dan regulasi yang berlaku di Indonesia, termasuk mengikuti pedoman dari Dewan Pers.</p>
+<h3>Penerbit / Badan Hukum</h3>
+<p>PT Sabda Karya Media</p>
 
-<h3>Pemimpin Redaksi</h3>
-<p>Pemimpin Redaksi bertanggung jawab atas keseluruhan isi pemberitaan, memastikan kualitas, akurasi, dan keberimbangan setiap artikel yang dipublikasikan. Pemimpin Redaksi juga memimpin conferences редакции harian untuk menentukan prioritas liputan.</p>
+<h3>Penanggung Jawab & Pemimpin Redaksi</h3>
+<p>Bertanggung jawab penuh atas keseluruhan isi pemberitaan, kebijakan redaksional, penegakan Kode Etik Jurnalistik, dan kepatuhan terhadap regulasi pers yang berlaku di Indonesia.</p>
 
-<h3>Sekretaris Redaksi</h3>
-<p>Sekretaris Redaksi mengelola administrasi редакции, mengkoordinasikan jadwal peliputan, dan memastikan kelancaran komunikasi internal serta dengan pihak eksternal.</p>
+<h3>Redaktur Pelaksana & Editor Senior</h3>
+<p>Mengkoordinasikan perencanaan liputan harian, memimpin rapat proyeksi redaksi, mengarahkan liputan investigasi mendalam, serta memastikan standar verifikasi dan akurasi naskah sebelum dipublikasikan.</p>
 
-<h3>Jurnalis dan Reporter</h3>
-<p>Tim jurnalis kami terdiri dari profesional berpengalaman yang tersebar di berbagai wilayah untuk memberikan peliputan mendalam tentang peristiwa penting yang mempengaruhi masyarakat.</p>
+<h3>Sekretariat Redaksi & Manajemen Berita</h3>
+<p>Mengelola alur kerja administratif keredaksian, dokumentasi penerbitan, komunikasi kelembagaan, serta layanan permohonan hak jawab dan koreksi pemberitaan dari masyarakat.</p>
 
-<h2>Komitmen Profesionalisme</h2>
-<p>Seluruh anggota редакции kami berkomitmen untuk mengikuti pelatihan jurnalistik berkelanjutan dan memahami perkembangan terbaru dalam standar pemberitaan yang bertanggung jawab.</p>`,
+<h3>Wartawan & Koresponden Daerah</h3>
+<p>Tim jurnalis profesional yang bertugas melakukan peliputan langsung di lapangan di berbagai wilayah daerah, memegang teguh kartu identitas pers resmi, dan dilarang menerima imbalan dalam bentuk apapun terkait tugas jurnalistik.</p>
 
-  ethics: `<h2>Kode Etik Jurnalistik Dewan Pers</h2>
-<p>Portal Berita Karya mengadopsi Kode Etik Jurnalistik Dewan Pers sebagai pedoman utama dalam menjalankan tugas jurnalistik. Kode etik ini merupakan komitmen kami untuk menjaga profesionalisme dan tanggung jawab dalam pemberitaan.</p>
+<h3>Divisi Teknologi, Desain & Multimedia</h3>
+<p>Mengembangkan infrastruktur portal siber, menyajikan visualisasi data, infografis, dan tata letak multimedia demi kenyamanan dan kecepatan akses pembaca.</p>
 
-<h3>Pasal 1: Wahrheit und Genauigkeit (Kebenaran dan Akurasi)</h3>
-<p>Jurnalis Indonesia harus mengutamakan kebenaran dan akurasi dalam setiap pemberitaan. Informasi yang disajikan harus dapat diverifikasi dari sumber-sumber terpercaya dan di.Cross-check dengan minimal dua sumber independen.</p>
+<h3>Kantor Redaksi Pusat & Layanan Pengaduan</h3>
+<p>Jl. Semeru No.54, Wonotakan, Kec. Berbek, Kabupaten Nganjuk, Jawa Timur</p>
+<p>Telepon / Hotline Redaksi: +628159921922 | Email: supportberitakarya@gmail.com</p>
 
-<h3>Pasal 2: Unabhängigkeit (Independensi)</h3>
-<p>Jurnalis harus menjaga independensi dari objek yang diberitakan. Pemberitaan tidak boleh dipengaruhi oleh kepentingan pribadi, politik, atau komersial. Segala bentuk konflik kepentingan harus diungkapkan secara transparan.</p>
+<h2>Pedoman Kerja & Integritas Wartawan</h2>
+<p>Dalam menjalankan tugas jurnalistik, seluruh jurnalis BeritaKarya dibekali identitas pers resmi, tercatat dalam basis data redaksi, serta dilarang meminta atau menerima suap, fasilitas, maupun gratifikasi dari narasumber atau pihak manapun.</p>`,
 
-<h3>Pasal 3: Fairness und Ausgewogenheit (Kejujuran dan Keseimbangan)</h3>
-<p>Jurnalis harus memberikan kesempatan yang sama untuk memberikan tanggapan kepada pihak-pihak yang的红会受到 pemberitaan kami. Kami memastikan semua pihak terkait memiliki kesempatan untuk membalas atau memberikan klarifikasi.</p>
+  ethics: `<h2>Kode Etik Jurnalistik (KEJ)</h2>
+<p>BeritaKarya mengadopsi dan tunduk sepenuhnya pada Kode Etik Jurnalistik yang ditetapkan oleh Dewan Pers sesuai Keputusan Dewan Pers Nomor 03/SK-DP/III/2006:</p>
 
-<h3>Pasal 4: Humanity (Kemanusiaan)</h3>
-<p>Jurnalis Indonesia harus menghormati privasi individu dan tidak melakukan intersive-interogasi yang melanggar etika. Pemberitaan tentang korban kejahatan dan tragedi harus dilakukan dengan penuh empati dan hormat.</p>
+<h3>Pasal 1: Independensi dan Akurasi</h3>
+<p>Wartawan Indonesia bersikap independen, menghasilkan berita yang akurat, berimbang, dan tidak beriktikad buruk.</p>
 
-<h3>Pasal 5: Tanggung Jawab</h3>
-<p>Jurnalis Indonesia berani untuk menyampaikan informasi yang benar, penting, dan bermanfaat bagi masyarakat. Kami siap menerima kritik dan koreksi dari publik sebagai bentuk tanggung jawab editorial.</p>
+<h3>Pasal 2: Profesionalisme dan Integritas</h3>
+<p>Wartawan Indonesia menempuh cara-cara yang profesional dalam melaksanakan tugas jurnalistik.</p>
 
-<h2>Sanksi Pelanggaran</h2>
-<p>Pelanggaran terhadap Kode Etik Jurnalistik akan ditindaklanjuti melalui mekanisme yang berlaku di редакции, termasuk koreksi publik, minta maaf, atau tindakan disipliner sesuai kebijakan внутренние редакции.</p>`,
+<h3>Pasal 3: Uji Informasi dan Asas Praduga Tak Bersalah</h3>
+<p>Wartawan Indonesia selalu menguji informasi, memberitakan secara berimbang, tidak mencampurkan fakta dan opini yang menghakimi, serta menerapkan asas praduga tak bersalah.</p>
 
-  terms: `<h2>Ketentuan Penggunaan Layanan</h2>
-<p>Selamat datang di Portal Berita Karya. Dengan mengakses dan menggunakan layanan kami, Anda menyetujui ketentuan penggunaan berikut. Mohon membaca dengan seksama sebelum menggunakan layanan kami.</p>
+<h3>Pasal 4: Perlindungan Terhadap Korban dan Privasi</h3>
+<p>Wartawan Indonesia tidak membuat berita bohong, fitnah, sadis, dan cabul, serta menghormati hak privasi narasumber kecuali berkaitan langsung dengan kepentingan publik.</p>
+
+<h3>Pasal 5: Perlindungan Anak dan Korban Kejahatan Susila</h3>
+<p>Wartawan Indonesia tidak menyebutkan dan menyiarkan identitas korban kejahatan susila dan tidak menyebutkan identitas anak yang menjadi pelaku kejahatan.</p>
+
+<h3>Pasal 6: Larangan Penyalahgunaan Profesi dan Suap</h3>
+<p>Wartawan Indonesia tidak menyalahgunakan profesi dan tidak menerima suap atau imbalan dalam bentuk apapun yang dapat mempengaruhi independensi pemberitaan.</p>
+
+<h3>Pasal 7: Hak Tolak dan Narasumber Terpercaya</h3>
+<p>Wartawan Indonesia memiliki Hak Tolak untuk melindungi narasumber yang tidak bersedia diketahui identitas maupun keberadaannya, menghargai ketentuan embargo, informasi latar belakang, dan <em>off the record</em>.</p>
+
+<h3>Pasal 8: Larangan Diskriminasi SARA</h3>
+<p>Wartawan Indonesia tidak menulis atau menyiarkan berita berdasarkan prasangka atau diskriminasi terhadap seseorang atas dasar perbedaan suku, ras, warna kulit, agama, jenis kelamin, dan bahasa serta tidak merendahkan martabat orang lemah, miskin, sakit, cacat jiwa atau cacat jasmani.</p>
+
+<h3>Pasal 9: Hak Narasumber atas Kehidupan Pribadi</h3>
+<p>Wartawan Indonesia menghormati hak narasumber tentang kehidupan pribadinya, kecuali untuk kepentingan publik.</p>
+
+<h3>Pasal 10: Pencabutan dan Ralat Berita</h3>
+<p>Wartawan Indonesia segera mencabut, meralat, dan memperbaiki berita yang keliru dan tidak akurat disertai dengan permintaan maaf kepada pembaca, pendengar, dan atau pemirsa.</p>
+
+<h3>Pasal 11: Hak Jawab dan Hak Koreksi</h3>
+<p>Wartawan Indonesia melayani Hak Jawab dan Hak Koreksi secara proporsional sesuai ketentuan Undang-Undang Pers.</p>
+
+<h2>Penegakan Disiplin & Pelanggaran Etika</h2>
+<p>Setiap dugaan pelanggaran terhadap Kode Etik Jurnalistik akan diproses melalui sidang etik internal redaksi dan mekanisme penyelesaian sengketa pers di Dewan Pers.</p>`,
+
+  terms: `<h2>Ketentuan Penggunaan Layanan (Terms of Service)</h2>
+<p>Selamat datang di portal BeritaKarya. Dengan mengakses dan menggunakan layanan kami, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh ketentuan penggunaan berikut:</p>
 
 <h3>1. Penerimaan Ketentuan</h3>
-<p>Dengan mengakses atau menggunakan layanan Portal Berita Karya, Anda dianggap telah membaca, memahami, dan menyetujui terikat oleh semua syarat dan ketentuan yang berlaku. Jika Anda tidak setuju dengan ketentuan ini, silakan tidak menggunakan layanan kami.</p>
+<p>Akses dan pemanfaatan seluruh konten di situs BeritaKarya tunduk pada syarat dan ketentuan ini serta peraturan perundang-undangan Republik Indonesia yang berlaku. Apabila Anda tidak menyetujui ketentuan ini, kami sarankan untuk tidak menggunakan layanan portal kami.</p>
 
-<h3>2. Deskripsi Layanan</h3>
-<p>Portal Berita Karya menyediakan layanan informasi berita dan artikel yang meliputi liputan peristiwa terkini, analisis, dan konten editorial lainnya. Layanan ini bersifat informatif dan tidak dimaksudkan sebagai nasihat profesional.</p>
+<h3>2. Hak Cipta & Penggunaan Konten</h3>
+<p>Seluruh materi publikasi di portal BeritaKarya, termasuk naskah artikel, foto jurnalistik, video, grafis, logo, dan tata letak, dilindungi oleh Undang-Undang Hak Cipta. Pengutipan berita diperbolehkan dengan mencantumkan kredit sumber secara jelas (nama media dan tautan aktif ke artikel rujukan). Penggandaan massal atau komersialisasi konten tanpa izin tertulis dari redaksi BeritaKarya dilarang keras.</p>
 
-<h3>3. Hak Cipta dan Hak Kekayaan Intelektual</h3>
-<p>Seluruh konten yang dipublikasikan di Portal Berita Karya, termasuk namun tidak terbatas pada teks, gambar, grafik, logo, dan desain, dilindungi oleh hak cipta dan hak kekayaan intelektual yang berlaku. Penggunaan kembali konten memerlukan izin tertulis dari редакции.</p>
+<h3>3. Batasan Tanggung Jawab</h3>
+<p>BeritaKarya berupaya menyajikan informasi yang akurat dan terkini. Namun, kami tidak bertanggung jawab atas segala kerugian materiil maupun immateriil yang timbul akibat pemanfaatan informasi dari situs ini atau tautan pihak ketiga yang berada di luar kendali kami.</p>
 
-<h3>4. Penggunaan yang Dilarang</h3>
-<p>Pengguna dilarang menggunakan layanan kami untuk tujuan ilegal, menyebarkan konten yang melanggar hukum, mengganggu ketertiban umum, atau做任何 hal yang dapat merusak reputasi редакции dan pihak lain.</p>
+<h3>4. Panduan Komentar Pengguna</h3>
+<p>Pengguna yang memanfaatkan fitur komentar atau interaksi publik dilarang memuat konten yang mengandung ujaran kebencian, fitnah, pornografi, diskriminasi SARA, maupun materi yang melanggar hukum. Redaksi berhak memoderasi, menyunting, atau menghapus komentar yang melanggar ketentuan tersebut.</p>
 
-<h3>5. Batasan Tanggung Jawab</h3>
-<p>Portal Berita Karya tidak bertanggung jawab atas kerugian langsung maupun tidak langsung yang timbul dari penggunaan layanan ini. Seluruh risiko penggunaan layanan sepenuhnya ditanggung oleh pengguna.</p>
+<h3>5. Perubahan Ketentuan</h3>
+<p>Redaksi BeritaKarya berhak memperbarui ketentuan penggunaan ini sewaktu-waktu. Perubahan mulai berlaku sejak tanggal naskah pembaruan diterbitkan pada halaman ini.</p>
 
-<h3>6. Perubahan Ketentuan</h3>
-<p>Portal Berita Karya berhak mengubah ketentuan penggunaan sewaktu-waktu tanpa pemberitahuan terlebih dahulu. Perubahan akan berlaku sejak tanggal publikasi di situs ini.</p>
+<h3>6. Hukum yang Mengatur</h3>
+<p>Ketentuan penggunaan ini diatur dan ditafsirkan berdasarkan hukum Negara Kesatuan Republik Indonesia. Setiap sengketa yang timbul akan diselesaikan secara musyawarah atau melalui forum penyelesaian sengketa yang berwenang di Indonesia.</p>`,
 
-<h3>7. Hukum yang Berlaku</h3>
-<p>Ketentuan penggunaan ini diatur oleh dan ditafsirkan sesuai dengan hukum Negara Republik Indonesia.</p>`,
+  'media-siber': `<h2>Pedoman Pemberitaan Media Siber (PPMS)</h2>
+<p>Kemerdekaan berpendapat, kemerdekaan berekspresi, dan kemerdekaan pers adalah hak asasi manusia yang dilindungi Pancasila, Undang-Undang Dasar 1945, dan Deklarasi Universal Hak Asasi Manusia PBB. BeritaKarya mematuhi Pedoman Pemberitaan Media Siber yang ditetapkan oleh Dewan Pers:</p>
 
-  'media-siber': `<h2>Pedoman Media Siber - Keputusan Dewan Pers</h2>
-<p>Portal Berita Karya berkomitmen untuk mengikuti Pedoman Pemberitaan Media Siber sesuai dengan Keputusan Dewan Pers Nomor: 03/DP-Kode Etik Jurnalistik/KEJ/2014 tentang Pedoman Pemberitaan Media Siber.</p>
+<h3>1. Ruang Lingkup</h3>
+<p>Media Siber adalah segala bentuk media yang menggunakan wahana internet dan melaksanakan kegiatan jurnalistik, serta memenuhi persyaratan Undang-Undang Pers dan Standar Perusahaan Pers yang ditetapkan Dewan Pers.</p>
 
-<h3>Prinsip Umum Pemberitaan Media Siber</h3>
-<p>1. Setiap berita harus memenuhi standar verifikasi dan cross-check sebelum dipublikasikan.</p>
-<p>2. Redaksi harus menjaga independensi editorial dari tekanan pihak manapun.</p>
-<p>3. Pemberitaan harus berimbang dan memberikan kesempatan kepada semua pihak yang terkait untuk membalas.</p>
-<p>4. Privasi individu harus dihormati kecuali jika informasi tersebut menjadi berita yang legítima.</p>
-<p>5. Tidak boleh memuat konten yang melanggar kesusilaan, SARA, atau memicu konflik.</p>
+<h3>2. Verifikasi dan Keberimbangan Berita</h3>
+<p>a. Pada prinsipnya setiap berita harus melalui verifikasi fakta dari berbagai sumber yang relevan.</p>
+<p>b. Berita yang dapat merugikan pihak lain memerlukan verifikasi pada berita yang sama untuk memenuhi prinsip akurasi dan keberimbangan.</p>
+<p>c. Setiap berita harus mencantumkan keterangan waktu publikasi dan pembaruan secara transparan.</p>
 
-<h3>Hal-Hal yang Harus Dihindari</h3>
-<p>1. Tidak memuat berita bohong (hoax) atau informasi yang tidak dapat diverifikasi kebenarannya.</p>
-<p>2. Tidak memuat konten yang dapat mengganggu stabilitas sosial, politik, dan ekonomi.</p>
-<p>3. Tidak memuat konten yang bersifat pornografi, kekerasan, atau diskriminasi.</p>
-<p>4. Tidak melakukan plagiarisme atau pengambilan konten tanpa izin dari sumber asli.</p>
-<p>5. Tidak memuat konten yang melanggar hak cipta atau hak kekayaan intelektual pihak lain.</p>
+<h3>3. Konten Buatan Pengguna (User Generated Content)</h3>
+<p>Media siber wajib mencantumkan syarat dan ketentuan mengenai Konten Buatan Pengguna yang tidak bertentangan dengan Undang-Undang No. 40 Tahun 1999 tentang Pers dan Kode Etik Jurnalistik. Redaksi memiliki kewajiban untuk melakukan moderasi terhadap konten interaktif pengguna.</p>
 
-<h3>Koreksi dan Hak Jawab</h3>
-<p>Portal Berita Karya menyediakan mekanisme koreksi untuk setiap kesalahan faktual yang ditemukan. Pihak-pihak yang merasa dirugikan oleh pemberitaan kami memiliki hak untuk memberikan tanggapan atau hak jawab sesuai ketentuan yang berlaku.</p>
+<h3>4. Ralat, Koreksi, dan Hak Jawab</h3>
+<p>a. Ralat, koreksi, dan hak jawab mengacu pada Undang-Undang Pers, Kode Etik Jurnalistik, dan Pedoman Hak Jawab yang ditetapkan Dewan Pers.</p>
+<p>b. Ralat, koreksi, dan hak jawab wajib ditautkan pada berita yang diralat, dikoreksi, atau diberi hak jawab.</p>
+<p>c. Pada setiap berita yang diralat, dikoreksi, atau diberi hak jawab wajib dicantumkan waktu pemuatan ralat, koreksi, atau hak jawab tersebut.</p>
 
-<h3>Penerapan dan Pengawasan</h3>
-<p>Pedoman ini diterapkan secara internal di редакции Portal Berita Karya. Kami secara berkala mengevaluasi kepatuhan terhadap pedoman ini dan menerima masukan dari publik untuk meningkatkan kualitas pemberitaan kami.</p>`,
+<h3>5. Pencabutan Berita</h3>
+<p>Berita yang sudah dipublikasikan tidak dapat dicabut karena alasan penyensoran dari pihak luar redaksi, kecuali terkait masalah SARA, kesusilaan, masa depan anak, pengalaman traumatik korban, atau pertimbangan khusus lain yang ditetapkan Dewan Pers.</p>
 
-  cookies: `<h2>Apa Itu Cookie?</h2>
-<p>Cookie adalah file teks kecil yang disimpan di perangkat Anda ketika mengunjungi situs web. Cookie membantu situs web mengingat informasi tentang kunjungan Anda, seperti bahasa pilihan dan pengaturan lainnya, sehingga kunjungan berikutnya menjadi lebih mudah dan pengalaman menggunakan layanan kami lebih bermanfaat.</p>
+<h3>6. Praktik Iklan & Editorial</h3>
+<p>Media siber wajib membedakan dengan tegas antara produk jurnalistik dan iklan. Setiap berita/artikel/isi yang merupakan iklan dan atau konten berbayar wajib mencantumkan keterangan 'iklan', 'advertorial', atau 'sponsor'.</p>`,
 
-<h2>Cookie yang Kami Gunakan</h2>
-<h3>Cookie Esensial</h3>
-<p>Cookie ini diperlukan agar situs web dapat berfungsi dengan baik. Tanpa cookie ini, layanan yang Anda minta tidak dapat disediakan, termasuk autentikasi sesi dan keamanan.</p>
+  cookies: `<h2>Kebijakan Cookie & Teknologi Pelacak</h2>
+<p>Kebijakan Cookie ini menjelaskan bagaimana portal BeritaKarya menggunakan cookie dan teknologi serupa untuk mengenali Anda saat mengunjungi situs web kami. Kebijakan ini menjelaskan apa itu teknologi tersebut, mengapa kami menggunakannya, serta hak Anda untuk mengontrol penggunaannya.</p>
 
-<h3>Cookie Fungsional</h3>
-<p>Cookie ini memungkinkan situs web mengingat pilihan yang Anda buat (seperti tema gelap/terang) dan menyediakan fitur yang lebih personal.</p>
+<h2>Apa Itu Cookie?</h2>
+<p>Cookie adalah file data teks kecil yang disimpan di perangkat peramban (browser) Anda saat mengunjungi sebuah situs web. Cookie digunakan secara luas oleh pemilik situs web untuk membuat situs berfungsi secara efisien, mengingat preferensi pengguna, dan menyediakan informasi analitik.</p>
 
-<h3>Cookie Analitik</h3>
-<p>Cookie ini membantu kami memahami bagaimana pengunjung berinteraksi dengan situs web kami dengan mengumpulkan dan melaporkan informasi secara anonim. Kami menggunakan data ini untuk meningkatkan kualitas layanan.</p>
+<h2>Jenis Cookie yang Kami Gunakan</h2>
+<h3>1. Cookie Esensial & Keamanan</h3>
+<p>Cookie ini sangat penting untuk pengoperasian dasar situs web, seperti autentikasi sesi login, pencegahan penipuan, dan keamanan transfer data.</p>
 
-<h3>Cookie Periklanan</h3>
-<p>Cookie ini digunakan untuk menampilkan iklan yang relevan bagi Anda. Cookie ini juga digunakan untuk membatasi jumlah tampilan iklan dan mengukur efektivitas kampanye iklan.</p>
+<h3>2. Cookie Preferensi & Fungsional</h3>
+<p>Cookie ini memungkinkan situs mengingat pengaturan yang Anda pilih (misalnya pilihan tema gelap/terang atau wilayah daerah berita pilihan) guna memberikan pengalaman yang lebih personal.</p>
 
-<h2>Pihak Ketiga</h2>
-<p>Kami dapat menggunakan layanan pihak ketiga yang juga menetapkan cookie di perangkat Anda, termasuk namun tidak terbatas pada:</p>
-<ul>
-  <li>Google Analytics untuk analitik situs</li>
-  <li>Google AdSense untuk periklanan</li>
-  <li>Platform media sosial untuk fitur berbagi</li>
-</ul>
+<h3>3. Cookie Analitik & Performa</h3>
+<p>Cookie ini membantu kami memahami bagaimana pengunjung berinteraksi dengan situs web dengan mengumpulkan data statistik anonim (seperti jumlah pembaca artikel dan waktu muat halaman) untuk meningkatkan kualitas layanan.</p>
 
-<h2>Mengelola Cookie</h2>
-<p>Anda dapat mengatur browser untuk menolak semua cookie atau memberi tahu saat cookie dikirimkan. Namun, beberapa fitur layanan kami mungkin tidak berfungsi dengan baik tanpa cookie.</p>
+<h3>4. Cookie Periklanan</h3>
+<p>Cookie ini digunakan oleh mitra periklanan tepercaya (seperti Google AdSense) untuk menyajikan iklan yang relevan serta membatasi frekuensi penayangan iklan yang sama kepada pengguna.</p>
 
-<p>Sebagian besar browser web secara otomatis menerima cookie, tetapi Anda biasanya dapat mengubah pengaturan browser untuk menolak cookie jika Anda lebih suka. Silakan merujuk pada dokumentasi browser Anda untuk informasi lebih lanjut tentang cara mengelola preferensi cookie.</p>
+<h2>Pengaturan & Pengelolaan Cookie</h2>
+<p>Anda berhak untuk menerima atau menolak cookie melalui pengaturan pada peramban web Anda. Sebagian besar peramban secara otomatis menerima cookie, namun Anda dapat memodifikasi pengaturan peramban untuk menolak cookie jika diinginkan. Harap diperhatikan bahwa menonaktifkan cookie tertentu dapat mempengaruhi fungsi beberapa fitur di portal kami.</p>
 
-<h2>Perubahan Kebijakan</h2>
-<p>Kami dapat memperbarui kebijakan cookie ini dari waktu ke waktu. Perubahan akan dipublikasikan di halaman ini dengan tanggal pembaruan terakhir.</p>
+<h2>Pembaruan Kebijakan</h2>
+<p>Kami dapat memperbarui Kebijakan Cookie ini dari waktu ke waktu untuk menyesuaikan dengan perubahan operasional, hukum, atau regulasi yang berlaku. Tanggal pembaruan terkini akan selalu tertera di bagian atas halaman ini.</p>
 
-<h2>Kontak</h2>
-<p>Jika Anda memiliki pertanyaan tentang penggunaan cookie kami, silakan hubungi kami melalui email redaksi yang tercantum di halaman kontak portal.</p>`
+<h2>Kontak & Layanan Pembaca</h2>
+<p>Jika Anda memiliki pertanyaan mengenai penggunaan cookie atau kebijakan privasi di BeritaKarya, silakan hubungi tim kami melalui formulir kontak atau email resmi redaksi di <strong>supportberitakarya@gmail.com</strong>.</p>`
 }
 
 export function resolveLegalPage(
