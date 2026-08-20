@@ -68,7 +68,7 @@ function AdSlide({
 export default function AdSpace({
   type,
   slot,
-  label = "Ad",
+  label = "Iklan",
   className = "",
   initialAds,
 }: AdSpaceProps) {
