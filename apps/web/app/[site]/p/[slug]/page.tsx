@@ -34,6 +34,7 @@ export async function generateMetadata({
       icons: faviconUrl,
       siteParam,
       canonicalPath: `/${siteParam}/p/${slug}`,
+      noIndex: true,
     })
   }
 

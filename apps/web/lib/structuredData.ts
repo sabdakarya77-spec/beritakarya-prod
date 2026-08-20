@@ -76,9 +76,11 @@ export interface ArticleSchemaOptions {
   dateModified?: string
   authorName: string
   authorUrl?: string
+  authorType?: 'Person' | 'Organization'
   siteName: string
   siteUrl: string
   articleUrl: string
+  articleBody?: string
   category?: string
   keywords?: string[]
   wordCount?: number
@@ -86,29 +88,61 @@ export interface ArticleSchemaOptions {
 }
 
 export function buildArticle(opts: ArticleSchemaOptions): JsonLdObject {
+  const baseUrl = getBaseUrl()
+  const authorClean = (opts.authorName || '').trim()
+  const isEditorialOrg =
+    opts.authorType === 'Organization' ||
+    ['redaksi', 'tim redaksi', 'staf redaksi', 'editor', 'beritakarya'].includes(
+      authorClean.toLowerCase()
+    )
+
+  const authorObject = isEditorialOrg
+    ? {
+        '@type': 'Organization',
+        name: authorClean || 'Redaksi',
+        url: opts.authorUrl || opts.siteUrl,
+      }
+    : {
+        '@type': 'Person',
+        name: authorClean,
+        url: opts.authorUrl,
+        jobTitle: 'Jurnalis',
+      }
+
+  const formatIsoDate = (dateStr?: string) => {
+    if (!dateStr) return undefined
+    try {
+      return new Date(dateStr).toISOString()
+    } catch {
+      return dateStr
+    }
+  }
+
+  const datePublished = formatIsoDate(opts.datePublished) || new Date().toISOString()
+  const dateModified = formatIsoDate(opts.dateModified) || datePublished
+
   return {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: opts.title,
     description: opts.description,
+    articleBody: opts.articleBody || undefined,
     image: Array.isArray(opts.image) ? opts.image : [opts.image],
-    datePublished: opts.datePublished,
-    dateModified: opts.dateModified || opts.datePublished,
-    author: [
-      {
-        '@type': 'Person',
-        name: opts.authorName,
-        url: opts.authorUrl,
-      },
-    ],
+    datePublished,
+    dateModified,
+    isAccessibleForFree: true,
+    author: [authorObject],
     publisher: {
-      '@type': 'Organization',
+      '@type': 'NewsMediaOrganization',
       name: opts.siteName,
       url: opts.siteUrl,
       logo: {
         '@type': 'ImageObject',
-        url: opts.publisherLogo || `${getBaseUrl()}${SITE_DEFAULT_LOGO}`,
+        url: opts.publisherLogo || `${baseUrl}${SITE_DEFAULT_LOGO}`,
+        width: 600,
+        height: 60,
       },
+      publishingPrinciples: `${opts.siteUrl}/p/media-siber`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',

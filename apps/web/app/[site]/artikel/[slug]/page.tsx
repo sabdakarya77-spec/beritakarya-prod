@@ -19,7 +19,6 @@ import ImageLightboxWrapper from '../../../../components/ui/ImageLightboxWrapper
 import { Container } from '../../../../components/layout/Container'
 import ArticleShareActions from '../../../../components/ui/ArticleShareActions'
 import ArticleBookmarkButton from '../../../../components/ui/ArticleBookmarkButton'
-import FadeInOnScroll from '../../../../components/ui/FadeInOnScroll'
 import { YouTubeEmbed } from '../../../../components/ui/YouTubeEmbed'
 
 
@@ -183,6 +182,20 @@ export default async function ArticlePage({ params }: Props) {
   const authorProfilePath = article.author?.id ? `/${siteParam}/penulis/${article.author.id}` : null
   const sidebarRelatedArticles = relatedArticles.slice(0, 2)
 
+  const rawBlocks = (Array.isArray(article.blocks) ? article.blocks : []) as Block[]
+  const fullArticleBody = rawBlocks
+    .map((b: Block) => {
+      if (b.type === 'paragraph' || b.type === 'heading' || b.type === 'quote' || b.type === 'callout') {
+        return b.content ? b.content.replace(/<[^>]+>/g, '').trim() : ''
+      }
+      if (b.type === 'list' && Array.isArray(b.items)) {
+        return b.items.map((i) => (i ? i.replace(/<[^>]+>/g, '').trim() : '')).join('. ')
+      }
+      return ''
+    })
+    .filter(Boolean)
+    .join('\n\n')
+
   const articleSchema = buildArticle({
     title: article.title,
     description: excerpt,
@@ -194,9 +207,10 @@ export default async function ArticlePage({ params }: Props) {
     siteName: siteConfig.name || 'BeritaKarya',
     siteUrl: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}`,
     articleUrl,
+    articleBody: fullArticleBody,
     category: primaryCategoryName,
     keywords: article.tags,
-    wordCount: article.wordCount,
+    wordCount: article.wordCount || fullArticleBody.split(/\s+/).filter(Boolean).length,
   })
   const breadcrumbSchema = buildBreadcrumb([
     { name: 'Beranda', url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}` },
@@ -366,78 +380,74 @@ export default async function ArticlePage({ params }: Props) {
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <FadeInOnScroll>
-                    <div className="space-y-8">
-                      <div className="article-content max-w-content space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
-                        {(() => {
-                          const blocks = (Array.isArray(article.blocks) ? article.blocks : []) as Block[];
-                          let paragraphCount = 0;
-                          const elements: React.ReactNode[] = [];
+                    <div className="article-content max-w-content space-y-8 text-left transition-all duration-300 xl:max-w-none 2xl:max-w-none">
+                      {(() => {
+                        const blocks = (Array.isArray(article.blocks) ? article.blocks : []) as Block[];
+                        let paragraphCount = 0;
+                        const elements: React.ReactNode[] = [];
 
-                          for (let i = 0; i < blocks.length; i++) {
-                            const block = blocks[i];
-                            elements.push(<PublicBlock key={`block-${i}`} block={block} index={i} />);
+                        for (let i = 0; i < blocks.length; i++) {
+                          const block = blocks[i];
+                          elements.push(<PublicBlock key={`block-${i}`} block={block} index={i} />);
 
-                            if (block.type === 'paragraph') {
-                              paragraphCount++;
+                          if (block.type === 'paragraph') {
+                            paragraphCount++;
 
-                              // After 5th paragraph: insert inline related article
-                              if (paragraphCount === 5 && relatedArticles.length > 0) {
-                                const rel = relatedArticles[0];
-                                elements.push(
-                                  <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
-                                    <div className="flex items-center gap-1.5 mb-3">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
-                                      <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-red">Baca Juga</span>
+                            // After 5th paragraph: insert inline related article
+                            if (paragraphCount === 5 && relatedArticles.length > 0) {
+                              const rel = relatedArticles[0];
+                              elements.push(
+                                <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+                                  <div className="flex items-center gap-1.5 mb-3">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-red">Baca Juga</span>
+                                  </div>
+                                  <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
+                                    <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
+                                      <SmartImage
+                                        src={rel.featuredImage || (Array.isArray(rel.blocks) ? rel.blocks : []).find((b: Block) => b.type === 'image')?.url}
+                                        context="card"
+                                        alt={rel.title}
+                                        fill
+                                        sizes="(max-width: 768px) 112px, 144px"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                      />
                                     </div>
-                                    <Link href={`/${siteParam}/artikel/${rel.slug}`} className="group flex gap-4">
-                                      <div className="relative w-28 h-20 md:w-36 md:h-24 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
-                                        <SmartImage
-                                          src={rel.featuredImage || (Array.isArray(rel.blocks) ? rel.blocks : []).find((b: Block) => b.type === 'image')?.url}
-                                          context="card"
-                                          alt={rel.title}
-                                          fill
-                                          sizes="(max-width: 768px) 112px, 144px"
-                                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                      </div>
-                                      <div className="min-w-0 flex flex-col justify-center">
-                                        <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.categories?.[0]?.category?.name || rel.category?.name)}`}>
-                                          {rel.categories?.[0]?.category?.name || rel.category?.name || 'Umum'}
-                                        </span>
-                                        <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
-                                          {rel.title}
-                                        </h4>
-                                      </div>
-                                    </Link>
-                                  </div>
-                                );
-                              }
+                                    <div className="min-w-0 flex flex-col justify-center">
+                                      <span className={`inline-block w-fit rounded-sm px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] mb-1.5 ${getCategoryColor(rel.categories?.[0]?.category?.name || rel.category?.name)}`}>
+                                        {rel.categories?.[0]?.category?.name || rel.category?.name || 'Umum'}
+                                      </span>
+                                      <h4 className="line-clamp-2 font-sans text-sm font-extrabold leading-snug tracking-tight text-brand-black dark:text-white group-hover:text-brand-red transition-colors">
+                                        {rel.title}
+                                      </h4>
+                                    </div>
+                                  </Link>
+                                </div>
+                              );
+                            }
 
-                              // After 3rd paragraph: insert ARTICLE_TOP ad (after pull quote)
-                              if (paragraphCount === 3) {
-                                elements.push(
-                                  <div key="visual-break-articletop-ad" className="my-10">
-                                    <AdSpace type="ARTICLE_TOP" label="Iklan" />
-                                  </div>
-                                );
-                              }
+                            // After 3rd paragraph: insert ARTICLE_TOP ad (after pull quote)
+                            if (paragraphCount === 3) {
+                              elements.push(
+                                <div key="visual-break-articletop-ad" className="my-10">
+                                  <AdSpace type="ARTICLE_TOP" label="Iklan" />
+                                </div>
+                              );
+                            }
 
-                              // After 8th paragraph: insert ARTICLE_MIDDLE ad
-                              if (paragraphCount === 8) {
-                                elements.push(
-                                  <div key="visual-break-articlemiddle-ad" className="my-10">
-                                    <AdSpace type="ARTICLE_MIDDLE" label="Iklan" />
-                                  </div>
-                                );
-                              }
+                            // After 8th paragraph: insert ARTICLE_MIDDLE ad
+                            if (paragraphCount === 8) {
+                              elements.push(
+                                <div key="visual-break-articlemiddle-ad" className="my-10">
+                                  <AdSpace type="ARTICLE_MIDDLE" label="Iklan" />
+                                </div>
+                              );
                             }
                           }
-                          return elements;
-                        })()}
-                      </div>
+                        }
+                        return elements;
+                      })()}
                     </div>
-                  </FadeInOnScroll>
 
                   {/* Share & Save Section (Inline at the end of article) */}
                   <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-y border-gray-100 py-4 dark:border-white/5">
@@ -450,67 +460,69 @@ export default async function ArticlePage({ params }: Props) {
                       <ArticleBookmarkButton
                         article={article}
                         site={siteParam}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-black/[0.06] bg-white shadow-sm transition-all hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/[0.04] dark:shadow-none"
-                        activeClassName="border-brand-red/40 bg-brand-red/10 text-brand-red"
-                        idleClassName="text-brand-text-muted hover:text-brand-red hover:border-brand-red/30"
-                        iconSize={14}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08]"
+                        activeClassName="bg-brand-red text-white border-brand-red"
+                        idleClassName="text-brand-black dark:text-white hover:border-brand-red/30"
+                        iconSize={16}
                       />
                     </div>
                   </div>
 
                   {/* Tags */}
-                  <div className="mt-5 flex flex-wrap gap-2 pt-2">
-                    {(article.tags || ['Investigasi', 'KaryaNyata', 'Nusantara', 'Politik']).map((tag: string) => (
-                      <Link
-                        key={tag}
-                        href={`/${siteParam}?q=${encodeURIComponent(tag)}`}
-                        className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03] dark:text-brand-text-muted"
-                      >
-                        #{tag}
-                      </Link>
-                    ))}
-                  </div>
+                  {Array.isArray(article.tags) && article.tags.length > 0 && (
+                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                      <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
+                        <Tags size={12} /> Topik:
+                      </span>
+                      {article.tags.map((tag: string, index: number) => (
+                        <span
+                          key={index}
+                          className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-white/5 dark:text-gray-300"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Comment Section */}
                   <div id="comments">
                     <CommentSection articleId={article.id} />
                   </div>
 
-                  {/* ARTICLE_BOTTOM — before recommendations */}
+                  {/* Bottom Ad Space */}
                   <div className="my-10">
                     <AdSpace type="ARTICLE_BOTTOM" label="Iklan" />
                   </div>
 
                   {/* Recommended Articles */}
-                  <FadeInOnScroll>
-                    <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/5 md:mt-12 md:pt-10">
-                      <div className="mb-6 flex items-center gap-2.5">
-                        <div className="h-5 w-0.75 bg-brand-red" />
-                        <div>
-                          <h3 className="text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white">
-                            Rekomendasi Artikel
-                          </h3>
-                          <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-text-muted">
-                            Lanjutkan bacaan terkait topik ini
-                          </p>
-                        </div>
+                  <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/5 md:mt-12 md:pt-10">
+                    <div className="mb-6 flex items-center gap-2.5">
+                      <div className="h-5 w-0.75 bg-brand-red" />
+                      <div>
+                        <h3 className="text-lg md:text-xl font-sans font-extrabold tracking-tight text-brand-black dark:text-white">
+                          Rekomendasi Artikel
+                        </h3>
+                        <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-brand-text-muted">
+                          Lanjutkan bacaan terkait topik ini
+                        </p>
                       </div>
+                    </div>
 
-                      {relatedArticles.length > 0 ? (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                          {relatedArticles.map((rel: RelatedArticle) => (
-                            <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="col-span-full rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center dark:border-white/10">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-brand-text-muted">
-                            Belum ada rekomendasi artikel terkait.
-                          </p>
-                        </div>
-                      )}
-                    </section>
-                  </FadeInOnScroll>
+                    {relatedArticles.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        {relatedArticles.map((rel: RelatedArticle) => (
+                          <NewsCard key={rel.id} article={rel} variant="medium" site={siteParam} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="col-span-full rounded-2xl border border-dashed border-gray-200 px-4 py-8 text-center dark:border-white/10">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-brand-text-muted">
+                          Belum ada rekomendasi artikel terkait.
+                        </p>
+                      </div>
+                    )}
+                  </section>
                 </div>
               </div>
 

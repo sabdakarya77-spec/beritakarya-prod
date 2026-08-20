@@ -150,12 +150,12 @@ export function proxy(req: NextRequest) {
   res.headers.set('x-site-id', siteId)
 
   // Internal rewrite:
-  // Point '/', '/dashboard', '/sitemap.xml', '/robots.txt' ke '/[siteId]/...' secara internal
+  // Point '/', '/dashboard', '/sitemap.xml' ke '/[siteId]/...' secara internal
+  // NOTE: '/robots.txt' dan '/ads.txt' ditangani langsung di root oleh Route Handler tanpa rewrite
   const shouldRewrite =
     url.pathname === '/' ||
     url.pathname.startsWith('/dashboard') ||
-    url.pathname === '/sitemap.xml' ||
-    url.pathname === '/robots.txt'
+    url.pathname === '/sitemap.xml'
 
   if (shouldRewrite) {
     url.pathname = `/${siteId}${url.pathname === '/' ? '' : url.pathname}`

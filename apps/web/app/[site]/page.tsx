@@ -10,6 +10,8 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
   const resolvedSearchParams = await searchParams;
   const siteParam = resolvedParams?.site || 'pusat';
   const hasCategoryFilter = Boolean(resolvedSearchParams?.cat);
+  const hasSearchQuery = Boolean(resolvedSearchParams?.q);
+  const shouldNoIndex = hasCategoryFilter || hasSearchQuery;
 
   let siteName = siteParam.charAt(0).toUpperCase() + siteParam.slice(1);
   let description = `Portal berita independen ${siteName} menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.`;
@@ -32,15 +34,17 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
   }
 
   return constructMetadata({
-    title: `${siteName} - Berita Terkini & Terpercaya`,
+    title: hasSearchQuery
+      ? `Hasil Pencarian: "${resolvedSearchParams.q}" - ${siteName}`
+      : `${siteName} - Berita Terkini & Terpercaya`,
     description,
     image: ogImageUrl,
     icons: faviconUrl,
     siteParam,
-    noIndex: hasCategoryFilter,
-    // Saat filter ?cat= aktif, arahkan canonical ke URL induk tanpa query string.
-    // Ini memberi tahu Google bahwa halaman kanonik adalah /{site} bukan /{site}?cat=...
-    ...(hasCategoryFilter && { canonicalPath: `/${siteParam}` }),
+    noIndex: shouldNoIndex,
+    // Saat filter ?cat= atau pencarian ?q= aktif, arahkan canonical ke URL induk tanpa query string.
+    // Ini mencegah duplikasi dan melarang Google mengindeks URL query pencarian internal.
+    ...(shouldNoIndex && { canonicalPath: `/${siteParam}` }),
   })
 }
 
