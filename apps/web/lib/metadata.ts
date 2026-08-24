@@ -44,13 +44,13 @@ export function constructMetadata({
   const baseUrl = resolveBaseUrl()
   const twitter = twitterHandle || resolveTwitterHandle()
 
-  const canonical = canonicalPath
-    ? `${baseUrl}${canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`}`
+  const canonical = canonicalPath !== undefined
+    ? (canonicalPath === '/' || canonicalPath === '' ? `${baseUrl}/` : `${baseUrl}${canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`}`)
     : slug
     ? siteParam
       ? `${baseUrl}/${siteParam}/artikel/${slug}`
       : `${baseUrl}/artikel/${slug}`
-    : siteParam
+    : siteParam && siteParam !== 'pusat'
     ? `${baseUrl}/${siteParam}`
     : `${baseUrl}/`
 

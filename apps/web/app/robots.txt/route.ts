@@ -18,7 +18,9 @@ User-agent: *
 Allow: /
 Disallow: /dashboard/
 Disallow: /login
+Disallow: /login*
 Disallow: /register
+Disallow: /register*
 Disallow: /api/
 Disallow: /auth/
 Disallow: /reset-password
@@ -26,6 +28,7 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /*?q=*
 Disallow: /*?site=*
+Disallow: /*?cat=*
 Disallow: /_next/static/media/
 
 # Dedicated Bot Rules
@@ -36,11 +39,14 @@ Allow: /_next/image
 Allow: /uploads/
 Disallow: /dashboard/
 Disallow: /login
+Disallow: /login*
 Disallow: /register
+Disallow: /register*
 Disallow: /api/
 Disallow: /auth/
 Disallow: /*?q=*
 Disallow: /*?site=*
+Disallow: /*?cat=*
 Disallow: /_next/static/media/
 
 User-agent: Googlebot-Image

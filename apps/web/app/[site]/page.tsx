@@ -1,14 +1,22 @@
+import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { API_URL } from '../../lib/api'
 import { constructMetadata } from '../../lib/metadata'
 import { SiteHomePage } from '../../components/pages/home/SiteHomePage'
 import { JsonLd } from '../../components/ui/JsonLd'
 import { buildOrganization, buildWebsite } from '../../lib/structuredData'
+import { SITE_MAP } from '@beritakarya/config'
 
 export async function generateMetadata({ params, searchParams }: { params: { site: string }; searchParams: { cat?: string; q?: string } }): Promise<Metadata> {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  const siteParam = resolvedParams?.site || 'pusat';
+  const rawSiteParam = resolvedParams?.site || 'pusat';
+  const siteParam = rawSiteParam.toLowerCase();
+
+  if (!/^[a-z0-9-]+$/.test(siteParam)) {
+    return { title: 'Halaman Tidak Ditemukan', robots: { index: false, follow: false } };
+  }
+
   const hasCategoryFilter = Boolean(resolvedSearchParams?.cat);
   const hasSearchQuery = Boolean(resolvedSearchParams?.q);
   const shouldNoIndex = hasCategoryFilter || hasSearchQuery;
@@ -44,7 +52,7 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
     noIndex: shouldNoIndex,
     // Saat filter ?cat= atau pencarian ?q= aktif, arahkan canonical ke URL induk tanpa query string.
     // Ini mencegah duplikasi dan melarang Google mengindeks URL query pencarian internal.
-    ...(shouldNoIndex && { canonicalPath: `/${siteParam}` }),
+    ...(shouldNoIndex && { canonicalPath: siteParam === 'pusat' ? '/' : `/${siteParam}` }),
   })
 }
 
@@ -56,21 +64,34 @@ export default async function SitePage({
   searchParams: { cat?: string; q?: string }
 }) {
   const resolvedParams = await params;
-  const siteParam = resolvedParams?.site || 'pusat';
+  const rawSiteParam = resolvedParams?.site || 'pusat';
+  const siteParam = rawSiteParam.toLowerCase();
+
+  if (!/^[a-z0-9-]+$/.test(siteParam)) {
+    notFound();
+  }
+
   const resolvedSearchParams = await searchParams;
 
   let siteName = siteParam.charAt(0).toUpperCase() + siteParam.slice(1);
   let socialLinks: Record<string, string | null | undefined> = {};
+  let siteFound = false;
+
   try {
     const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const json = await res.json();
       if (json.data) {
+        siteFound = true;
         siteName = json.data.name || siteName;
         socialLinks = json.data.socialLinks || {};
       }
     }
   } catch {}
+
+  if (!siteFound && siteParam !== 'pusat' && !SITE_MAP[siteParam]) {
+    notFound();
+  }
 
   return (
     <>

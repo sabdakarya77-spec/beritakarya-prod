@@ -7,9 +7,9 @@ import { GoogleAnalytics } from '../components/layout/GoogleAnalytics'
 export async function generateMetadata(): Promise<Metadata> {
   return constructMetadata({
     title: 'BeritaKarya — Portal Berita Terpercaya',
-    description: 'BeritaKarya pusat: informasi terkini dari seluruh Nusantara tanpa perlu menambahkan /pusat di URL.',
-    siteParam: '',
-    canonicalPath: '/pusat',
+    description: 'Portal berita independen menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.',
+    siteParam: 'pusat',
+    canonicalPath: '/',
   })
 }
 

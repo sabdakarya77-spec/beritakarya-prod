@@ -222,6 +222,7 @@ export default function Navbar({
             ) : (
               <Link
                 href="/login"
+                rel="nofollow"
                 className="flex items-center gap-1.5 rounded-full p-1.5 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 <UserIcon size={15} strokeWidth={1.5} />
@@ -367,6 +368,7 @@ export default function Navbar({
               ) : (
                 <Link
                   href="/login"
+                  rel="nofollow"
                   className="flex items-center gap-1.5 rounded-full p-1.5 text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
                 >
                   <UserIcon size={15} strokeWidth={1.5} />

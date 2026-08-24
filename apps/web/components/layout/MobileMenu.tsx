@@ -136,6 +136,7 @@ export default function MobileMenu({
             ) : (
               <Link
                 href="/login"
+                rel="nofollow"
                 onClick={onClose}
                 className="flex items-center justify-between rounded-2xl bg-brand-red p-3.5 text-white shadow-lg shadow-brand-red/20"
               >

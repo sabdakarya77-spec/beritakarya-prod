@@ -237,6 +237,7 @@ export default function FullScreenSearch({
                 <Link
                   key={tag}
                   href={`/${site}?q=${encodeURIComponent(tag)}`}
+                  rel="nofollow"
                   onClick={onClose}
                   className="px-4 py-2 bg-black/5 dark:bg-white/5 hover:bg-brand-red hover:text-white border border-black/5 dark:border-white/10 rounded-full text-xs font-bold text-gray-600 dark:text-gray-300 transition-all hover:scale-105"
                 >

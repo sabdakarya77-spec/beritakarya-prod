@@ -695,6 +695,7 @@ export default async function ArticlePage({ params }: Props) {
                           <Link
                             key={tag}
                             href={`/${siteParam}?q=${encodeURIComponent(tag)}`}
+                            rel="nofollow"
                             className="inline-flex items-center rounded-full border border-black/5 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.1em] text-brand-text-muted transition-colors hover:border-brand-red/40 hover:text-brand-red dark:border-white/5 dark:bg-white/[0.03] dark:text-brand-text-muted"
                           >
                             #{tag}

@@ -74,11 +74,10 @@ function toAbsolute(baseUrl: string, path: string) {
 
 export async function generateSiteSitemap(site: string): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
-  const siteUrl = `${baseUrl}/${site}`
+  const siteUrl = site === 'pusat' ? baseUrl : `${baseUrl}/${site}`
 
-  const [articles, categories, authors] = await Promise.all([
+  const [articles, authors] = await Promise.all([
     getArticles(site),
-    getCategories(site),
     getAuthors(site),
   ])
 
@@ -86,7 +85,7 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
 
   const entries: MetadataRoute.Sitemap = [
     {
-      url: siteUrl,
+      url: site === 'pusat' ? `${baseUrl}/` : siteUrl,
       lastModified: now,
       changeFrequency: 'hourly',
       priority: 1.0,
@@ -124,16 +123,6 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
     lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.7,
-  })
-
-  // Categories
-  categories.forEach((cat: { name: string; updatedAt?: string }) => {
-    entries.push({
-      url: `${siteUrl}?cat=${encodeURIComponent(cat.name)}`,
-      lastModified: cat.updatedAt ? new Date(cat.updatedAt) : now,
-      changeFrequency: 'daily',
-      priority: 0.8,
-    })
   })
 
   // Author profiles
