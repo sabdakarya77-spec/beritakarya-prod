@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { SiteHomePage } from '../components/pages/home/SiteHomePage'
 import type { Metadata } from 'next'
 import { constructMetadata } from '../lib/metadata'
@@ -5,10 +6,16 @@ import { fetchSiteSettings, buildPublicSiteConfig } from '../lib/siteSettings'
 import { GoogleAnalytics } from '../components/layout/GoogleAnalytics'
 
 export async function generateMetadata(): Promise<Metadata> {
+  const headerList = await headers()
+  const siteParam = headerList.get('x-site-id') || 'pusat'
+  const siteSettings = await fetchSiteSettings(siteParam)
+  const siteName = siteSettings?.name || (siteParam === 'pusat' ? 'BeritaKarya' : `BeritaKarya ${siteParam.charAt(0).toUpperCase() + siteParam.slice(1)}`)
+  const description = siteSettings?.description || 'Portal berita independen menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.'
+
   return constructMetadata({
-    title: 'BeritaKarya — Portal Berita Terpercaya',
-    description: 'Portal berita independen menyajikan analisis tajam, investigasi mendalam, dan informasi tepercaya dari seluruh pelosok Indonesia.',
-    siteParam: 'pusat',
+    title: `${siteName} — Portal Berita Terpercaya`,
+    description,
+    siteParam,
     canonicalPath: '/',
   })
 }
@@ -18,15 +25,15 @@ export default async function RootPage({
 }: {
   searchParams: { cat?: string; q?: string }
 }) {
-  // PENTING: route '/' ini TIDAK melewati app/[site]/layout.tsx, jadi
-  // <GoogleAnalytics> harus dipasang di sini juga. Tanpa ini, gtag.js
-  // tidak pernah ter-inject di homepage https://beritakarya.co.
-  const siteSettings = await fetchSiteSettings('pusat')
-  const siteConfig = buildPublicSiteConfig('pusat', siteSettings)
+  const headerList = await headers()
+  const siteParam = headerList.get('x-site-id') || 'pusat'
+
+  const siteSettings = await fetchSiteSettings(siteParam)
+  const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   return (
     <>
-      <SiteHomePage siteParam="pusat" searchParams={searchParams} />
+      <SiteHomePage siteParam={siteParam} searchParams={searchParams} />
       {siteConfig.gaMeasurementId && (
         <GoogleAnalytics gaMeasurementId={siteConfig.gaMeasurementId} />
       )}

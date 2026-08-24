@@ -1,9 +1,50 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Root reserved segments that should NOT be rewritten to /[site]/[segment] on subdomains
+const RESERVED_ROOT_PATHS = new Set([
+  'login',
+  'register',
+  'forgot-password',
+  'reset-password',
+  'verify-email',
+  'auth',
+  'api',
+  '_next',
+  'favicon.ico',
+  'robots.txt',
+  'sitemap.xml',
+  'ads.txt',
+  'manifest.webmanifest',
+])
+
+function extractSubdomain(hostname: string): string {
+  if (!hostname) return ''
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
+
+  if (isLocalhost) {
+    // e.g. jombang.localhost:3000 -> parts = ['jombang', 'localhost:3000']
+    const parts = hostname.split('.')
+    if (parts.length > 1 && !parts[0].includes(':') && parts[0] !== 'localhost') {
+      return parts[0].toLowerCase()
+    }
+  } else {
+    // e.g. jombang.beritakarya.co -> parts = ['jombang', 'beritakarya', 'co']
+    const parts = hostname.split('.')
+    if (parts.length > 2) {
+      const sub = parts[0].toLowerCase()
+      if (sub !== 'www' && sub !== 'media') {
+        return sub
+      }
+    }
+  }
+  return ''
+}
+
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone()
   const pathname = url.pathname
+  const hostname = req.headers.get('host') || ''
 
   // 1. Block placeholder query strings that leaked from SearchAction templates (e.g. ?q={search_term_string})
   const rawQuery = req.nextUrl.search
@@ -20,17 +61,25 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 3. Redirect known legacy root paths to proper canonical URLs
-  const ROOT_REDIRECTS: Record<string, string> = {
-    privacy: '/pusat/kebijakan-privasi',
-    terms: '/pusat/p/terms',
-    cookies: '/pusat/cookies',
-    bantuan: '/pusat/p/about',
-    arsip: '/',
-  }
-  const firstSegment = pathname.split('/').filter(Boolean)[0]?.toLowerCase()
-  if (firstSegment && ROOT_REDIRECTS[firstSegment]) {
-    return NextResponse.redirect(new URL(ROOT_REDIRECTS[firstSegment], req.url), 301)
+  const subdomain = extractSubdomain(hostname)
+  const isSubdomain = Boolean(subdomain && subdomain !== 'pusat' && subdomain !== 'www')
+  const siteId = isSubdomain ? subdomain : 'pusat'
+
+  const pathSegments = pathname.split('/').filter(Boolean)
+  const firstSegment = pathSegments[0]?.toLowerCase()
+
+  // 3. Redirect known legacy root paths to proper canonical URLs (only when not on subdomain)
+  if (!isSubdomain) {
+    const ROOT_REDIRECTS: Record<string, string> = {
+      privacy: '/pusat/kebijakan-privasi',
+      terms: '/pusat/p/terms',
+      cookies: '/pusat/cookies',
+      bantuan: '/pusat/p/about',
+      arsip: '/',
+    }
+    if (firstSegment && ROOT_REDIRECTS[firstSegment]) {
+      return NextResponse.redirect(new URL(ROOT_REDIRECTS[firstSegment], req.url), 301)
+    }
   }
 
   // 4. Redirect auth pages with ?next= query parameters to clean canonical auth pages for bots
@@ -51,7 +100,43 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  return NextResponse.next()
+  // 6. Subdomain Multi-Tenant Routing
+  // On subdomains (e.g. jombang.beritakarya.co):
+  // - '/' rewrites to '/jombang'
+  // - '/artikel/xyz' rewrites to '/jombang/artikel/xyz'
+  // - '/penulis/abc' rewrites to '/jombang/penulis/abc'
+  // - '/cookies' rewrites to '/jombang/cookies'
+  // - Reserved paths (login, register, api, etc.) are NOT rewritten
+  if (isSubdomain && (!firstSegment || !RESERVED_ROOT_PATHS.has(firstSegment))) {
+    if (firstSegment !== subdomain) {
+      url.pathname = `/${subdomain}${pathname}`
+      const response = NextResponse.rewrite(url)
+      response.headers.set('x-site-id', subdomain)
+      response.cookies.set('siteId', subdomain, {
+        httpOnly: false,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24,
+      })
+      return response
+    }
+  }
+
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set('x-site-id', siteId)
+
+  const res = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+  res.headers.set('x-site-id', siteId)
+  res.cookies.set('siteId', siteId, {
+    httpOnly: false,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24,
+  })
+
+  return res
 }
 
 export const config = {
