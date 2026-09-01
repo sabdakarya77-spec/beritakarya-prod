@@ -31,7 +31,7 @@ export type PublicSiteConfig = {
 export async function fetchSiteSettings(site: string) {
   try {
     const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${site}`, {
-      cache: 'no-store',
+      next: { revalidate: 60 }, // 60 detik — konsisten dengan page.tsx agar tidak ada cache conflict via Next.js request deduplication
     })
     if (!res.ok) return null
     const json = await res.json()

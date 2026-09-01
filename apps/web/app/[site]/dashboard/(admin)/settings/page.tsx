@@ -181,7 +181,7 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const { data } = await api.get('/sites/settings')
+      const { data } = await api.get('/sites/settings', { params: { site } })
       if (data.success) {
         const mappedSettings = {
           name: data.data.name || '',
@@ -254,7 +254,7 @@ export default function SettingsPage() {
     setSaving(true)
     setMessage(null)
     try {
-      const { data } = await api.patch('/sites/settings', finalSettings)
+      const { data } = await api.patch('/sites/settings', finalSettings, { params: { site } })
       if (data.success) {
         setMessage({ type: 'success', text: 'Pengaturan berhasil disimpan!' })
         setSettings(finalSettings)

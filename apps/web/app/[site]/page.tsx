@@ -27,7 +27,7 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
   let ogImageUrl = '/logo.png';
 
   try {
-    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 60 } });
     if (res.ok) {
       const json = await res.json();
       if (json.data) {
@@ -78,7 +78,7 @@ export default async function SitePage({
   let siteFound = false;
 
   try {
-    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/v1/sites/settings?site=${siteParam}`, { next: { revalidate: 60 } });
     if (res.ok) {
       const json = await res.json();
       if (json.data) {
