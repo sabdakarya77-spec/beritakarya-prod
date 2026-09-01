@@ -351,9 +351,21 @@ export async function SiteHomePage({ siteParam, searchParams }: SiteHomePageProp
   const showPhotoSection = isHomepage && photoJournal.length >= 1
   const showVideoSection = isHomepage && videoStories.length >= 1
 
-  const whatsappUrl = buildWhatsAppUrl(siteConfig.phone, siteConfig.name)
-  const telegramUrl = siteConfig.socialLinks?.telegram || null
-  const reportUrl = `mailto:${siteConfig.contactEmail}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
+  const whatsappUrl = siteConfig.editorialContact?.whatsapp
+    ? (siteConfig.editorialContact.whatsapp.startsWith('http')
+        ? siteConfig.editorialContact.whatsapp
+        : buildWhatsAppUrl(siteConfig.editorialContact.whatsapp, siteConfig.name))
+    : buildWhatsAppUrl(siteConfig.phone, siteConfig.name)
+
+  const telegramUrl = siteConfig.editorialContact?.telegram
+    ? (siteConfig.editorialContact.telegram.startsWith('http')
+        ? siteConfig.editorialContact.telegram
+        : `https://t.me/${siteConfig.editorialContact.telegram.replace(/^@/, '')}`)
+    : (siteConfig.socialLinks?.telegram || null)
+
+  const reportUrl = siteConfig.editorialContact?.email
+    ? `mailto:${siteConfig.editorialContact.email}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
+    : `mailto:${siteConfig.contactEmail || 'support.beritakarya@gmail.com'}?subject=${encodeURIComponent(`Laporan Warga untuk ${siteConfig.name}`)}`
 
   // ── Pilih template berdasarkan config ──
   const templateKey: TemplateKey = (homepageConfig?.template as TemplateKey) || 'F'

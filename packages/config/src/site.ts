@@ -16,6 +16,11 @@ export interface SiteConfig {
     telegram?: string
     tiktok?: string
   }
+  editorialContact?: {
+    whatsapp?: string
+    telegram?: string
+    email?: string
+  }
   address?: string
   contactEmail?: string
   phone?: string

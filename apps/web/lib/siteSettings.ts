@@ -13,6 +13,11 @@ export type PublicSiteConfig = {
   phone?: string | null
   appearance: { primaryColor?: string }
   socialLinks: Record<string, string>
+  editorialContact?: {
+    whatsapp?: string
+    telegram?: string
+    email?: string
+  }
   trendingTopics?: unknown[]
   aboutUs?: string | null
   codeOfEthics?: string | null
@@ -74,6 +79,7 @@ export function buildPublicSiteConfig(
     phone: (siteSettings?.phone as string) || fallback?.phone || null,
     appearance: (siteSettings?.appearance as PublicSiteConfig['appearance']) || fallback?.appearance || { primaryColor: '#e11d48' },
     socialLinks: (siteSettings?.socialLinks as Record<string, string>) || fallback?.socialLinks || { facebook: '', twitter: '', instagram: '', youtube: '' },
+    editorialContact: (siteSettings?.editorialContact as PublicSiteConfig['editorialContact']) || (fallback as unknown as { editorialContact?: PublicSiteConfig['editorialContact'] })?.editorialContact || { whatsapp: '', telegram: '', email: '' },
     trendingTopics: (siteSettings?.trendingTopics as unknown[]) || [],
     aboutUs: (siteSettings?.aboutUs as string) || null,
     codeOfEthics: (siteSettings?.codeOfEthics as string) || null,

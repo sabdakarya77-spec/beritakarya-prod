@@ -13,6 +13,7 @@ import type { Prisma } from '@prisma/client'
  */
 const CORPORATE_ASSET_FIELDS = [
   'socialLinks',          // Saluran Media Sosial Resmi
+  'editorialContact',    // Akses Redaksi (WhatsApp, Telegram, Email)
   'footerText',           // Teks Footer Hak Cipta
   'googleIndexingConfig', // Google Search API
   'aboutUs',              // Halaman Legal
@@ -420,6 +421,7 @@ export class SiteService {
       termsOfService: site.termsOfService,
       mediaSiber: site.mediaSiber,
       socialLinks: site.socialLinks,
+      editorialContact: site.editorialContact,
       appearance: site.appearance,
       trendingTopics: site.trendingTopics,
       googleIndexingConfig: site.googleIndexingConfig,
@@ -462,14 +464,14 @@ export class SiteService {
       'name', 'domain', 'description', 'logoUrl', 'faviconUrl', 'ogImageUrl', 'footerText',
       'address', 'contactEmail', 'phone', 'aboutUs', 'codeOfEthics',
       'editorial', 'advertising', 'privacyPolicy', 'termsOfService', 'mediaSiber',
-      'socialLinks', 'appearance', 'trendingTopics',
+      'socialLinks', 'editorialContact', 'appearance', 'trendingTopics',
       'googleIndexingConfig', 'ga4PropertyId', 'gaMeasurementId', 'gscSiteUrl',   // gaMeasurementId BARU
       'wapimredSettings', 'kaperwilSettings', 'korwilSettings', 'kabiroSettings'
     ]
 
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
-        if (['socialLinks', 'appearance', 'trendingTopics', 'googleIndexingConfig'].includes(field) && typeof data[field] === 'object') {
+        if (['socialLinks', 'editorialContact', 'appearance', 'trendingTopics', 'googleIndexingConfig'].includes(field) && typeof data[field] === 'object') {
           // Prisma handles objects natively for JSON fields in Postgres
           updateData[field] = data[field]
         } else {

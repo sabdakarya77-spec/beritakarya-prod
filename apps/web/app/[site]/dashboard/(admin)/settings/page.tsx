@@ -78,6 +78,11 @@ export default function SettingsPage() {
       telegram: '',
       tiktok: ''
     },
+    editorialContact: {
+      whatsapp: '',
+      telegram: '',
+      email: ''
+    },
     appearance: {
       primaryColor: '#e11d48',
       editorialPdfUrl: ''
@@ -203,6 +208,11 @@ export default function SettingsPage() {
             youtube: data.data.socialLinks?.youtube || '',
             telegram: data.data.socialLinks?.telegram || '',
             tiktok: data.data.socialLinks?.tiktok || ''
+          },
+          editorialContact: {
+            whatsapp: data.data.editorialContact?.whatsapp || '',
+            telegram: data.data.editorialContact?.telegram || '',
+            email: data.data.editorialContact?.email || ''
           },
           appearance: {
             primaryColor: data.data.appearance?.primaryColor || '#e11d48',
@@ -780,6 +790,79 @@ export default function SettingsPage() {
                         placeholder="+62 812-3456-7890"
                         className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-3 text-base text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
                       />
+                    </div>
+                  </div>
+
+                  <hr className="border-gray-200 dark:border-gray-800" />
+
+                  {/* SEKSI: AKSES REDAKSI (HOMEPAGE) */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Mail size={16} className="text-brand-red" /> Akses Redaksi
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Jalur komunikasi langsung untuk kotak <strong>Akses Redaksi</strong> di homepage portal (Chat Redaksi, Telegram Redaksi, dan Kirim Email).
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* WhatsApp Chat Redaksi */}
+                      <div className="space-y-2">
+                        <label htmlFor="editorial-whatsapp" className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" /> WhatsApp Chat Redaksi
+                        </label>
+                        <input
+                          id="editorial-whatsapp"
+                          type="text"
+                          value={settings.editorialContact.whatsapp}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            editorialContact: { ...settings.editorialContact, whatsapp: e.target.value }
+                          })}
+                          placeholder="+62 812-3456-7890 atau https://wa.me/..."
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-[11px] text-gray-400">Nomor/link WhatsApp untuk tombol Chat Redaksi.</p>
+                      </div>
+
+                      {/* Telegram Redaksi */}
+                      <div className="space-y-2">
+                        <label htmlFor="editorial-telegram" className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-sky-500" /> Telegram Redaksi
+                        </label>
+                        <input
+                          id="editorial-telegram"
+                          type="text"
+                          value={settings.editorialContact.telegram}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            editorialContact: { ...settings.editorialContact, telegram: e.target.value }
+                          })}
+                          placeholder="@redaksiberitakarya atau https://t.me/..."
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-[11px] text-gray-400">Username/link Telegram untuk tombol Telegram Redaksi.</p>
+                      </div>
+
+                      {/* Email Redaksi */}
+                      <div className="space-y-2">
+                        <label htmlFor="editorial-email" className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-brand-red" /> Email Redaksi
+                        </label>
+                        <input
+                          id="editorial-email"
+                          type="email"
+                          value={settings.editorialContact.email}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            editorialContact: { ...settings.editorialContact, email: e.target.value }
+                          })}
+                          placeholder="redaksi@beritakarya.co"
+                          className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/20 transition-all"
+                        />
+                        <p className="text-[11px] text-gray-400">Email khusus laporan/aduan untuk tombol Kirim Email.</p>
+                      </div>
                     </div>
                   </div>
 

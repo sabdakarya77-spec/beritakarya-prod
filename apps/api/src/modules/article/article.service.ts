@@ -315,6 +315,27 @@ export async function updateArticle(
      }
   }
 
+  // Publikasi hanya diizinkan untuk superadmin dan wapimred (dengan toggle canPublish)
+  if (input.status === 'published' && article.status !== 'published') {
+    if (!['superadmin', 'wapimred'].includes(user.role)) {
+      throw new AppError('Akses ditolak: Hanya Superadmin dan Wapimred yang dapat menerbitkan artikel', 403)
+    }
+    if (user.role === 'wapimred') {
+      const siteForToggle = await prisma.site.findUnique({
+        where: { id: siteId },
+        select: { wapimredSettings: true }
+      })
+      const settings = (siteForToggle?.wapimredSettings as unknown as Record<string, boolean>) || {}
+      if (!settings.canPublish) {
+        throw new AppError(
+          'WAPIMRED tidak memiliki izin untuk menerbitkan artikel. Hubungi Pimred.',
+          403
+        )
+      }
+    }
+    assertCanPublish(article, user, false)
+  }
+
   // Cek toggle canSchedule untuk wewenang manajerial
   if (['wapimred', 'kaperwil', 'korwil', 'kabiro'].includes(user.role) && input.status === 'scheduled') {
     const roleSettingsKey = `${user.role}Settings` as 'wapimredSettings' | 'kaperwilSettings' | 'korwilSettings' | 'kabiroSettings';

@@ -66,6 +66,7 @@ model Site {
   termsOfService       String?   @db.Text
   mediaSiber           String?   @db.Text
   socialLinks          Json?     @default("{}")
+  editorialContact     Json?     @default("{\"whatsapp\":\"\",\"telegram\":\"\",\"email\":\"\"}")
   appearance           Json?     @default("{\"primaryColor\":\"#e11d48\"}")
   trendingTopics       Json?     @default("[]")
   googleIndexingConfig Json?     @default("{}")

@@ -200,6 +200,49 @@ describe('updateArticle — ownership', () => {
       })
     }))
   })
+
+  it('kabiro ditolak jika mencoba mengubah status ke published', async () => {
+    const kabiroUser: JWTPayload = { userId: 'u-kabiro', role: 'kabiro', siteId: 'bandung', iat: 0, exp: 0 }
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'kabiro', kycStatus: 'APPROVED' } as unknown as User)
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as unknown as ArticleWithDetails
+    )
+
+    const err = await updateArticle('art-1', 'bandung', { status: 'published' }, kabiroUser).catch((e) => e)
+    expect(err.statusCode).toBe(403)
+    expect(err.message).toContain('Hanya Superadmin dan Wapimred')
+  })
+
+  it('wapimred tanpa izin canPublish ditolak jika mengubah status ke published', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'wapimred', kycStatus: 'APPROVED' } as unknown as User)
+    vi.mocked(prisma.site.findUnique).mockResolvedValue({
+      id: 'bandung',
+      wapimredSettings: { canPublish: false }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as unknown as ArticleWithDetails
+    )
+
+    const err = await updateArticle('art-1', 'bandung', { status: 'published' }, editorPusat).catch((e) => e)
+    expect(err.statusCode).toBe(403)
+    expect(err.message).toContain('WAPIMRED tidak memiliki izin')
+  })
+
+  it('superadmin diizinkan mengubah status ke published dari approved', async () => {
+    const superadminUser: JWTPayload = { userId: 'u-sa', role: 'superadmin', siteId: null, iat: 0, exp: 0 }
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ role: 'superadmin', kycStatus: 'APPROVED' } as unknown as User)
+    vi.mocked(repo.findArticleById).mockResolvedValue(
+      mockArticle({ status: 'approved', blocks: publishReadyBlocks() }) as unknown as ArticleWithDetails
+    )
+    vi.mocked(repo.updateArticle).mockResolvedValue(
+      mockArticle({ status: 'published' }) as unknown as ArticleWithDetails
+    )
+
+    await expect(
+      updateArticle('art-1', 'bandung', { status: 'published' }, superadminUser)
+    ).resolves.not.toThrow()
+  })
 })
 
 describe('publishArticle', () => {
