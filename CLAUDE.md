@@ -150,20 +150,20 @@ cp apps/web/.env.example apps/web/.env.local
 
 ## Production Architecture
 
-Hybrid: **Frontend di Vercel**, backend & database self-hosted di Proxmox VE (3 LXC Container, native tanpa Docker):
+Full Self-Hosted: Frontend, backend & database self-hosted di Proxmox VE (4 LXC Container, native tanpa Docker):
 
 | Lokasi | Layanan |
 |--------|---------|
-| **Vercel** | Next.js frontend, wildcard subdomain (`*.beritakarya.co`), CDN edge |
 | CT 101 (10.0.0.11) | PostgreSQL 15, Redis 7, Meilisearch v1.6, MinIO |
-| CT 102 (10.0.0.12) | Express API (PM2), Caddy, Cloudflare Tunnel |
+| CT 102 (10.0.0.12) | Express API (PM2 cluster), Caddy reverse proxy, Cloudflare Tunnel |
 | CT 103 (10.0.0.13) | Prometheus, Grafana, Exporters |
+| CT 104 (10.0.0.14) | Next.js Frontend Standalone (PM2 cluster) |
 
 - **Infra = kepastian**, codebase menyesuaikan
-- Frontend multi-site routing via Vercel wildcard subdomain
-- Backend API via Cloudflare Tunnel → `api.beritakarya.co`
+- Frontend multi-site routing via Cloudflare Tunnel wildcard (`*.beritakarya.co`) → Caddy (CT 102) → CT 104:3000 (PM2)
+- Backend API via Cloudflare Tunnel → Caddy (CT 102) → localhost:3001 (PM2) → `api.beritakarya.co`
 - Media storage: MinIO (S3-compatible) di CT 101, bukan Supabase
-- Dokumentasi: `docs/architecture.md`, `docs/panduan_produksi_lxc.md`, `docs/ads.md`
+- Dokumentasi: `docs/infrastructure.md`, `docs/ads.md`
 
 ## Design System
 

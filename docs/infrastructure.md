@@ -37,16 +37,16 @@ Arsitektur sistem BeritaKarya — platform CMS media digital multi-situs.
 │           │   ├── Redis 7                                    │
 │           │   ├── Meilisearch v1.6                           │
 │           │   └── MinIO (S3-compatible media storage)        │
-│           ├── CT 102 (10.0.0.12) — API Server                │
+│           ├── CT 102 (10.0.0.12) — API Server & Gateway      │
 │           │   ├── Express API (PM2 cluster)                  │
-│           │   ├── Caddy (reverse proxy, API + Media)         │
+│           │   ├── Caddy (reverse proxy: Web, API, Media)     │
 │           │   └── Cloudflare Tunnel                          │
-│                                                             │
-│  External: Vercel (Frontend Next.js, wildcard subdomain)     │
-│           └── CT 103 (10.0.0.13) — Monitoring               │
-│               ├── Prometheus                                  │
-│               ├── Grafana                                     │
-│               └── Exporters (Node, PG, Redis)                │
+│           ├── CT 103 (10.0.0.13) — Monitoring                │
+│           │   ├── Prometheus                                 │
+│           │   ├── Grafana                                    │
+│           │   └── Exporters (Node, PG, Redis)                │
+│           └── CT 104 (10.0.0.14) — Frontend Web Server       │
+│               └── Next.js Standalone (PM2 cluster)           │
 │                                                             │
 │  External: Cloudflare (DNS/Tunnel/CDN), OpenAI (AI API)     │
 └─────────────────────────────────────────────────────────────┘
@@ -296,8 +296,9 @@ Dokumen ini menyediakan panduan langkah-demi-langkah yang terperinci untuk mengo
 
 Berdasarkan dokumen arsitektur dan topologi jaringan, berikut adalah alokasi container kita:
 - **CT 101 (`lxc-1-db`)**: `10.0.0.11` — Menjalankan PostgreSQL 15, Redis 7, dan Meilisearch v1.6.
-- **CT 102 (`lxc-2-app`)**: `10.0.0.12` — Menjalankan Express API (PM2), Caddy, dan Cloudflare Tunnel. Frontend (Next.js) di-deploy ke **Vercel**.
+- **CT 102 (`lxc-2-app`)**: `10.0.0.12` — Menjalankan Express API (PM2), Caddy reverse proxy gateway, dan Cloudflare Tunnel.
 - **CT 103 (`lxc-3-monitor`)**: `10.0.0.13` — Menjalankan Prometheus, Grafana, dan Exporters.
+- **CT 104 (`lxc-4-web`)**: `10.0.0.14` — Menjalankan Frontend Next.js Standalone (PM2 cluster).
 
 ---
 
@@ -505,9 +506,9 @@ echo "0 2 * * * root /usr/local/bin/backup_db.sh" >> /etc/crontab
 
 ---
 
-### BAB 3: Konfigurasi `lxc-2-app` (API Server)
+### BAB 3: Konfigurasi `lxc-2-app` (API Server & Ingress Gateway)
 
-Container ini dialokasikan 2 Core CPU dan 4 GB RAM untuk menjalankan backend Express API. Frontend (Next.js) di-deploy ke **Vercel**, tidak di container ini.
+Container ini dialokasikan 2 Core CPU dan 4 GB RAM untuk menjalankan backend Express API, Caddy reverse proxy gateway, dan Cloudflare Tunnel. Frontend Next.js dipisahkan ke **CT 104 (`10.0.0.14`)**.
 
 #### 3.1 Install Node.js LTS, PNPM, PM2, dan Caddy
 Jalankan langkah-langkah berikut di `lxc-2-app` (`10.0.0.12`):
@@ -605,19 +606,19 @@ SEED_ADMIN_EMAIL=admin@beritakarya.co
 SEED_ADMIN_PASSWORD=PasswordAdminAwal123!
 ```
 
-##### 3.3.2 Frontend (Vercel — Tidak Perlu di Server)
+##### 3.3.2 Frontend Web: `/var/www/beritakarya-prod/apps/web/.env.production`
 
-Frontend di-deploy ke **Vercel**. Environment variables diatur di **Vercel Dashboard** → Project → Settings → Environment Variables:
+Frontend di-deploy secara self-hosted via Next.js standalone server. Environment variables disiapkan dalam file `apps/web/.env.production` **sebelum build** dijalankan:
 
-| Variable | Nilai |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | `https://api.beritakarya.co` |
-| `NEXT_PUBLIC_URL` | `https://beritakarya.co` |
-| `NEXT_PUBLIC_GA_ID` | `G-XXXXXXXXXX` |
+```ini
+NODE_ENV=production
+NEXT_PUBLIC_API_URL="https://api.beritakarya.co"
+NEXT_PUBLIC_URL="https://beritakarya.co"
+NEXT_PUBLIC_SITE_ID="pusat"
+NEXT_PUBLIC_ADSENSE_PUBLISHER_ID="pub-XXXXXXXXXXXXXXXX"
+```
 
-> Tidak perlu buat `.env.production` di server. Cukup set di Vercel Dashboard.
-
-#### 3.4 Build API & Inisialisasi Database
+#### 3.4 Build Aplikasi & Inisialisasi Database
 Jalankan proses build di direktori root project:
 
 ```bash
@@ -627,19 +628,19 @@ pnpm --filter @beritakarya/api db:generate
 # Jalankan migrasi schema database ke PostgreSQL target
 pnpm --filter @beritakarya/api db:migrate:deploy
 
-# Jalankan seeder database untuk data role quota awal dan superadmin
+# Jalankan seeder database untuk data awal
 pnpm --filter @beritakarya/api db:seed
 
-# Build API saja (frontend di Vercel, tidak perlu build di server)
-pnpm --filter @beritakarya/api build
+# Build semua aplikasi (API & Web Standalone)
+pnpm build
+
+# Copy static assets untuk standalone Next.js
+cp -r apps/web/public apps/web/.next/standalone/apps/web/public
+cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
 ```
 
-> **Catatan**: Tidak perlu build `apps/web` — frontend di-deploy ke Vercel via Git push.
-
 #### 3.5 Konfigurasi PM2 Process Manager
-Buat file konfigurasi `/var/www/beritakarya-prod/ecosystem.config.js` untuk mengelola proses API dengan PM2:
-
-> **Catatan**: Hanya API — frontend (Next.js) di-deploy ke Vercel.
+Gunakan file konfigurasi `/var/www/beritakarya-prod/ecosystem.config.js` untuk mengelola proses API dan Web:
 
 ```javascript
 module.exports = {
@@ -649,19 +650,38 @@ module.exports = {
       script: 'node',
       args: 'apps/api/dist/main.js',
       cwd: '/var/www/beritakarya-prod',
-      instances: 2,                     // 2 workers (hemat RAM, cukup untuk 2 core)
+      instances: 2,
       exec_mode: 'cluster',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 3001,
       },
       max_memory_restart: '800M',
       listen_timeout: 8000,
       kill_timeout: 3000,
       merge_logs: true,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss'
-    }
-  ]
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+    },
+    {
+      name: 'beritakarya-web',
+      script: 'apps/web/.next/standalone/apps/web/server.js',
+      cwd: '/var/www/beritakarya-prod',
+      instances: 2,
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+        HOSTNAME: '0.0.0.0',
+        NEXT_PUBLIC_API_URL: 'https://api.beritakarya.co',
+        NEXT_PUBLIC_URL: 'https://beritakarya.co',
+      },
+      max_memory_restart: '1G',
+      listen_timeout: 8000,
+      kill_timeout: 3000,
+      merge_logs: true,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+    },
+  ],
 };
 ```
 
@@ -681,10 +701,30 @@ pm2 startup
 ```
 
 #### 3.6 Konfigurasi Caddy Reverse Proxy
-Caddy hanya menangani **API** dan **media**. Frontend di-deploy ke Vercel.
+Caddy menangani **Frontend Web** (termasuk wildcard subdomains), **API**, dan **media**:
 
 Edit `/etc/caddy/Caddyfile`:
 ```caddy
+# Frontend Web (Domain utama & Wildcard Subdomain) -> Proxy ke CT 104 (10.0.0.14)
+beritakarya.co, *.beritakarya.co {
+    reverse_proxy 10.0.0.14:3000
+
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /var/log/caddy/access_web.log {
+            roll_size 50mb
+            roll_keep 7
+        }
+    }
+}
+
 # Backend REST API
 api.beritakarya.co {
     reverse_proxy localhost:3001
@@ -730,7 +770,7 @@ systemctl restart caddy
 ```
 
 #### 3.7 Integrasi Cloudflare Tunnel
-Cloudflare Tunnel mengekspos **API** dan **media** ke internet. Frontend di Vercel, tidak melewati tunnel.
+Cloudflare Tunnel mengekspos **Frontend Web**, **API**, dan **media** ke internet secara aman tanpa membuka port publik di router.
 
 ```bash
 # Unduh dan pasang cloudflared
@@ -741,10 +781,9 @@ dpkg -i cloudflared.deb
 cloudflared tunnel login
 
 # Buat tunnel baru
-cloudflared tunnel create beritakarya-api-tunnel
+cloudflared tunnel create beritakarya-tunnel
 
 # Konfigurasi tunnel di /root/.cloudflared/config.yml:
-# Hanya api dan media — frontend di Vercel
 ```
 
 Config file `/root/.cloudflared/config.yml`:
@@ -753,6 +792,10 @@ tunnel: <TUNNEL_ID>
 credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
+  - hostname: beritakarya.co
+    service: http://localhost:80
+  - hostname: "*.beritakarya.co"
+    service: http://localhost:80
   - hostname: api.beritakarya.co
     service: http://localhost:80
   - hostname: media.beritakarya.co
@@ -771,10 +814,10 @@ systemctl enable cloudflared
 
 | Type | Name | Content | Keterangan |
 |---|---|---|---|
+| CNAME | `beritakarya.co` | `<TUNNEL_ID>.cfargotunnel.com` | Frontend Web utama |
+| CNAME | `*` | `<TUNNEL_ID>.cfargotunnel.com` | Wildcard Subdomain |
 | CNAME | `api` | `<TUNNEL_ID>.cfargotunnel.com` | API backend |
 | CNAME | `media` | `<TUNNEL_ID>.cfargotunnel.com` | Media MinIO |
-| CNAME | `beritakarya.co` | `cname.vercel-dns.com` | Frontend Vercel |
-| CNAME | `*` | `cname.vercel-dns.com` | Wildcard Vercel |
 
 ---
 
@@ -1558,9 +1601,9 @@ pct create 101 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
 
 ---
 
-#### 5.8 Membuat LXC Container (CT 102 — API Server)
+#### 5.8 Membuat LXC Container (CT 102 — API Server & Gateway)
 
-Ulangi proses yang sama untuk **CT 102** (`lxc-2-app`) — container ini menjalankan Express API dan Cloudflare Tunnel. Frontend (Next.js) di-deploy ke **Vercel**.
+Ulangi proses yang sama untuk **CT 102** (`lxc-2-app`) — container ini menjalankan Express API, Caddy, dan Cloudflare Tunnel:
 
 ##### Via CLI:
 
@@ -1577,8 +1620,6 @@ pct create 102 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
   --nameserver 1.1.1.1 \
   --start 1
 ```
-
-> CT 102 cukup **2 core, 4 GB RAM** karena hanya menjalankan API. Frontend di Vercel.
 
 ---
 
@@ -1604,7 +1645,31 @@ pct create 103 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
 
 ---
 
-#### 5.10 Verifikasi Container & Koneksi VLAN 20
+#### 5.10 Membuat LXC Container (CT 104 — Frontend Web Server)
+
+**CT 104** (`lxc-4-web`) khusus menjalankan frontend Next.js Standalone (PM2 cluster).
+
+##### Via CLI:
+
+```bash
+pct create 104 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
+  --hostname lxc-4-web \
+  --password "GantiDenganPasswordKuat!" \
+  --storage local-lvm \
+  --rootfs local-lvm:30 \
+  --cores 4 \
+  --memory 6144 \
+  --swap 2048 \
+  --net0 name=eth0,bridge=vmbr0,tag=20,ip=10.0.0.14/24,gw=10.0.0.1 \
+  --nameserver 1.1.1.1 \
+  --start 1
+```
+
+> **Catatan**: CT 104 dialokasikan **4 core, 6 GB RAM** untuk menjalankan build Next.js dan 2 worker PM2 cluster secara lancar.
+
+---
+
+#### 5.11 Verifikasi Container & Koneksi VLAN 20
 
 ##### 5.10.1 Cek Status Semua Container
 

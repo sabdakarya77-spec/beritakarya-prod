@@ -939,8 +939,8 @@ Impresi juga di-deduplicate per IP dengan TTL 30 menit di Redis.
 | **MinIO** | Storage gambar (S3-compatible) |
 | **Redis** | Rate limiting + impression dedup |
 | **Midtrans Snap** | Payment gateway |
-| **Cloudflare** | CDN + tunnel ke API |
-| **Vercel** | Frontend hosting |
+| **Cloudflare** | CDN + tunnel ke Web, API, Media |
+| **PM2 (Self-Hosted)** | Frontend Next.js standalone & API hosting di CT 102 |
 
 ---
 

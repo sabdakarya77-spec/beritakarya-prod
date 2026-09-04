@@ -89,7 +89,7 @@ const nextConfig = {
 
     return [
       {
-        // Security headers untuk SEMUA halaman (termasuk di Vercel)
+        // Security headers untuk SEMUA halaman
         source: '/(.*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },

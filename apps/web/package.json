@@ -42,6 +42,7 @@
     "react-dom": "^18.3.0",
     "react-image-crop": "^11.0.10",
     "recharts": "^3.8.1",
+    "sharp": "^0.35.3",
     "tailwind-merge": "^3.5.0",
     "tippy.js": "^6.3.7",
     "uuid": "^9.0.1",

@@ -1,66 +1,99 @@
 #!/bin/bash
-# setup-production.sh — Setup awal BeritaKarya di CT 102
-# Jalankan SEKALI setelah CT 102 siap
+# setup-production.sh — Setup awal BeritaKarya di production LXC
+# Penggunaan:
+#   bash scripts/setup-production.sh         # Auto-detect berdasarkan hostname (lxc-2-app -> api, lxc-4-web -> web)
+#   bash scripts/setup-production.sh api     # Setup API di CT 102 (10.0.0.12)
+#   bash scripts/setup-production.sh web     # Setup Frontend Web di CT 104 (10.0.0.14)
+#   bash scripts/setup-production.sh all     # Setup semua
 
 set -e
 
 PROJECT_DIR="/var/www/beritakarya-prod"
+MODE="${1:-auto}"
 
-echo "=== BeritaKarya Production Setup ==="
+if [ "$MODE" = "auto" ]; then
+  CURRENT_HOST=$(hostname 2>/dev/null || echo "")
+  if [ "$CURRENT_HOST" = "lxc-4-web" ]; then
+    MODE="web"
+  elif [ "$CURRENT_HOST" = "lxc-2-app" ]; then
+    MODE="api"
+  else
+    MODE="all"
+  fi
+fi
+
+echo "=== BeritaKarya Production Setup (Target: $MODE) ==="
 
 # 1. Clone repository
-echo "[1/7] Cloning repository..."
+echo "[1/6] Cloning repository..."
 mkdir -p /var/www
 cd /var/www
-git clone https://github.com/sabdakarya77-spec/beritakarya-prod.git beritakarya-prod
+if [ ! -d "beritakarya-prod" ]; then
+  git clone https://github.com/sabdakarya77-spec/beritakarya-prod.git beritakarya-prod
+fi
 cd beritakarya-prod
 
 # 2. Checkout main branch
 git checkout main
 
-# 3. Copy environment files
-echo "[2/7] Setting up environment files..."
-cp apps/api/.env.example.selfhosted apps/api/.env
-cp apps/web/.env.example apps/web/.env.production
-# PENTING: Edit file .env dengan nilai yang benar SEBELUM melanjutkan
+# 3. Environment files
+echo "[2/6] Setting up environment files..."
+if [ "$MODE" = "api" ] || [ "$MODE" = "all" ]; then
+  if [ ! -f "apps/api/.env" ]; then
+    cp apps/api/.env.example.selfhosted apps/api/.env
+    echo ">>> EDIT apps/api/.env dengan kredensial production (DB, Redis, Meilisearch, MinIO, JWT)"
+  fi
+fi
+
+if [ "$MODE" = "web" ] || [ "$MODE" = "all" ]; then
+  if [ ! -f "apps/web/.env.production" ]; then
+    cp apps/web/.env.example apps/web/.env.production
+    echo ">>> EDIT apps/web/.env.production dengan NEXT_PUBLIC_API_URL dan NEXT_PUBLIC_URL"
+  fi
+fi
+
 echo ""
-echo ">>> EDIT apps/api/.env dengan kredensial production (DB, Redis, Meilisearch, MinIO, JWT)"
-echo ">>> EDIT apps/web/.env.production dengan NEXT_PUBLIC_API_URL dan NEXT_PUBLIC_URL"
-echo ""
-read -p "Tekan Enter setelah selesai mengedit..."
+read -p "Tekan Enter setelah selesai memastikan file .env terisi..."
 
 # 4. Install dependencies
-echo "[3/7] Installing dependencies..."
+echo "[3/6] Installing dependencies..."
 pnpm install --frozen-lockfile
 
-# 5. Generate Prisma client
-echo "[4/7] Generating Prisma client..."
-pnpm --filter @beritakarya/api db:generate
+# --- SETUP API (CT 102) ---
+if [ "$MODE" = "api" ] || [ "$MODE" = "all" ]; then
+  echo "[4/6] Setting up API..."
+  pnpm --filter @beritakarya/api db:generate
+  pnpm --filter @beritakarya/api db:migrate:deploy
+  pnpm --filter @beritakarya/api db:seed
+  pnpm --filter @beritakarya/api build
 
-# 6. Run migrations & seed
-echo "[5/7] Running migrations and seed..."
-pnpm --filter @beritakarya/api db:migrate:deploy
-pnpm --filter @beritakarya/api db:seed
+  pm2 start ecosystem.config.js --only beritakarya-api
+  pm2 save
+fi
 
-# 7. Build
-echo "[6/7] Building applications..."
-pnpm build
+# --- SETUP WEB (CT 104) ---
+if [ "$MODE" = "web" ] || [ "$MODE" = "all" ]; then
+  echo "[4/6] Setting up Frontend Web..."
+  pnpm --filter @beritakarya/web build
 
-# 8. Copy static assets untuk standalone Next.js
-echo "[7/7] Copying static assets..."
-cp -r apps/web/public apps/web/.next/standalone/public
-cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+  # Copy static assets
+  cp -r apps/web/public apps/web/.next/standalone/apps/web/public
+  cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
+  cp -r apps/web/public apps/web/.next/standalone/public
+  cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
 
-# 9. Setup PM2
-echo "[PM2] Starting PM2..."
-pm2 start ecosystem.config.js
-pm2 save
+  pm2 start ecosystem.config.js --only beritakarya-web
+  pm2 save
+fi
+
+# 5. Startup PM2
 pm2 startup
 
 echo ""
-echo "=== Setup Complete ==="
-echo "Next steps:"
-echo "  1. Verify: curl http://localhost:3001/health"
-echo "  2. Configure Caddy: /etc/caddy/Caddyfile"
-echo "  3. Setup Cloudflare Tunnel"
-echo "  4. Test: https://beritakarya.co"
+echo "=== Setup Complete for $MODE ==="
+if [ "$MODE" = "api" ] || [ "$MODE" = "all" ]; then
+  echo "  - Verify API: curl http://localhost:3001/health"
+fi
+if [ "$MODE" = "web" ] || [ "$MODE" = "all" ]; then
+  echo "  - Verify Web: curl -I http://localhost:3000/"
+fi

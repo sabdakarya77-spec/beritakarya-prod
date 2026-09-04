@@ -1,9 +1,7 @@
 import { logger } from './logger'
 
-// ─── Redis Client (Optional) ─────────────────────────────────────────────────
-// Di lingkungan serverless (Vercel), Redis lokal tidak tersedia.
+// ─── Redis Client (CT 101 / Optional) ─────────────────────────────────────────
 // Jika REDIS_HOST tidak diset, semua operasi cache akan di-skip secara silent.
-// Untuk produksi serverless, gunakan Upstash Redis (diakses lewat @upstash/redis REST API).
 
 let redis: import('ioredis').Redis | null = null
 

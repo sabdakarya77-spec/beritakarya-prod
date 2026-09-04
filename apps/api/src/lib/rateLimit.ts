@@ -5,11 +5,8 @@ import { logger } from './logger'
  * Rate Limit Store Strategy:
  *
  * - Development lokal tanpa Redis: menggunakan MemoryStore (default express-rate-limit)
- * - Produksi dengan Upstash/Redis: menggunakan RedisStore (rate-limit-redis)
- *
- * Di serverless (Vercel), MemoryStore tidak persistent antar invokasi,
- * sehingga rate-limiting akan "longgar". Untuk produksi yang ketat,
- * pastikan REDIS_HOST atau UPSTASH_REDIS_REST_URL diset.
+ * - Development lokal tanpa Redis: menggunakan MemoryStore (default express-rate-limit)
+ * - Produksi: menggunakan RedisStore (rate-limit-redis) via Redis di CT 101
  */
 
 import type { Store } from 'express-rate-limit'

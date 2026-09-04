@@ -56,8 +56,7 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
 
-  // ── Cron Security ─────────────────────────────────────────────────────────
-  // Secret used to authorize cron job HTTP requests from Vercel
+  // Secret used to authorize cron job HTTP requests
   CRON_SECRET: z.string().optional(),
 
   // ── Monitoring ────────────────────────────────────────────────────────────

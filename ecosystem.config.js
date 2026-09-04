@@ -2,6 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'beritakarya-api',
+      // Dijalankan di CT 102 (10.0.0.12): pm2 start ecosystem.config.js --only beritakarya-api
       script: 'node',
       args: 'apps/api/dist/main.js',
       cwd: '/var/www/beritakarya-prod',
@@ -19,10 +20,11 @@ module.exports = {
     },
     {
       name: 'beritakarya-web',
+      // Dijalankan di CT 104 (10.0.0.14): pm2 start ecosystem.config.js --only beritakarya-web
       // STANDALONE MODE — bukan `next start`
       // Sesuai dengan `output: 'standalone'` di next.config.mjs
-      // dan Dockerfile yang menggunakan `node apps/web/server.js`
-      script: 'apps/web/.next/standalone/server.js',
+      // Pada monorepo Turborepo, server.js ada di apps/web/.next/standalone/apps/web/server.js
+      script: 'apps/web/.next/standalone/apps/web/server.js',
       cwd: '/var/www/beritakarya-prod',
       instances: 2,
       exec_mode: 'cluster',

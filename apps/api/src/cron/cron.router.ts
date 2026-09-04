@@ -1,10 +1,8 @@
 /**
  * cron.router.ts
  *
- * HTTP endpoints yang dipanggil oleh Vercel Cron Jobs.
+ * HTTP endpoints yang dipanggil oleh scheduler (crontab lokal / systemd timer).
  * Setiap endpoint dilindungi dengan Authorization header berisi CRON_SECRET.
- *
- * Konfigurasi jadwal ada di vercel.json (apps/api/vercel.json).
  */
 import { Router, Request, Response } from 'express'
 import { runKYCCleanup } from './kyc-cleanup'
