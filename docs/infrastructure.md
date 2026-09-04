@@ -701,20 +701,69 @@ pm2 startup
 ```
 
 #### 3.6 Konfigurasi Caddy Reverse Proxy
-Caddy menangani **Frontend Web** (termasuk wildcard subdomains), **API**, dan **media**:
 
-Edit `/etc/caddy/Caddyfile`:
+Caddy di CT102 bertugas sebagai **ingress gateway internal**: menerima traffic dari Cloudflare Tunnel (masuk via HTTP `localhost:80`) lalu meneruskan ke service yang tepat.
+
+> **Penting — Arsitektur TLS:**
+> Cloudflare Tunnel sudah melakukan **TLS termination di edge Cloudflare**. Request yang masuk ke Caddy dari tunnel adalah **plain HTTP** ke `localhost:80`. Oleh karena itu, Caddy **TIDAK boleh** mencoba mengurus TLS/auto-HTTPS sendiri, karena akan menyebabkan konflik (terutama untuk wildcard `*.beritakarya.co` yang butuh DNS-01 challenge).
+
+```
+Alur traffic:
+Internet (HTTPS) → Cloudflare Edge (TLS terminated)
+  → Cloudflare Tunnel → CT102:80
+    → Caddy (http, no TLS)
+      ├── beritakarya.co / *.beritakarya.co → CT104:3000 (Next.js)
+      ├── api.beritakarya.co               → localhost:3001 (Express)
+      └── media.beritakarya.co             → CT101:9000 (MinIO)
+```
+
+Buat log directory dan edit `/etc/caddy/Caddyfile`:
+
+```bash
+mkdir -p /var/log/caddy
+nano /etc/caddy/Caddyfile
+```
+
 ```caddy
-# Frontend Web (Domain utama & Wildcard Subdomain) -> Proxy ke CT 104 (10.0.0.14)
-beritakarya.co, *.beritakarya.co {
-    reverse_proxy 10.0.0.14:3000
+# ─── Global Options ────────────────────────────────────────────────────────────
+# auto_https off  → wajib! CF Tunnel sudah handle TLS, Caddy cukup listen HTTP
+# http_port 80    → Caddy hanya terima traffic di port 80 dari Cloudflare Tunnel
+# ───────────────────────────────────────────────────────────────────────────────
+{
+    auto_https off
+    http_port  80
+    admin      off
+    log {
+        level WARN
+    }
+}
+
+# ─── Frontend Web (Domain utama & Wildcard Subdomain) ─────────────────────────
+# Proxy ke CT 104 (10.0.0.14:3000) — Next.js Standalone via PM2
+# ───────────────────────────────────────────────────────────────────────────────
+http://beritakarya.co, http://*.beritakarya.co {
+    reverse_proxy 10.0.0.14:3000 {
+        # Health check ke CT104 agar Caddy tahu jika Next.js down
+        health_uri      /
+        health_interval 30s
+        health_timeout  10s
+
+        # Teruskan IP asli pengunjung dari Cloudflare ke Next.js
+        # (diperlukan untuk logging, rate limit, dsb.)
+        header_up X-Real-IP          {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-For    {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-Proto  https
+        header_up Host               {host}
+    }
 
     encode gzip zstd
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Content-Type-Options    "nosniff"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        # Hapus header yang mungkin duplikat dari Next.js
+        -X-Powered-By
     }
 
     log {
@@ -722,20 +771,27 @@ beritakarya.co, *.beritakarya.co {
             roll_size 50mb
             roll_keep 7
         }
+        format json
     }
 }
 
-# Backend REST API
-api.beritakarya.co {
-    reverse_proxy localhost:3001
+# ─── Backend REST API ──────────────────────────────────────────────────────────
+# Express API berjalan di localhost:3001 (PM2, di CT102 sendiri)
+# ───────────────────────────────────────────────────────────────────────────────
+http://api.beritakarya.co {
+    reverse_proxy localhost:3001 {
+        header_up X-Real-IP         {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-For   {http.request.header.CF-Connecting-IP}
+        header_up X-Forwarded-Proto https
+    }
 
     encode gzip zstd
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-XSS-Protection "1; mode=block"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "strict-origin-when-cross-origin"
+        X-XSS-Protection          "1; mode=block"
+        X-Content-Type-Options    "nosniff"
+        Referrer-Policy           "strict-origin-when-cross-origin"
     }
 
     log {
@@ -743,11 +799,14 @@ api.beritakarya.co {
             roll_size 50mb
             roll_keep 7
         }
+        format json
     }
 }
 
-# Media (MinIO di CT 101)
-media.beritakarya.co {
+# ─── Media Storage (MinIO di CT 101) ──────────────────────────────────────────
+# MinIO S3-compatible, berjalan di CT101 (10.0.0.11:9000)
+# ───────────────────────────────────────────────────────────────────────────────
+http://media.beritakarya.co {
     reverse_proxy 10.0.0.11:9000
 
     encode gzip zstd
@@ -761,16 +820,41 @@ media.beritakarya.co {
             roll_size 50mb
             roll_keep 7
         }
+        format json
     }
 }
 ```
-Mulai ulang Caddy:
+
+Validasi dan restart Caddy:
 ```bash
+# Validasi konfigurasi dulu sebelum restart
+caddy validate --config /etc/caddy/Caddyfile
+
+# Jika OK (no errors), restart
 systemctl restart caddy
+systemctl status caddy
 ```
 
+#### 3.6.1 Verifikasi Konektivitas CT102 → CT104
+
+Sebelum restart Caddy, pastikan CT104 sudah running dan reachable dari CT102:
+
+```bash
+# Test koneksi jaringan ke CT104
+ping -c 3 10.0.0.14
+nc -zv 10.0.0.14 3000
+# Expected: Connection to 10.0.0.14 3000 port [tcp/*] succeeded!
+
+# Test HTTP response dari CT104
+curl -I http://10.0.0.14:3000/
+# Expected: HTTP/1.1 200 OK atau 308 (redirect)
+```
+
+> **Catatan penting**: Pastikan Next.js di CT104 listen di **semua interface** (`0.0.0.0`), **bukan** hanya `127.0.0.1`. Ini diatur via variabel `HOSTNAME=0.0.0.0` di `ecosystem.config.js` pada CT104 (sudah terkonfigurasi di section 3.5).
+
 #### 3.7 Integrasi Cloudflare Tunnel
-Cloudflare Tunnel mengekspos **Frontend Web**, **API**, dan **media** ke internet secara aman tanpa membuka port publik di router.
+
+Cloudflare Tunnel mengekspos **Frontend Web**, **API**, dan **media** ke internet secara aman tanpa membuka port publik di router. Semua traffic masuk dari Cloudflare ke **Caddy di CT102 via port 80**.
 
 ```bash
 # Unduh dan pasang cloudflared
@@ -792,14 +876,31 @@ tunnel: <TUNNEL_ID>
 credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
+  # Frontend Web — domain utama
   - hostname: beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true   # Caddy menerima plain HTTP, bukan HTTPS
+
+  # Frontend Web — wildcard subdomain (mis. bandung.beritakarya.co)
   - hostname: "*.beritakarya.co"
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Backend API
   - hostname: api.beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Media (MinIO)
   - hostname: media.beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Fallback: semua hostname lain → 404
   - service: http_status:404
 ```
 
@@ -808,16 +909,21 @@ ingress:
 cloudflared service install <TUNNEL_TOKEN>
 systemctl start cloudflared
 systemctl enable cloudflared
+
+# Verifikasi tunnel aktif
+cloudflared tunnel info beritakarya-tunnel
 ```
 
-**DNS di Cloudflare Dashboard:**
+**DNS di Cloudflare Dashboard** (semua harus pointing ke Tunnel, bukan Vercel atau IP publik lain):
 
-| Type | Name | Content | Keterangan |
-|---|---|---|---|
-| CNAME | `beritakarya.co` | `<TUNNEL_ID>.cfargotunnel.com` | Frontend Web utama |
-| CNAME | `*` | `<TUNNEL_ID>.cfargotunnel.com` | Wildcard Subdomain |
-| CNAME | `api` | `<TUNNEL_ID>.cfargotunnel.com` | API backend |
-| CNAME | `media` | `<TUNNEL_ID>.cfargotunnel.com` | Media MinIO |
+| Type | Name | Content | Proxy Status | Keterangan |
+|------|------|---------|--------------|------------|
+| CNAME | `beritakarya.co` | `<TUNNEL_ID>.cfargotunnel.com` | Proxied ☁️ | Frontend Web utama |
+| CNAME | `*` | `<TUNNEL_ID>.cfargotunnel.com` | Proxied ☁️ | Wildcard Subdomain (bandung, surabaya, dll) |
+| CNAME | `api` | `<TUNNEL_ID>.cfargotunnel.com` | Proxied ☁️ | API backend |
+| CNAME | `media` | `<TUNNEL_ID>.cfargotunnel.com` | Proxied ☁️ | Media MinIO |
+
+> **⚠️ Perhatikan**: Pastikan record `beritakarya.co` dan `*` (wildcard) di DNS Cloudflare sudah pointing ke Tunnel ID (`*.cfargotunnel.com`), **bukan** ke Vercel atau provider lain. Jika masih pointing ke Vercel, ubah dulu sebelum deploy ke CT104.
 
 ---
 

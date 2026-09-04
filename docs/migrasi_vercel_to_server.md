@@ -155,28 +155,59 @@ curl -I http://localhost:3000/
 
 Frontend kini berjalan di `10.0.0.14:3000`. Sekarang kita atur Caddy di **CT 102 (`10.0.0.12`)** agar meneruskan traffic domain publik ke CT 104.
 
+> **⚠️ Penting — Kenapa `auto_https off`?**
+> Cloudflare Tunnel sudah melakukan **TLS termination di edge Cloudflare**. Traffic yang masuk ke Caddy dari tunnel adalah **plain HTTP ke `localhost:80`**. Jika Caddy dibiarkan mencoba mengurus TLS sendiri (auto-HTTPS default), ia akan gagal — terutama untuk wildcard `*.beritakarya.co` yang butuh DNS-01 challenge khusus. Caddy harus dikonfigurasi hanya sebagai **HTTP reverse proxy internal**.
+
 1. Buka shell **CT 102**:
    ```bash
    pct enter 102
    ```
 
-2. Edit `/etc/caddy/Caddyfile`:
+2. Buat log directory (jika belum ada) dan edit Caddyfile:
    ```bash
+   mkdir -p /var/log/caddy
    nano /etc/caddy/Caddyfile
    ```
 
-3. Tambahkan blok untuk domain utama dan wildcard subdomain:
+3. Isi dengan konfigurasi lengkap berikut:
    ```caddy
-   # Frontend Web (Domain utama & Wildcard Subdomain) -> Reverse Proxy ke CT 104
-   beritakarya.co, *.beritakarya.co {
-       reverse_proxy 10.0.0.14:3000
+   # ─── Global Options ────────────────────────────────────────────────────────
+   # auto_https off → CF Tunnel sudah handle TLS, Caddy cukup terima HTTP
+   # http_port 80   → Caddy listen di port 80 dari Cloudflare Tunnel
+   # ───────────────────────────────────────────────────────────────────────────
+   {
+       auto_https off
+       http_port  80
+       admin      off
+       log {
+           level WARN
+       }
+   }
+
+   # ─── Frontend Web: domain utama & wildcard subdomain ───────────────────────
+   # Proxy ke CT 104 (10.0.0.14:3000) — Next.js Standalone via PM2
+   # ───────────────────────────────────────────────────────────────────────────
+   http://beritakarya.co, http://*.beritakarya.co {
+       reverse_proxy 10.0.0.14:3000 {
+           # Health check agar Caddy tahu jika CT104 down
+           health_uri      /
+           health_interval 30s
+           health_timeout  10s
+
+           # Teruskan IP asli pengunjung dari Cloudflare ke Next.js
+           header_up X-Real-IP          {http.request.header.CF-Connecting-IP}
+           header_up X-Forwarded-For    {http.request.header.CF-Connecting-IP}
+           header_up X-Forwarded-Proto  https
+           header_up Host               {host}
+       }
 
        encode gzip zstd
 
        header {
            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-           X-Content-Type-Options "nosniff"
-           Referrer-Policy "strict-origin-when-cross-origin"
+           X-Content-Type-Options    "nosniff"
+           Referrer-Policy           "strict-origin-when-cross-origin"
+           -X-Powered-By
        }
 
        log {
@@ -184,26 +215,68 @@ Frontend kini berjalan di `10.0.0.14:3000`. Sekarang kita atur Caddy di **CT 102
                roll_size 50mb
                roll_keep 7
            }
+           format json
        }
    }
 
-   # Backend REST API (tetap di localhost CT 102)
-   api.beritakarya.co {
-       reverse_proxy localhost:3001
+   # ─── Backend REST API (Express di CT102 localhost:3001) ─────────────────────
+   http://api.beritakarya.co {
+       reverse_proxy localhost:3001 {
+           header_up X-Real-IP         {http.request.header.CF-Connecting-IP}
+           header_up X-Forwarded-For   {http.request.header.CF-Connecting-IP}
+           header_up X-Forwarded-Proto https
+       }
        encode gzip zstd
+
+       header {
+           Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+           X-Content-Type-Options    "nosniff"
+           Referrer-Policy           "strict-origin-when-cross-origin"
+       }
+
+       log {
+           output file /var/log/caddy/access_api.log {
+               roll_size 50mb
+               roll_keep 7
+           }
+           format json
+       }
    }
 
-   # Media MinIO (tetap ke CT 101)
-   media.beritakarya.co {
+   # ─── Media MinIO (CT 101 — 10.0.0.11:9000) ─────────────────────────────────
+   http://media.beritakarya.co {
        reverse_proxy 10.0.0.11:9000
        encode gzip zstd
+
+       header {
+           Cache-Control "public, max-age=31536000, immutable"
+       }
+
+       log {
+           output file /var/log/caddy/access_media.log {
+               roll_size 50mb
+               roll_keep 7
+           }
+           format json
+       }
    }
    ```
 
-4. Uji dan reload Caddy:
+4. Verifikasi dulu koneksi CT102 → CT104 sebelum reload:
+   ```bash
+   # Pastikan CT104 reachable dari CT102
+   nc -zv 10.0.0.14 3000
+   curl -I http://10.0.0.14:3000/
+   # Expected: HTTP/1.1 200 OK atau 308
+   ```
+
+5. Validasi dan reload Caddy:
    ```bash
    caddy validate --config /etc/caddy/Caddyfile
-   systemctl reload caddy
+   systemctl restart caddy
+   systemctl status caddy
+   # Cek log jika ada error
+   journalctl -u caddy --no-pager -n 30
    ```
 
 ---
@@ -216,21 +289,38 @@ Masih di **CT 102**, periksa konfigurasi Cloudflare Tunnel di `/root/.cloudflare
 nano /root/.cloudflared/config.yml
 ```
 
-Pastikan domain utama dan wildcard diarahkan ke port HTTP Caddy lokal (`localhost:80`):
+Pastikan semua hostname diarahkan ke Caddy di `localhost:80` dengan `noTLSVerify: true` (karena Caddy menerima plain HTTP, bukan HTTPS):
 
 ```yaml
 tunnel: <TUNNEL_ID>
 credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
+  # Frontend Web — domain utama
   - hostname: beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Frontend Web — wildcard subdomain (mis. bandung.beritakarya.co)
   - hostname: "*.beritakarya.co"
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Backend API
   - hostname: api.beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Media MinIO
   - hostname: media.beritakarya.co
     service: http://localhost:80
+    originRequest:
+      noTLSVerify: true
+
+  # Fallback
   - service: http_status:404
 ```
 
@@ -239,24 +329,31 @@ Mulai ulang service cloudflared:
 ```bash
 systemctl restart cloudflared
 systemctl status cloudflared
+
+# Verifikasi tunnel aktif dan semua hostname terdaftar
+cloudflared tunnel info beritakarya-tunnel
 ```
 
 ---
 
 ## Langkah 7: Update DNS Record di Cloudflare Dashboard
 
-Ini adalah langkah pengalihan dari Vercel ke server Anda:
+Ini adalah langkah pengalihan dari Vercel ke server Anda. **Perubahan DNS akan berlaku langsung** karena Cloudflare Proxied records tidak perlu propagasi.
 
 1. Buka [dash.cloudflare.com](https://dash.cloudflare.com) → Pilih domain `beritakarya.co`.
 2. Masuk ke menu **DNS** → **Records**.
-3. Temukan record berikut dan ubah targetnya:
+3. Ubah **semua** record berikut agar mengarah ke Cloudflare Tunnel:
 
-| Type | Name | Target Lama (Vercel) | Target Baru (Cloudflare Tunnel) | Proxy Status |
-|---|---|---|---|---|
-| **CNAME** | `beritakarya.co` | `cname.vercel-dns.com` | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** (Awan Oranye) |
-| **CNAME** | `*` | `cname.vercel-dns.com` | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** (Awan Oranye) |
+| Type | Name | Target Lama (Vercel) | Target Baru (Tunnel) | Proxy Status |
+|------|------|----------------------|----------------------|--------------|
+| CNAME | `beritakarya.co` | `cname.vercel-dns.com` atau `645f2a...vercel-dns-017.com` | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** ☁️ |
+| CNAME | `*` (wildcard) | `cname.vercel-dns.com` atau tidak ada | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** ☁️ |
+| CNAME | `api` | sudah Tunnel | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** ☁️ |
+| CNAME | `media` | sudah Tunnel | `<TUNNEL_ID>.cfargotunnel.com` | **Proxied** ☁️ |
 
-*(Jika record `api` dan `media` sudah ada, pastikan keduanya juga mengarah ke `<TUNNEL_ID>.cfargotunnel.com`).*
+> **⚠️ Jangan lewatkan wildcard `*`!** Record ini yang memungkinkan subdomain seperti `bandung.beritakarya.co` atau `jombang.beritakarya.co` bisa diakses. Tanpa record ini, multi-site routing tidak akan berfungsi.
+
+4. Setelah diubah, verifikasi bahwa record **tidak lagi** menunjuk ke `vercel-dns.com` atau `vercel-dns-017.com`.
 
 ---
 
