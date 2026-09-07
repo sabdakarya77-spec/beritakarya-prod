@@ -175,10 +175,22 @@ export default async function ArticlePage({ params }: Props) {
     || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')
   const coverImageCaption = coverImageBlock?.caption || null
   const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'paragraph')?.content || ''
-  const articleUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/artikel/${slugParam}`
+  // Resolve correct public-facing base URL for this site:
+  // - pusat  → https://beritakarya.co
+  // - jombang → https://jombang.beritakarya.co  (NOT beritakarya.co/jombang)
+  const _base = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
+  const _protocol = _base.startsWith('https') ? 'https' : 'http'
+  const _rootDomain = _base.replace(/^https?:\/\//, '').split('/')[0]
+  const siteBaseUrl = siteParam === 'pusat'
+    ? _base
+    : `${_protocol}://${siteParam}.${_rootDomain}`
+
+  // URL artikel yang benar untuk structured data & breadcrumb
+  const articleUrl = `${siteBaseUrl}/artikel/${slugParam}`
+  // URL profil penulis
   const authorProfileUrl = article.author?.id
-    ? `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}/penulis/${article.author.id}`
-    : `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}`
+    ? `${siteBaseUrl}/penulis/${article.author.id}`
+    : siteBaseUrl
   const authorProfilePath = article.author?.id ? `/${siteParam}/penulis/${article.author.id}` : null
   const sidebarRelatedArticles = relatedArticles.slice(0, 2)
 
@@ -205,7 +217,7 @@ export default async function ArticlePage({ params }: Props) {
     authorName: article.author?.name || 'Redaksi',
     authorUrl: authorProfileUrl,
     siteName: siteConfig.name || 'BeritaKarya',
-    siteUrl: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}`,
+    siteUrl: siteBaseUrl,
     articleUrl,
     articleBody: fullArticleBody,
     category: primaryCategoryName,
@@ -213,9 +225,9 @@ export default async function ArticlePage({ params }: Props) {
     wordCount: article.wordCount || fullArticleBody.split(/\s+/).filter(Boolean).length,
   })
   const breadcrumbSchema = buildBreadcrumb([
-    { name: 'Beranda', url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}` },
+    { name: 'Beranda', url: siteBaseUrl },
     ...(primaryCategoryName
-      ? [{ name: primaryCategoryName, url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/${siteParam}?cat=${encodeURIComponent(primaryCategoryName)}` }]
+      ? [{ name: primaryCategoryName, url: `${siteBaseUrl}?cat=${encodeURIComponent(primaryCategoryName)}` }]
       : []),
     { name: article.title, url: articleUrl },
   ])

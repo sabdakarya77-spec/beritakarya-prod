@@ -12,6 +12,9 @@ import { ROLE_LABELS, getCategoryColor } from '../../../../lib/constants'
 import { cn } from '../../../../lib/utils'
 import { API_URL } from '../../../../lib/api'
 import { fetchSiteSettings, buildPublicSiteConfig } from '../../../../lib/siteSettings'
+import { constructMetadata } from '../../../../lib/metadata'
+import { JsonLd } from '../../../../components/ui/JsonLd'
+import { buildPerson, buildBreadcrumb } from '../../../../lib/structuredData'
 
 interface Props {
   params: { site: string; id: string }
@@ -165,17 +168,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Profil Penulis Tidak Ditemukan', description: 'Profil penulis yang Anda cari tidak tersedia.', icons: faviconUrl, robots: { index: false, follow: false } }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
   const title = `${profileData.profile.name} - Profil Penulis ${siteName}`
   const description = (profileData.profile.bio || getFallbackBio(profileData.profile.name, profileData.profile.role, siteName)).slice(0, 160)
-  const url = `${baseUrl}/${siteParam}/penulis/${authorId}`
 
-  return {
-    title, description, metadataBase: new URL(baseUrl),
-    openGraph: { title, description, url, siteName, locale: 'id_ID', type: 'profile' },
-    twitter: { card: 'summary_large_image', title, description, creator: '@beritakarya' },
+  return constructMetadata({
+    title,
+    description,
+    image: profileData.profile.avatarUrl || '/logo.png',
     icons: faviconUrl,
-  }
+    siteParam,
+    canonicalPath: `/${siteParam}/penulis/${authorId}`,
+    type: 'profile',
+    author: profileData.profile.name,
+    noIndex: false,
+  })
 }
 
 // ─── Page Component ─────────────────────────────────────────────────
@@ -204,11 +210,34 @@ export default async function AuthorProfilePage({ params }: Props) {
   const featuredArticle = recentArticles[0]
   const remainingArticles = recentArticles.slice(1)
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://beritakarya.co'
+  const siteUrl = siteParam === 'pusat' ? baseUrl : `https://${siteParam}.beritakarya.co`
+  const profileUrl = siteParam === 'pusat' ? `${siteUrl}/pusat/penulis/${authorId}` : `${siteUrl}/penulis/${authorId}`
+
   const sidebarCardClass = 'rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5'
   const sidebarLabelClass = 'flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-brand-text-muted'
 
   return (
     <PublicSiteLayout siteConfig={siteConfig}>
+      <JsonLd
+        id={`ld-author-${authorId}`}
+        data={buildPerson({
+          name: profile.name,
+          url: profileUrl,
+          role: roleLabel,
+          bio,
+          image: profile.avatarUrl || undefined,
+          worksFor: siteConfig.name,
+        })}
+      />
+      <JsonLd
+        id={`ld-breadcrumb-author-${authorId}`}
+        data={buildBreadcrumb([
+          { name: siteConfig.name, url: siteUrl },
+          { name: 'Penulis', url: siteParam === 'pusat' ? `${siteUrl}/pusat/penulis` : `${siteUrl}/penulis` },
+          { name: profile.name, url: profileUrl },
+        ])}
+      />
       <main className="min-h-screen">
         {/* ── HERO SECTION ────────────────────────────────────────── */}
         <section className="relative overflow-hidden border-b border-gray-100 bg-white pt-16 dark:border-white/5 dark:bg-slate-950 md:pt-24">

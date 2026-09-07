@@ -166,7 +166,20 @@ app.use('/api/v1/market', publicLimiter, marketRouter)
 // Cron endpoints (called by scheduler — crontab lokal / systemd timer)
 app.use('/api/cron', cronRouter)
 
-// ─── Health & Metrics ─────────────────────────────────────────────────────────
+// ─── Health & Metrics & Root ──────────────────────────────────────────────────
+
+app.get('/robots.txt', (_, res) => {
+  res.type('text/plain').send('User-agent: *\nDisallow: /\n')
+})
+
+app.get('/', (_, res) => {
+  res.json({
+    name: 'BeritaKarya API Service',
+    status: 'online',
+    version: '1.0.0',
+    documentation: 'https://beritakarya.co',
+  })
+})
 
 app.get('/health', asyncHandler(async (_, res) => {
   let databaseHealth = false

@@ -28,7 +28,6 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /*?q=*
 Disallow: /*?site=*
-Disallow: /*?cat=*
 Disallow: /_next/static/media/
 
 # Dedicated Bot Rules
@@ -46,7 +45,6 @@ Disallow: /api/
 Disallow: /auth/
 Disallow: /*?q=*
 Disallow: /*?site=*
-Disallow: /*?cat=*
 Disallow: /_next/static/media/
 
 User-agent: Googlebot-Image

@@ -74,11 +74,22 @@ function toAbsolute(baseUrl: string, path: string) {
 
 export async function generateSiteSitemap(site: string): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
-  const siteUrl = site === 'pusat' ? baseUrl : `${baseUrl}/${site}`
 
-  const [articles, authors] = await Promise.all([
+  // Resolve the correct public URL for this site:
+  // - pusat  → https://beritakarya.co  (main domain)
+  // - jombang → https://jombang.beritakarya.co  (subdomain)
+  // Using the subdomain URL ensures sitemap URLs match what Google actually crawls,
+  // preventing 404s caused by sitemap pointing to beritakarya.co/jombang/artikel/xxx.
+  const protocol = baseUrl.startsWith('https') ? 'https' : 'http'
+  const rootDomain = baseUrl.replace(/^https?:\/\//, '').split('/')[0]
+  const siteUrl = site === 'pusat'
+    ? baseUrl
+    : `${protocol}://${site}.${rootDomain}`
+
+  const [articles, authors, categories] = await Promise.all([
     getArticles(site),
     getAuthors(site),
+    getCategories(site),
   ])
 
   const now = new Date()
@@ -93,27 +104,50 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
     },
   ]
 
+  // Categories
+  categories.forEach((category: { slug?: string; updatedAt?: string }) => {
+    if (!category?.slug) return
+    const slug = category.slug.toLowerCase().trim()
+    if (slug === 'tersimpan' || slug === 'terbaru') return
+
+    const categoryUrl = site === 'pusat'
+      ? `${baseUrl}/pusat?cat=${encodeURIComponent(slug)}`
+      : `${siteUrl}/?cat=${encodeURIComponent(slug)}`
+
+    entries.push({
+      url: categoryUrl,
+      lastModified: category.updatedAt ? new Date(category.updatedAt) : now,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    })
+  })
+
   // Legal pages
   entries.push({
     url: `${siteUrl}/kebijakan-privasi`,
     lastModified: now,
     changeFrequency: 'monthly',
-    priority: 0.3,
+    priority: 0.6,
   })
   entries.push({
     url: `${siteUrl}/cookies`,
     lastModified: now,
     changeFrequency: 'monthly',
-    priority: 0.3,
+    priority: 0.6,
   })
 
   // Legal/info pages (/p/*)
+  // page.href(site) returns /{site}/p/about — strip the /{site} prefix for subdomain sites
+  // since siteUrl already encodes the correct domain (jombang.beritakarya.co).
   ALL_LEGAL_PAGES.forEach((page) => {
+    const href = page.href(site)
+    // Remove the /{site} prefix: /jombang/p/about → /p/about
+    const subPath = href.replace(new RegExp(`^\\/${site}`), '') || '/'
     entries.push({
-      url: `${baseUrl}${page.href(site)}`,
+      url: `${siteUrl}${subPath}`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.3,
+      priority: 0.6,
     })
   })
 

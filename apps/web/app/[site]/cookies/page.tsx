@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { LegalStandardPage } from '../../../components/legal'
 import { buildPublicSiteConfig, fetchSiteSettings } from '../../../lib/siteSettings'
 import { constructMetadata } from '../../../lib/metadata'
+import { JsonLd } from '../../../components/ui/JsonLd'
+import { buildBreadcrumb } from '../../../lib/structuredData'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,9 +27,12 @@ export async function generateMetadata({
 
   return constructMetadata({
     title: `${COOKIES_PAGE.title} - ${siteName}`,
+    description: COOKIES_PAGE.intro,
     image: ogImageUrl,
     icons: faviconUrl,
     siteParam,
+    canonicalPath: `/${siteParam}/cookies`,
+    noIndex: false,
   })
 }
 
@@ -76,14 +81,26 @@ export default async function CookiesPage({ params }: { params: { site: string }
   }
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://beritakarya.co'
+  const siteUrl = siteParam === 'pusat' ? baseUrl : `https://${siteParam}.beritakarya.co`
+  const pageUrl = siteParam === 'pusat' ? `${siteUrl}/pusat/cookies` : `${siteUrl}/cookies`
 
   return (
-    <LegalStandardPage
-      siteConfig={siteConfig}
-      title={COOKIES_PAGE.title}
-      intro={COOKIES_PAGE.intro}
-      content={(siteSettings as Record<string, unknown>)?.cookiePolicy as string | null | undefined || FALLBACK_CONTENT}
-      emptyMessage={`Konten kebijakan cookie belum tersedia. Silakan hubungi redaksi ${siteConfig.name} untuk informasi lebih lanjut.`}
-    />
+    <>
+      <JsonLd
+        id="ld-breadcrumb-cookies"
+        data={buildBreadcrumb([
+          { name: siteConfig.name, url: siteUrl },
+          { name: COOKIES_PAGE.title, url: pageUrl },
+        ])}
+      />
+      <LegalStandardPage
+        siteConfig={siteConfig}
+        title={COOKIES_PAGE.title}
+        intro={COOKIES_PAGE.intro}
+        content={(siteSettings as Record<string, unknown>)?.cookiePolicy as string | null | undefined || FALLBACK_CONTENT}
+        emptyMessage={`Konten kebijakan cookie belum tersedia. Silakan hubungi redaksi ${siteConfig.name} untuk informasi lebih lanjut.`}
+      />
+    </>
   )
 }

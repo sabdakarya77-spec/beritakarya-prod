@@ -5,8 +5,30 @@ const SITE_DEFAULT_DESCRIPTION =
   'Portal berita terpercaya dari berbagai penjuru daerah. Liputan terkini, investigasi, dan analisis tajam.'
 const SITE_DEFAULT_LOGO = '/logo.png'
 
+import { SITE_MAP } from '@beritakarya/config'
+
 function getBaseUrl() {
   return process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
+}
+
+/**
+ * Resolves the correct public URL for a site:
+ * - pusat  → https://beritakarya.co
+ * - jombang → https://jombang.beritakarya.co
+ */
+function resolveSubdomainUrl(siteParam?: string): string {
+  const baseUrl = getBaseUrl()
+  if (!siteParam || siteParam === 'pusat') return baseUrl
+
+  const siteConfig = SITE_MAP[siteParam as keyof typeof SITE_MAP]
+  if (siteConfig?.domain) {
+    const protocol = baseUrl.startsWith('https') ? 'https' : 'http'
+    return `${protocol}://${siteConfig.domain}`
+  }
+
+  const protocol = baseUrl.startsWith('https') ? 'https' : 'http'
+  const rootDomain = baseUrl.replace(/^https?:\/\//, '').split('/')[0]
+  return `${protocol}://${siteParam}.${rootDomain}`
 }
 
 export interface OrganizationOptions {
@@ -20,7 +42,7 @@ export interface OrganizationOptions {
 
 export function buildOrganization(opts: OrganizationOptions = {}): JsonLdObject {
   const baseUrl = getBaseUrl()
-  const url = opts.url || baseUrl
+  const siteUrl = opts.url || (opts.siteParam ? resolveSubdomainUrl(opts.siteParam) : baseUrl)
   const logo = opts.logo || `${baseUrl}${SITE_DEFAULT_LOGO}`
   const name = opts.name || SITE_NAME
   const description = opts.description || SITE_DEFAULT_DESCRIPTION
@@ -30,7 +52,7 @@ export function buildOrganization(opts: OrganizationOptions = {}): JsonLdObject 
     '@context': 'https://schema.org',
     '@type': 'NewsMediaOrganization',
     name,
-    url,
+    url: siteUrl,
     logo: {
       '@type': 'ImageObject',
       url: logo,
@@ -49,8 +71,12 @@ export interface WebsiteOptions {
 }
 
 export function buildWebsite(opts: WebsiteOptions = {}): JsonLdObject {
-  const baseUrl = getBaseUrl()
-  const url = opts.siteParam ? `${baseUrl}/${opts.siteParam}` : baseUrl
+  // Gunakan URL subdomain yang benar:
+  // pusat  → https://beritakarya.co
+  // jombang → https://jombang.beritakarya.co  (bukan https://beritakarya.co/jombang)
+  const url = opts.siteParam
+    ? resolveSubdomainUrl(opts.siteParam)
+    : getBaseUrl()
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
