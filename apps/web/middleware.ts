@@ -85,6 +85,15 @@ export function middleware(req: NextRequest) {
     if (firstSegment && ROOT_REDIRECTS[firstSegment]) {
       return NextResponse.redirect(new URL(ROOT_REDIRECTS[firstSegment], req.url), 301)
     }
+
+    // 3b. On the main domain, content routes only exist under /pusat/* because the
+    // Next.js route tree is /[site]/artikel/[slug] etc. URLs shared/copied without
+    // the /pusat prefix (e.g. beritakarya.co/artikel/xyz from old share links or
+    // old sitemaps) would 404 — 301 them to the canonical /pusat/* path so the
+    // link equity is reclaimed.
+    if (firstSegment && ['artikel', 'penulis', 'p'].includes(firstSegment)) {
+      return NextResponse.redirect(new URL(`/pusat${pathname}`, req.url), 301)
+    }
   }
 
   // 4. Redirect auth pages with ?next= query parameters to clean canonical auth pages for bots

@@ -185,11 +185,19 @@ export default async function ArticlePage({ params }: Props) {
     ? _base
     : `${_protocol}://${siteParam}.${_rootDomain}`
 
-  // URL artikel yang benar untuk structured data & breadcrumb
-  const articleUrl = `${siteBaseUrl}/artikel/${slugParam}`
+  // Base untuk URL konten (artikel & profil penulis):
+  // - pusat    → https://beritakarya.co/pusat   (route adalah /[site]/artikel/[slug],
+  //                                              jadi domain utama WAJIB pakai prefix /pusat)
+  // - subdomain → https://jombang.beritakarya.co (tanpa prefix, middleware me-rewrite)
+  const siteContentBase = siteParam === 'pusat'
+    ? `${_base}/pusat`
+    : `${_protocol}://${siteParam}.${_rootDomain}`
+
+  // URL artikel yang benar untuk structured data & breadcrumb & tombol share/copy link
+  const articleUrl = `${siteContentBase}/artikel/${slugParam}`
   // URL profil penulis
   const authorProfileUrl = article.author?.id
-    ? `${siteBaseUrl}/penulis/${article.author.id}`
+    ? `${siteContentBase}/penulis/${article.author.id}`
     : siteBaseUrl
   const authorProfilePath = article.author?.id ? `/${siteParam}/penulis/${article.author.id}` : null
   const sidebarRelatedArticles = relatedArticles.slice(0, 2)

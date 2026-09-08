@@ -82,8 +82,11 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
   // preventing 404s caused by sitemap pointing to beritakarya.co/jombang/artikel/xxx.
   const protocol = baseUrl.startsWith('https') ? 'https' : 'http'
   const rootDomain = baseUrl.replace(/^https?:\/\//, '').split('/')[0]
+  // siteUrl mencakup prefix /pusat untuk domain utama, karena route konten adalah
+  // /[site]/artikel/[slug] — di domain utama URL valid harus /pusat/artikel/{slug}.
+  // Subdomain tidak perlu prefix (middleware me-rewrite /artikel → /{site}/artikel).
   const siteUrl = site === 'pusat'
-    ? baseUrl
+    ? `${baseUrl}/pusat`
     : `${protocol}://${site}.${rootDomain}`
 
   const [articles, authors, categories] = await Promise.all([
