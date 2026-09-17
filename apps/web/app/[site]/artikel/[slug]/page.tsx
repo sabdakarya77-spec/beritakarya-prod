@@ -55,8 +55,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     fetchSiteSettings(siteParam)
   ])
 
-  // Artikel tidak ada atau masih draft → beri noindex agar Google tidak mengindeks halaman 404
-  if (!article || article.status !== 'published') {
+  const cleanSlug = slugParam ? slugParam.toLowerCase().trim() : ''
+  const isTestSlug = cleanSlug.startsWith('uji-coba') || cleanSlug.startsWith('test-') || cleanSlug.startsWith('dummy-') || cleanSlug === 'test'
+
+  // Artikel tidak ada, masih draft, atau slug uji coba → beri noindex agar Google tidak mengindeks halaman 404
+  if (isTestSlug || !article || article.status !== 'published') {
     return { title: 'Post Tidak Ditemukan', robots: { index: false, follow: false } }
   }
 
@@ -158,6 +161,10 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
+
+  const cleanSlug = slugParam ? slugParam.toLowerCase().trim() : ''
+  const isTestSlug = cleanSlug.startsWith('uji-coba') || cleanSlug.startsWith('test-') || cleanSlug.startsWith('dummy-') || cleanSlug === 'test'
+  if (isTestSlug) notFound()
 
   const article = await getArticle(siteParam, slugParam)
   if (!article || article.status !== 'published') notFound()

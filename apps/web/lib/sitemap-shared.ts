@@ -72,58 +72,66 @@ function toAbsolute(baseUrl: string, path: string) {
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
 }
 
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+export function sitemapToXml(entries: MetadataRoute.Sitemap): string {
+  const xmlEntries = entries
+    .map((entry) => {
+      const loc = `<loc>${escapeXml(entry.url)}</loc>`
+      const lastmod = entry.lastModified
+        ? `<lastmod>${entry.lastModified instanceof Date ? entry.lastModified.toISOString() : new Date(entry.lastModified).toISOString()}</lastmod>`
+        : ''
+      const changefreq = entry.changeFrequency
+        ? `<changefreq>${entry.changeFrequency}</changefreq>`
+        : ''
+      const priority = entry.priority !== undefined ? `<priority>${entry.priority.toFixed(1)}</priority>` : ''
+
+      const images = (entry.images || [])
+        .map((img) => `<image:image><image:loc>${escapeXml(img)}</image:loc></image:image>`)
+        .join('')
+
+      return `<url>${loc}${lastmod}${changefreq}${priority}${images}</url>`
+    })
+    .join('\n  ')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n  ${xmlEntries}\n</urlset>`
+}
+
 export async function generateSiteSitemap(site: string): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
 
   // Resolve the correct public URL for this site:
   // - pusat  → https://beritakarya.co  (main domain)
   // - jombang → https://jombang.beritakarya.co  (subdomain)
-  // Using the subdomain URL ensures sitemap URLs match what Google actually crawls,
-  // preventing 404s caused by sitemap pointing to beritakarya.co/jombang/artikel/xxx.
   const protocol = baseUrl.startsWith('https') ? 'https' : 'http'
   const rootDomain = baseUrl.replace(/^https?:\/\//, '').split('/')[0]
-  // siteUrl mencakup prefix /pusat untuk domain utama, karena route konten adalah
-  // /[site]/artikel/[slug] — di domain utama URL valid harus /pusat/artikel/{slug}.
-  // Subdomain tidak perlu prefix (middleware me-rewrite /artikel → /{site}/artikel).
   const siteUrl = site === 'pusat'
     ? `${baseUrl}/pusat`
     : `${protocol}://${site}.${rootDomain}`
 
-  const [articles, authors, categories] = await Promise.all([
+  const [articles, authors] = await Promise.all([
     getArticles(site),
     getAuthors(site),
-    getCategories(site),
   ])
 
   const now = new Date()
 
   const entries: MetadataRoute.Sitemap = [
     {
-      url: site === 'pusat' ? `${baseUrl}/` : siteUrl,
+      url: site === 'pusat' ? `${baseUrl}/` : `${siteUrl}/`,
       lastModified: now,
       changeFrequency: 'hourly',
       priority: 1.0,
       images: [toAbsolute(baseUrl, DEFAULT_IMAGE)],
     },
   ]
-
-  // Categories
-  categories.forEach((category: { slug?: string; updatedAt?: string }) => {
-    if (!category?.slug) return
-    const slug = category.slug.toLowerCase().trim()
-    if (slug === 'tersimpan' || slug === 'terbaru') return
-
-    const categoryUrl = site === 'pusat'
-      ? `${baseUrl}/pusat?cat=${encodeURIComponent(slug)}`
-      : `${siteUrl}/?cat=${encodeURIComponent(slug)}`
-
-    entries.push({
-      url: categoryUrl,
-      lastModified: category.updatedAt ? new Date(category.updatedAt) : now,
-      changeFrequency: 'daily',
-      priority: 0.8,
-    })
-  })
 
   // Legal pages
   entries.push({
@@ -140,11 +148,8 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
   })
 
   // Legal/info pages (/p/*)
-  // page.href(site) returns /{site}/p/about — strip the /{site} prefix for subdomain sites
-  // since siteUrl already encodes the correct domain (jombang.beritakarya.co).
   ALL_LEGAL_PAGES.forEach((page) => {
     const href = page.href(site)
-    // Remove the /{site} prefix: /jombang/p/about → /p/about
     const subPath = href.replace(new RegExp(`^\\/${site}`), '') || '/'
     entries.push({
       url: `${siteUrl}${subPath}`,
@@ -164,6 +169,7 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
 
   // Author profiles
   authors.forEach((author: { id: string; updatedAt?: string }) => {
+    if (!author?.id) return
     entries.push({
       url: `${siteUrl}/penulis/${author.id}`,
       lastModified: author.updatedAt ? new Date(author.updatedAt) : now,
@@ -180,6 +186,16 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
     featuredImage?: string | null
     blocks?: Array<{ type?: string; url?: string }>
   }) => {
+    if (!article?.slug) return
+    const cleanSlug = article.slug.toLowerCase().trim()
+    if (
+      cleanSlug.startsWith('uji-coba') ||
+      cleanSlug.startsWith('test-') ||
+      cleanSlug.startsWith('dummy-') ||
+      cleanSlug === 'test'
+    ) {
+      return
+    }
     const image = article.featuredImage ||
       (Array.isArray(article.blocks) ? article.blocks : []).find((b) => b.type === 'image')?.url ||
       DEFAULT_IMAGE

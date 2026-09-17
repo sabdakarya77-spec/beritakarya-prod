@@ -46,10 +46,22 @@ export function middleware(req: NextRequest) {
   const pathname = url.pathname
   const hostname = req.headers.get('host') || ''
 
-  // 1. Block placeholder query strings that leaked from SearchAction templates (e.g. ?q={search_term_string})
+  // 1. Block placeholder query strings that leaked from SearchAction templates (e.g. ?q={search_term_string} or encoded %7Bsearch_term_string%7D)
   const rawQuery = req.nextUrl.search
-  if (rawQuery.includes('{') || rawQuery.includes('}')) {
-    return new NextResponse('Not Found', { status: 404 })
+  if (
+    rawQuery.includes('{') ||
+    rawQuery.includes('}') ||
+    rawQuery.includes('%7B') ||
+    rawQuery.includes('%7D') ||
+    rawQuery.includes('search_term_string')
+  ) {
+    return new NextResponse('Not Found', {
+      status: 404,
+      headers: {
+        'X-Robots-Tag': 'noindex, nofollow',
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    })
   }
 
   // 2. Reject URLs with special character garbage segments (e.g. /&, /$, /%26, /%24)
