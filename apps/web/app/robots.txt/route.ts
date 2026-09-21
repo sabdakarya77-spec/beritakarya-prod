@@ -36,6 +36,7 @@ Disallow: /auth/
 Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /verify-email
+Disallow: /cdn-cgi/
 Disallow: /*?q=*
 Disallow: /*?site=*
 Disallow: /*?cat=*
@@ -56,6 +57,10 @@ Disallow: /register
 Disallow: /register*
 Disallow: /api/
 Disallow: /auth/
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /verify-email
+Disallow: /cdn-cgi/
 Disallow: /*?q=*
 Disallow: /*?site=*
 Disallow: /*?cat=*

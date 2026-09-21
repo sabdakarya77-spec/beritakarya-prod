@@ -16,6 +16,7 @@ const RESERVED_ROOT_PATHS = new Set([
   'sitemap.xml',
   'ads.txt',
   'manifest.webmanifest',
+  'cdn-cgi',
 ])
 
 function extractSubdomain(hostname: string): string {
@@ -78,6 +79,18 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/manifest.webmanifest', req.url), 301)
   }
 
+  // 2c. Intercept Cloudflare email protection or internal virtual paths (e.g. /cdn-cgi/l/email-protection)
+  // Ensure search engines get an explicit 404 with noindex header so GSC doesn't flag them as crawl errors
+  if (pathname.startsWith('/cdn-cgi/')) {
+    return new NextResponse('Not Found', {
+      status: 404,
+      headers: {
+        'X-Robots-Tag': 'noindex, nofollow',
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    })
+  }
+
   const subdomain = extractSubdomain(hostname)
   const isSubdomain = Boolean(subdomain && subdomain !== 'pusat' && subdomain !== 'www')
   const siteId = isSubdomain ? subdomain : 'pusat'
@@ -87,15 +100,32 @@ export function middleware(req: NextRequest) {
 
   // 3. Redirect known legacy root paths to proper canonical URLs (only when not on subdomain)
   if (!isSubdomain) {
+    // 3a. Konsolidasi Homepage di domain utama: /pusat diarahkan ke root canonical /
+    if (pathname === '/pusat' || pathname === '/pusat/') {
+      return NextResponse.redirect(new URL(`/${url.search}`, req.url), 301)
+    }
+
     const ROOT_REDIRECTS: Record<string, string> = {
+      // Halaman Kebijakan & Legal
+      'kebijakan-privasi': '/pusat/kebijakan-privasi',
       privacy: '/pusat/kebijakan-privasi',
-      terms: '/pusat/p/terms',
       cookies: '/pusat/cookies',
+      // Halaman Info Resmi (/p/*)
+      terms: '/pusat/p/terms',
+      about: '/pusat/p/about',
+      'tentang-kami': '/pusat/p/about',
       bantuan: '/pusat/p/about',
+      editorial: '/pusat/p/editorial',
+      redaksi: '/pusat/p/editorial',
+      ethics: '/pusat/p/ethics',
+      'kode-etik': '/pusat/p/ethics',
+      'media-siber': '/pusat/p/media-siber',
+      'pedoman-media-siber': '/pusat/p/media-siber',
+      ads: '/pusat/p/ads',
       arsip: '/',
     }
     if (firstSegment && ROOT_REDIRECTS[firstSegment]) {
-      return NextResponse.redirect(new URL(ROOT_REDIRECTS[firstSegment], req.url), 301)
+      return NextResponse.redirect(new URL(`${ROOT_REDIRECTS[firstSegment]}${url.search}`, req.url), 301)
     }
 
     // 3b. On the main domain, content routes only exist under /pusat/* because the
@@ -104,7 +134,7 @@ export function middleware(req: NextRequest) {
     // old sitemaps) would 404 — 301 them to the canonical /pusat/* path so the
     // link equity is reclaimed.
     if (firstSegment && ['artikel', 'penulis', 'p'].includes(firstSegment)) {
-      return NextResponse.redirect(new URL(`/pusat${pathname}`, req.url), 301)
+      return NextResponse.redirect(new URL(`/pusat${pathname}${url.search}`, req.url), 301)
     }
   }
 
@@ -149,7 +179,7 @@ export function middleware(req: NextRequest) {
     // The 301 redirect reclaims any link equity Google assigned to the old URL.
     if (firstSegment === 'pusat' || firstSegment === subdomain) {
       const withoutPrefix = pathname.replace(new RegExp(`^\\/${firstSegment}`), '') || '/'
-      const redirectUrl = new URL(withoutPrefix, req.url)
+      const redirectUrl = new URL(`${withoutPrefix}${url.search}`, req.url)
       return NextResponse.redirect(redirectUrl, 301)
     }
 

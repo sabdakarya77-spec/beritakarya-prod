@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { LegalStandardPage } from '../../../../components/legal'
 import { AdsMarketingPage } from '../../../../components/marketing'
 import {
@@ -31,6 +31,14 @@ export async function generateMetadata({
   const slug = resolvedParams.slug
 
   const siteSettings = await fetchSiteSettings(siteParam)
+
+  if (!siteSettings && siteParam !== 'pusat') {
+    return {
+      title: 'Halaman Tidak Ditemukan',
+      robots: { index: false, follow: false },
+    }
+  }
+
   const siteName = siteSettings?.name || siteParam.charAt(0).toUpperCase() + siteParam.slice(1)
   const faviconUrl = siteSettings?.faviconUrl || '/favicon.ico'
   const ogImageUrl = siteSettings?.ogImageUrl || '/logo.png'
@@ -47,16 +55,20 @@ export async function generateMetadata({
     })
   }
 
+  // Konsolidasi: /p/cookies dialihkan ke halaman kanonikal /cookies
+  if (slug === 'cookies') {
+    return {
+      title: `Kebijakan Cookie - ${siteName}`,
+      robots: { index: false, follow: true },
+    }
+  }
+
+  // Slug tidak valid / bukan dokumen legal resmi → kembalikan noindex agar tidak memicu Soft 404
   if (!isLegalSlug(slug)) {
-    return constructMetadata({
-      title: 'Informasi',
-      description: 'Halaman informasi resmi portal berita.',
-      image: ogImageUrl,
-      icons: faviconUrl,
-      siteParam,
-      canonicalPath: `/${siteParam}/p/${slug}`,
-      noIndex: false,
-    })
+    return {
+      title: 'Halaman Tidak Ditemukan',
+      robots: { index: false, follow: false },
+    }
   }
 
   const intro = LEGAL_PAGE_INTROS[slug as LegalSlug] || 'Informasi dan dokumen resmi portal berita.'
@@ -78,6 +90,17 @@ export default async function InfoPage({ params }: { params: { site: string; slu
   const slug = resolvedParams.slug
 
   const siteSettings = await fetchSiteSettings(siteParam)
+
+  if (!siteSettings && siteParam !== 'pusat') {
+    notFound()
+  }
+
+  // Konsolidasi URL: /p/cookies dialihkan langsung ke canonical /cookies
+  if (slug === 'cookies') {
+    const destination = siteParam === 'pusat' ? '/pusat/cookies' : '/cookies'
+    redirect(destination)
+  }
+
   const siteConfig = buildPublicSiteConfig(siteParam, siteSettings)
 
   if (isAdsPublicSlug(slug)) {

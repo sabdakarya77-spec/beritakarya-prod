@@ -33,6 +33,9 @@ export function securityHeadersMiddleware(
   // Add XSS Protection
   res.setHeader('X-XSS-Protection', '1; mode=block')
 
+  // Prevent search engine indexing for all API endpoints
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow')
+
   // Content Security Policy (CSP) — aktif di SEMUA environment
   const cspDirectives = [
     "default-src 'self'",

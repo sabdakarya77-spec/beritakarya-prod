@@ -124,6 +124,10 @@ export async function GET(request: NextRequest) {
     {
       width: 1200,
       height: 630,
+      headers: {
+        'X-Robots-Tag': 'noindex, nofollow',
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+      },
     }
   )
 }

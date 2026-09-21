@@ -42,3 +42,14 @@ describe('sitemapToXml', () => {
     expect(xml).toContain('<loc>https://beritakarya.co/pusat/artikel/artikel-dengan-&amp;-karakter</loc>')
   })
 })
+
+describe('generateSiteSitemap uniqueness', () => {
+  it('does not contain duplicate URLs', async () => {
+    const { generateSiteSitemap } = await import('./sitemap-shared')
+    const entries = await generateSiteSitemap('pusat')
+    const urls = entries.map((e) => e.url)
+    const uniqueUrls = new Set(urls)
+
+    expect(urls.length).toBe(uniqueUrls.size)
+  })
+})

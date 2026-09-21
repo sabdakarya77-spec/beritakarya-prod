@@ -133,21 +133,7 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
     },
   ]
 
-  // Legal pages
-  entries.push({
-    url: `${siteUrl}/kebijakan-privasi`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  })
-  entries.push({
-    url: `${siteUrl}/cookies`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  })
-
-  // Legal/info pages (/p/*)
+  // Legal/info pages (ALL_LEGAL_PAGES includes about, editorial, ethics, terms, media-siber, kebijakan-privasi, and cookies)
   ALL_LEGAL_PAGES.forEach((page) => {
     const href = page.href(site)
     const subPath = href.replace(new RegExp(`^\\/${site}`), '') || '/'
@@ -208,5 +194,15 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
     })
   })
 
-  return entries
+  // Deduplicate entries by URL to ensure Google never encounters duplicate <loc> tags
+  const seenUrls = new Set<string>()
+  const uniqueEntries: MetadataRoute.Sitemap = []
+  for (const entry of entries) {
+    if (!seenUrls.has(entry.url)) {
+      seenUrls.add(entry.url)
+      uniqueEntries.push(entry)
+    }
+  }
+
+  return uniqueEntries
 }
