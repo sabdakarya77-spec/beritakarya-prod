@@ -107,21 +107,48 @@ function dedupById(articles: HomeArticle[]): HomeArticle[] {
 // freshness  = max(0, 1 - daysSincePublish / 7)  → 0–1 (hari ke-7 = 0)
 // engagement = viewCount / maxViewCount (normalised) → 0–1
 // editorial  = isFeatured(0.5) + isExclusive(0.3) + isBreaking(0.2) → 0–1
+//
+// [FIX] isFeatured virtual decay: flag isFeatured hanya diakui jika artikel
+//   berusia ≤ FEATURED_DECAY_DAYS (7 hari). Artikel lebih lama diperlakukan
+//   sebagai artikel biasa — tidak mendapat bonus editorial 0.5 — sehingga
+//   artikel lama yang pernah ditandai editor tidak mendominasi Fokus Redaksi.
+//
+// [FIX] Hard age cap: artikel > EXTENDED_FOKUS_AGE_DAYS (30 hari) mendapat
+//   score -Infinity dan tidak bisa menang scoring apapun.
 
 const DEFAULT_SCORE_WEIGHTS = { freshness: 0.4, engagement: 0.3, editorial: 0.3 }
 const FRESHNESS_DECAY_DAYS = 7
 
+/** [FIX] Usia maks agar flag isFeatured masih diperhitungkan di scoring. */
+const FEATURED_DECAY_DAYS = 7
+
+/** [FIX] Hard cap usia untuk kandidat Fokus Redaksi.
+ *  Artikel > 30 hari mendapat score -Infinity (tidak pernah menang). */
+const EXTENDED_FOKUS_AGE_DAYS = 30
+
+/** [FIX] isFeatured hanya berlaku jika artikel masih ≤ FEATURED_DECAY_DAYS.
+ *  Ini mencegah artikel lama yang lupa di-uncheck oleh editor mendapat bonus score. */
+function isEffectivelyFeatured(article: HomeArticle): boolean {
+  if (!article.isFeatured) return false
+  const ageDays = (Date.now() - getPublishedDate(article).getTime()) / (1000 * 60 * 60 * 24)
+  return ageDays <= FEATURED_DECAY_DAYS
+}
+
 function scoreArticle(article: HomeArticle, maxViewCount: number, weights = DEFAULT_SCORE_WEIGHTS): number {
   // Freshness: 0 hari = 1.0, 7 hari = 0.0
   const daysSincePublish = (Date.now() - getPublishedDate(article).getTime()) / (1000 * 60 * 60 * 24)
+
+  // [FIX] Hard age cap: artikel > 30 hari tidak bisa menang apapun
+  if (daysSincePublish > EXTENDED_FOKUS_AGE_DAYS) return -Infinity
+
   const freshness = Math.max(0, 1 - daysSincePublish / FRESHNESS_DECAY_DAYS)
 
   // Engagement: normalised viewCount
   const engagement = maxViewCount > 0 ? (article.viewCount || 0) / maxViewCount : 0
 
-  // Editorial: isFeatured + isExclusive + isBreaking
+  // [FIX] Editorial: gunakan isEffectivelyFeatured (bukan raw isFeatured)
   const editorial =
-    (article.isFeatured ? 0.5 : 0) +
+    (isEffectivelyFeatured(article) ? 0.5 : 0) +
     (article.isExclusive ? 0.3 : 0) +
     (article.isBreaking ? 0.2 : 0)
 
@@ -163,23 +190,39 @@ export function scoreAndDistribute(pools: HomepagePools, opts: DistributionOptio
 
   // ─────────────────────────────────────────────
   // 2. FOKUS REDAKSI: hard cutoff usia + filter isFeatured + scoring
-  //    Hard cutoff: Hanya artikel bertanda isFeatured yang terbit <= maxFokusAgeDays (default 14 hari) yang masuk candidate pool.
-  //    Di antara candidate, pakai scoring untuk rotasi.
-  //    Fallback: Jika artikel dalam batas usia fresh < 2 (mis. di environment test), gunakan artikel sisa tanpa hard cutoff.
+  //
+  //    [FIX] Candidate pool kini bertingkat (3 level):
+  //      Level 1 (primary)  : artikel ≤ maxFokusAgeDays (default 14 hari)
+  //      Level 2 (extended) : artikel ≤ EXTENDED_FOKUS_AGE_DAYS (30 hari)
+  //      Level 3 (last-resort): semua remainingAfterHero — hanya aktif jika
+  //                             level 1 + 2 keduanya menghasilkan < 2 artikel
+  //                             (mis. situs baru / sepi konten / environment test).
+  //                             Artikel > 30 hari tetap tidak menang karena hard cap
+  //                             di scoreArticle mengembalikan -Infinity.
+  //
+  //    [FIX] featuredPool menggunakan isEffectivelyFeatured (bukan raw isFeatured)
+  //    sehingga artikel lama yang lupa di-uncheck tidak masuk featured pool.
   // ─────────────────────────────────────────────
   const remainingAfterHero = articles.filter(a => !heroIds.has(a.id))
   const sortedRemaining = sortByNewest(remainingAfterHero)
 
   const maxFokusAgeDays = opts.maxFokusAgeDays ?? 14
-  const isFreshForFokus = (a: HomeArticle) => {
-    const ageInDays = (Date.now() - getPublishedDate(a).getTime()) / (1000 * 60 * 60 * 24)
-    return ageInDays <= maxFokusAgeDays
-  }
 
-  const freshRemaining = remainingAfterHero.filter(isFreshForFokus)
-  const candidatePool = freshRemaining.length >= 2 ? freshRemaining : remainingAfterHero
+  const getAgeDays = (a: HomeArticle) =>
+    (Date.now() - getPublishedDate(a).getTime()) / (1000 * 60 * 60 * 24)
 
-  const featuredPool = candidatePool.filter(a => a.isFeatured)
+  const freshRemaining    = remainingAfterHero.filter(a => getAgeDays(a) <= maxFokusAgeDays)
+  const extendedRemaining = remainingAfterHero.filter(a => getAgeDays(a) <= EXTENDED_FOKUS_AGE_DAYS)
+
+  // [FIX] Fallback bertingkat — Level 3 hanya sebagai last-resort
+  const candidatePool = freshRemaining.length >= 2
+    ? freshRemaining
+    : extendedRemaining.length >= 2
+      ? extendedRemaining
+      : remainingAfterHero
+
+  // [FIX] featuredPool pakai isEffectivelyFeatured (artikel > 7 hari tidak masuk)
+  const featuredPool = candidatePool.filter(a => isEffectivelyFeatured(a))
   const fokusRedaksi = featuredPool.length >= 2
     ? scoreAndSort(featuredPool, scoreWeights).slice(0, 4)
     : scoreAndSort(candidatePool, scoreWeights).slice(0, 4)
