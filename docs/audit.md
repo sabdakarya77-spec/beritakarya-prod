@@ -316,4 +316,142 @@ Konsolidasi `ScrollAnimate` → `FadeInOnScroll`:
 
 ---
 
-*Dokumen ini di-generate otomatis oleh audit pada 5 Juli 2026.*
+*Laporan audit 1 & 2 di-generate pada Juli 2026.*
+
+---
+
+## 3. Audit Arsitektur, Keamanan & Kualitas Monorepo BeritaKarya
+
+> Tanggal verifikasi: 10 Oktober 2026  
+> Auditor: Antigravity AI Code Auditor  
+> Scope: Seluruh monorepo (`apps/api`, `apps/web`, `packages/types`, `packages/utils`, `packages/config`), skema database, keamanan, dan deployment self-hosted.
+
+---
+
+### 3.1 Ringkasan Eksekutif & Skor Kematangan
+
+Sistem CMS multi-tenant **BeritaKarya** menunjukkan kematangan arsitektur dan disiplin rekayasa perangkat lunak yang sangat tinggi. Seluruh paket monorepo terisolasi dengan baik, integritas tipe data TypeScript sempurna, dan cakupan pengujian otomatis mencapai 100% kelulusan.
+
+| Dimensi Audit | Skor (1–10) | Status | Ringkasan Evaluasi |
+|---|:---:|:---:|---|
+| **Type Safety & Build** | **9.8 / 10** | 🟢 Luar Biasa | 8/8 target turbo lolos tanpa error (`tsc --noEmit`). |
+| **Test Automation** | **9.5 / 10** | 🟢 Luar Biasa | **298 unit & integration test** lolos (100% pass, 0 fail). |
+| **Linting & Code Standards** | **9.2 / 10** | 🟢 Sangat Baik | ESLint 0 error, 2 warning minor. Custom AST layout rule aktif. |
+| **Arsitektur Backend & DB** | **8.8 / 10** | 🟢 Baik Sekali | 44 Prisma migration terkelola rapi, multi-tenant index solid. |
+| **Frontend Architecture** | **8.5 / 10** | 🟢 Baik Sekali | Next.js 16 App Router standalone, tokenized design system. |
+| **Keamanan Aplikasi (AppSec)** | **8.0 / 10** | 🟡 Perlu Patch | Fitur AppSec kuat, namun ada CVE upstream di dependensi. |
+| **Maintainability (God Files)** | **7.2 / 10** | 🟡 Perlu Refactor | Sejumlah service dan page >1.000 baris butuh pemecahan modul. |
+
+---
+
+### 3.2 Hasil Pengujian Nyata (Hard Verifications)
+
+1. **TypeScript Type-Check (`pnpm type-check`)**
+   - Hasil: **8/8 paket sukses**, durasi 1m 41s.
+   - Status: **0 error kompilasi** di seluruh ekosistem Turborepo.
+
+2. **Automated Testing Suite (`pnpm test` via Vitest)**
+   - `@beritakarya/utils`: **13 passed** dari 2 file test.
+   - `@beritakarya/api`: **142 passed** dari 22 file test (mencakup Auth, Rate Limit, Editorial Lifecycle, Sanitizer, AI Quota, Media, Security).
+   - `@beritakarya/web`: **143 passed** dari 9 file test (mencakup Container, SmartImage, NewsCard, ReducedMotion, Zustand Stores).
+   - Total keseluruhan: **298 test passed**, **0 gagal**.
+
+3. **Linter Monorepo (`pnpm lint`)**
+   - Hasil: **0 error**, 2 warning:
+     - `apps/web/app/[site]/dashboard/(admin)/settings/page.tsx:239`: `react-hooks/exhaustive-deps` pada `fetchSettings`.
+     - `apps/web/lib/sitemap-shared.ts:46`: `getCategories` unused variable.
+   - Deteksi Deprecasi: Penggunaan legacy `.eslintrc.cjs` dengan `ESLINT_USE_FLAT_CONFIG=false` perlu dimigrasikan ke ESLint Flat Config (`eslint.config.mjs`) sebelum ESLint v10.
+
+---
+
+### 3.3 Temuan Keamanan & Analisis Kerentanan (Security Audit)
+
+Audit dependensi via `pnpm audit` mengidentifikasi celah upstream yang memerlukan pembaruan pada `pnpm.overrides` di `package.json`:
+
+#### 🔴 Kritis & Tinggi (Harus Segera Diperbaiki)
+
+1. **[CRITICAL] Next.js Remote Code Execution pada `next/og` (`GHSA-vcvr-r3jv-pc5j`)**
+   - **Lokasi**: `apps/web` (Next.js saat ini di `^16.3.5`).
+   - **Dampak**: Versi `>=16.2.0 <16.3.6` rentan terhadap RCE pada fitur dynamic OpenGraph Image generation. Selain itu, versi ini juga memiliki kerentanan Server-Side Request Forgery (SSRF) pada Image Optimization (`GHSA-cjq9-62q9-8jv4`).
+   - **Solusi**: Perbarui override menjadi `"next": "^16.3.8"`.
+
+2. **[CRITICAL] `proxy-addr` IP Spoofing via IPv4-Mapped IPv6 Subnet (`GHSA-jqcg-44mw-7w3h`)**
+   - **Lokasi**: `apps/api` via Express.js (`app.set('trust proxy', ...)`).
+   - **Dampak**: Versi `<2.0.8` memungkinkan bypass subnet trust yang berpotensi memanipulasi deteksi IP asal pada rate limiter dan audit log.
+   - **Solusi**: Tambahkan `"proxy-addr": "^2.0.8"` ke `pnpm.overrides`.
+
+3. **[HIGH] Sharp / librsvg Vulnerability (`GHSA-wq5f-xc86-pv6w`, CVE-2026-96889)**
+   - **Lokasi**: `apps/api` (`sharp` saat ini di `^0.35.4`).
+   - **Solusi**: Perbarui override ke `"sharp": "^0.35.5"`.
+
+4. **[HIGH] DOMPurify Rawtext Reparse Bypass (`GHSA-6688-9rhm-gjv2`)**
+   - **Lokasi**: `apps/api` (`dompurify` saat ini di `^3.4.12`).
+   - **Solusi**: Perbarui override ke `"dompurify": "^3.4.16"`.
+
+5. **[HIGH] Nodemailer ReDoS pada Addressparser (`GHSA-prgh-xp8r-p3m5`)**
+   - **Lokasi**: `apps/api` (`nodemailer` saat ini di `^9.1.1`).
+   - **Solusi**: Tambahkan override `"nodemailer": "^10.0.5"`.
+
+6. **[TIMING ATTACK] Verifikasi Token Cron (`CWE-208`)**
+   - **Lokasi**: `apps/api/src/cron/cron.router.ts:26`.
+   - **Kondisi**: Validasi `authHeader !== 'Bearer ' + secret` menggunakan equality operator biasa.
+   - **Solusi**: Gunakan `crypto.timingSafeEqual` untuk mencegah microsecond timing leak.
+
+---
+
+### 3.4 Utang Teknis & Kompleksitas Kode (God Files)
+
+File-file dengan tingkat tanggung jawab yang terlalu besar (*Single Responsibility Principle violation*):
+
+| File | Ukuran | Domain / Concern Tercampur | Rencana Solusi |
+|---|:---:|---|---|
+| `apps/api/src/modules/category/category.service.ts` | **1.393 baris** | CRUD, sinkronisasi global↔local, migrasi skema, dan utilitas pohon hierarki. | Lanjutkan **Fase 2 Modularisasi** (`category-crud`, `category-sync`, `category-migration`). |
+| `apps/web/app/[site]/dashboard/(admin)/settings/page.tsx` | **1.290 baris** | Form pengaturan portal, SEO, analytics GA4/GSC, identitas site, dan role redaksi dalam 1 komponen. | Ekstrak menjadi sub-komponen per tab di `settings/tabs/`. |
+| `apps/api/src/modules/site/site.service.ts` | **1.057 baris** | Resolusi subdomain, domain custom, izin role redaksi, dan konfigurasi tema. | Lanjutkan **Fase 3 Modularisasi**. |
+| `apps/web/app/[site]/artikel/[slug]/page.tsx` | **1.029 baris** | Halaman detail artikel menggabungkan render block, injeksi slot iklan, JSON-LD Schema.org, komentar, dan tracking. | Pisahkan utilitas JSON-LD dan ad-slot container ke modul pembantu. |
+
+---
+
+### 3.5 Evaluasi Kesiapan Operasional & DevOps (Self-Hosted LXC)
+
+1. **Standalone Production Server**:
+   - `output: 'standalone'` di `apps/web/next.config.mjs` telah selaras dengan `ecosystem.config.js` (`apps/web/.next/standalone/apps/web/server.js`).
+   - Menghemat konsumsi RAM container CT 104 secara signifikan dibandingkan menjalankan `next start`.
+
+2. **Manajemen Memori PM2**:
+   - Ambang batas `max_memory_restart: '800M'` (API) dan `'1G'` (Web) memberikan proteksi terhadap risiko memory leak jangka panjang.
+
+3. **Storage & Media Delivery**:
+   - Arsitektur MinIO mandiri (CT 101) via S3-compatible protocol dengan Cloudflare CDN di `https://media.beritakarya.co` berjalan efisien tanpa vendor lock-in.
+
+---
+
+### 3.6 Rekomendasi Rencana Aksi (Action Roadmap)
+
+#### Tahap 1 — Mendesak (Security Patch)
+Perbarui blok `pnpm.overrides` pada root `package.json`:
+```json
+"pnpm": {
+  "overrides": {
+    "next": "^16.3.8",
+    "proxy-addr": "^2.0.8",
+    "sharp": "^0.35.5",
+    "dompurify": "^3.4.16",
+    "nodemailer": "^10.0.5",
+    "compression": "^1.8.2"
+  }
+}
+```
+Lalu jalankan `pnpm install`.
+
+#### Tahap 2 — Jangka Pendek (Maintainability)
+- Eksekusi Fase 2 & Fase 3 dari `implementation_plan.md` untuk memecah `category.service.ts` dan `site.service.ts`.
+- Modularisasi `settings/page.tsx` ke dalam folder tab terpisah.
+- Amankan validasi secret di `cron.router.ts` dengan `crypto.timingSafeEqual`.
+- Bersihkan 2 warning ESLint yang terdeteksi.
+
+#### Tahap 3 — Jangka Menengah (Modernisasi Tooling)
+- Migrasikan `.eslintrc.cjs` ke ESLint Flat Config (`eslint.config.mjs`) agar siap menyongsong ESLint v10.
+
+---
+*Laporan audit komprehensif ini dicatat pada 10 Oktober 2026. Laporan rinci file tidak terpakai/dead code dapat dilihat di [docs/audit-dead-code.md](audit-dead-code.md).*

@@ -276,30 +276,91 @@
 }
 
 @media print {
+  /* 1. Sembunyikan semua elemen navigasi, panel melayang, iklan, dan tombol */
   .no-print, 
   header, 
   footer, 
   aside, 
-  nav, 
+  nav,
+  [role="navigation"],
+  [role="toolbar"],
   .share-sidebar, 
   .comment-section, 
   button,
   .reading-progress,
-  .ad-space {
+  .ad-space,
+  .mobile-bottom-nav,
+  #mobile-bottom-nav,
+  [data-floating-tools] {
     display: none !important;
   }
   
-  body {
-    background: white !important;
-    color: black !important;
+  /* 2. Format dasar cetak (kertas putih bersih) */
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset CSS variables tema ke hitam pekat (mencegah pudar akibat dark mode) */
+  :root,
+  .dark {
+    --brand-text: #000000 !important;
+    --brand-text-rgb: 0 0 0 !important;
+    --brand-text-muted: #1e293b !important;
+    --brand-text-muted-rgb: 30 41 59 !important;
+    --brand-black: #000000 !important;
+    --brand-black-rgb: 0 0 0 !important;
+  }
+
+  /* 3. Paksa semua teks artikel, judul, excerpt, paragraf, dan list berwarna hitam pekat */
+  article,
+  article h1,
+  article h2,
+  article h3,
+  article h4,
+  article h5,
+  article h6,
+  article p,
+  article li,
+  article blockquote,
+  article figcaption,
+  article time,
+  .article-content,
+  .article-content p,
+  .article-content span,
+  .article-content div {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Hilangkan gradient gelap pada hero overlay saat cetak */
+  article [class*="bg-gradient-to-"] {
+    display: none !important;
+  }
+
+  article [class*="bg-[#020617]"],
+  article [class*="bg-brand-black"] {
+    background: transparent !important;
+    background-color: transparent !important;
   }
   
   .article-content {
-    font-size: 12pt !important;
-    line-height: 1.75 !important;
+    font-size: 11.5pt !important;
+    line-height: 1.7 !important;
+  }
+
+  .article-content p {
+    font-size: 11.5pt !important;
+    line-height: 1.7 !important;
+    margin-bottom: 1.2rem !important;
   }
   
-  .max-w-4xl, .max-w-7xl, .max-w-container {
+  .max-w-4xl, .max-w-7xl, .max-w-container, .max-w-content {
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -307,6 +368,15 @@
   
   img {
     max-width: 100% !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  p, h1, h2, h3, blockquote {
+    orphans: 3;
+    widows: 3;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 

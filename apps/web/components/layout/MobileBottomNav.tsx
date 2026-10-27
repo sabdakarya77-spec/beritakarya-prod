@@ -86,7 +86,7 @@ export default function MobileBottomNav({ site = 'pusat', onSearchClick, onMenuC
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-50 w-[91%] max-w-md -translate-x-1/2 md:hidden">
+    <div className="fixed bottom-4 left-1/2 z-50 w-[91%] max-w-md -translate-x-1/2 md:hidden print:hidden no-print mobile-bottom-nav">
       <div className="flex items-center justify-around rounded-2xl border border-gray-200/50 bg-white/80 px-2 py-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/85 dark:shadow-[0_8px_28px_rgba(0,0,0,0.3)]">
         {navItems.map((item, index) => {
           const Icon = item.icon;

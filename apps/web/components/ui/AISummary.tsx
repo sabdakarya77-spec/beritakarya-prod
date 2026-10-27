@@ -15,7 +15,7 @@ export default function AISummary({ title, content, isVisible = false }: AISumma
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 max-w-sm w-full animate-fade-slide-up">
+    <div className="fixed bottom-6 right-6 z-40 max-w-sm w-full animate-fade-slide-up print:hidden no-print">
       <div className="bg-brand-black border border-white/10 p-6 rounded-xl shadow-2xl overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-red via-purple-500 to-blue-500" />
 

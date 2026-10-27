@@ -25,7 +25,7 @@ export default function ReadingProgress() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 h-1 bg-brand-red z-[60] origin-left transition-transform duration-100 ease-out"
+      className="fixed top-0 left-0 right-0 h-1 bg-brand-red z-[60] origin-left transition-transform duration-100 ease-out print:hidden no-print reading-progress"
       style={{ transform: `scaleX(${progress})` }}
     />
   );

@@ -111,7 +111,7 @@ export function PWAInstallPrompt({
   if (!mounted || !isVisible || (!deferredPrompt && !isIOS)) return null
 
   return (
-    <div className="fixed bottom-24 sm:bottom-6 right-4 left-4 sm:left-auto sm:w-[420px] z-[9999] animate-fade-in">
+    <div className="fixed bottom-24 sm:bottom-6 right-4 left-4 sm:left-auto sm:w-[420px] z-[9999] animate-fade-in print:hidden no-print">
       <div className="relative overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-gray-200 dark:border-white/10 p-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
         
         {/* Tombol Tutup (X) di Pojok Kanan Atas */}

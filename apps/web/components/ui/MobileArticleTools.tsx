@@ -184,7 +184,7 @@ export default function MobileArticleTools({
   };
 
   return (
-    <>
+    <div className="print:hidden no-print">
       {/* Share options panel (fallback when Web Share API is not supported) */}
       <AnimatePresence>
         {isShareSheetOpen && !isCollapsed && (
@@ -362,6 +362,6 @@ export default function MobileArticleTools({
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

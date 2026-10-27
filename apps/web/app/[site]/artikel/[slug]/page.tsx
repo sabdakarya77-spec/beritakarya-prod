@@ -297,17 +297,18 @@ export default async function ArticlePage({ params }: Props) {
             {/* Text Overlay / Metadata Container */}
             {/* Absolute positioning on desktop, relative flow with background on mobile */}
             <div className={cn(
-              "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0",
+              "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0 print:relative print:inset-auto print:block print:bg-transparent print:pt-4 print:pb-2",
               article.coverLayout === 'center' ? 'md:items-center' :
               article.coverLayout === 'left-top' ? 'md:items-start' :
               'md:items-end'
             )}>
-              <Container className={cn(article.coverLayout !== 'center' && 'md:mx-0')}>
+              <Container className={cn(article.coverLayout !== 'center' && 'md:mx-0', "print:px-0")}>
                 <div className={cn(
                   "max-w-4xl",
                   article.coverLayout === 'center' ? 'md:mx-auto md:text-center' :
                   article.coverLayout === 'left-top' ? 'md:pt-12' :
-                  'md:pb-12'
+                  'md:pb-12',
+                  "print:p-0 print:max-w-none"
                 )}>
                   <div className={cn("flex flex-wrap items-center gap-2.5 mb-4", article.coverLayout === 'center' && 'md:justify-center')}>
                     {badgeVariant && (
@@ -320,27 +321,27 @@ export default async function ArticlePage({ params }: Props) {
                     <span className={`rounded-sm px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.14em] ${getCategoryColor(primaryCategoryName)}`}>
                       {primaryCategoryName || 'NASIONAL'}
                     </span>
-                    <span className="h-1 w-1 rounded-full bg-white/30" />
-                    <span className="text-[10px] font-semibold text-white/70">
+                    <span className="h-1 w-1 rounded-full bg-white/30 print:bg-black/30" />
+                    <span className="text-[10px] font-semibold text-white/70 print:text-black">
                       {new Date(article.publishedAt).toLocaleDateString('id-ID', {
                         day: 'numeric', month: 'long', year: 'numeric'
                       })}
                     </span>
                   </div>
 
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-extrabold text-white leading-[1.1] tracking-tight mb-5 md:mb-6 drop-shadow-lg">
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-extrabold text-white leading-[1.1] tracking-tight mb-5 md:mb-6 drop-shadow-lg print:text-black print:drop-shadow-none">
                     {article.title}
                   </h1>
 
                   {article.excerpt && (
-                    <p className={cn("text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl", article.coverLayout === 'center' && 'md:mx-auto md:text-center')}>
+                    <p className={cn("text-sm md:text-base font-sans font-normal text-white/85 leading-relaxed mb-5 md:mb-6 drop-shadow max-w-2xl print:text-black print:drop-shadow-none", article.coverLayout === 'center' && 'md:mx-auto md:text-center')}>
                       {article.excerpt}
                     </p>
                   )}
 
                   <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5", article.coverLayout === 'center' && 'md:justify-center')}>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 backdrop-blur-sm text-sm font-sans font-bold text-white">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 backdrop-blur-sm text-sm font-sans font-bold text-white print:border print:border-gray-300 print:text-black">
                         {article.author?.avatarUrl ? (
                           <img
                             src={article.author.avatarUrl}
@@ -352,11 +353,11 @@ export default async function ArticlePage({ params }: Props) {
                         )}
                       </div>
                       <div>
-                        <div className="text-[11px] font-bold text-white">{article.author?.name || 'Redaksi'}</div>
-                        <div className="text-[9px] font-medium text-white/60">Staf Redaksi BeritaKarya</div>
+                        <div className="text-[11px] font-bold text-white print:text-black">{article.author?.name || 'Redaksi'}</div>
+                        <div className="text-[9px] font-medium text-white/60 print:text-gray-700">Staf Redaksi BeritaKarya</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 print:hidden">
                       <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1.5 text-[9px] font-bold text-white/90">
                         <BookOpen size={10} />
                         {readingTime} menit baca
@@ -401,7 +402,7 @@ export default async function ArticlePage({ params }: Props) {
             <div className={cn(articleRailClassName, 'mb-12 md:mb-16')}>
               {/* Main Content */}
               <div className="min-w-0 xl:grid xl:grid-cols-[4.25rem_minmax(0,40rem)] xl:gap-8 2xl:grid-cols-[4.5rem_minmax(0,42rem)]">
-                <div className="hidden xl:block relative z-30">
+                <div className="hidden xl:block relative z-30 print:hidden">
                   <div className="sticky top-32">
                     <ArticleFloatingTools title={article.title} url={articleUrl} />
                   </div>
@@ -739,12 +740,14 @@ export default async function ArticlePage({ params }: Props) {
         </article>
 
         {/* Mobile bottom bar — Share & Bookmark, only visible on < md */}
-        <MobileArticleTools
-          title={article.title}
-          url={articleUrl}
-          article={article}
-          site={siteParam}
-        />
+        <div className="print:hidden no-print">
+          <MobileArticleTools
+            title={article.title}
+            url={articleUrl}
+            article={article}
+            site={siteParam}
+          />
+        </div>
       </ImageLightboxWrapper>
       </main>
 
@@ -753,10 +756,10 @@ export default async function ArticlePage({ params }: Props) {
 }
 function PublicBlock({ block, index = 0 }: { block: Block; index?: number }) {
   const bodyTextClass =
-    'font-sans text-[calc(1rem*var(--article-font-scale))] leading-[calc(1.75rem*var(--article-font-scale))] antialiased text-left md:text-[calc(1.05rem*var(--article-font-scale))] md:leading-[calc(1.85rem*var(--article-font-scale))]';
+    'font-sans text-[calc(1rem*var(--article-font-scale))] leading-[calc(1.75rem*var(--article-font-scale))] antialiased text-left md:text-[calc(1.05rem*var(--article-font-scale))] md:leading-[calc(1.85rem*var(--article-font-scale))] print:text-black';
 
   const leadTextClass =
-    'font-sans text-[calc(1.125rem*var(--article-font-scale))] leading-relaxed font-medium text-brand-black/90 dark:text-white/90 antialiased md:text-[calc(1.25rem*var(--article-font-scale))]';
+    'font-sans text-[calc(1.125rem*var(--article-font-scale))] leading-relaxed font-medium text-brand-black/90 dark:text-white/90 antialiased md:text-[calc(1.25rem*var(--article-font-scale))] print:text-black';
 
   switch (block.type) {
     case 'paragraph':
