@@ -1,10 +1,11 @@
 import nodemailer from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 import { logger } from '../lib/logger'
 import { ROLE_LABELS } from '@beritakarya/config'
 
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null
+  private transporter: Transporter | null = null
   private isEnabled: boolean = false
 
   constructor() {

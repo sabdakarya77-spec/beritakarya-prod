@@ -62,8 +62,8 @@ export function errorMiddleware(
       error: {
         code: 'VALIDATION_ERROR',
         message: 'Input tidak valid',
-        details: err.errors.map(e => ({
-          field: e.path.join('.'),
+        details: err.issues.map((e) => ({
+          field: e.path.map(String).join('.'),
           message: e.message
         }))
       }

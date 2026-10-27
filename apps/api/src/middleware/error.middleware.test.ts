@@ -52,7 +52,7 @@ describe('errorMiddleware', () => {
 
   it('menangani ZodError', () => {
     const err = new ZodError([
-      { code: 'too_small', minimum: 3, type: 'string', inclusive: true, path: ['name'], message: 'Too short' },
+      { code: 'too_small', minimum: 3, origin: 'string', inclusive: true, path: ['name'], message: 'Too short' },
     ])
     const req = mockReq()
     const res = mockRes()
