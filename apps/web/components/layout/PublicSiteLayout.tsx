@@ -82,7 +82,7 @@ export default function PublicSiteLayout({
 
   return (
     <div
-      className="min-h-screen bg-[var(--bg-main)] pb-28 transition-colors duration-500 md:pb-0 print:pb-0"
+      className="min-h-screen bg-[var(--bg-main)] pb-28 transition-colors duration-500 md:pb-0 print:pb-0 print:!bg-white print:min-h-0"
       style={{ '--brand-red': siteConfig.appearance?.primaryColor || '#B91C1C' } as React.CSSProperties}
     >
       <a href="#main-content" className="skip-to-content">

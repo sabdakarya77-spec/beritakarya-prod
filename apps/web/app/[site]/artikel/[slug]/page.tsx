@@ -281,12 +281,12 @@ export default async function ArticlePage({ params }: Props) {
                   className="object-cover animate-fade-in rounded-lg"
                 />
               </div>
-              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 print:hidden" />
+              <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent print:hidden" />
 
               {/* Cover Credit */}
               {article.featuredImageCredit && (
-                <div className="absolute bottom-3 right-3 z-10 max-w-[220px] text-right">
+                <div className="absolute bottom-3 right-3 z-10 max-w-[220px] text-right print:hidden">
                   <p className="text-[10px] font-sans uppercase tracking-[0.12em] text-white/70 drop-shadow leading-tight">
                     {article.featuredImageCredit}
                   </p>
@@ -297,7 +297,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Text Overlay / Metadata Container */}
             {/* Absolute positioning on desktop, relative flow with background on mobile */}
             <div className={cn(
-              "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0 print:relative print:inset-auto print:block print:bg-transparent print:pt-4 print:pb-2",
+              "relative md:absolute md:inset-0 md:flex bg-[#020617] md:bg-transparent pt-6 pb-8 md:py-0 print:relative print:inset-auto print:block print:!bg-white print:!bg-transparent print:pt-4 print:pb-2",
               article.coverLayout === 'center' ? 'md:items-center' :
               article.coverLayout === 'left-top' ? 'md:items-start' :
               'md:items-end'
@@ -425,7 +425,7 @@ export default async function ArticlePage({ params }: Props) {
                             if (paragraphCount === 5 && relatedArticles.length > 0) {
                               const rel = relatedArticles[0];
                               elements.push(
-                                <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5">
+                                <div key="visual-break-related" className="my-10 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/5 dark:bg-white/[0.02] md:p-5 print:hidden no-print">
                                   <div className="flex items-center gap-1.5 mb-3">
                                     <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
                                     <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-red">Baca Juga</span>
@@ -457,7 +457,7 @@ export default async function ArticlePage({ params }: Props) {
                             // After 3rd paragraph: insert ARTICLE_TOP ad (after pull quote)
                             if (paragraphCount === 3) {
                               elements.push(
-                                <div key="visual-break-articletop-ad" className="my-10">
+                                <div key="visual-break-articletop-ad" className="my-10 print:hidden no-print">
                                   <AdSpace type="ARTICLE_TOP" label="Iklan" />
                                 </div>
                               );
@@ -466,7 +466,7 @@ export default async function ArticlePage({ params }: Props) {
                             // After 8th paragraph: insert ARTICLE_MIDDLE ad
                             if (paragraphCount === 8) {
                               elements.push(
-                                <div key="visual-break-articlemiddle-ad" className="my-10">
+                                <div key="visual-break-articlemiddle-ad" className="my-10 print:hidden no-print">
                                   <AdSpace type="ARTICLE_MIDDLE" label="Iklan" />
                                 </div>
                               );
@@ -478,7 +478,7 @@ export default async function ArticlePage({ params }: Props) {
                     </div>
 
                   {/* Share & Save Section (Inline at the end of article) */}
-                  <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-y border-gray-100 py-4 dark:border-white/5">
+                  <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-y border-gray-100 py-4 dark:border-white/5 print:hidden no-print">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-text-muted">Bagikan:</span>
                       <ArticleShareActions title={article.title} url={articleUrl} variant="inline" />
@@ -498,7 +498,7 @@ export default async function ArticlePage({ params }: Props) {
 
                   {/* Tags */}
                   {Array.isArray(article.tags) && article.tags.length > 0 && (
-                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <div className="mt-6 flex flex-wrap items-center gap-2 print:hidden no-print">
                       <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
                         <Tags size={12} /> Topik:
                       </span>
@@ -514,12 +514,12 @@ export default async function ArticlePage({ params }: Props) {
                   )}
 
                   {/* Comment Section */}
-                  <div id="comments">
+                  <div id="comments" className="print:hidden no-print">
                     <CommentSection articleId={article.id} />
                   </div>
 
                   {/* Bottom Ad Space */}
-                  <div className="my-10">
+                  <div className="my-10 print:hidden no-print">
                     <AdSpace type="ARTICLE_BOTTOM" label="Iklan" />
                   </div>
 

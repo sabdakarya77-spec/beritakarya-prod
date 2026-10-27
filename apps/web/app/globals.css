@@ -276,7 +276,7 @@
 }
 
 @media print {
-  /* 1. Sembunyikan semua elemen navigasi, panel melayang, iklan, dan tombol */
+  /* 1. Sembunyikan semua elemen navigasi, panel melayang, iklan, komentar, dan tombol */
   .no-print, 
   header, 
   footer, 
@@ -291,31 +291,64 @@
   .ad-space,
   .mobile-bottom-nav,
   #mobile-bottom-nav,
-  [data-floating-tools] {
+  [data-floating-tools],
+  #comments,
+  .ad-container,
+  [data-ad-space],
+  [class*="ad-"],
+  [class*="AdSpace"],
+  [id*="comments"],
+  [class*="visual-break-"] {
     display: none !important;
   }
   
-  /* 2. Format dasar cetak (kertas putih bersih) */
-  html, body {
+  /* 2. Format dasar cetak (kertas putih bersih) & Reset CSS variables tema */
+  :root,
+  .dark,
+  html,
+  body {
+    --bg-main: #ffffff !important;
+    --brand-surface: #ffffff !important;
+    --brand-grey: #ffffff !important;
+    --brand-text: #000000 !important;
+    --brand-text-muted: #334155 !important;
+    --brand-black: #000000 !important;
+    --brand-dark: #000000 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
   }
 
-  /* Reset CSS variables tema ke hitam pekat (mencegah pudar akibat dark mode) */
-  :root,
-  .dark {
-    --brand-text: #000000 !important;
-    --brand-text-rgb: 0 0 0 !important;
-    --brand-text-muted: #1e293b !important;
-    --brand-text-muted-rgb: 30 41 59 !important;
-    --brand-black: #000000 !important;
-    --brand-black-rgb: 0 0 0 !important;
+  /* 3. Hilangkan semua background gelap, dark mode, dan bayangan */
+  html,
+  body,
+  #__next,
+  main,
+  article,
+  section,
+  div {
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
   }
 
-  /* 3. Paksa semua teks artikel, judul, excerpt, paragraf, dan list berwarna hitam pekat */
+  html,
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Hilangkan gradient gelap dan class background gelap bawaan */
+  [class*="bg-gradient-to-"],
+  [class*="bg-[#020617]"],
+  [class*="bg-brand-black"],
+  [class*="dark:bg-"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+
+  /* 4. Paksa semua teks artikel, judul, excerpt, paragraf, dan list berwarna hitam pekat */
   article,
   article h1,
   article h2,
@@ -328,25 +361,27 @@
   article blockquote,
   article figcaption,
   article time,
+  article span,
+  article strong,
+  article b,
   .article-content,
   .article-content p,
   .article-content span,
-  .article-content div {
+  .article-content div,
+  .article-content h2,
+  .article-content h3,
+  .article-content li {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
     text-shadow: none !important;
     filter: none !important;
   }
 
-  /* Hilangkan gradient gelap pada hero overlay saat cetak */
-  article [class*="bg-gradient-to-"] {
-    display: none !important;
-  }
-
-  article [class*="bg-[#020617]"],
-  article [class*="bg-brand-black"] {
-    background: transparent !important;
-    background-color: transparent !important;
+  /* Drop cap first letter */
+  .article-content p[data-drop-cap="true"]::first-letter,
+  .article-body p[data-drop-cap="true"]::first-letter {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
   }
   
   .article-content {
@@ -370,6 +405,8 @@
     max-width: 100% !important;
     page-break-inside: avoid;
     break-inside: avoid;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   p, h1, h2, h3, blockquote {
@@ -412,9 +449,3 @@
   }
 }
 
-@media print {
-  .article-content p[data-drop-cap="true"]::first-letter,
-  .article-body p[data-drop-cap="true"]::first-letter {
-    color: #000 !important;
-  }
-}

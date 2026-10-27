@@ -236,7 +236,7 @@ export default function AdSpace({
   // HOME_TOP active ad — wrap in section with balanced padding and Container
   if (type === 'HOME_TOP') {
     return (
-      <section className="py-8 md:py-12">
+      <section className="py-8 md:py-12 no-print print:hidden">
         <Container>
           {/* Single ad — render directly (no carousel) */}
           {!isCarousel ? (
@@ -274,7 +274,7 @@ export default function AdSpace({
 
   // Non‑HOME_TOP: render ad content directly (no sticky wrapper)
   return (
-    <>
+    <div className="no-print print:hidden">
       {/* Single ad — render directly (no carousel) */}
       {!isCarousel ? (
         <div
@@ -304,6 +304,6 @@ export default function AdSpace({
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
