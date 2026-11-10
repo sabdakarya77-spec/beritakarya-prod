@@ -178,9 +178,6 @@ export default async function ArticlePage({ params }: Props) {
     getPopularArticles(siteParam, slugParam)
   ])
   const coverImage = article.featuredImage || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')?.url || '/placeholder.jpg'
-  const coverImageBlock = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image' && b.url === coverImage)
-    || (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'image')
-  const coverImageCaption = coverImageBlock?.caption || null
   const excerpt = (Array.isArray(article.blocks) ? article.blocks : []).find((b: Block) => b.type === 'paragraph')?.content || ''
   // Resolve correct public-facing base URL for this site:
   // - pusat  → https://beritakarya.co
@@ -380,22 +377,6 @@ export default async function ArticlePage({ params }: Props) {
               </Container>
             </div>
           </section>
-
-          {/* --- HERO CAPTION --- */}
-          {coverImageCaption && (
-            <div className="border-b border-gray-100 dark:border-white/5">
-              <Container>
-                <div className="py-3 flex items-center justify-between gap-4 max-w-5xl">
-                  <p className="text-[11px] text-brand-text-muted italic leading-relaxed">
-                    {coverImageCaption}
-                  </p>
-                  <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-brand-text-muted shrink-0">
-                    {article.featuredImageCredit || 'Foto / Dokumentasi Redaksi'}
-                  </span>
-                </div>
-              </Container>
-            </div>
-          )}
 
           {/* --- CONTENT SECTION --- */}
           <Container>
