@@ -37,7 +37,7 @@
     "framer-motion": "^12.38.0",
     "isomorphic-dompurify": "^3.16.0",
     "lucide-react": "^1.14.0",
-    "next": "^16.4.1",
+    "next": "^16.4.6",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-image-crop": "^11.0.10",
