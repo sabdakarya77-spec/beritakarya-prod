@@ -60,20 +60,20 @@ export async function generateMetadata({ params, searchParams }: { params: { sit
   if (hasSearchQuery) {
     pageTitle = `Hasil Pencarian: "${rawQuery}" - ${siteName}`;
     pageNoIndex = true;
-    pageCanonicalPath = `/${siteParam}`;
+    pageCanonicalPath = siteParam === 'pusat' ? '/' : `/${siteParam}`;
   } else if (isSavedFilter) {
     pageTitle = `Artikel Tersimpan - ${siteName}`;
     pageNoIndex = true;
-    pageCanonicalPath = `/${siteParam}`;
+    pageCanonicalPath = siteParam === 'pusat' ? '/' : `/${siteParam}`;
   } else if (isRealCategory && rawCat) {
     const formattedCat = formatCategoryTitle(rawCat);
     pageTitle = `Berita ${formattedCat} Terkini - ${siteName}`;
     pageDescription = `Kumpulan berita ${formattedCat} terkini, investigasi, dan analisis mendalam dari ${siteName}.`;
     pageNoIndex = false;
-    pageCanonicalPath = `/${siteParam}?cat=${encodeURIComponent(rawCat)}`;
+    pageCanonicalPath = siteParam === 'pusat' ? `/?cat=${encodeURIComponent(rawCat)}` : `/${siteParam}?cat=${encodeURIComponent(rawCat)}`;
   } else if (isDefaultFeed) {
     // ?cat=terbaru sama dengan homepage, konsolidasikan canonical ke homepage
-    pageCanonicalPath = `/${siteParam}`;
+    pageCanonicalPath = siteParam === 'pusat' ? '/' : `/${siteParam}`;
   }
 
   return constructMetadata({
@@ -118,7 +118,7 @@ export default async function SitePage({
         socialLinks = json.data.socialLinks || {};
       }
     }
-  } catch {}
+  } catch { }
 
   if (!siteFound && siteParam !== 'pusat' && !SITE_MAP[siteParam]) {
     notFound();

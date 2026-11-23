@@ -134,8 +134,11 @@ export async function generateSiteSitemap(site: string): Promise<MetadataRoute.S
   ]
 
   // Legal/info pages (ALL_LEGAL_PAGES includes about, editorial, ethics, terms, media-siber, kebijakan-privasi, and cookies)
+  // CATATAN: Hanya masukkan halaman yang benar-benar bisa diindeks (noIndex: false).
+  // Halaman /p/ads dikecualikan karena noIndex: true di generateMetadata-nya.
   ALL_LEGAL_PAGES.forEach((page) => {
     const href = page.href(site)
+    // Strip prefix /{site} dari href agar tidak double: /{site}/p/about → /p/about
     const subPath = href.replace(new RegExp(`^\\/${site}`), '') || '/'
     entries.push({
       url: `${siteUrl}${subPath}`,

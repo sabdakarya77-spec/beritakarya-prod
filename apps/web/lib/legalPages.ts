@@ -9,7 +9,8 @@ export const LEGAL_SLUGS = [
   'editorial',
   'terms',
   'media-siber',
-  'cookies',
+  // 'cookies' dihapus dari sini karena sudah punya route canonical sendiri di /[site]/cookies/page.tsx
+  // Akses via /p/cookies sekarang menghasilkan 404, menghilangkan konflik redirect+noindex di GSC
 ] as const
 
 export type LegalSlug = (typeof LEGAL_SLUGS)[number]
@@ -20,7 +21,6 @@ export const LEGAL_SLUG_TITLES: Record<LegalSlug, string> = {
   editorial: 'Redaksi',
   terms: 'Ketentuan Penggunaan',
   'media-siber': 'Pedoman Media Siber',
-  cookies: 'Kebijakan Cookie',
 }
 
 export const LEGAL_PAGE_INTROS: Record<LegalSlug, string> = {
@@ -30,7 +30,7 @@ export const LEGAL_PAGE_INTROS: Record<LegalSlug, string> = {
   terms: 'Ketentuan penggunaan layanan, hak cipta, serta batas tanggung jawab yang berlaku bagi seluruh pengguna.',
   'media-siber':
     'Rujukan pedoman media siber dan praktik publikasi yang mengikuti prinsip tanggung jawab pers.',
-  cookies: 'Penjelasan mengenai penggunaan cookie dan teknologi serupa pada layanan portal kami.',
+  // 'cookies' dipindahkan ke halaman canonical /[site]/cookies — tidak ada di LEGAL_SLUGS lagi
 }
 
 type SiteSettingsLike = {
@@ -127,7 +127,7 @@ const CONTENT_BY_SLUG: Record<
   editorial: { title: LEGAL_SLUG_TITLES.editorial, settingsKey: 'editorial' },
   terms: { title: LEGAL_SLUG_TITLES.terms, settingsKey: 'termsOfService' },
   'media-siber': { title: LEGAL_SLUG_TITLES['media-siber'], settingsKey: 'mediaSiber' },
-  cookies: { title: LEGAL_SLUG_TITLES.cookies, settingsKey: 'cookiePolicy' },
+  // 'cookies' dihapus — sudah dihandle di /[site]/cookies/page.tsx
 }
 
 export function isLegalSlug(slug: string): slug is LegalSlug {
@@ -261,34 +261,6 @@ const FALLBACK_CONTENT: Record<LegalSlug, string> = {
 
 <h3>6. Praktik Iklan & Editorial</h3>
 <p>Media siber wajib membedakan dengan tegas antara produk jurnalistik dan iklan. Setiap berita/artikel/isi yang merupakan iklan dan atau konten berbayar wajib mencantumkan keterangan 'iklan', 'advertorial', atau 'sponsor'.</p>`,
-
-  cookies: `<h2>Kebijakan Cookie & Teknologi Pelacak</h2>
-<p>Kebijakan Cookie ini menjelaskan bagaimana portal BeritaKarya menggunakan cookie dan teknologi serupa untuk mengenali Anda saat mengunjungi situs web kami. Kebijakan ini menjelaskan apa itu teknologi tersebut, mengapa kami menggunakannya, serta hak Anda untuk mengontrol penggunaannya.</p>
-
-<h2>Apa Itu Cookie?</h2>
-<p>Cookie adalah file data teks kecil yang disimpan di perangkat peramban (browser) Anda saat mengunjungi sebuah situs web. Cookie digunakan secara luas oleh pemilik situs web untuk membuat situs berfungsi secara efisien, mengingat preferensi pengguna, dan menyediakan informasi analitik.</p>
-
-<h2>Jenis Cookie yang Kami Gunakan</h2>
-<h3>1. Cookie Esensial & Keamanan</h3>
-<p>Cookie ini sangat penting untuk pengoperasian dasar situs web, seperti autentikasi sesi login, pencegahan penipuan, dan keamanan transfer data.</p>
-
-<h3>2. Cookie Preferensi & Fungsional</h3>
-<p>Cookie ini memungkinkan situs mengingat pengaturan yang Anda pilih (misalnya pilihan tema gelap/terang atau wilayah daerah berita pilihan) guna memberikan pengalaman yang lebih personal.</p>
-
-<h3>3. Cookie Analitik & Performa</h3>
-<p>Cookie ini membantu kami memahami bagaimana pengunjung berinteraksi dengan situs web dengan mengumpulkan data statistik anonim (seperti jumlah pembaca artikel dan waktu muat halaman) untuk meningkatkan kualitas layanan.</p>
-
-<h3>4. Cookie Periklanan</h3>
-<p>Cookie ini digunakan oleh mitra periklanan tepercaya (seperti Google AdSense) untuk menyajikan iklan yang relevan serta membatasi frekuensi penayangan iklan yang sama kepada pengguna.</p>
-
-<h2>Pengaturan & Pengelolaan Cookie</h2>
-<p>Anda berhak untuk menerima atau menolak cookie melalui pengaturan pada peramban web Anda. Sebagian besar peramban secara otomatis menerima cookie, namun Anda dapat memodifikasi pengaturan peramban untuk menolak cookie jika diinginkan. Harap diperhatikan bahwa menonaktifkan cookie tertentu dapat mempengaruhi fungsi beberapa fitur di portal kami.</p>
-
-<h2>Pembaruan Kebijakan</h2>
-<p>Kami dapat memperbarui Kebijakan Cookie ini dari waktu ke waktu untuk menyesuaikan dengan perubahan operasional, hukum, atau regulasi yang berlaku. Tanggal pembaruan terkini akan selalu tertera di bagian atas halaman ini.</p>
-
-<h2>Kontak & Layanan Pembaca</h2>
-<p>Jika Anda memiliki pertanyaan mengenai penggunaan cookie atau kebijakan privasi di BeritaKarya, silakan hubungi tim kami melalui formulir kontak atau email resmi redaksi di <strong>supportberitakarya@gmail.com</strong>.</p>`
 }
 
 export function resolveLegalPage(

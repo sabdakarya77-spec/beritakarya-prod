@@ -55,12 +55,17 @@ export async function generateMetadata({
     })
   }
 
-  // Konsolidasi: /p/cookies dialihkan ke halaman kanonikal /cookies
+  // Konsolidasi: jika mengakses URL legacy /p/cookies, berikan canonical mengarah ke /cookies
   if (slug === 'cookies') {
-    return {
+    return constructMetadata({
       title: `Kebijakan Cookie - ${siteName}`,
-      robots: { index: false, follow: true },
-    }
+      description: 'Penjelasan mengenai penggunaan cookie dan teknologi serupa pada layanan portal kami.',
+      image: ogImageUrl,
+      icons: faviconUrl,
+      siteParam,
+      canonicalPath: `/${siteParam}/cookies`,
+      noIndex: false,
+    })
   }
 
   // Slug tidak valid / bukan dokumen legal resmi → kembalikan noindex agar tidak memicu Soft 404

@@ -27,6 +27,7 @@ export function GET(req: Request) {
 User-agent: *
 Allow: /
 Disallow: /dashboard/
+Disallow: /*/dashboard/
 Disallow: /login
 Disallow: /login*
 Disallow: /register
@@ -38,8 +39,7 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /cdn-cgi/
 Disallow: /*?q=*
-Disallow: /*?site=*
-Disallow: /*?cat=*
+Disallow: /*?*cat=tersimpan*
 Disallow: /_next/static/media/
 Disallow: /*.woff2$
 Disallow: /favicon.ico?*
@@ -51,6 +51,7 @@ Allow: /_next/static/
 Allow: /_next/image
 Allow: /uploads/
 Disallow: /dashboard/
+Disallow: /*/dashboard/
 Disallow: /login
 Disallow: /login*
 Disallow: /register
@@ -62,8 +63,7 @@ Disallow: /forgot-password
 Disallow: /verify-email
 Disallow: /cdn-cgi/
 Disallow: /*?q=*
-Disallow: /*?site=*
-Disallow: /*?cat=*
+Disallow: /*?*cat=tersimpan*
 Disallow: /_next/static/media/
 Disallow: /*.woff2$
 Disallow: /favicon.ico?*

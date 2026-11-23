@@ -125,7 +125,11 @@ export function constructMetadata({
       return `${subdomainUrl}/`
     }
     if (siteParam) {
-      // pusat: https://beritakarya.co/pusat
+      // pusat: di domain utama beritakarya.co, homepage canonical adalah root '/' bukan '/pusat'
+      // karena middleware me-redirect /pusat -> / (301)
+      if (siteParam === 'pusat') {
+        return `${baseUrl}/`
+      }
       return `${baseUrl}/${siteParam}`
     }
     return `${baseUrl}/`

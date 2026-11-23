@@ -18,6 +18,9 @@ export function SiteNotFoundClient() {
     }
   };
 
+  const homeHref = site === 'pusat' ? '/' : `/${site}`;
+  const latestHref = site === 'pusat' ? '/?cat=terbaru' : `/${site}?cat=terbaru`;
+
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
       <div className="mx-auto max-w-md">
@@ -56,14 +59,14 @@ export function SiteNotFoundClient() {
         {/* Actions */}
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Link
-            href={`/${site}`}
+            href={homeHref}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-red px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-red/90"
           >
             <Home size={15} />
             Kembali ke Beranda
           </Link>
           <Link
-            href={`/${site}?cat=terbaru`}
+            href={latestHref}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-brand-black transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
           >
             Berita Terbaru
