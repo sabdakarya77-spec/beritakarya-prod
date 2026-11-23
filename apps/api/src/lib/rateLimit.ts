@@ -1,4 +1,4 @@
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import rateLimit from 'express-rate-limit'
 import { logger } from './logger'
 
 /**
@@ -67,7 +67,7 @@ export const apiLimiter = rateLimit({
 
 const articleRateLimitKey = (req: { ip?: string; user?: { userId?: string } }) => {
   const user = (req as { user?: { userId?: string } }).user
-  return user?.userId ? `user:${user.userId}` : ipKeyGenerator(req.ip || '127.0.0.1')
+  return user?.userId ? `user:${user.userId}` : `ip:${req.ip || '127.0.0.1'}`
 }
 
 export const articleWriteLimiter = rateLimit({
@@ -75,6 +75,7 @@ export const articleWriteLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 30,
   keyGenerator: articleRateLimitKey,
+  validate: { keyGeneratorIpFallback: false },
   message: {
     success: false,
     error: {
@@ -91,6 +92,7 @@ export const articleUpdateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 120,
   keyGenerator: articleRateLimitKey,
+  validate: { keyGeneratorIpFallback: false },
   message: {
     success: false,
     error: {
