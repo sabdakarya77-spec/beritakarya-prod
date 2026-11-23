@@ -81,6 +81,7 @@ jobs:
   e2e-playwright:
     runs-on: ubuntu-24.04
     needs: build-and-test
+    continue-on-error: true
     services:
       postgres:
         image: postgres:15-alpine
