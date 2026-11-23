@@ -46,7 +46,7 @@ function AdSlide({
       href={ad.linkUrl || '#'}
       onClick={() => onAdClick(ad)}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="sponsored noopener noreferrer"
       className="block relative w-full h-full overflow-hidden group border border-gray-200 dark:border-white/10 bg-white dark:bg-black"
     >
       <span className="absolute right-1.5 top-1.5 z-10 rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white/70">
